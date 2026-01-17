@@ -1,0 +1,2 @@
+# This directory contains generated files from TypeScript.
+# Run `pnpm export-variants` from apps/web to regenerate variants.json

@@ -68,6 +68,9 @@ temp/
 *.tgz
 *.tar.gz
 
+# Generated files
+apps/quantum/src/data/variants.json
+
 # Vercel
 .vercel/
 

@@ -24,6 +24,13 @@ model Plant {
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 
+  // Lifecycle fields
+  // variantId references PlantVariant.id from TypeScript definitions (not a DB relation)
+  variantId           String              @default("simple-bloom")
+  germinatedAt        DateTime?           // When lifecycle started (null = seed/dormant)
+  lifecycleModifier   Float               @default(1.0) // Speed multiplier from quantum growthRate
+  colorVariationName  String?             // Selected color variation for multi-color variants
+
   // Relations
   quantumCircuit      QuantumRecord       @relation(fields: [quantumCircuitId], references: [id])
   entanglementGroup   EntanglementGroup?  @relation(fields: [entanglementGroupId], references: [id])
@@ -31,6 +38,8 @@ model Plant {
 
   @@index([observed])
   @@index([entanglementGroupId])
+  @@index([variantId])
+  @@index([germinatedAt])
 }
 
 // Quantum circuit record for IonQ execution

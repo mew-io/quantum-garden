@@ -8,6 +8,7 @@ import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
 import { createReticleController, type ReticleController } from "./reticle-controller";
 import { createObservationSystem, type ObservationSystem } from "./observation-system";
 import { useObservation } from "@/hooks/use-observation";
+import { usePlants } from "@/hooks/use-plants";
 
 /**
  * Main garden canvas component.
@@ -25,6 +26,9 @@ export function GardenCanvas() {
 
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
+
+  // Load plants from server into store
+  usePlants();
 
   // Store callback ref to keep it stable across renders
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});

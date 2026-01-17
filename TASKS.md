@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 8)_
+_Last updated: 2026-01-17 (Session 9)_
 
 ## Project Goal
 
@@ -16,12 +16,20 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] End-to-end observation testing (seed garden, observe plant, verify state change)
-- [ ] Visual testing (run app and verify lifecycle renders correctly)
+- [ ] Observation testing (verify observation triggers state collapse in browser)
+- [ ] Add tests for PlantSprite and PlantRenderer components
 
 ---
 
 ## Completed
+
+### 2026-01-17 - End-to-End Visual Verification
+
+- [x] Create usePlants hook to fetch plant data and sync to Zustand store
+- [x] Integrate usePlants hook into GardenCanvas component
+- [x] Verify plants render correctly in browser (12 plants: 8 simple-bloom, 2 pulsing-orb, 2 quantum-tulip)
+- [x] Verify reticle moves autonomously across the garden
+- [x] Visual confirmation: plants display with correct colors, patterns, and lifecycle states
 
 ### 2026-01-17 - Observation Router Integration Tests
 

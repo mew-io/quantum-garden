@@ -1,5 +1,47 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
+import type { ResolvedTraits } from "@quantum-garden/shared";
+
+/** Quantum service URL (Python FastAPI service) */
+const QUANTUM_SERVICE_URL = process.env.QUANTUM_SERVICE_URL ?? "http://localhost:18742";
+
+/** Response type from quantum service measurement endpoint */
+interface QuantumMeasureResponse {
+  plant_id: string;
+  success: boolean;
+  traits?: {
+    glyphPattern: number[][];
+    colorPalette: string[];
+    growthRate: number;
+    opacity: number;
+  };
+  error?: string;
+}
+
+/**
+ * Call the quantum service to perform measurement on a plant's circuit.
+ */
+async function callQuantumMeasurement(
+  plantId: string,
+  circuitDefinition: string
+): Promise<QuantumMeasureResponse> {
+  const response = await fetch(`${QUANTUM_SERVICE_URL}/circuits/measure`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      plant_id: plantId,
+      circuit_definition: circuitDefinition,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Quantum service error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<QuantumMeasureResponse>;
+}
 
 /**
  * Observation-related procedures.
@@ -48,9 +90,33 @@ export const observationRouter = router({
         throw new Error("Plant has already been observed");
       }
 
-      // TODO: Call quantum service to perform measurement
-      // For now, we'll just mark the plant as observed
-      // In production, this will trigger IonQ circuit execution
+      // Get the circuit definition from the quantum record
+      const circuitDefinition = plant.quantumCircuit?.circuitDefinition;
+      if (!circuitDefinition) {
+        throw new Error("Plant has no quantum circuit definition");
+      }
+
+      // Call quantum service to perform measurement
+      let resolvedTraits: ResolvedTraits | undefined;
+      try {
+        const measureResult = await callQuantumMeasurement(
+          input.plantId,
+          circuitDefinition as string
+        );
+
+        if (measureResult.success && measureResult.traits) {
+          resolvedTraits = {
+            glyphPattern: measureResult.traits.glyphPattern,
+            colorPalette: measureResult.traits.colorPalette,
+            growthRate: measureResult.traits.growthRate,
+            opacity: measureResult.traits.opacity,
+          };
+        }
+      } catch (error) {
+        // Log error but continue with observation
+        // In production, you might want to handle this differently
+        console.error("Quantum measurement failed:", error);
+      }
 
       const updatedPlant = await ctx.db.plant.update({
         where: { id: input.plantId },
@@ -58,7 +124,8 @@ export const observationRouter = router({
           observed: true,
           observedAt: new Date(),
           visualState: "collapsed",
-          // traits will be set after quantum measurement
+          // Store resolved traits from quantum measurement
+          traits: resolvedTraits ? (resolvedTraits as unknown as object) : undefined,
         },
       });
 

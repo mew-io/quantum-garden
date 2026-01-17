@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17_
+_Last updated: 2026-01-17 (Session 3)_
 
 ## Project Goal
 
@@ -16,15 +16,26 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Build observation system with dwell tracking
-- [ ] Create observation region manager
-- [ ] Connect frontend observation to quantum measurement endpoint
 - [ ] Seed initial plants with variant assignments
+- [ ] Implement state collapse animation (visual transition from superposed to collapsed)
 - [ ] Add test coverage for lifecycle computation logic
+- [ ] Create quantum service `/circuits/measure` endpoint to complete integration
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Observation System with Dwell Tracking
+
+- [x] Create ObservationSystem class with region management and dwell tracking
+- [x] Implement alignment detection (reticle overlaps plant within region)
+- [x] Track dwell time per eligible plant with progress sync to store
+- [x] Trigger observation events when dwell threshold reached
+- [x] Manage post-observation cooldown period
+- [x] Integrate ObservationSystem into GardenCanvas component
+- [x] Create useObservation hook for triggering observations via tRPC
+- [x] Update observation.ts router to call quantum service `/circuits/measure` endpoint
+- [x] Wire GardenCanvas to use observation hook with callback ref pattern
 
 ### 2026-01-17 - Reticle Controller Implementation
 
@@ -95,9 +106,9 @@ _Core functionality needed for a working demo_
 
 - [x] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
 - [x] **Reticle System**: Implement autonomous reticle with drift behavior
-- [ ] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
+- [x] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
+- [x] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
 - [ ] **State Collapse Animation**: Animate transition from superposed to collapsed state
-- [ ] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
 - [ ] **Plant Seeding**: Create initial batch of plants with quantum circuits and variants
 - [ ] **Real-time Updates**: Broadcast observation results to all connected clients
 
@@ -139,35 +150,35 @@ _Nice-to-have enhancements_
 
 ## Implementation Status
 
-| Component                    | Status      | Notes                                        |
-| ---------------------------- | ----------- | -------------------------------------------- |
-| **Frontend (apps/web)**      |             |                                              |
-| PixiJS canvas initialization | Done        | Full-screen, resize handling                 |
-| Plant rendering (main)       | Done        | PlantSprite + PlantRenderer with lifecycle   |
-| Variant sandbox              | Done        | Full timeline editor, gallery, playback      |
-| Superposed view              | Done        | Pastel palettes, visual development tool     |
-| Reticle controller           | Done        | Autonomous drift, state machine, edge bounce |
-| Observation system           | Not Started | Documented in docs/observation-system.md     |
-| Zustand store                | Done        | Plant data with lifecycle fields             |
-| tRPC client                  | Done        | Connected and working                        |
-| **Shared (packages/shared)** |             |                                              |
-| Variant types                | Done        | PlantVariant, GlyphKeyframe, lifecycle types |
-| Variant definitions          | Done        | 3 example variants defined                   |
-| Lifecycle computation        | Done        | computeLifecycleState, interpolation         |
-| **API Layer**                |             |                                              |
-| tRPC endpoints               | Scaffolded  | Plants, observation, health routers exist    |
-| Prisma schema                | Done        | Full schema with lifecycle fields            |
-| Prisma client                | Done        | Generated and working                        |
-| **Quantum Service**          |             |                                              |
-| FastAPI app                  | Done        | Running on port 18742                        |
-| Circuit generation           | Done        | Using Qiskit                                 |
-| IonQ integration             | Done        | Client implemented                           |
-| Trait mapping                | Done        | Basic mapping in place                       |
-| Variant loader               | Done        | Python module to load variant definitions    |
-| **Infrastructure**           |             |                                              |
-| PostgreSQL                   | Done        | Docker Compose configured                    |
-| CI/CD                        | Done        | GitHub Actions workflow                      |
-| Pre-commit hooks             | Done        | Linting, formatting, secrets                 |
+| Component                    | Status     | Notes                                        |
+| ---------------------------- | ---------- | -------------------------------------------- |
+| **Frontend (apps/web)**      |            |                                              |
+| PixiJS canvas initialization | Done       | Full-screen, resize handling                 |
+| Plant rendering (main)       | Done       | PlantSprite + PlantRenderer with lifecycle   |
+| Variant sandbox              | Done       | Full timeline editor, gallery, playback      |
+| Superposed view              | Done       | Pastel palettes, visual development tool     |
+| Reticle controller           | Done       | Autonomous drift, state machine, edge bounce |
+| Observation system           | Done       | Region management, dwell tracking, cooldown  |
+| Zustand store                | Done       | Plant data, dwell state, cooldown state      |
+| tRPC client                  | Done       | Connected and working                        |
+| **Shared (packages/shared)** |            |                                              |
+| Variant types                | Done       | PlantVariant, GlyphKeyframe, lifecycle types |
+| Variant definitions          | Done       | 3 example variants defined                   |
+| Lifecycle computation        | Done       | computeLifecycleState, interpolation         |
+| **API Layer**                |            |                                              |
+| tRPC endpoints               | Scaffolded | Plants, observation, health routers exist    |
+| Prisma schema                | Done       | Full schema with lifecycle fields            |
+| Prisma client                | Done       | Generated and working                        |
+| **Quantum Service**          |            |                                              |
+| FastAPI app                  | Done       | Running on port 18742                        |
+| Circuit generation           | Done       | Using Qiskit                                 |
+| IonQ integration             | Done       | Client implemented                           |
+| Trait mapping                | Done       | Basic mapping in place                       |
+| Variant loader               | Done       | Python module to load variant definitions    |
+| **Infrastructure**           |            |                                              |
+| PostgreSQL                   | Done       | Docker Compose configured                    |
+| CI/CD                        | Done       | GitHub Actions workflow                      |
+| Pre-commit hooks             | Done       | Linting, formatting, secrets                 |
 
 ---
 

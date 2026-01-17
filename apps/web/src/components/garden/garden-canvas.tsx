@@ -3,8 +3,11 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Application } from "pixi.js";
 import { CANVAS } from "@quantum-garden/shared";
+import type { ObservationPayload } from "@quantum-garden/shared";
 import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
 import { createReticleController, type ReticleController } from "./reticle-controller";
+import { createObservationSystem, type ObservationSystem } from "./observation-system";
+import { useObservation } from "@/hooks/use-observation";
 
 /**
  * Main garden canvas component.
@@ -18,6 +21,14 @@ export function GardenCanvas() {
   const appRef = useRef<Application | null>(null);
   const plantRendererRef = useRef<PlantRenderer | null>(null);
   const reticleControllerRef = useRef<ReticleController | null>(null);
+  const observationSystemRef = useRef<ObservationSystem | null>(null);
+
+  // Observation hook for quantum measurement
+  const { triggerObservation } = useObservation();
+
+  // Store callback ref to keep it stable across renders
+  const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
+  observationCallbackRef.current = triggerObservation;
 
   // Handle window resize
   const handleResize = useCallback(() => {
@@ -64,9 +75,15 @@ export function GardenCanvas() {
         reticleControllerRef.current = reticleController;
         reticleController.start();
 
-        // TODO: Initialize remaining garden systems
-        // - Observation system
-        // - Dwell tracker
+        // Initialize observation system
+        const observationSystem = createObservationSystem(app);
+        observationSystemRef.current = observationSystem;
+        observationSystem.setObservationCallback((payload) => {
+          // Use the ref to call the current observation trigger
+          // This allows the callback to access the latest hook reference
+          observationCallbackRef.current(payload);
+        });
+        observationSystem.start();
 
         // Listen for window resize
         window.addEventListener("resize", handleResize);
@@ -81,6 +98,11 @@ export function GardenCanvas() {
     return () => {
       mounted = false;
       window.removeEventListener("resize", handleResize);
+
+      if (observationSystemRef.current) {
+        observationSystemRef.current.destroy();
+        observationSystemRef.current = null;
+      }
 
       if (reticleControllerRef.current) {
         reticleControllerRef.current.destroy();

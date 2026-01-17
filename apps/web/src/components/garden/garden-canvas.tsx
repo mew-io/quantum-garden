@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { Application } from "pixi.js";
 import { CANVAS } from "@quantum-garden/shared";
 import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
+import { createReticleController, type ReticleController } from "./reticle-controller";
 
 /**
  * Main garden canvas component.
@@ -16,6 +17,7 @@ export function GardenCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
   const plantRendererRef = useRef<PlantRenderer | null>(null);
+  const reticleControllerRef = useRef<ReticleController | null>(null);
 
   // Handle window resize
   const handleResize = useCallback(() => {
@@ -57,8 +59,12 @@ export function GardenCanvas() {
         plantRendererRef.current = plantRenderer;
         plantRenderer.start();
 
+        // Initialize reticle controller
+        const reticleController = createReticleController(app);
+        reticleControllerRef.current = reticleController;
+        reticleController.start();
+
         // TODO: Initialize remaining garden systems
-        // - Reticle controller
         // - Observation system
         // - Dwell tracker
 
@@ -75,6 +81,11 @@ export function GardenCanvas() {
     return () => {
       mounted = false;
       window.removeEventListener("resize", handleResize);
+
+      if (reticleControllerRef.current) {
+        reticleControllerRef.current.destroy();
+        reticleControllerRef.current = null;
+      }
 
       if (plantRendererRef.current) {
         plantRendererRef.current.destroy();

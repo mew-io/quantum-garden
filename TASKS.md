@@ -16,8 +16,8 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Create reticle controller for observation targeting
 - [ ] Build observation system with dwell tracking
+- [ ] Create observation region manager
 - [ ] Connect frontend observation to quantum measurement endpoint
 - [ ] Seed initial plants with variant assignments
 - [ ] Add test coverage for lifecycle computation logic
@@ -25,6 +25,16 @@ _No tasks currently in progress_
 ---
 
 ## Completed
+
+### 2026-01-17 - Reticle Controller Implementation
+
+- [x] Create ReticleController class with autonomous drift behavior
+- [x] Implement state machine with drifting/paused states
+- [x] Add edge bouncing with slight randomization
+- [x] Render reticle as small cross pattern (3px default)
+- [x] Sync reticle position to Zustand garden store
+- [x] Integrate ReticleController into GardenCanvas component
+- [x] Add cleanup for ReticleController on unmount
 
 ### 2026-01-17 - Plant Rendering on Main Canvas
 
@@ -84,7 +94,7 @@ _No tasks currently in progress_
 _Core functionality needed for a working demo_
 
 - [x] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
-- [ ] **Reticle System**: Implement cursor-following reticle for targeting plants
+- [x] **Reticle System**: Implement autonomous reticle with drift behavior
 - [ ] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
 - [ ] **State Collapse Animation**: Animate transition from superposed to collapsed state
 - [ ] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
@@ -136,7 +146,7 @@ _Nice-to-have enhancements_
 | Plant rendering (main)       | Done        | PlantSprite + PlantRenderer with lifecycle   |
 | Variant sandbox              | Done        | Full timeline editor, gallery, playback      |
 | Superposed view              | Done        | Pastel palettes, visual development tool     |
-| Reticle controller           | Not Started | Next priority                                |
+| Reticle controller           | Done        | Autonomous drift, state machine, edge bounce |
 | Observation system           | Not Started | Documented in docs/observation-system.md     |
 | Zustand store                | Done        | Plant data with lifecycle fields             |
 | tRPC client                  | Done        | Connected and working                        |

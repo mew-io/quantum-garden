@@ -1,0 +1,94 @@
+// Quantum Garden Database Schema
+// Run `pnpm db:push` to sync with the database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A plant in the quantum garden
+model Plant {
+  id                  String              @id @default(cuid())
+  positionX           Float
+  positionY           Float
+  observed            Boolean             @default(false)
+  observedAt          DateTime?
+  visualState         String              @default("superposed") // "superposed" | "collapsed"
+  quantumCircuitId    String
+  entanglementGroupId String?
+  traits              Json?               // ResolvedTraits when observed
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Relations
+  quantumCircuit      QuantumRecord       @relation(fields: [quantumCircuitId], references: [id])
+  entanglementGroup   EntanglementGroup?  @relation(fields: [entanglementGroupId], references: [id])
+  observationEvents   ObservationEvent[]
+
+  @@index([observed])
+  @@index([entanglementGroupId])
+}
+
+// Quantum circuit record for IonQ execution
+model QuantumRecord {
+  id                String    @id @default(cuid())
+  circuitDefinition Json      // Qiskit circuit serialized
+  ionqJobId         String?   @unique
+  status            String    @default("pending") // pending, submitted, running, completed, failed
+  measurements      Int[]     // Raw measurement results
+  probabilities     Float[]   // Probability distribution
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+
+  // Relations
+  plants            Plant[]
+  entanglementGroup EntanglementGroup?
+
+  @@index([status])
+  @@index([ionqJobId])
+}
+
+// Observation event - when a plant's quantum state was observed
+model ObservationEvent {
+  id              String   @id @default(cuid())
+  plantId         String
+  regionId        String
+  timestamp       DateTime @default(now())
+  quantumRecordId String
+
+  // Relations
+  plant           Plant    @relation(fields: [plantId], references: [id])
+
+  @@index([plantId])
+  @@index([timestamp])
+}
+
+// Observation region - invisible area where observation can occur
+model ObservationRegion {
+  id        String   @id @default(cuid())
+  centerX   Float
+  centerY   Float
+  radius    Float
+  active    Boolean  @default(true)
+  lifetime  Int      // seconds
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([active])
+  @@index([expiresAt])
+}
+
+// Group of entangled plants sharing correlated traits
+model EntanglementGroup {
+  id               String        @id @default(cuid())
+  quantumCircuitId String        @unique
+  createdAt        DateTime      @default(now())
+
+  // Relations
+  plants           Plant[]
+  quantumCircuit   QuantumRecord @relation(fields: [quantumCircuitId], references: [id])
+}

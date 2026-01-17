@@ -8,7 +8,11 @@ appearance and behavior.
 
 import math
 
-from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
+from qiskit import (  # type: ignore[import-untyped]
+    ClassicalRegister,
+    QuantumCircuit,
+    QuantumRegister,
+)
 
 
 def create_plant_circuit(

@@ -1,2 +1,11 @@
+# Node.js checks
 pnpm lint
 pnpm typecheck
+pnpm format:check
+
+# Python checks
+cd apps/quantum
+uv run ruff check src/
+uv run ruff format --check src/
+uv run mypy src/
+uv run pytest

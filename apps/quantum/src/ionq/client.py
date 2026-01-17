@@ -10,7 +10,7 @@ import base64
 import io
 from typing import Any
 
-from qiskit import QuantumCircuit, qpy
+from qiskit import QuantumCircuit, qpy  # type: ignore[import-untyped]
 from qiskit_ionq import IonQProvider
 
 from ..config import settings
@@ -86,7 +86,7 @@ async def submit_circuit(
         lambda: backend.run(circuit, shots=shots),
     )
 
-    return job.job_id()
+    return str(job.job_id())
 
 
 async def get_job_status(job_id: str) -> str:
@@ -105,7 +105,7 @@ async def get_job_status(job_id: str) -> str:
     )
 
     status = job.status()
-    return status.name.lower()
+    return str(getattr(status, "name", status)).lower()
 
 
 async def get_job_result(
@@ -137,7 +137,7 @@ async def get_job_result(
     # Wait for completion
     elapsed = 0.0
     while elapsed < timeout:
-        status = job.status().name.lower()
+        status = str(getattr(job.status(), "name", job.status())).lower()
 
         if status == "done":
             # Get results

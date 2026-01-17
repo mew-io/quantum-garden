@@ -11,9 +11,13 @@ out/
 
 # Python
 __pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 .venv/
 venv/
 *.egg-info/
+uv.lock
 
 # Generated
 prisma/migrations/

@@ -52,7 +52,7 @@ class MeasureResponse(BaseModel):
 
     plant_id: str
     success: bool
-    traits: dict | None = None
+    traits: dict[str, float] | None = None
     error: str | None = None
 
 

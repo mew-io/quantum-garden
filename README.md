@@ -50,11 +50,11 @@ pnpm dev
 
 ### Development URLs
 
-| Service | URL | Port |
-|---------|-----|------|
-| Web App | http://localhost:14923 | 14923 |
+| Service         | URL                    | Port  |
+| --------------- | ---------------------- | ----- |
+| Web App         | http://localhost:14923 | 14923 |
 | Quantum Service | http://localhost:18742 | 18742 |
-| PostgreSQL | localhost:13318 | 13318 |
+| PostgreSQL      | localhost:13318        | 13318 |
 
 We use nonstandard high ports to avoid conflicts with other services you may be running.
 
@@ -113,4 +113,5 @@ See [docs/context/](docs/context/) for the original RFP and project proposal.
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
+
 # quantum-garden

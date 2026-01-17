@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 7)_
+_Last updated: 2026-01-17 (Session 8)_
 
 ## Project Goal
 
@@ -17,11 +17,23 @@ _No tasks currently in progress_
 ### Up Next
 
 - [ ] End-to-end observation testing (seed garden, observe plant, verify state change)
-- [ ] Integration testing for observation router
+- [ ] Visual testing (run app and verify lifecycle renders correctly)
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Observation Router Integration Tests
+
+- [x] Add vitest as test framework for web app
+- [x] Create vitest.config.ts with path alias support
+- [x] Add test and test:watch npm scripts to apps/web
+- [x] Write integration tests for observation router (10 tests)
+- [x] Test recordObservation: plant state collapse with trait generation
+- [x] Test recordObservation: error handling (not found, already observed)
+- [x] Test deterministic traits from circuit seed
+- [x] Test getActiveRegion: active, expired, inactive region scenarios
+- [x] Test getHistory: retrieve observation events by plant
 
 ### 2026-01-17 - Lifecycle Test Coverage
 
@@ -181,45 +193,45 @@ _Nice-to-have enhancements_
 - [ ] Document quantum circuit design decisions in code
 - [ ] Add error boundaries in React components
 - [ ] Implement proper error handling for IonQ API failures
-- [ ] Add tests for observation router logic
+- [x] Add tests for observation router logic
 - [ ] Add tests for PlantSprite and PlantRenderer
 
 ---
 
 ## Implementation Status
 
-| Component                    | Status     | Notes                                        |
-| ---------------------------- | ---------- | -------------------------------------------- |
-| **Frontend (apps/web)**      |            |                                              |
-| PixiJS canvas initialization | Done       | Full-screen, resize handling                 |
-| Plant rendering (main)       | Done       | PlantSprite + PlantRenderer with lifecycle   |
-| Variant sandbox              | Done       | Full timeline editor, gallery, playback      |
-| Superposed view              | Done       | Pastel palettes, visual development tool     |
-| Reticle controller           | Done       | Autonomous drift, state machine, edge bounce |
-| Observation system           | Done       | Region management, dwell tracking, cooldown  |
-| Zustand store                | Done       | Plant data, dwell state, cooldown state      |
-| tRPC client                  | Done       | Connected and working                        |
-| **Shared (packages/shared)** |            |                                              |
-| Variant types                | Done       | PlantVariant, GlyphKeyframe, lifecycle types |
-| Variant definitions          | Done       | 3 example variants defined                   |
-| Lifecycle computation        | Done       | computeLifecycleState, interpolation         |
-| Lifecycle tests              | Done       | 45 tests covering all lifecycle functions    |
-| **API Layer**                |            |                                              |
-| tRPC endpoints               | Scaffolded | Plants, observation, health routers exist    |
-| Prisma schema                | Done       | Full schema with lifecycle fields            |
-| Prisma client                | Done       | Generated and working                        |
-| Garden seeding               | Done       | 12 plants with variants, `db:seed` script    |
-| **Quantum Service**          |            |                                              |
-| FastAPI app                  | Done       | Running on port 18742                        |
-| Circuit generation           | Done       | Using Qiskit                                 |
-| IonQ integration             | Deferred   | Client implemented, real execution deferred  |
-| Trait mapping                | Done       | Basic mapping in place                       |
-| Variant loader               | Done       | Python module to load variant definitions    |
-| Mock trait generation        | Done       | Pseudorandom traits seeded from circuit      |
-| **Infrastructure**           |            |                                              |
-| PostgreSQL                   | Done       | Docker Compose configured                    |
-| CI/CD                        | Done       | GitHub Actions workflow                      |
-| Pre-commit hooks             | Done       | Linting, formatting, secrets                 |
+| Component                    | Status   | Notes                                        |
+| ---------------------------- | -------- | -------------------------------------------- |
+| **Frontend (apps/web)**      |          |                                              |
+| PixiJS canvas initialization | Done     | Full-screen, resize handling                 |
+| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle   |
+| Variant sandbox              | Done     | Full timeline editor, gallery, playback      |
+| Superposed view              | Done     | Pastel palettes, visual development tool     |
+| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce |
+| Observation system           | Done     | Region management, dwell tracking, cooldown  |
+| Zustand store                | Done     | Plant data, dwell state, cooldown state      |
+| tRPC client                  | Done     | Connected and working                        |
+| **Shared (packages/shared)** |          |                                              |
+| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types |
+| Variant definitions          | Done     | 3 example variants defined                   |
+| Lifecycle computation        | Done     | computeLifecycleState, interpolation         |
+| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions    |
+| **API Layer**                |          |                                              |
+| tRPC endpoints               | Done     | Plants, observation (tested), health routers |
+| Prisma schema                | Done     | Full schema with lifecycle fields            |
+| Prisma client                | Done     | Generated and working                        |
+| Garden seeding               | Done     | 12 plants with variants, `db:seed` script    |
+| **Quantum Service**          |          |                                              |
+| FastAPI app                  | Done     | Running on port 18742                        |
+| Circuit generation           | Done     | Using Qiskit                                 |
+| IonQ integration             | Deferred | Client implemented, real execution deferred  |
+| Trait mapping                | Done     | Basic mapping in place                       |
+| Variant loader               | Done     | Python module to load variant definitions    |
+| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit      |
+| **Infrastructure**           |          |                                              |
+| PostgreSQL                   | Done     | Docker Compose configured                    |
+| CI/CD                        | Done     | GitHub Actions workflow                      |
+| Pre-commit hooks             | Done     | Linting, formatting, secrets                 |
 
 ---
 

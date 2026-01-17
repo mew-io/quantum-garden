@@ -42,6 +42,16 @@ export interface Plant {
   traits?: ResolvedTraits;
   createdAt: Date;
   updatedAt: Date;
+
+  // Lifecycle fields
+  /** Variant ID referencing a PlantVariant definition */
+  variantId: string;
+  /** When the plant's lifecycle started (null = dormant/seed state) */
+  germinatedAt?: Date | null;
+  /** Speed multiplier for lifecycle progression (from quantum growthRate) */
+  lifecycleModifier: number;
+  /** Selected color variation for multi-color variants */
+  colorVariationName?: string | null;
 }
 
 /**

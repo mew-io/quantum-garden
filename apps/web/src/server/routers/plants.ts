@@ -1,5 +1,29 @@
 import { z } from "zod";
+import type { Plant as PrismaPlant } from "@prisma/client";
+import type { Plant, VisualState, ResolvedTraits } from "@quantum-garden/shared";
 import { router, publicProcedure } from "../trpc";
+
+/**
+ * Transform a Prisma plant to the shared Plant type.
+ */
+function transformPlant(plant: PrismaPlant): Plant {
+  return {
+    id: plant.id,
+    position: { x: plant.positionX, y: plant.positionY },
+    observed: plant.observed,
+    observedAt: plant.observedAt ?? undefined,
+    quantumCircuitId: plant.quantumCircuitId,
+    visualState: plant.visualState as VisualState,
+    entanglementGroupId: plant.entanglementGroupId ?? undefined,
+    traits: plant.traits ? (plant.traits as unknown as ResolvedTraits) : undefined,
+    createdAt: plant.createdAt,
+    updatedAt: plant.updatedAt,
+    variantId: plant.variantId,
+    germinatedAt: plant.germinatedAt,
+    lifecycleModifier: plant.lifecycleModifier,
+    colorVariationName: plant.colorVariationName,
+  };
+}
 
 /**
  * Plant-related procedures.
@@ -14,7 +38,7 @@ export const plantsRouter = router({
     const plants = await ctx.db.plant.findMany({
       orderBy: { createdAt: "asc" },
     });
-    return plants;
+    return plants.map(transformPlant);
   }),
 
   /**
@@ -28,7 +52,7 @@ export const plantsRouter = router({
         entanglementGroup: true,
       },
     });
-    return plant;
+    return plant ? transformPlant(plant) : null;
   }),
 
   /**
@@ -40,7 +64,7 @@ export const plantsRouter = router({
       const plants = await ctx.db.plant.findMany({
         where: { entanglementGroupId: input.groupId },
       });
-      return plants;
+      return plants.map(transformPlant);
     }),
 
   /**
@@ -50,6 +74,6 @@ export const plantsRouter = router({
     const plants = await ctx.db.plant.findMany({
       where: { observed: false },
     });
-    return plants;
+    return plants.map(transformPlant);
   }),
 });

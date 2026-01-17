@@ -16,15 +16,26 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Implement plant rendering on main PixiJS canvas using lifecycle system
 - [ ] Create reticle controller for observation targeting
 - [ ] Build observation system with dwell tracking
 - [ ] Connect frontend observation to quantum measurement endpoint
 - [ ] Seed initial plants with variant assignments
+- [ ] Add test coverage for lifecycle computation logic
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Plant Rendering on Main Canvas
+
+- [x] Create PlantSprite class for rendering individual plants with lifecycle state
+- [x] Create PlantRenderer class to manage all plant sprites and sync with Zustand store
+- [x] Integrate PlantRenderer into GardenCanvas component
+- [x] Add lifecycle fields to shared Plant type (variantId, germinatedAt, lifecycleModifier, colorVariationName)
+- [x] Create transformPlant function in plants router to properly map DB plants to shared type
+- [x] Add window resize handling to GardenCanvas
+- [x] Add full-screen styling to GardenCanvas
+- [x] Add proper cleanup on unmount for PlantRenderer
 
 ### 2026-01-17 - Plant Lifecycle & Variant Sandbox
 
@@ -72,7 +83,7 @@ _No tasks currently in progress_
 
 _Core functionality needed for a working demo_
 
-- [ ] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
+- [x] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
 - [ ] **Reticle System**: Implement cursor-following reticle for targeting plants
 - [ ] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
 - [ ] **State Collapse Animation**: Animate transition from superposed to collapsed state
@@ -106,6 +117,7 @@ _Nice-to-have enhancements_
 
 ## Technical Debt
 
+- [ ] Configure test script in package.json (currently no test runner)
 - [ ] Add comprehensive test coverage for quantum service
 - [ ] Add E2E tests for observation flow
 - [ ] Document quantum circuit design decisions in code
@@ -120,13 +132,13 @@ _Nice-to-have enhancements_
 | Component                    | Status      | Notes                                        |
 | ---------------------------- | ----------- | -------------------------------------------- |
 | **Frontend (apps/web)**      |             |                                              |
-| PixiJS canvas initialization | Done        | Basic setup complete                         |
-| Plant rendering (main)       | Not Started | Need to integrate lifecycle system           |
+| PixiJS canvas initialization | Done        | Full-screen, resize handling                 |
+| Plant rendering (main)       | Done        | PlantSprite + PlantRenderer with lifecycle   |
 | Variant sandbox              | Done        | Full timeline editor, gallery, playback      |
 | Superposed view              | Done        | Pastel palettes, visual development tool     |
-| Reticle controller           | Not Started |                                              |
+| Reticle controller           | Not Started | Next priority                                |
 | Observation system           | Not Started | Documented in docs/observation-system.md     |
-| Zustand store                | Scaffolded  | Basic structure, needs lifecycle integration |
+| Zustand store                | Done        | Plant data with lifecycle fields             |
 | tRPC client                  | Done        | Connected and working                        |
 | **Shared (packages/shared)** |             |                                              |
 | Variant types                | Done        | PlantVariant, GlyphKeyframe, lifecycle types |

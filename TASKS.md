@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 6)_
+_Last updated: 2026-01-17 (Session 7)_
 
 ## Project Goal
 
@@ -16,12 +16,22 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Add test coverage for lifecycle computation logic
 - [ ] End-to-end observation testing (seed garden, observe plant, verify state change)
+- [ ] Integration testing for observation router
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Lifecycle Test Coverage
+
+- [x] Add vitest as test framework for shared package
+- [x] Configure turbo `test` task for monorepo-wide testing
+- [x] Write comprehensive lifecycle computation tests (45 tests)
+- [x] Test `computeLifecycleState` for ungerminated, germinated, and complete lifecycles
+- [x] Test `interpolateKeyframes` with pattern, palette, and property blending
+- [x] Test color variation selection and effective palette resolution
+- [x] Test lifecycle modifier (speed up/slow down) behavior
 
 ### 2026-01-17 - Mock Trait Generation
 
@@ -166,13 +176,13 @@ _Nice-to-have enhancements_
 
 ## Technical Debt
 
-- [ ] Configure test script in package.json (currently no test runner)
 - [ ] Add comprehensive test coverage for quantum service
 - [ ] Add E2E tests for observation flow
 - [ ] Document quantum circuit design decisions in code
 - [ ] Add error boundaries in React components
 - [ ] Implement proper error handling for IonQ API failures
-- [ ] Add tests for lifecycle computation logic
+- [ ] Add tests for observation router logic
+- [ ] Add tests for PlantSprite and PlantRenderer
 
 ---
 
@@ -193,6 +203,7 @@ _Nice-to-have enhancements_
 | Variant types                | Done       | PlantVariant, GlyphKeyframe, lifecycle types |
 | Variant definitions          | Done       | 3 example variants defined                   |
 | Lifecycle computation        | Done       | computeLifecycleState, interpolation         |
+| Lifecycle tests              | Done       | 45 tests covering all lifecycle functions    |
 | **API Layer**                |            |                                              |
 | tRPC endpoints               | Scaffolded | Plants, observation, health routers exist    |
 | Prisma schema                | Done       | Full schema with lifecycle fields            |

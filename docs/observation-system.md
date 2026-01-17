@@ -177,13 +177,32 @@ This event is sent to the backend to perform quantum measurement.
 
 ## Quantum execution
 
-Backend responsibilities:
+> **Current Implementation Status**: Real quantum hardware integration is deferred. The system currently uses pseudorandom trait generation that simulates quantum measurement outcomes. When quantum integration is enabled, the architecture supports real hardware execution without changes to the observation UX.
+
+### Pre-computed trait resolution
+
+Plant traits are pre-computed at seeding time using pseudorandom generation. The observation event does not perform real-time computation—it reveals traits that already exist.
+
+This means:
+
+- Trait values are determined when plants are created
+- Observation is purely a UX transition, not a computation trigger
+- No real-time updates or broadcasts are needed
+- The collapsed state is already stored; observation marks it as revealed
+
+### Backend responsibilities
 
 - Verify plant is still unobserved
-- Execute the associated quantum circuit on real hardware
-- Store the measurement result permanently
-- Return the collapsed visual state
-- Broadcast the update to all connected clients
+- Mark the plant as observed in the database
+- Return the pre-computed collapsed visual state
+
+### Future quantum integration
+
+When quantum hardware integration is enabled:
+
+- The quantum circuit will be executed at plant creation time (not observation time)
+- Measurement results will be stored as pre-computed traits
+- The observation UX remains unchanged—it reveals, not computes
 
 The quantum result maps directly to pixel level decisions in the glyph.
 

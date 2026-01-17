@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 5)_
+_Last updated: 2026-01-17 (Session 6)_
 
 ## Project Goal
 
@@ -17,12 +17,21 @@ _No tasks currently in progress_
 ### Up Next
 
 - [ ] Add test coverage for lifecycle computation logic
-- [ ] Create quantum service `/circuits/measure` endpoint to complete integration
-- [ ] Implement real-time updates for observation results broadcast
+- [ ] End-to-end observation testing (seed garden, observe plant, verify state change)
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Mock Trait Generation
+
+- [x] Implement seeded pseudorandom number generator for reproducible traits
+- [x] Create `generateMockTraits()` function using circuit definition as seed
+- [x] Replace quantum service call with local mock trait resolution
+- [x] Use variant's palette for color selection, with random fallback
+- [x] Generate growth rate (0.5-1.5) and opacity (0.7-1.0) from seed
+- [x] Update TASKS.md to reflect architectural clarification
+- [x] Update observation system documentation with pre-computed approach
 
 ### 2026-01-17 - State Collapse Animation
 
@@ -125,10 +134,11 @@ _Core functionality needed for a working demo_
 - [x] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
 - [x] **Reticle System**: Implement autonomous reticle with drift behavior
 - [x] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
-- [x] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
-- [x] **Plant Seeding**: Create initial batch of plants with quantum circuits and variants
+- [x] **Quantum Integration**: Wire frontend observation to backend (mock traits, real quantum deferred)
+- [x] **Plant Seeding**: Create initial batch of plants with pre-computed traits
 - [x] **State Collapse Animation**: Animate transition from superposed to collapsed state
-- [ ] **Real-time Updates**: Broadcast observation results to all connected clients
+
+> **Note**: Real-time updates are not needed. Observation is a UX layer over pre-computed data—traits are determined at plant creation, not observation time.
 
 ### Medium Priority
 
@@ -191,9 +201,10 @@ _Nice-to-have enhancements_
 | **Quantum Service**          |            |                                              |
 | FastAPI app                  | Done       | Running on port 18742                        |
 | Circuit generation           | Done       | Using Qiskit                                 |
-| IonQ integration             | Done       | Client implemented                           |
+| IonQ integration             | Deferred   | Client implemented, real execution deferred  |
 | Trait mapping                | Done       | Basic mapping in place                       |
 | Variant loader               | Done       | Python module to load variant definitions    |
+| Mock trait generation        | Done       | Pseudorandom traits seeded from circuit      |
 | **Infrastructure**           |            |                                              |
 | PostgreSQL                   | Done       | Docker Compose configured                    |
 | CI/CD                        | Done       | GitHub Actions workflow                      |
@@ -220,3 +231,5 @@ _Nice-to-have enhancements_
 - Target: Web-based experience, potentially adaptable to gallery installation
 - Philosophy: Calm, contemplative, slow - visitors are observers, not controllers
 - TypeScript is single source of truth for variants (exported to JSON for Python)
+- **Quantum integration is deferred**: Currently using pseudorandom trait generation. The architecture supports real quantum execution when enabled, but observation UX is identical either way.
+- **Observation is a UX layer**: Traits are pre-computed at plant creation. Observation reveals existing data, it does not trigger computation or require real-time updates.

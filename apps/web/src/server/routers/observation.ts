@@ -1,46 +1,87 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import type { ResolvedTraits } from "@quantum-garden/shared";
+import {
+  GLYPH_PATTERNS,
+  COLOR_PALETTES,
+  getVariantById,
+  getEffectivePalette,
+} from "@quantum-garden/shared";
 
-/** Quantum service URL (Python FastAPI service) */
-const QUANTUM_SERVICE_URL = process.env.QUANTUM_SERVICE_URL ?? "http://localhost:18742";
-
-/** Response type from quantum service measurement endpoint */
-interface QuantumMeasureResponse {
-  plant_id: string;
-  success: boolean;
-  traits?: {
-    glyphPattern: number[][];
-    colorPalette: string[];
-    growthRate: number;
-    opacity: number;
+/**
+ * Simple seeded pseudo-random number generator.
+ * Uses a linear congruential generator for reproducible randomness.
+ */
+function seededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
   };
-  error?: string;
 }
 
 /**
- * Call the quantum service to perform measurement on a plant's circuit.
+ * Generate mock traits that simulate quantum measurement outcomes.
+ *
+ * This uses pseudorandom generation seeded from the circuit definition
+ * to produce reproducible, deterministic trait values. When real quantum
+ * integration is enabled, this function will be replaced with actual
+ * measurement results.
+ *
+ * The traits generated are:
+ * - glyphPattern: Selected from predefined patterns based on variant/seed
+ * - colorPalette: Uses variant's palette or falls back to randomized selection
+ * - growthRate: 0.5 to 1.5 (slow to fast lifecycle)
+ * - opacity: 0.7 to 1.0 (maintains visibility)
  */
-async function callQuantumMeasurement(
-  plantId: string,
-  circuitDefinition: string
-): Promise<QuantumMeasureResponse> {
-  const response = await fetch(`${QUANTUM_SERVICE_URL}/circuits/measure`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      plant_id: plantId,
-      circuit_definition: circuitDefinition,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Quantum service error: ${response.status} ${response.statusText}`);
+function generateMockTraits(
+  circuitDefinition: string,
+  variantId: string,
+  colorVariationName: string | null
+): ResolvedTraits {
+  // Extract seed from circuit definition for reproducible randomness
+  let seed = 0;
+  try {
+    const decoded = Buffer.from(circuitDefinition, "base64").toString("utf-8");
+    const parsed = JSON.parse(decoded) as { seed?: number };
+    seed = parsed.seed ?? Date.now();
+  } catch {
+    // If parsing fails, use current time as seed
+    seed = Date.now();
   }
 
-  return response.json() as Promise<QuantumMeasureResponse>;
+  const random = seededRandom(seed);
+
+  // Get variant for palette selection
+  const variant = getVariantById(variantId);
+
+  // Select a glyph pattern based on seed
+  const patternIndex = Math.floor(random() * GLYPH_PATTERNS.length);
+  const selectedPattern = GLYPH_PATTERNS[patternIndex];
+  const glyphPattern = selectedPattern?.grid ?? GLYPH_PATTERNS[0]!.grid;
+
+  // Use variant's palette if available, otherwise select randomly
+  let colorPalette: string[];
+  if (variant && variant.keyframes[0]) {
+    colorPalette = getEffectivePalette(variant.keyframes[0], variant, colorVariationName ?? null);
+  } else {
+    const paletteIndex = Math.floor(random() * COLOR_PALETTES.length);
+    const selectedPalette = COLOR_PALETTES[paletteIndex];
+    colorPalette = selectedPalette?.colors ?? COLOR_PALETTES[0]!.colors;
+  }
+
+  // Generate growth rate (0.5 to 1.5)
+  const growthRate = 0.5 + random();
+
+  // Generate opacity (0.7 to 1.0)
+  const opacity = 0.7 + random() * 0.3;
+
+  return {
+    glyphPattern,
+    colorPalette,
+    growthRate,
+    opacity,
+  };
 }
 
 /**
@@ -96,27 +137,15 @@ export const observationRouter = router({
         throw new Error("Plant has no quantum circuit definition");
       }
 
-      // Call quantum service to perform measurement
-      let resolvedTraits: ResolvedTraits | undefined;
-      try {
-        const measureResult = await callQuantumMeasurement(
-          input.plantId,
-          circuitDefinition as string
-        );
-
-        if (measureResult.success && measureResult.traits) {
-          resolvedTraits = {
-            glyphPattern: measureResult.traits.glyphPattern,
-            colorPalette: measureResult.traits.colorPalette,
-            growthRate: measureResult.traits.growthRate,
-            opacity: measureResult.traits.opacity,
-          };
-        }
-      } catch (error) {
-        // Log error but continue with observation
-        // In production, you might want to handle this differently
-        console.error("Quantum measurement failed:", error);
-      }
+      // Generate resolved traits using mock quantum measurement
+      // When real quantum integration is enabled, this will use actual
+      // measurement results from IonQ hardware. For now, we use
+      // deterministic pseudorandom generation seeded from the circuit.
+      const resolvedTraits = generateMockTraits(
+        circuitDefinition as string,
+        plant.variantId,
+        plant.colorVariationName
+      );
 
       const updatedPlant = await ctx.db.plant.update({
         where: { id: input.plantId },
@@ -124,8 +153,8 @@ export const observationRouter = router({
           observed: true,
           observedAt: new Date(),
           visualState: "collapsed",
-          // Store resolved traits from quantum measurement
-          traits: resolvedTraits ? (resolvedTraits as unknown as object) : undefined,
+          // Store resolved traits (pre-computed or mock-generated)
+          traits: resolvedTraits as unknown as object,
         },
       });
 

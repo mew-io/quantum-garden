@@ -50,11 +50,12 @@ pnpm dev
 
 ### Development URLs
 
-| Service         | URL                    | Port  |
-| --------------- | ---------------------- | ----- |
-| Web App         | http://localhost:14923 | 14923 |
-| Quantum Service | http://localhost:18742 | 18742 |
-| PostgreSQL      | localhost:13318        | 13318 |
+| Service         | URL                            | Port  |
+| --------------- | ------------------------------ | ----- |
+| Web App         | http://localhost:14923         | 14923 |
+| Sprite Sandbox  | http://localhost:14923/sandbox | 14923 |
+| Quantum Service | http://localhost:18742         | 18742 |
+| PostgreSQL      | localhost:13318                | 13318 |
 
 We use nonstandard high ports to avoid conflicts with other services you may be running.
 
@@ -90,6 +91,7 @@ See [docs/architecture.md](docs/architecture.md) for detailed system design.
 - [Architecture Overview](docs/architecture.md)
 - [Observation System](docs/observation-system.md)
 - [Quantum Circuits](docs/quantum-circuits.md)
+- [Sprite Sandbox](docs/sandbox.md) — Visual development tool for plant patterns
 - [Contributing Guide](docs/contributing.md)
 
 ---

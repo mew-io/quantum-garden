@@ -1,7 +1,7 @@
 # Session Archive: Plant Rendering on Main Canvas
 
 **Date**: 2026-01-17
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: ff87154
 
 ---
 

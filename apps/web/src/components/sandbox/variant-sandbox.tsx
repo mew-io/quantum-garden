@@ -1,120 +1,79 @@
 "use client";
 
+import type { PlantVariant } from "@quantum-garden/shared";
 import { VariantControls } from "./variant-controls";
 import { VariantTimeline } from "./variant-timeline";
 import { VariantPreview } from "./variant-preview";
 import { KeyframePanel } from "./keyframe-panel";
+import { VariantGallery } from "./variant-gallery";
+import { VariantConfigPanel } from "./variant-config-panel";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 
 /**
  * Variant Sandbox
  *
  * A visual development environment for designing plant variants and their
- * lifecycle animations. Features:
+ * lifecycle animations. Features two main views:
  *
- * - Variant selector with color variation support
- * - Timeline view showing keyframes with proportional widths
+ * Gallery View:
+ * - Overview of all variants with previews
+ * - Quick stats and feature badges
+ * - Click to open detail view
+ *
+ * Detail View:
  * - Live preview with playback controls
- * - Keyframe detail panel
+ * - Timeline showing keyframes with sprites
+ * - Full configuration panel showing all options
+ * - Color variation selector
  *
  * Workflow for designers:
- * 1. Select a variant to preview
- * 2. Use playback controls to watch the lifecycle animation
- * 3. Click keyframes in the timeline to view their details
- * 4. Edit keyframe definitions in packages/shared/src/variants/definitions.ts
- * 5. Hot-reload updates the preview immediately
+ * 1. Browse variants in gallery view
+ * 2. Click a variant to open detail view
+ * 3. Use playback controls to watch the lifecycle animation
+ * 4. Review all configuration options in the config panel
+ * 5. Edit definitions in packages/shared/src/variants/definitions.ts
+ * 6. Hot-reload updates the preview immediately
  */
 export function VariantSandbox() {
-  const { getSelectedVariant } = useVariantSandboxStore();
+  const { viewMode, getSelectedVariant, goToGallery } = useVariantSandboxStore();
   const variant = getSelectedVariant();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="px-6 py-4 bg-white border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Variant Sandbox</h1>
-        <p className="text-sm text-gray-600 mt-1">Design and preview plant lifecycle animations</p>
+        <div className="flex items-center gap-4">
+          {viewMode === "detail" && (
+            <button
+              onClick={goToGallery}
+              className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span className="text-sm">All Variants</span>
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {viewMode === "gallery" ? "Variant Sandbox" : variant?.name || "Variant Detail"}
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              {viewMode === "gallery"
+                ? "Browse and preview plant lifecycle animations"
+                : variant?.description || "View and test variant configuration"}
+            </p>
+          </div>
+        </div>
       </header>
 
-      {/* Controls */}
-      <VariantControls />
-
-      {/* Variant info bar */}
-      {variant && (
-        <div className="px-6 py-2 bg-gray-100 border-b border-gray-200 flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700">{variant.name}</span>
-          {variant.description && (
-            <span className="text-sm text-gray-500">{variant.description}</span>
-          )}
-          <span className="text-xs text-gray-400 ml-auto">
-            Rarity: {(variant.rarity * 100).toFixed(0)}%
-          </span>
-          {variant.requiresObservationToGerminate && (
-            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-              Requires observation
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Main content */}
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Preview and Keyframe Panel row */}
-          <div className="flex gap-6">
-            {/* Preview */}
-            <div className="flex-shrink-0">
-              <h2 className="text-sm font-medium text-gray-700 mb-3">Live Preview</h2>
-              <VariantPreview />
-            </div>
-
-            {/* Keyframe Panel */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-sm font-medium text-gray-700 mb-3">Keyframe Details</h2>
-              <KeyframePanel />
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div>
-            <h2 className="text-sm font-medium text-gray-700 mb-3">Lifecycle Timeline</h2>
-            <VariantTimeline />
-          </div>
-
-          {/* Color Variations info (if variant has them) */}
-          {variant?.colorVariations && variant.colorVariations.length > 0 && (
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-sm font-medium text-gray-300 mb-3">Color Variations</h2>
-              <div className="flex flex-wrap gap-3">
-                {variant.colorVariations.map((cv) => (
-                  <div
-                    key={cv.name}
-                    className="bg-gray-700 rounded px-3 py-2 flex items-center gap-2"
-                  >
-                    <span className="text-sm text-white">{cv.name}</span>
-                    <span className="text-xs text-gray-400">
-                      {(cv.weight * 100).toFixed(0)}% weight
-                    </span>
-                    {/* Color preview */}
-                    <div className="flex gap-0.5 ml-2">
-                      {Object.values(cv.palettes)[0]
-                        ?.slice(0, 3)
-                        .map((color, i) => (
-                          <div
-                            key={i}
-                            className="w-4 h-4 rounded-sm border border-gray-600"
-                            style={{ backgroundColor: color }}
-                            title={color}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* View-specific content */}
+      {viewMode === "gallery" ? <GalleryView /> : <DetailView variant={variant} />}
 
       {/* Footer with file hints */}
       <footer className="px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">
@@ -130,6 +89,138 @@ export function VariantSandbox() {
           </span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+/**
+ * Gallery view showing all variants
+ */
+function GalleryView() {
+  return (
+    <div className="flex-1 overflow-auto">
+      <VariantGallery />
+    </div>
+  );
+}
+
+/**
+ * Detail view for a single variant
+ */
+function DetailView({ variant }: { variant: PlantVariant | null }) {
+  if (!variant) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-500">
+        No variant selected
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Controls */}
+      <VariantControls />
+
+      {/* Main content */}
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="max-w-7xl mx-auto">
+          {/* Two-column layout */}
+          <div className="flex gap-6">
+            {/* Left column - Preview and Timeline */}
+            <div className="flex-1 min-w-0 space-y-6">
+              {/* Preview and Keyframe Panel row */}
+              <div className="flex gap-6">
+                {/* Preview */}
+                <div className="flex-shrink-0">
+                  <h2 className="text-sm font-medium text-gray-700 mb-3">Live Preview</h2>
+                  <VariantPreview />
+                </div>
+
+                {/* Keyframe Panel */}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-sm font-medium text-gray-700 mb-3">Keyframe Details</h2>
+                  <KeyframePanel />
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div>
+                <h2 className="text-sm font-medium text-gray-700 mb-3">Lifecycle Timeline</h2>
+                <VariantTimeline />
+              </div>
+
+              {/* Color Variations selector (if variant has them) */}
+              {variant.colorVariations && variant.colorVariations.length > 0 && (
+                <ColorVariationSelector variant={variant} />
+              )}
+            </div>
+
+            {/* Right column - Configuration Panel */}
+            <div className="w-80 flex-shrink-0">
+              <h2 className="text-sm font-medium text-gray-700 mb-3">Configuration</h2>
+              <VariantConfigPanel variant={variant} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * Color variation selector with visual preview
+ */
+function ColorVariationSelector({ variant }: { variant: PlantVariant }) {
+  const { selectedColorVariation, selectColorVariation } = useVariantSandboxStore();
+
+  if (!variant.colorVariations || variant.colorVariations.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4">
+      <h2 className="text-sm font-medium text-gray-300 mb-3">Color Variations</h2>
+      <div className="flex flex-wrap gap-2">
+        {/* Default option */}
+        <button
+          onClick={() => selectColorVariation(null)}
+          className={`px-3 py-2 rounded flex items-center gap-2 transition-colors ${
+            !selectedColorVariation
+              ? "bg-blue-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          <span className="text-sm">Default</span>
+        </button>
+
+        {/* Color variations */}
+        {variant.colorVariations.map((cv) => (
+          <button
+            key={cv.name}
+            onClick={() => selectColorVariation(cv.name)}
+            className={`px-3 py-2 rounded flex items-center gap-2 transition-colors ${
+              selectedColorVariation === cv.name
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            }`}
+          >
+            <span className="text-sm">{cv.name}</span>
+            <span className="text-xs opacity-70">{(cv.weight * 100).toFixed(0)}%</span>
+            {/* Color preview dots */}
+            <div className="flex gap-0.5 ml-1">
+              {Object.values(cv.palettes)[0]
+                ?.slice(0, 3)
+                .map((color, i) => (
+                  <div
+                    key={i}
+                    className="w-3 h-3 rounded-full border border-white/30"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

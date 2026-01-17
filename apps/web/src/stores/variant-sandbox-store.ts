@@ -4,8 +4,12 @@ import { PLANT_VARIANTS } from "@quantum-garden/shared";
 
 export type PlaybackSpeed = 0.5 | 1 | 2 | 5 | 10;
 export type Background = "white" | "dark" | "checkerboard";
+export type ViewMode = "gallery" | "detail";
 
 interface VariantSandboxState {
+  // View mode
+  viewMode: ViewMode;
+
   // Variant selection
   selectedVariantId: string | null;
   selectedKeyframeIndex: number | null;
@@ -49,11 +53,18 @@ interface VariantSandboxState {
   setScale: (scale: number) => void;
   setBackground: (bg: Background) => void;
   toggleGrid: () => void;
+
+  // Navigation actions
+  setViewMode: (mode: ViewMode) => void;
+  openVariantDetail: (variantId: string) => void;
+  goToGallery: () => void;
 }
 
 export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => ({
   // Initial state
-  selectedVariantId: PLANT_VARIANTS[0]?.id ?? null,
+  viewMode: "gallery",
+
+  selectedVariantId: null,
   selectedKeyframeIndex: null,
   selectedColorVariation: null,
 
@@ -164,7 +175,8 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
 
   reset: () =>
     set({
-      selectedVariantId: PLANT_VARIANTS[0]?.id ?? null,
+      viewMode: "gallery",
+      selectedVariantId: null,
       selectedKeyframeIndex: null,
       selectedColorVariation: null,
       isPlaying: false,
@@ -179,4 +191,21 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
   setScale: (scale) => set({ scale }),
   setBackground: (background) => set({ background }),
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+
+  // Navigation actions
+  setViewMode: (mode) => set({ viewMode: mode }),
+  openVariantDetail: (variantId) =>
+    set({
+      viewMode: "detail",
+      selectedVariantId: variantId,
+      selectedKeyframeIndex: null,
+      selectedColorVariation: null,
+      currentTime: 0,
+      isPlaying: false,
+    }),
+  goToGallery: () =>
+    set({
+      viewMode: "gallery",
+      isPlaying: false,
+    }),
 }));

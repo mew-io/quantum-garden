@@ -1,6 +1,5 @@
 "use client";
 
-import { PLANT_VARIANTS } from "@quantum-garden/shared";
 import {
   useVariantSandboxStore,
   type PlaybackSpeed,
@@ -16,72 +15,28 @@ const BACKGROUNDS: { value: Background; label: string }[] = [
 ];
 
 /**
- * Control panel for variant sandbox.
- * Includes variant selector, color variation selector, playback controls, and view settings.
+ * Control panel for variant detail view.
+ * Includes playback controls and view settings.
+ * Note: Variant selection is handled via the gallery view.
  */
 export function VariantControls() {
   const {
-    selectedVariantId,
-    selectedColorVariation,
     isPlaying,
     playbackSpeed,
     scale,
     background,
     showGrid,
-    getSelectedVariant,
-    selectVariant,
-    selectColorVariation,
     togglePlayback,
     setPlaybackSpeed,
     setCurrentTime,
     setScale,
     setBackground,
     toggleGrid,
-    reset,
+    goToGallery,
   } = useVariantSandboxStore();
-
-  const variant = getSelectedVariant();
 
   return (
     <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-100 border-b border-gray-200">
-      {/* Variant selector */}
-      <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-700">Variant:</label>
-        <select
-          value={selectedVariantId || ""}
-          onChange={(e) => selectVariant(e.target.value || null)}
-          className="px-3 py-1.5 text-sm rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          {PLANT_VARIANTS.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Color variation selector (if variant has color variations) */}
-      {variant?.colorVariations && variant.colorVariations.length > 0 && (
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Color:</label>
-          <select
-            value={selectedColorVariation || ""}
-            onChange={(e) => selectColorVariation(e.target.value || null)}
-            className="px-3 py-1.5 text-sm rounded border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Default</option>
-            {variant.colorVariations.map((cv) => (
-              <option key={cv.name} value={cv.name}>
-                {cv.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Divider */}
-      <div className="w-px h-6 bg-gray-300" />
-
       {/* Playback controls */}
       <div className="flex items-center gap-2">
         {/* Play/Pause button */}
@@ -196,12 +151,20 @@ export function VariantControls() {
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Reset all button */}
+      {/* Back to gallery button */}
       <button
-        onClick={reset}
-        className="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
+        onClick={goToGallery}
+        className="px-3 py-1 text-sm rounded bg-gray-200 text-gray-700 hover:bg-gray-300 flex items-center gap-1"
       >
-        Reset All
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+          />
+        </svg>
+        All Variants
       </button>
     </div>
   );

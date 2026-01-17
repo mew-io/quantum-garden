@@ -27,7 +27,17 @@ Take the time to think deeply. This is not a task to rush through.
 
 ## Phase 1: Session Review
 
-### Step 1: Gather Context
+### Step 1: Gather Session Log
+
+First, check for the session log:
+
+```bash
+cat SESSION.md 2>/dev/null || echo "No session log found"
+```
+
+The session log (`SESSION.md`) contains notes from the current development session. If it exists and has content, this is the primary source for what was accomplished.
+
+### Step 2: Gather Project Context
 
 Read these materials to understand current project state:
 
@@ -43,7 +53,7 @@ Read these materials to understand current project state:
 - `docs/context/application.md` — Original project proposal
 - `docs/context/rfp.md` — Original RFP
 
-### Step 2: Analyze Recent Changes
+### Step 3: Analyze Recent Changes
 
 Run these commands to understand what changed:
 
@@ -51,9 +61,9 @@ Run these commands to understand what changed:
 git status
 git diff --stat HEAD~5..HEAD
 git log --oneline -10
-````
+```
 
-### Step 3: Deep Analysis (Extended Thinking Required)
+### Step 4: Deep Analysis (Extended Thinking Required)
 
 Using extended thinking, analyze the session:
 
@@ -146,7 +156,73 @@ Use the TodoWrite tool to track your progress:
 
 ---
 
-## Phase 3: Project State Assessment
+## Phase 3: Session Archive Creation
+
+**Create a timestamped session summary for the archive.**
+
+After updating the main documentation, create an archive file:
+
+### Archive File Path
+
+`docs/archive/sessions/YYYY-MM-DD-[brief-description].md`
+
+Example: `docs/archive/sessions/2026-01-16-initial-setup.md`
+
+### Archive Content Template
+
+```markdown
+# Session Archive: [Brief Description]
+
+**Date**: [YYYY-MM-DD]
+**Synthesis Commit**: [will be filled after commit]
+
+---
+
+## Session Summary
+
+[2-3 sentence summary of what was accomplished]
+
+## Work Completed
+
+- [Item 1]
+- [Item 2]
+- [Item 3]
+
+## Code Changes
+
+| Area | Change |
+|------|--------|
+| [Component] | [Brief description] |
+
+## Decisions Made
+
+- [Decision 1 and rationale]
+- [Decision 2 and rationale]
+
+## Issues Encountered
+
+- [Issue and resolution, if any]
+
+## Next Session Priorities
+
+1. [Priority 1]
+2. [Priority 2]
+3. [Priority 3]
+
+---
+
+*This archive preserves the detailed session context. For current project state, see [TASKS.md](../../../TASKS.md).*
+```
+
+### Create Archive Directory (if needed)
+
+```bash
+mkdir -p docs/archive/sessions
+```
+
+---
+
+## Phase 4: Project State Assessment
 
 ### Current Implementation Status
 
@@ -174,7 +250,7 @@ Update TASKS.md with this assessment.
 
 ---
 
-## Phase 4: Next Steps Planning
+## Phase 5: Next Steps Planning
 
 ### Strategic Prioritization
 
@@ -202,20 +278,51 @@ Each task should be:
 
 ---
 
-## Phase 5: Commit and Report
+## Phase 6: Commit, Clear Session Log, and Report
 
-### Create Synthesis Commit
+### Create Synthesis Commit and Push
 
-If there are documentation updates, commit them:
+Commit all documentation updates with a descriptive message, then push to origin:
 
 ```bash
 git add -A
-git commit -m "Synthesis: Update documentation and tasks
+git commit -m "Synthesis: [brief summary of session focus]
 
-- Updated TASKS.md with current progress
-- [Other documentation changes]
+Documentation updates:
+- TASKS.md: [brief changes]
+- docs/archive/sessions/[file]: Session archive created
 
 Synthesis date: [date]"
+git push origin
+```
+
+**IMPORTANT**: Always push to origin after committing. This ensures:
+- Work is backed up remotely
+- Changes are available if context compacts and session continues elsewhere
+- Progress is preserved even if local session is interrupted
+
+### Clear Session Log
+
+**After committing**, reset the session log for the next session:
+
+```markdown
+# Session Log
+
+**Session Started**: (awaiting next session)
+**Previous Synthesis**: [commit hash from synthesis commit]
+
+---
+
+## Notes
+
+(No active session)
+```
+
+Write this to `SESSION.md`, then commit and push:
+
+```bash
+git add SESSION.md
+git commit -m "Clear session log after synthesis"
 git push origin
 ```
 
@@ -225,11 +332,12 @@ Output a synthesis report including:
 
 1. **Session Summary**: What work was completed?
 2. **Documentation Updates**: What files were updated?
-3. **Current Project Status**: High-level assessment
-4. **Implementation Progress**: Which components are complete?
-5. **Next Steps**: Top 3-5 priorities for next session
-6. **Blockers**: Anything preventing progress?
-7. **Notes**: Any important observations or decisions
+3. **Session Archive Created**: Path to the archive file
+4. **Current Project Status**: High-level assessment
+5. **Implementation Progress**: Which components are complete?
+6. **Next Steps**: Top 3-5 priorities for next session
+7. **Blockers**: Anything preventing progress?
+8. **Notes**: Any important observations or decisions
 
 ---
 
@@ -238,12 +346,14 @@ Output a synthesis report including:
 ### Completeness
 
 - All session work must be reflected in TASKS.md
+- Session log content must be preserved in archive
 - Documentation should match current implementation
 
 ### Clarity
 
 - Tasks should be understandable without session context
 - Documentation should be accurate and up-to-date
+- Archives should capture key decisions and context
 
 ### Strategic Alignment
 
@@ -256,19 +366,19 @@ Output a synthesis report including:
 
 At minimum, every synthesis MUST:
 
-| Action                | Purpose                             |
-| --------------------- | ----------------------------------- |
-| Update `TASKS.md`     | Track progress and plan next steps  |
-| Review documentation  | Ensure docs match implementation    |
-| Assess project status | Understand what's done vs remaining |
-| Plan next session     | Clear priorities for continued work |
+| Action                   | Purpose                                |
+| ------------------------ | -------------------------------------- |
+| Read `SESSION.md`        | Capture what was done this session     |
+| Update `TASKS.md`        | Track progress and plan next steps     |
+| Create session archive   | Preserve detailed session context      |
+| Clear `SESSION.md`       | Reset for next session                 |
+| Commit and push          | Backup all changes to remote           |
 
-**If you update nothing else, update TASKS.md.** It is the primary record of project progress and planning.
+**The session log is the primary input. The archive preserves it. TASKS.md tracks the work.**
 
 ---
 
-Begin now by reading the project documentation and recent git history to understand what needs to be synthesized.
-
+Begin now by reading the session log and project documentation to understand what needs to be synthesized.
 ````
 
 ---
@@ -280,15 +390,15 @@ When the user runs `/synthesize`, you MUST:
 1. **Spawn a sub-agent** using the Task tool:
    - `subagent_type`: `general-purpose`
    - `description`: `Synthesize session and update docs`
-   - `prompt`: The full prompt above (everything between the ``` markers)
+   - `prompt`: The full prompt above (everything between the ```` markers)
 
 2. **Do NOT run synthesis in the current context** — it must run as a sub-agent with its own context and task list
 
 3. **Wait for the sub-agent to complete** and relay its final report to the user
 
 This ensures:
+
 - The synthesis agent has a clean context window
 - It can use its own TodoWrite task list for tracking progress
 - Complex multi-file analysis doesn't pollute the parent conversation
 - The parent session can continue with a summary rather than full synthesis details
-````

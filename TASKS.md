@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 3)_
+_Last updated: 2026-01-17 (Session 4)_
 
 ## Project Goal
 
@@ -16,14 +16,25 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Seed initial plants with variant assignments
 - [ ] Implement state collapse animation (visual transition from superposed to collapsed)
 - [ ] Add test coverage for lifecycle computation logic
 - [ ] Create quantum service `/circuits/measure` endpoint to complete integration
+- [ ] Implement real-time updates for observation results broadcast
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Garden Seeding with Variant Assignments
+
+- [x] Create `scripts/seed-garden.ts` seed script
+- [x] Implement variant selection based on rarity weights
+- [x] Generate grid-based plant positions with jitter
+- [x] Create quantum records with placeholder circuit definitions
+- [x] Assign color variations for multi-color variants
+- [x] Randomly germinate 50% of plants for immediate visual interest
+- [x] Add `db:seed` npm script to package.json
+- [x] Sync Prisma schema to database with `db:push`
 
 ### 2026-01-17 - Observation System with Dwell Tracking
 
@@ -108,8 +119,8 @@ _Core functionality needed for a working demo_
 - [x] **Reticle System**: Implement autonomous reticle with drift behavior
 - [x] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
 - [x] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
+- [x] **Plant Seeding**: Create initial batch of plants with quantum circuits and variants
 - [ ] **State Collapse Animation**: Animate transition from superposed to collapsed state
-- [ ] **Plant Seeding**: Create initial batch of plants with quantum circuits and variants
 - [ ] **Real-time Updates**: Broadcast observation results to all connected clients
 
 ### Medium Priority
@@ -169,6 +180,7 @@ _Nice-to-have enhancements_
 | tRPC endpoints               | Scaffolded | Plants, observation, health routers exist    |
 | Prisma schema                | Done       | Full schema with lifecycle fields            |
 | Prisma client                | Done       | Generated and working                        |
+| Garden seeding               | Done       | 12 plants with variants, `db:seed` script    |
 | **Quantum Service**          |            |                                              |
 | FastAPI app                  | Done       | Running on port 18742                        |
 | Circuit generation           | Done       | Using Qiskit                                 |

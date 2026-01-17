@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 4)_
+_Last updated: 2026-01-17 (Session 5)_
 
 ## Project Goal
 
@@ -16,7 +16,6 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Implement state collapse animation (visual transition from superposed to collapsed)
 - [ ] Add test coverage for lifecycle computation logic
 - [ ] Create quantum service `/circuits/measure` endpoint to complete integration
 - [ ] Implement real-time updates for observation results broadcast
@@ -24,6 +23,14 @@ _No tasks currently in progress_
 ---
 
 ## Completed
+
+### 2026-01-17 - State Collapse Animation
+
+- [x] Implement collapse transition in PlantSprite class
+- [x] Track visual state changes to detect superposed to collapsed transition
+- [x] Add 1.5-second crossfade animation with ease-out cubic timing
+- [x] Render superposed layers fading out while collapsed form fades in
+- [x] Add `isCollapseTransitioning` and `collapseProgress` getters
 
 ### 2026-01-17 - Garden Seeding with Variant Assignments
 
@@ -120,7 +127,7 @@ _Core functionality needed for a working demo_
 - [x] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
 - [x] **Quantum Integration**: Wire frontend observation to quantum measurement endpoint
 - [x] **Plant Seeding**: Create initial batch of plants with quantum circuits and variants
-- [ ] **State Collapse Animation**: Animate transition from superposed to collapsed state
+- [x] **State Collapse Animation**: Animate transition from superposed to collapsed state
 - [ ] **Real-time Updates**: Broadcast observation results to all connected clients
 
 ### Medium Priority

@@ -39,18 +39,30 @@ interface PlantSpriteOptions {
   cellSize?: number;
 }
 
+/** Duration of the collapse transition in seconds */
+const COLLAPSE_TRANSITION_DURATION = 1.5;
+
 /**
  * A PixiJS container that renders a single plant.
  *
  * The sprite automatically computes its lifecycle state and renders
  * the appropriate keyframe. For superposed plants, it renders multiple
  * faint overlays representing possible states.
+ *
+ * When a plant is observed, a subtle crossfade transition occurs from
+ * the superposed rendering to the collapsed form.
  */
 export class PlantSprite extends Container {
   private plant: RenderablePlant;
   private variant: PlantVariant | undefined;
   private graphics: Graphics;
   private cellSize: number;
+
+  // Transition state for collapse animation
+  private isTransitioning: boolean;
+  private transitionProgress: number; // 0 = superposed, 1 = collapsed
+  private transitionStartTime: number;
+  private previousVisualState: "superposed" | "collapsed";
 
   constructor(plant: RenderablePlant, options: PlantSpriteOptions = {}) {
     super();
@@ -60,6 +72,12 @@ export class PlantSprite extends Container {
     this.variant = getVariantById(plant.variantId);
     this.graphics = new Graphics();
 
+    // Initialize transition state
+    this.isTransitioning = false;
+    this.transitionProgress = plant.visualState === "collapsed" ? 1 : 0;
+    this.transitionStartTime = 0;
+    this.previousVisualState = plant.visualState;
+
     this.addChild(this.graphics);
     this.updatePosition();
     this.renderPlant();
@@ -67,12 +85,33 @@ export class PlantSprite extends Container {
 
   /**
    * Update the plant data and re-render.
+   *
+   * Detects state changes and triggers the collapse transition animation.
    */
   updatePlant(plant: RenderablePlant): void {
+    // Detect transition from superposed to collapsed
+    if (
+      this.previousVisualState === "superposed" &&
+      plant.visualState === "collapsed" &&
+      !this.isTransitioning
+    ) {
+      this.startCollapseTransition();
+    }
+
+    this.previousVisualState = plant.visualState;
     this.plant = plant;
     this.variant = getVariantById(plant.variantId);
     this.updatePosition();
     this.renderPlant();
+  }
+
+  /**
+   * Start the collapse transition animation.
+   */
+  private startCollapseTransition(): void {
+    this.isTransitioning = true;
+    this.transitionProgress = 0;
+    this.transitionStartTime = performance.now();
   }
 
   /**
@@ -87,6 +126,9 @@ export class PlantSprite extends Container {
 
   /**
    * Render the plant based on its current lifecycle state.
+   *
+   * During a collapse transition, this blends between the superposed
+   * and collapsed renderings for a smooth visual crossfade.
    */
   renderPlant(): void {
     this.graphics.clear();
@@ -96,11 +138,101 @@ export class PlantSprite extends Container {
       return;
     }
 
-    if (this.plant.visualState === "superposed") {
+    // Update transition progress if animating
+    if (this.isTransitioning) {
+      const elapsed = (performance.now() - this.transitionStartTime) / 1000;
+      this.transitionProgress = Math.min(1, elapsed / COLLAPSE_TRANSITION_DURATION);
+
+      if (this.transitionProgress >= 1) {
+        this.isTransitioning = false;
+        this.transitionProgress = 1;
+      }
+    }
+
+    // Render based on state and transition
+    if (this.plant.visualState === "superposed" && !this.isTransitioning) {
       this.renderSuperposed();
+    } else if (this.isTransitioning) {
+      // During transition: crossfade from superposed to collapsed
+      this.renderTransition();
     } else {
       this.renderCollapsed();
     }
+  }
+
+  /**
+   * Render the transition from superposed to collapsed.
+   *
+   * Uses a smooth crossfade: superposed fades out while collapsed fades in.
+   */
+  private renderTransition(): void {
+    if (!this.variant) return;
+
+    // Ease function for smoother transition (ease-out cubic)
+    const eased = 1 - Math.pow(1 - this.transitionProgress, 3);
+
+    // Render fading superposed layers
+    const superposedOpacity = GLYPH.SUPERPOSED_OPACITY * (1 - eased);
+    if (superposedOpacity > 0.01) {
+      const keyframes = this.variant.keyframes.slice(0, 3);
+      keyframes.forEach((keyframe, index) => {
+        const palette = getEffectivePalette(keyframe, this.variant!, this.plant.colorVariationName);
+        const offset = index * 1;
+        this.drawKeyframe(
+          keyframe.pattern,
+          palette,
+          superposedOpacity,
+          keyframe.scale ?? 1,
+          offset
+        );
+      });
+    }
+
+    // Render emerging collapsed form
+    const collapsedOpacity = GLYPH.COLLAPSED_OPACITY * eased;
+    if (collapsedOpacity > 0.01) {
+      this.renderCollapsedWithOpacity(collapsedOpacity);
+    }
+  }
+
+  /**
+   * Render the collapsed state with a specific opacity.
+   * Used during transition animation.
+   */
+  private renderCollapsedWithOpacity(targetOpacity: number): void {
+    if (!this.variant) return;
+
+    // If the plant has resolved traits from quantum measurement, use those
+    if (this.plant.traits?.glyphPattern) {
+      const pattern = this.plant.traits.glyphPattern;
+      const palette = this.plant.traits.colorPalette ?? ["#888888", "#AAAAAA", "#CCCCCC"];
+      const baseOpacity = this.plant.traits.opacity ?? GLYPH.COLLAPSED_OPACITY;
+      this.drawKeyframe(pattern, palette, baseOpacity * targetOpacity, 1, 0);
+      return;
+    }
+
+    // Otherwise compute lifecycle state
+    const state = computeLifecycleState(this.plant, this.variant, new Date());
+    const keyframe = state.currentKeyframe;
+    const palette = getEffectivePalette(keyframe, this.variant, this.plant.colorVariationName);
+
+    let pattern = keyframe.pattern;
+    let opacity = keyframe.opacity ?? GLYPH.COLLAPSED_OPACITY;
+    let effectiveScale = keyframe.scale ?? 1;
+
+    // Interpolate if tweening is enabled
+    if (this.variant.tweenBetweenKeyframes && state.nextKeyframe) {
+      const interpolated = interpolateKeyframes(
+        keyframe,
+        state.nextKeyframe,
+        state.keyframeProgress
+      );
+      pattern = interpolated.pattern;
+      opacity = interpolated.opacity;
+      effectiveScale = interpolated.scale;
+    }
+
+    this.drawKeyframe(pattern, palette, opacity * targetOpacity, effectiveScale, 0);
   }
 
   /**
@@ -215,5 +347,20 @@ export class PlantSprite extends Container {
    */
   get plantId(): string {
     return this.plant.id;
+  }
+
+  /**
+   * Check if the plant is currently in a collapse transition.
+   */
+  get isCollapseTransitioning(): boolean {
+    return this.isTransitioning;
+  }
+
+  /**
+   * Get the current transition progress (0-1).
+   * Returns 1 if not transitioning.
+   */
+  get collapseProgress(): number {
+    return this.transitionProgress;
   }
 }

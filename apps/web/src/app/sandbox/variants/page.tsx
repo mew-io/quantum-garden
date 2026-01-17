@@ -1,10 +1,9 @@
-import { VariantSandbox } from "@/components/sandbox";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Variant Sandbox | Quantum Garden",
-  description: "Design and preview plant lifecycle animations",
-};
-
+/**
+ * Redirect to consolidated sandbox.
+ * The variant sandbox is now the main sandbox at /sandbox.
+ */
 export default function VariantSandboxPage() {
-  return <VariantSandbox />;
+  redirect("/sandbox");
 }

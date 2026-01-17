@@ -7,18 +7,24 @@ import { VariantPreview } from "./variant-preview";
 import { KeyframePanel } from "./keyframe-panel";
 import { VariantGallery } from "./variant-gallery";
 import { VariantConfigPanel } from "./variant-config-panel";
+import { SuperposedView } from "./superposed-view";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 
 /**
  * Variant Sandbox
  *
  * A visual development environment for designing plant variants and their
- * lifecycle animations. Features two main views:
+ * lifecycle animations. Features three main views:
  *
  * Gallery View:
  * - Overview of all variants with previews
  * - Quick stats and feature badges
  * - Click to open detail view
+ *
+ * Superposed View:
+ * - All variants overlaid in quantum superposition
+ * - Visual comparison of all variants at once
+ * - Click variant to isolate and view details
  *
  * Detail View:
  * - Live preview with playback controls
@@ -35,45 +41,83 @@ import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
  * 6. Hot-reload updates the preview immediately
  */
 export function VariantSandbox() {
-  const { viewMode, getSelectedVariant, goToGallery } = useVariantSandboxStore();
+  const { viewMode, getSelectedVariant, goToGallery, goToSuperposed } = useVariantSandboxStore();
   const variant = getSelectedVariant();
+
+  const getTitle = () => {
+    switch (viewMode) {
+      case "gallery":
+        return "Variant Sandbox";
+      case "superposed":
+        return "Quantum Superposition";
+      case "detail":
+        return variant?.name || "Variant Detail";
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (viewMode) {
+      case "gallery":
+        return "Browse and preview plant lifecycle animations";
+      case "superposed":
+        return "All variants overlaid in quantum superposition";
+      case "detail":
+        return variant?.description || "View and test variant configuration";
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="px-6 py-4 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-4">
-          {viewMode === "detail" && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {(viewMode === "detail" || viewMode === "superposed") && (
+              <button
+                onClick={goToGallery}
+                className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                <span className="text-sm">All Variants</span>
+              </button>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
+              <p className="text-sm text-gray-600 mt-1">{getSubtitle()}</p>
+            </div>
+          </div>
+
+          {/* Superposed button (only in gallery view) */}
+          {viewMode === "gallery" && (
             <button
-              onClick={goToGallery}
-              className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+              onClick={goToSuperposed}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
+                  d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
                 />
               </svg>
-              <span className="text-sm">All Variants</span>
+              <span className="text-sm font-medium">View Superposed</span>
             </button>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {viewMode === "gallery" ? "Variant Sandbox" : variant?.name || "Variant Detail"}
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              {viewMode === "gallery"
-                ? "Browse and preview plant lifecycle animations"
-                : variant?.description || "View and test variant configuration"}
-            </p>
-          </div>
         </div>
       </header>
 
       {/* View-specific content */}
-      {viewMode === "gallery" ? <GalleryView /> : <DetailView variant={variant} />}
+      {viewMode === "gallery" && <GalleryView />}
+      {viewMode === "superposed" && <SuperposedView />}
+      {viewMode === "detail" && <DetailView variant={variant} />}
 
       {/* Footer with file hints */}
       <footer className="px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">

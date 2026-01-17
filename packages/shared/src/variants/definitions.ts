@@ -22,7 +22,7 @@ import type { PlantVariant } from "./types";
  * Example: Simple Bloom
  *
  * A fixed-color plant that goes through bud → bloom → fade.
- * Uses soft greens throughout - grass-like plants are always green.
+ * Uses soft sage greens from the pastel palette.
  */
 const simpleBloom: PlantVariant = {
   id: "simple-bloom",
@@ -44,7 +44,8 @@ const simpleBloom: PlantVariant = {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      palette: ["#4A7C59", "#68A357", "#8BC34A"],
+      // Sage palette - quiet growth
+      palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
       opacity: 0.6,
       scale: 0.7,
     },
@@ -61,7 +62,8 @@ const simpleBloom: PlantVariant = {
         [0, 0, 0, 1, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      palette: ["#4A7C59", "#68A357", "#8BC34A"],
+      // Mint palette - fresh clarity
+      palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
       opacity: 0.8,
       scale: 0.85,
     },
@@ -78,7 +80,8 @@ const simpleBloom: PlantVariant = {
         [0, 0, 0, 1, 1, 0, 0, 0],
         [0, 0, 0, 1, 1, 0, 0, 0],
       ],
-      palette: ["#2E7D32", "#4CAF50", "#81C784"],
+      // Sage palette at full
+      palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
       opacity: 1.0,
       scale: 1.0,
     },
@@ -95,7 +98,8 @@ const simpleBloom: PlantVariant = {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      palette: ["#5D4037", "#795548", "#A1887F"],
+      // Canvas palette - returning to neutral
+      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.5,
       scale: 0.9,
     },
@@ -106,13 +110,13 @@ const simpleBloom: PlantVariant = {
  * Example: Quantum Tulip
  *
  * A multi-color variant demonstrating colorVariations.
- * Quantum measurement determines whether it's red, yellow, or purple.
- * Pattern remains the same, only colors change.
+ * Quantum measurement determines whether it's coral, peach, or lavender.
+ * Uses soft pastel palette. Pattern remains the same, only colors change.
  */
 const quantumTulip: PlantVariant = {
   id: "quantum-tulip",
   name: "Quantum Tulip",
-  description: "A tulip that can bloom in different colors based on quantum measurement",
+  description: "A tulip that blooms in soft pastel colors based on quantum measurement",
   rarity: 0.5, // Less common
   requiresObservationToGerminate: true,
   keyframes: [
@@ -129,8 +133,8 @@ const quantumTulip: PlantVariant = {
         [0, 0, 0, 1, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      // Default: subtle brown/green for bulb (same across variations)
-      palette: ["#5D4037", "#6D4C41", "#795548"],
+      // Canvas palette - pure potential
+      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.5,
       scale: 0.6,
     },
@@ -147,8 +151,8 @@ const quantumTulip: PlantVariant = {
         [0, 0, 0, 1, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      // Green stem (same across variations)
-      palette: ["#388E3C", "#4CAF50", "#66BB6A"],
+      // Mint palette - fresh clarity
+      palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
       opacity: 0.7,
       scale: 0.8,
     },
@@ -165,8 +169,8 @@ const quantumTulip: PlantVariant = {
         [0, 0, 0, 1, 1, 0, 0, 0],
         [0, 0, 0, 1, 1, 0, 0, 0],
       ],
-      // Default bloom color (overridden by colorVariations)
-      palette: ["#E91E63", "#F06292", "#F8BBD9"],
+      // Default: Blossom palette (overridden by colorVariations)
+      palette: ["#F0D0E0", "#E0E8F0", "#E8F0E8"],
       opacity: 1.0,
       scale: 1.0,
     },
@@ -183,8 +187,8 @@ const quantumTulip: PlantVariant = {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      // Faded version (also overridden by colorVariations)
-      palette: ["#8D6E63", "#A1887F", "#BCAAA4"],
+      // Canvas palette - fading to neutral
+      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.4,
       scale: 0.85,
     },
@@ -192,27 +196,30 @@ const quantumTulip: PlantVariant = {
   // Color variations - quantum selects one
   colorVariations: [
     {
-      name: "red",
+      name: "coral",
       weight: 1.0, // Common
       palettes: {
-        bloom: ["#C62828", "#E53935", "#EF5350"],
-        wilt: ["#5D4037", "#6D4C41", "#795548"],
+        // Soft coral pink - gentle warmth
+        bloom: ["#F0C0C0", "#F0D0D0", "#F8E8E8"],
+        wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
     },
     {
-      name: "yellow",
+      name: "peach",
       weight: 0.8, // Slightly less common
       palettes: {
-        bloom: ["#F9A825", "#FBC02D", "#FFEB3B"],
-        wilt: ["#5D4037", "#6D4C41", "#795548"],
+        // Warm peach apricot - sunset glow
+        bloom: ["#F0D0B0", "#F0E0C0", "#F8F0E0"],
+        wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
     },
     {
-      name: "purple",
+      name: "lavender",
       weight: 0.5, // Rare
       palettes: {
-        bloom: ["#6A1B9A", "#8E24AA", "#AB47BC"],
-        wilt: ["#4A148C", "#6A1B9A", "#7B1FA2"],
+        // Lavender lilac - dreamy calm
+        bloom: ["#E0C0F0", "#E0D0F0", "#F0E8F8"],
+        wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
     },
   ],
@@ -222,12 +229,12 @@ const quantumTulip: PlantVariant = {
  * Example: Pulsing Orb
  *
  * A looping variant that continuously pulses.
- * Demonstrates the loop feature for infinite animation.
+ * Uses the sky palette. Demonstrates the loop feature for infinite animation.
  */
 const pulsingOrb: PlantVariant = {
   id: "pulsing-orb",
   name: "Pulsing Orb",
-  description: "An ethereal orb that continuously pulses with light",
+  description: "An ethereal orb that gently pulses with morning light",
   rarity: 0.3, // Rare
   requiresObservationToGerminate: true,
   loop: true, // Loops forever
@@ -246,7 +253,8 @@ const pulsingOrb: PlantVariant = {
         [0, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 1, 1, 1, 1, 0, 0],
       ],
-      palette: ["#1A237E", "#283593", "#3949AB"],
+      // Sky palette - morning light (dimmed)
+      palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
       opacity: 0.4,
       scale: 0.9,
     },
@@ -263,7 +271,8 @@ const pulsingOrb: PlantVariant = {
         [0, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 1, 1, 1, 1, 0, 0],
       ],
-      palette: ["#5C6BC0", "#7986CB", "#9FA8DA"],
+      // Sky palette - morning light (bright)
+      palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
       opacity: 1.0,
       scale: 1.1,
     },

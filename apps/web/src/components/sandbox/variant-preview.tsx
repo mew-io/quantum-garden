@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { Application, Graphics } from "pixi.js";
 import { useVariantSandboxStore, type Background } from "@/stores/variant-sandbox-store";
 import {
@@ -27,6 +27,7 @@ export function VariantPreview() {
   const appRef = useRef<Application | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
+  const [isReady, setIsReady] = useState(false);
 
   const {
     getSelectedVariant,
@@ -48,25 +49,39 @@ export function VariantPreview() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const container = containerRef.current;
     const app = new Application();
+    let mounted = true;
 
     const initApp = async () => {
-      await app.init({
-        width: canvasSize,
-        height: canvasSize,
-        backgroundColor: BACKGROUND_COLORS[background],
-        antialias: false,
-        resolution: window.devicePixelRatio || 1,
-        autoDensity: true,
-      });
+      try {
+        await app.init({
+          width: canvasSize,
+          height: canvasSize,
+          backgroundColor: BACKGROUND_COLORS[background],
+          antialias: false,
+          resolution: window.devicePixelRatio || 1,
+          autoDensity: true,
+        });
 
-      containerRef.current?.appendChild(app.canvas);
-      appRef.current = app;
+        if (!mounted) {
+          app.destroy(true);
+          return;
+        }
+
+        container.appendChild(app.canvas);
+        appRef.current = app;
+        setIsReady(true);
+      } catch (error) {
+        console.error("Failed to initialize PixiJS:", error);
+      }
     };
 
     initApp();
 
     return () => {
+      mounted = false;
+      setIsReady(false);
       if (appRef.current) {
         appRef.current.destroy(true);
         appRef.current = null;
@@ -230,10 +245,12 @@ export function VariantPreview() {
     };
   }, [isPlaying, playbackSpeed, currentTime, setCurrentTime, getTotalDuration, variant?.loop]);
 
-  // Render when state changes
+  // Render when state changes (only after app is ready)
   useEffect(() => {
-    render();
-  }, [render]);
+    if (isReady) {
+      render();
+    }
+  }, [render, isReady]);
 
   if (!variant) {
     return (

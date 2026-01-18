@@ -20,8 +20,9 @@ const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 800;
 
 // Seed configuration
-const NUM_PLANTS = 12;
-const NUM_ENTANGLED_PAIRS = 2; // Number of entangled plant pairs
+// With 14 variants, 24 plants gives good distribution across rarities
+const NUM_PLANTS = 24;
+const NUM_ENTANGLED_PAIRS = 3; // Number of entangled plant pairs
 const MARGIN = 80; // Keep plants away from edges
 
 /**

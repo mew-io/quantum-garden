@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 21)_
+_Last updated: 2026-01-17 (Session 22)_
 
 ## Project Goal
 
@@ -97,15 +97,23 @@ _Ethereal_ (magical, very rare):
 - [x] Design 2-3 new flower variants (dewdrop-daisy, midnight-poppy, bell-cluster)
 - [x] Design 2 shrub variants (cloud-bush, berry-thicket)
 - [x] Design 1-2 tree variants (sapling-hope, weeping-willow)
+- [x] Update seed script with new variant distribution (24 plants, 3 entangled pairs)
 - [ ] Add scale property to seed script for size variation
 - [ ] Update PlantRenderer to handle scale differences
 - [ ] Consider z-ordering by plant category
-- [ ] Update seed script with new variant distribution
 - [ ] Test visual balance in sandbox
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Seed Distribution Update
+
+- [x] Increase plant count from 12 to 24 for better variant distribution
+- [x] Increase entangled pairs from 2 to 3
+- [x] Verify seed script dynamically uses PLANT_VARIANTS array with rarity-based selection
+- [x] Confirm all 14 variants automatically available via shared package export
+- [x] All quality checks passing: TypeScript, 83 tests, lint
 
 ### 2026-01-17 - Ecosystem Expansion (Phase 4: Trees)
 
@@ -513,7 +521,7 @@ _Nice-to-have enhancements_
 | tRPC endpoints               | Done     | Plants, observation (tested), health routers                          |
 | Prisma schema                | Done     | Full schema with lifecycle + entanglement                             |
 | Prisma client                | Done     | Generated and working                                                 |
-| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)                                      |
+| Garden seeding               | Done     | 24 plants, 6 entangled (3 pairs), all 14 variants                     |
 | Correlated observation       | Done     | Entangled partners collapse together                                  |
 | **Quantum Service**          |          |                                                                       |
 | FastAPI app                  | Done     | Running on port 18742                                                 |

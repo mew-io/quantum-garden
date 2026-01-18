@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 9)_
+_Last updated: 2026-01-17 (Session 10)_
 
 ## Project Goal
 
@@ -17,11 +17,32 @@ _No tasks currently in progress_
 ### Up Next
 
 - [ ] Observation testing (verify observation triggers state collapse in browser)
-- [ ] Add tests for PlantSprite and PlantRenderer components
+- [ ] E2E tests for observation flow (Playwright or Cypress)
 
 ---
 
 ## Completed
+
+### 2026-01-17 - PlantSprite and PlantRenderer Tests
+
+- [x] Create PlantSprite test suite (13 tests)
+  - Initialization for superposed and collapsed plants
+  - State transition detection (superposed to collapsed)
+  - Collapse transition animation timing (1.5s duration)
+  - Rendering with resolved traits vs lifecycle state
+  - Fallback rendering for missing variants
+  - Position updates on plant movement
+- [x] Create PlantRenderer test suite (15 tests)
+  - Initialization and container setup
+  - Store subscription on start/stop
+  - Sprite creation for initial plants
+  - Dynamic sprite addition/removal on store updates
+  - Sprite reuse on plant data changes
+  - Resource cleanup on destroy
+  - Sprite lookup by ID
+- [x] Implement proper PixiJS mocking with class implementations
+- [x] Create mock garden store with subscribe/getState
+- [x] Total test coverage: 83 tests (45 lifecycle + 38 web app)
 
 ### 2026-01-17 - End-to-End Visual Verification
 
@@ -202,7 +223,7 @@ _Nice-to-have enhancements_
 - [ ] Add error boundaries in React components
 - [ ] Implement proper error handling for IonQ API failures
 - [x] Add tests for observation router logic
-- [ ] Add tests for PlantSprite and PlantRenderer
+- [x] Add tests for PlantSprite and PlantRenderer
 
 ---
 

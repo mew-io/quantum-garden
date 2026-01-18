@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 32 - Observation Feedback)_
+_Last updated: 2026-01-18 (Session 33 - Haptic Feedback)_
 
 ## Project Goal
 
@@ -23,7 +23,7 @@ Critical UX feedback missing for touch users:
 - [x] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%) - Done
 - [x] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode - Done
 - [x] **Observation feedback**: Visual pulse/glow when observation completes - Done
-- [ ] **Consider haptic feedback**: Vibration on observation complete (if device supports)
+- [x] **Haptic feedback**: Vibration on observation complete and touch mode activation - Done
 
 #### Sandbox Mobile Polish
 
@@ -46,6 +46,20 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Haptic Feedback
+
+- [x] Create haptic feedback utility module (`apps/web/src/utils/haptics.ts`)
+  - `supportsHaptics()` - checks for Web Vibration API support
+  - `hapticLight()` - 15ms pulse for subtle feedback (touch mode activation)
+  - `hapticMedium()` - 30ms pulse for confirmations
+  - `hapticSuccess()` - two quick pulses [40, 50, 40] for celebrations
+  - `hapticCustom()` - arbitrary vibration patterns
+  - Gracefully degrades (no-op) on unsupported devices (iOS Safari, desktop)
+- [x] Integrate haptics into GardenCanvas
+  - `hapticLight()` triggers on touch mode activation for tactile confirmation
+  - `hapticSuccess()` triggers on observation complete before visual celebration
+- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
 
 ### 2026-01-18 - Observation Feedback
 

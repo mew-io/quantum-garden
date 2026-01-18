@@ -16,6 +16,7 @@ import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
+import { hapticSuccess, hapticLight } from "@/utils/haptics";
 
 /**
  * Main garden canvas component.
@@ -118,10 +119,15 @@ export function GardenCanvas() {
         touchModeIndicatorRef.current = touchModeIndicator;
         touchModeIndicator.start();
 
-        // Set up mode change callback to trigger visual feedback
+        // Set up mode change callback to trigger visual and haptic feedback
         reticleController.setModeChangeCallback((mode, position) => {
-          if (mode === "touch" && touchModeIndicatorRef.current) {
-            touchModeIndicatorRef.current.triggerPulse(position.x, position.y);
+          if (mode === "touch") {
+            // Visual feedback
+            if (touchModeIndicatorRef.current) {
+              touchModeIndicatorRef.current.triggerPulse(position.x, position.y);
+            }
+            // Haptic feedback
+            hapticLight();
           }
         });
 
@@ -171,6 +177,9 @@ export function GardenCanvas() {
           // Use the ref to call the current observation trigger
           // This allows the callback to access the latest hook reference
           observationCallbackRef.current(payload);
+
+          // Trigger haptic feedback for tactile confirmation (mobile)
+          hapticSuccess();
 
           // Trigger visual celebration at the observed plant's location
           const plants = useGardenStore.getState().plants;

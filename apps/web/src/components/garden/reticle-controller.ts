@@ -33,6 +33,7 @@ interface Velocity {
 
 type ReticleState = "drifting" | "paused";
 export type ControlMode = "autonomous" | "touch";
+export type ModeChangeCallback = (mode: ControlMode, position: Position) => void;
 
 /**
  * Controls the autonomous reticle movement and rendering.
@@ -54,6 +55,7 @@ export class ReticleController {
   private stateTimer: number; // Seconds until state change
   private reticleSize: number;
   private controlMode: ControlMode;
+  private onModeChange: ModeChangeCallback | null;
 
   // Configuration (from constants with some variation)
   private readonly minSpeed = RETICLE.MIN_SPEED;
@@ -87,6 +89,7 @@ export class ReticleController {
 
     // Default to autonomous control (reticle drifts on its own)
     this.controlMode = "autonomous";
+    this.onModeChange = null;
 
     // Parse color from hex string to number
     this.color = parseInt(RETICLE.COLOR.replace("#", ""), 16);
@@ -291,7 +294,22 @@ export class ReticleController {
    * @param mode - "autonomous" for drift behavior, "touch" for external control
    */
   setControlMode(mode: ControlMode): void {
+    const previousMode = this.controlMode;
     this.controlMode = mode;
+
+    // Notify callback if mode actually changed
+    if (previousMode !== mode && this.onModeChange) {
+      this.onModeChange(mode, { ...this.position });
+    }
+  }
+
+  /**
+   * Set a callback to be notified when the control mode changes.
+   *
+   * @param callback - Function called with (newMode, position) when mode changes
+   */
+  setModeChangeCallback(callback: ModeChangeCallback | null): void {
+    this.onModeChange = callback;
   }
 
   /**

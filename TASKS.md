@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 30 - Dwell Progress Indicator)_
+_Last updated: 2026-01-18 (Session 31 - Touch Mode Indicator)_
 
 ## Project Goal
 
@@ -21,7 +21,7 @@ _No tasks currently in progress_
 Critical UX feedback missing for touch users:
 
 - [x] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%) - Done
-- [ ] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode
+- [x] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode - Done
 - [ ] **Observation feedback**: Visual pulse/glow when observation completes
 - [ ] **Consider haptic feedback**: Vibration on observation complete (if device supports)
 
@@ -46,6 +46,22 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Touch Mode Indicator
+
+- [x] Create TouchModeIndicator class for visual feedback on mode switch
+  - Expanding ring animation at touch location when touch mode activates
+  - Ring expands from 20px to 60px radius over 0.6 seconds
+  - Uses eased-out cubic animation with fading alpha
+  - Soft cyan color (#4ecdc4) to match garden theme
+- [x] Add ModeChangeCallback to ReticleController
+  - New `setModeChangeCallback()` method for external notifications
+  - Callback triggered when control mode actually changes (not just set)
+- [x] Integrate TouchModeIndicator into GardenCanvas
+  - Initialized after reticle controller (above reticle for visibility)
+  - Mode change callback triggers pulse animation on touch mode activation
+  - Proper cleanup in unmount handler
+- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
 
 ### 2026-01-18 - Dwell Progress Indicator
 

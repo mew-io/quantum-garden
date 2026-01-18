@@ -9,6 +9,7 @@ import { createReticleController, type ReticleController } from "./reticle-contr
 import { createObservationSystem, type ObservationSystem } from "./observation-system";
 import { createEntanglementRenderer, type EntanglementRenderer } from "./entanglement-renderer";
 import { createDwellIndicator, type DwellIndicator } from "./dwell-indicator";
+import { createTouchModeIndicator, type TouchModeIndicator } from "./touch-mode-indicator";
 import { createGardenEvolutionSystem, type GardenEvolutionSystem } from "./garden-evolution";
 import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
@@ -30,6 +31,7 @@ export function GardenCanvas() {
   const observationSystemRef = useRef<ObservationSystem | null>(null);
   const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
   const dwellIndicatorRef = useRef<DwellIndicator | null>(null);
+  const touchModeIndicatorRef = useRef<TouchModeIndicator | null>(null);
   const evolutionSystemRef = useRef<GardenEvolutionSystem | null>(null);
   const cleanupTouchHandlersRef = useRef<(() => void) | null>(null);
 
@@ -103,6 +105,18 @@ export function GardenCanvas() {
         const reticleController = createReticleController(app);
         reticleControllerRef.current = reticleController;
         reticleController.start();
+
+        // Initialize touch mode indicator (above reticle for visibility)
+        const touchModeIndicator = createTouchModeIndicator(app);
+        touchModeIndicatorRef.current = touchModeIndicator;
+        touchModeIndicator.start();
+
+        // Set up mode change callback to trigger visual feedback
+        reticleController.setModeChangeCallback((mode, position) => {
+          if (mode === "touch" && touchModeIndicatorRef.current) {
+            touchModeIndicatorRef.current.triggerPulse(position.x, position.y);
+          }
+        });
 
         // Touch handling: Switch reticle to touch mode on pointer input
         // PointerEvents work for both touch and mouse, providing unified handling
@@ -211,6 +225,11 @@ export function GardenCanvas() {
       if (dwellIndicatorRef.current) {
         dwellIndicatorRef.current.destroy();
         dwellIndicatorRef.current = null;
+      }
+
+      if (touchModeIndicatorRef.current) {
+        touchModeIndicatorRef.current.destroy();
+        touchModeIndicatorRef.current = null;
       }
 
       if (evolutionSystemRef.current) {

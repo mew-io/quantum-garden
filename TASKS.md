@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 25 - Sandbox Visual Polish)_
+_Last updated: 2026-01-17 (Session 26 - Sandbox URL Sync and Tweening Fixes)_
 
 ## Project Goal
 
@@ -29,6 +29,32 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-17 - Sandbox URL Sync and Tweening Fixes
+
+- [x] Create `useSandboxUrlSync` hook for shareable sandbox URLs
+  - Supports `/sandbox?variant=simple-bloom&color=red` format
+  - Syncs view mode, variant selection, and color variation to URL
+  - Includes `buildSandboxUrl()` helper for generating links
+- [x] Add Suspense boundary to sandbox page for URL param loading
+- [x] Fix edge-only tweening in lifecycle system
+  - Tweening now only occurs in first 10% of keyframe (tween-in from previous)
+  - No tween-out at keyframe end - eliminates discontinuity at boundaries
+  - Added `prevKeyframe` tracking to `ComputedLifecycleState`
+  - Track `hasLooped` flag to avoid wrapping prevKeyframe on first loop iteration
+- [x] Update VariantPreview to use `getActiveVisual()` helper function
+- [x] Improve sandbox responsive layout
+  - Fixed overflow handling with `h-screen overflow-hidden`
+  - Made header/footer non-shrinkable
+  - Better detail view layout on mobile
+- [x] Enhance VariantGallery mobile experience
+  - Full stats display (duration, features) on mobile cards
+  - Keyframe strip preview on mobile
+  - Sticky table header for desktop
+  - Prevent column squishing with `whitespace-nowrap`
+- [x] Update default sandbox scale from 16 to 2 (appropriate for 64x64 grids)
+- [x] Add 4 new lifecycle tests for prevKeyframe and loop behavior
+- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
 
 ### 2026-01-17 - Sandbox Visual Polish
 
@@ -478,7 +504,7 @@ _Nice-to-have enhancements_
 | Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types                          |
 | Variant definitions          | Done     | 14 variants: 2 ground, 2 grass, 5 flower, 2 shrub, 2 tree, 1 ethereal |
 | Lifecycle computation        | Done     | computeLifecycleState, interpolation                                  |
-| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions                             |
+| Lifecycle tests              | Done     | 49 tests covering all lifecycle functions                             |
 | **API Layer**                |          |                                                                       |
 | tRPC endpoints               | Done     | Plants, observation (tested), health routers                          |
 | Prisma schema                | Done     | Full schema with lifecycle + entanglement                             |

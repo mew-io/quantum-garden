@@ -73,7 +73,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
   playbackSpeed: 1,
   currentTime: 0,
 
-  scale: 16,
+  scale: 2,
   background: "dark",
   showGrid: false,
 
@@ -183,7 +183,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       isPlaying: false,
       playbackSpeed: 1,
       currentTime: 0,
-      scale: 16,
+      scale: 2,
       background: "dark",
       showGrid: false,
     }),

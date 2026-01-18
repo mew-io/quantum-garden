@@ -243,6 +243,36 @@ describe("computeLifecycleState", () => {
       expect(state.keyframeProgress).toBeCloseTo(0.5, 5); // 5/10 = 0.5
       expect(state.isComplete).toBe(false);
     });
+
+    it("should not have prevKeyframe on first iteration of loop", () => {
+      const variant = createVariant({ loop: true });
+      const germinatedAt = new Date("2026-01-01T00:00:00Z");
+      const plant = createPlant({ germinatedAt });
+      // At 5s into first keyframe of first iteration
+      const now = new Date("2026-01-01T00:00:05Z");
+
+      const state = computeLifecycleState(plant, variant, now);
+
+      expect(state.currentKeyframe.name).toBe("seed");
+      expect(state.keyframeIndex).toBe(0);
+      // First iteration - no prevKeyframe for first keyframe
+      expect(state.prevKeyframe).toBeUndefined();
+    });
+
+    it("should have prevKeyframe after completing first loop", () => {
+      const variant = createVariant({ loop: true });
+      const germinatedAt = new Date("2026-01-01T00:00:00Z");
+      const plant = createPlant({ germinatedAt });
+      // At 65s = 5s into second loop's first keyframe
+      const now = new Date("2026-01-01T00:01:05Z");
+
+      const state = computeLifecycleState(plant, variant, now);
+
+      expect(state.currentKeyframe.name).toBe("seed");
+      expect(state.keyframeIndex).toBe(0);
+      // After looping - prevKeyframe should be last keyframe for smooth transition
+      expect(state.prevKeyframe?.name).toBe("bloom");
+    });
   });
 
   describe("lifecycle modifier", () => {
@@ -304,16 +334,51 @@ describe("getActiveVisual", () => {
     expect(visual).toBe(state.currentKeyframe);
   });
 
-  it("should return interpolated keyframe when tweening enabled", () => {
+  it("should return interpolated keyframe at keyframe start when tweening enabled", () => {
     const variant = createVariant({ tweenBetweenKeyframes: true });
     const germinatedAt = new Date("2026-01-01T00:00:00Z");
     const plant = createPlant({ germinatedAt });
+
+    // At 0.5s into first keyframe (5% progress) - no prev keyframe exists
+    const nowFirst = new Date("2026-01-01T00:00:00.500Z");
+    const stateFirst = computeLifecycleState(plant, variant, nowFirst);
+    const visualFirst = getActiveVisual(stateFirst, variant);
+    // At very start of first keyframe with no prev, should return current keyframe
+    expect(visualFirst).toBe(stateFirst.currentKeyframe);
+
+    // At 10.5s = 0.5s into second keyframe (20s duration) = 2.5% progress (in tween-in zone)
+    const nowSecond = new Date("2026-01-01T00:00:10.500Z");
+    const stateSecond = computeLifecycleState(plant, variant, nowSecond);
+    const visualSecond = getActiveVisual(stateSecond, variant);
+    // Should return interpolated keyframe (has 't' property) - tweening in from prev
+    expect("t" in visualSecond).toBe(true);
+  });
+
+  it("should return stable keyframe at end of keyframe (no tween-out)", () => {
+    const variant = createVariant({ tweenBetweenKeyframes: true });
+    const germinatedAt = new Date("2026-01-01T00:00:00Z");
+    const plant = createPlant({ germinatedAt });
+
+    // At 9.5s into 10s keyframe = 95% progress (past the 10% tween-in zone)
+    const now = new Date("2026-01-01T00:00:09.500Z");
+    const state = computeLifecycleState(plant, variant, now);
+    const visual = getActiveVisual(state, variant);
+    // Should return current keyframe, not interpolated (no tween-out)
+    expect(visual).toBe(state.currentKeyframe);
+  });
+
+  it("should return stable keyframe in middle of keyframe when tweening enabled", () => {
+    const variant = createVariant({ tweenBetweenKeyframes: true });
+    const germinatedAt = new Date("2026-01-01T00:00:00Z");
+    const plant = createPlant({ germinatedAt });
+    // At 5s into 10s keyframe = 50% progress (in stable zone: 10%-90%)
     const now = new Date("2026-01-01T00:00:05Z");
 
     const state = computeLifecycleState(plant, variant, now);
     const visual = getActiveVisual(state, variant);
 
-    expect("t" in visual).toBe(true); // Interpolated keyframe has 't' property
+    // Should return the current keyframe, not interpolated
+    expect(visual).toBe(state.currentKeyframe);
   });
 
   it("should return current keyframe on last frame even with tweening", () => {

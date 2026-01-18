@@ -9,6 +9,7 @@ import { VariantGallery } from "./variant-gallery";
 import { VariantConfigPanel } from "./variant-config-panel";
 import { SuperposedView } from "./superposed-view";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
+import { useSandboxUrlSync } from "@/hooks/use-sandbox-url-sync";
 
 /**
  * Variant Sandbox
@@ -44,6 +45,9 @@ export function VariantSandbox() {
   const { viewMode, getSelectedVariant, goToGallery, goToSuperposed } = useVariantSandboxStore();
   const variant = getSelectedVariant();
 
+  // Sync store state with URL query parameters
+  useSandboxUrlSync();
+
   const getTitle = () => {
     switch (viewMode) {
       case "gallery":
@@ -67,9 +71,9 @@ export function VariantSandbox() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
-      <header className="px-6 py-4 bg-white border-b border-gray-200">
+      <header className="flex-shrink-0 px-6 py-4 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {(viewMode === "detail" || viewMode === "superposed") && (
@@ -120,7 +124,7 @@ export function VariantSandbox() {
       {viewMode === "detail" && <DetailView variant={variant} />}
 
       {/* Footer with file hints */}
-      <footer className="px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">
+      <footer className="flex-shrink-0 px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">
         <div className="flex gap-6">
           <span>
             <strong>Variants:</strong> packages/shared/src/variants/definitions.ts
@@ -161,19 +165,21 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
   }
 
   return (
-    <>
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Controls */}
-      <VariantControls />
+      <div className="flex-shrink-0">
+        <VariantControls />
+      </div>
 
-      {/* Main content */}
-      <div className="flex-1 p-6 overflow-auto">
+      {/* Main content - scrollable */}
+      <div className="flex-1 p-6 overflow-auto min-h-0">
         <div className="max-w-7xl mx-auto">
           {/* Two-column layout */}
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             {/* Left column - Preview and Timeline */}
             <div className="flex-1 min-w-0 space-y-6">
               {/* Preview and Keyframe Panel row */}
-              <div className="flex gap-6">
+              <div className="flex flex-col sm:flex-row gap-6">
                 {/* Preview */}
                 <div className="flex-shrink-0">
                   <h2 className="text-sm font-medium text-gray-700 mb-3">Live Preview</h2>
@@ -200,14 +206,14 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
             </div>
 
             {/* Right column - Configuration Panel */}
-            <div className="w-80 flex-shrink-0">
+            <div className="w-full lg:w-80 flex-shrink-0">
               <h2 className="text-sm font-medium text-gray-700 mb-3">Configuration</h2>
               <VariantConfigPanel variant={variant} />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

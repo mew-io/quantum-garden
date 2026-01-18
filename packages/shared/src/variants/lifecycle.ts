@@ -73,6 +73,7 @@ export function computeLifecycleState(
       totalProgress: 0,
       elapsedSeconds: 0,
       totalDurationSeconds: totalDuration,
+      prevKeyframe: undefined,
       nextKeyframe: variant.keyframes[1],
       isComplete: false,
     };
@@ -82,8 +83,10 @@ export function computeLifecycleState(
   const elapsedMs = now.getTime() - germinatedAt.getTime();
   let elapsedSeconds = Math.max(0, elapsedMs / 1000);
 
-  // Handle looping
+  // Handle looping - track if we've completed at least one full cycle
+  let hasLooped = false;
   if (variant.loop && totalDuration > 0) {
+    hasLooped = elapsedSeconds >= totalDuration;
     elapsedSeconds = elapsedSeconds % totalDuration;
   }
 
@@ -100,6 +103,16 @@ export function computeLifecycleState(
       const timeInKeyframe = elapsedSeconds - accumulated;
       const keyframeProgress = effectiveDuration > 0 ? timeInKeyframe / effectiveDuration : 1;
 
+      // Get previous keyframe
+      // For looping variants on first keyframe, only wrap to last keyframe
+      // if we've actually completed at least one loop
+      let prevKeyframe: GlyphKeyframe | undefined;
+      if (i > 0) {
+        prevKeyframe = variant.keyframes[i - 1];
+      } else if (variant.loop && hasLooped) {
+        prevKeyframe = variant.keyframes[variant.keyframes.length - 1];
+      }
+
       return {
         currentKeyframe: keyframe,
         keyframeIndex: i,
@@ -107,6 +120,7 @@ export function computeLifecycleState(
         totalProgress: totalDuration > 0 ? elapsedSeconds / totalDuration : 1,
         elapsedSeconds,
         totalDurationSeconds: totalDuration,
+        prevKeyframe,
         nextKeyframe: variant.keyframes[i + 1],
         isComplete: false,
       };
@@ -128,13 +142,25 @@ export function computeLifecycleState(
     totalProgress: 1,
     elapsedSeconds,
     totalDurationSeconds: totalDuration,
+    prevKeyframe: variant.keyframes[variant.keyframes.length - 2],
     nextKeyframe: undefined,
     isComplete: true,
   };
 }
 
+/** Fraction of keyframe duration used for tween-in */
+const TWEEN_EDGE_FRACTION = 0.1;
+
 /**
  * Get the active visual for a plant, handling tweening if enabled.
+ *
+ * Tweening only occurs at keyframe start:
+ * - First 10%: Tween in from previous keyframe (smooth entry)
+ * - Last 90%: Stable current keyframe
+ *
+ * Note: We only do tween-in, not tween-out, to avoid a discontinuity at
+ * keyframe boundaries. The tween-in of keyframe B handles the transition
+ * from keyframe A, so no tween-out from A is needed.
  *
  * @param state - Computed lifecycle state
  * @param variant - Plant variant
@@ -144,13 +170,22 @@ export function getActiveVisual(
   state: ComputedLifecycleState,
   variant: PlantVariant
 ): GlyphKeyframe | InterpolatedKeyframe {
-  // No tweening - return current keyframe as-is
-  if (!variant.tweenBetweenKeyframes || !state.nextKeyframe) {
+  // No tweening enabled - return current keyframe as-is
+  if (!variant.tweenBetweenKeyframes) {
     return state.currentKeyframe;
   }
 
-  // Tweening enabled - interpolate between current and next keyframe
-  return interpolateKeyframes(state.currentKeyframe, state.nextKeyframe, state.keyframeProgress);
+  const progress = state.keyframeProgress;
+
+  // First 10%: Tween in from previous keyframe
+  if (progress < TWEEN_EDGE_FRACTION && state.prevKeyframe) {
+    // Map 0.0-0.1 to 0.0-1.0 for interpolation
+    const t = progress / TWEEN_EDGE_FRACTION;
+    return interpolateKeyframes(state.prevKeyframe, state.currentKeyframe, t);
+  }
+
+  // Remaining 90%: Return stable current keyframe
+  return state.currentKeyframe;
 }
 
 /**

@@ -6,8 +6,10 @@ import { useVariantSandboxStore, type Background } from "@/stores/variant-sandbo
 import {
   computeLifecycleState,
   getEffectivePalette,
-  interpolateKeyframes,
+  getActiveVisual,
   type PlantWithLifecycle,
+  type InterpolatedKeyframe,
+  type GlyphKeyframe,
 } from "@quantum-garden/shared";
 
 const BACKGROUND_COLORS: Record<Background, number> = {
@@ -132,25 +134,27 @@ export function VariantPreview() {
 
     // Compute lifecycle state
     const state = computeLifecycleState(mockPlant, variant, new Date());
-    const keyframe = state.currentKeyframe;
 
-    // Get effective palette (considering color variations)
-    const palette = getEffectivePalette(keyframe, variant, selectedColorVariation);
+    // Get the active visual (handles edge-only tweening)
+    const visual = getActiveVisual(state, variant);
 
-    // Interpolate if tweening is enabled and we have a next keyframe
-    let pattern = keyframe.pattern;
-    let effectiveOpacity = keyframe.opacity ?? 1.0;
-    let effectiveScale = keyframe.scale ?? 1.0;
+    // Type guard to check if visual is interpolated
+    const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
+      "t" in v;
 
-    if (variant.tweenBetweenKeyframes && state.nextKeyframe) {
-      const interpolated = interpolateKeyframes(
-        keyframe,
-        state.nextKeyframe,
-        state.keyframeProgress
-      );
-      pattern = interpolated.pattern;
-      effectiveOpacity = interpolated.opacity ?? effectiveOpacity;
-      effectiveScale = interpolated.scale ?? effectiveScale;
+    // Extract pattern, opacity, scale from the visual
+    const pattern = visual.pattern;
+    const effectiveOpacity = visual.opacity ?? 1.0;
+    const effectiveScale = visual.scale ?? 1.0;
+
+    // Get palette: use effective palette for keyframes, interpolated palette for tweens
+    let palette: string[];
+    if (isInterpolated(visual)) {
+      // During interpolation, use the interpolated palette
+      palette = visual.palette;
+    } else {
+      // Normal keyframe: apply color variation if selected
+      palette = getEffectivePalette(visual, variant, selectedColorVariation);
     }
 
     // Draw the glyph

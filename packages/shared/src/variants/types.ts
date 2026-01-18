@@ -156,6 +156,9 @@ export interface ComputedLifecycleState {
   /** Total duration of the lifecycle in seconds (with modifier applied) */
   totalDurationSeconds: number;
 
+  /** Previous keyframe for tweening (undefined if on first keyframe) */
+  prevKeyframe?: GlyphKeyframe;
+
   /** Next keyframe for tweening (undefined if on last keyframe) */
   nextKeyframe?: GlyphKeyframe;
 

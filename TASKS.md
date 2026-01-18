@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 23)_
+_Last updated: 2026-01-17 (Session 24 - Autowork Ecosystem Complete)_
 
 ## Project Goal
 
@@ -16,95 +16,32 @@ _No tasks currently in progress_
 
 ### Up Next
 
-#### Garden Ecosystem Expansion
+#### Manual Testing Required
 
-Expand plant variety to create a richer, more natural garden with visual hierarchy and ecological diversity.
+The Garden Ecosystem Expansion is code-complete. Before considering the feature done, manual visual testing is required:
 
-**Design Goals**:
-
-- Maintain calm, pastel aesthetic
-- Create visual depth through plant categories
-- **Rarity = Visual Reward**: Rarer plants have more interesting glyphs and animations
-- Plants should feel like they belong together
-
-**Visual Complexity by Rarity**:
-
-| Rarity      | Animation             | Glyph Complexity           | Effects          |
-| ----------- | --------------------- | -------------------------- | ---------------- |
-| Very Common | Static or simple loop | Basic shapes (dots, lines) | None             |
-| Common      | Gentle sway/pulse     | Simple patterns            | Subtle           |
-| Moderate    | Multi-stage lifecycle | Detailed patterns          | Shimmer          |
-| Uncommon    | Complex transitions   | Intricate designs          | Color shifts     |
-| Rare        | Elaborate sequences   | Unique silhouettes         | Multi-effect     |
-| Very Rare   | Stunning, memorable   | One-of-a-kind              | Layered, magical |
-
-**Proposed Plant Categories**:
-
-| Category         | Role                          | Scale    | Rarity Range | Examples                        |
-| ---------------- | ----------------------------- | -------- | ------------ | ------------------------------- |
-| **Ground Cover** | Background texture            | 0.3-0.5x | Very common  | Moss, lichen, small grasses     |
-| **Grasses**      | Gentle movement, fill space   | 0.5-0.8x | Common       | Meadow grass, reeds, ferns      |
-| **Flowers**      | Focal interest, color variety | 0.8-1.2x | Moderate     | Current blooms + new species    |
-| **Shrubs**       | Mid-ground structure          | 1.0-1.5x | Uncommon     | Bushes, hedges, berry plants    |
-| **Trees**        | Landmarks, rare discoveries   | 1.5-3.0x | Rare         | Saplings, bonsai, ancient trees |
-| **Ethereal**     | Magical/quantum elements      | Variable | Very rare    | Orbs, crystals, anomalies       |
-
-**Variant Ideas by Category**:
-
-_Ground Cover_ (simple, ambient):
-
-- `soft-moss` - Static spreading texture, fades in slowly
-- `pebble-patch` - Tiny dots, no animation
-
-_Grasses_ (gentle motion):
-
-- `meadow-tuft` - 2-frame gentle sway loop
-- `whisper-reed` - Thin lines, subtle lean animation
-- `curled-fern` - Slow unfurl over long duration
-
-_Flowers_ (lifecycle + color):
-
-- `simple-bloom` - (existing) 4-stage lifecycle, sage palette
-- `quantum-tulip` - (existing) multi-color, elegant bloom
-- `dewdrop-daisy` - Cluster pattern, sparkle effect on bloom
-- `midnight-poppy` - Deep colors, dramatic open/close cycle (uncommon)
-- `bell-cluster` - Hanging bells, staggered bloom timing (uncommon)
-
-_Shrubs_ (structure + detail):
-
-- `cloud-bush` - Rounded, breathing scale animation, berry details appear
-- `berry-thicket` - Dense pattern, fruits materialize over lifecycle
-- `crystal-hedge` - Geometric growth, prismatic color shifts (rare shrub)
-
-_Trees_ (impressive, rare):
-
-- `sapling-hope` - Delicate branching, leaves unfurl one by one
-- `weeping-willow` - Cascading fronds with wave animation, tall
-- `bonsai-elder` - Twisted trunk, intricate branch pattern, very slow lifecycle (very rare)
-
-_Ethereal_ (magical, very rare):
-
-- `pulsing-orb` - (existing) looping pulse, sky palette
-- `quantum-crystal` - Rotating geometric facets, prismatic shimmer, color cycling
-- `memory-wisp` - Trailing particles, fade/reform cycle, ghost-like transparency
-- `void-bloom` - Inverted colors, petals appear from nothing, reality-bending (legendary)
-- `memory-wisp` - Fading trails, ghost-like
-
-**Implementation Tasks**:
-
-- [x] Design 2-3 ground cover variants (soft-moss, pebble-patch)
-- [x] Design 2-3 grass variants (meadow-tuft, whisper-reed)
-- [x] Design 2-3 new flower variants (dewdrop-daisy, midnight-poppy, bell-cluster)
-- [x] Design 2 shrub variants (cloud-bush, berry-thicket)
-- [x] Design 1-2 tree variants (sapling-hope, weeping-willow)
-- [x] Update seed script with new variant distribution (24 plants, 3 entangled pairs)
-- [x] Update PlantRenderer to handle scale differences (already implemented via lifecycle keyframes)
-- [x] Implement z-ordering by plant category (ground cover behind, trees in front)
-- [ ] Test visual balance in sandbox
+- [ ] Run `pnpm db:seed` to populate garden with all 14 variants
+- [ ] Start dev server (`pnpm dev`) and view at http://localhost:14923
+- [ ] Check sandbox at http://localhost:14923/sandbox to preview all variants
+- [ ] Verify visual balance and z-ordering in the garden
+- [ ] Consider adjusting scale/rarity values based on visual feedback
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Autowork: Garden Ecosystem Expansion (7 loops)
+
+Full ecosystem expansion completed via automated autowork session:
+
+- **14 total plant variants** across 6 categories implemented
+- **64x64 grid pattern upgrade** with pattern-builder utilities
+- **Pattern builder module** for programmatic glyph generation
+- **Z-ordering system** for visual depth (ground cover to ethereal)
+- **Seed script updated** to 24 plants with 3 entangled pairs
+- **83 tests passing**, TypeScript and lint clean
+
+See archive: `docs/archive/sessions/2026-01-17-autowork-ecosystem-complete.md`
 
 ### 2026-01-17 - Scale and Z-Ordering Integration
 

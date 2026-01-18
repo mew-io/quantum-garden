@@ -1,7 +1,7 @@
 # Session Archive: Sandbox URL Sync and Tweening Fixes
 
 **Date**: 2026-01-17
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 1c5b46d
 
 ---
 

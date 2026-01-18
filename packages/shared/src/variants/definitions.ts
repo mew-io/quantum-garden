@@ -545,6 +545,157 @@ function createBellClusterPatterns() {
   return { buds, first, second, full, fade };
 }
 
+/**
+ * Generate patterns for Sapling Hope
+ * A delicate young tree with branches and leaves that unfurl progressively
+ */
+function createSaplingHopePatterns() {
+  // Seedling: tiny sprout just emerging
+  const seedling = createEmptyPattern();
+  drawRect(seedling, 30, 48, 33, 60); // Tiny stem
+  drawEllipse(seedling, 32, 44, 4, 6); // First leaf bud
+
+  // Sprout: small stem with first leaves
+  const sprout = createEmptyPattern();
+  drawRect(sprout, 30, 36, 33, 60); // Taller stem
+  // First pair of leaves
+  drawPetal(sprout, 22, 38, 29, 40, 5);
+  drawPetal(sprout, 42, 38, 35, 40, 5);
+  drawCircle(sprout, 32, 32, 4); // Growing tip
+
+  // Growing: developing branches and more leaves
+  const growing = createEmptyPattern();
+  drawRect(growing, 30, 28, 33, 60); // Main trunk
+  // Left branch
+  drawRect(growing, 20, 34, 30, 36);
+  drawPetal(growing, 14, 30, 20, 34, 6);
+  drawPetal(growing, 16, 38, 20, 36, 5);
+  // Right branch
+  drawRect(growing, 34, 34, 44, 36);
+  drawPetal(growing, 50, 30, 44, 34, 6);
+  drawPetal(growing, 48, 38, 44, 36, 5);
+  // Top leaves
+  drawPetal(growing, 32, 18, 32, 26, 8);
+  drawPetal(growing, 24, 22, 30, 28, 6);
+  drawPetal(growing, 40, 22, 34, 28, 6);
+
+  // Young: full young tree with balanced canopy
+  const young = createEmptyPattern();
+  drawRect(young, 29, 32, 34, 60); // Thicker trunk
+  // Left branches
+  drawRect(young, 16, 36, 29, 38);
+  drawRect(young, 10, 28, 18, 30);
+  drawPetal(young, 6, 24, 12, 28, 6);
+  drawPetal(young, 8, 32, 14, 30, 5);
+  drawPetal(young, 12, 40, 18, 38, 6);
+  drawPetal(young, 20, 42, 24, 38, 5);
+  // Right branches
+  drawRect(young, 35, 36, 48, 38);
+  drawRect(young, 46, 28, 54, 30);
+  drawPetal(young, 58, 24, 52, 28, 6);
+  drawPetal(young, 56, 32, 50, 30, 5);
+  drawPetal(young, 52, 40, 46, 38, 6);
+  drawPetal(young, 44, 42, 40, 38, 5);
+  // Top canopy
+  drawCircle(young, 32, 20, 10);
+  drawPetal(young, 32, 6, 32, 18, 10);
+  drawPetal(young, 22, 12, 28, 20, 7);
+  drawPetal(young, 42, 12, 36, 20, 7);
+
+  // Mature: full tree with lush foliage
+  const mature = createEmptyPattern();
+  drawRect(mature, 28, 34, 35, 62); // Strong trunk
+  // Dense left canopy
+  drawCircle(mature, 18, 28, 12);
+  drawCircle(mature, 12, 36, 10);
+  drawCircle(mature, 22, 40, 8);
+  // Dense right canopy
+  drawCircle(mature, 46, 28, 12);
+  drawCircle(mature, 52, 36, 10);
+  drawCircle(mature, 42, 40, 8);
+  // Top canopy
+  drawCircle(mature, 32, 16, 14);
+  drawCircle(mature, 24, 22, 10);
+  drawCircle(mature, 40, 22, 10);
+  drawCircle(mature, 32, 8, 8);
+
+  return { seedling, sprout, growing, young, mature };
+}
+
+/**
+ * Generate patterns for Weeping Willow
+ * A tall tree with cascading fronds that create a wave animation
+ */
+function createWeepingWillowPatterns() {
+  // Sapling: young willow with first drooping branches
+  const sapling = createEmptyPattern();
+  drawRect(sapling, 30, 20, 33, 60); // Thin trunk
+  // First drooping fronds
+  drawGrassBlade(sapling, 28, 24, 30, 0.6, 2);
+  drawGrassBlade(sapling, 36, 24, 32, -0.6, 2);
+  drawGrassBlade(sapling, 26, 28, 25, 0.5, 2);
+  drawGrassBlade(sapling, 38, 28, 27, -0.5, 2);
+
+  // Growing: more fronds developing
+  const growing = createEmptyPattern();
+  drawRect(growing, 29, 14, 34, 60); // Thicker trunk
+  // Left fronds
+  drawGrassBlade(growing, 24, 18, 36, 0.7, 2);
+  drawGrassBlade(growing, 22, 22, 34, 0.6, 2);
+  drawGrassBlade(growing, 20, 26, 32, 0.5, 2);
+  drawGrassBlade(growing, 26, 30, 28, 0.4, 2);
+  // Right fronds
+  drawGrassBlade(growing, 40, 18, 36, -0.7, 2);
+  drawGrassBlade(growing, 42, 22, 34, -0.6, 2);
+  drawGrassBlade(growing, 44, 26, 32, -0.5, 2);
+  drawGrassBlade(growing, 38, 30, 28, -0.4, 2);
+  // Top
+  drawCircle(growing, 32, 12, 6);
+
+  // SwayLeft: full willow with fronds leaning left
+  const swayLeft = createEmptyPattern();
+  drawRect(swayLeft, 28, 10, 35, 62); // Full trunk
+  // Crown
+  drawCircle(swayLeft, 32, 8, 8);
+  // Left-leaning fronds (longer cascade)
+  for (let i = 0; i < 8; i++) {
+    const baseX = 20 + i * 3;
+    const baseY = 12 + i * 2;
+    const height = 40 - i * 2;
+    drawGrassBlade(swayLeft, baseX, baseY, height, 0.5 + i * 0.05, 2);
+  }
+  // Right fronds (shorter, less lean)
+  for (let i = 0; i < 6; i++) {
+    const baseX = 38 + i * 3;
+    const baseY = 14 + i * 2;
+    const height = 35 - i * 3;
+    drawGrassBlade(swayLeft, baseX, baseY, height, -0.3 + i * 0.02, 2);
+  }
+
+  // SwayRight: mirror of swayLeft
+  const swayRight = mirrorHorizontal(swayLeft);
+
+  // Full: neutral position (average of sway positions)
+  const full = createEmptyPattern();
+  drawRect(full, 28, 10, 35, 62); // Full trunk
+  drawCircle(full, 32, 8, 8);
+  // Balanced fronds
+  for (let i = 0; i < 7; i++) {
+    const baseX = 18 + i * 2;
+    const baseY = 12 + i * 2;
+    const height = 42 - i * 3;
+    drawGrassBlade(full, baseX, baseY, height, 0.4 + i * 0.03, 2);
+  }
+  for (let i = 0; i < 7; i++) {
+    const baseX = 46 - i * 2;
+    const baseY = 12 + i * 2;
+    const height = 42 - i * 3;
+    drawGrassBlade(full, baseX, baseY, height, -0.4 - i * 0.03, 2);
+  }
+
+  return { sapling, growing, swayLeft, swayRight, full };
+}
+
 // Generate all patterns once at module load
 const simpleBloomPatterns = createSimpleBloomPatterns();
 const quantumTulipPatterns = createQuantumTulipPatterns();
@@ -558,6 +709,8 @@ const midnightPoppyPatterns = createMidnightPoppyPatterns();
 const bellClusterPatterns = createBellClusterPatterns();
 const cloudBushPatterns = createCloudBushPatterns();
 const berryThicketPatterns = createBerryThicketPatterns();
+const saplingHopePatterns = createSaplingHopePatterns();
+const weepingWillowPatterns = createWeepingWillowPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -1160,6 +1313,146 @@ const berryThicket: PlantVariant = {
 };
 
 // ============================================================================
+// TREES - Rare, landmark elements with impressive patterns
+// ============================================================================
+
+/**
+ * Sapling Hope
+ *
+ * A delicate young tree with branches and leaves that unfurl progressively.
+ * Rare and memorable - a hopeful discovery in the garden.
+ * Scale: 1.8x (larger landmark)
+ */
+const saplingHope: PlantVariant = {
+  id: "sapling-hope",
+  name: "Sapling Hope",
+  description: "A young tree whose leaves unfurl one by one, symbol of new growth",
+  rarity: 0.3, // Rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "seedling",
+      duration: 20,
+      pattern: saplingHopePatterns.seedling,
+      // Fresh spring green - new life
+      palette: ["#C0E0B0", "#D0E8C0", "#E0F0D0"],
+      opacity: 0.4,
+      scale: 0.6,
+    },
+    {
+      name: "sprout",
+      duration: 25,
+      pattern: saplingHopePatterns.sprout,
+      // Brightening green
+      palette: ["#B0D8A0", "#C0E0B0", "#D8F0C8"],
+      opacity: 0.6,
+      scale: 0.9,
+    },
+    {
+      name: "growing",
+      duration: 30,
+      pattern: saplingHopePatterns.growing,
+      // Healthy green
+      palette: ["#A0D090", "#B0D8A0", "#C8E8B8"],
+      opacity: 0.8,
+      scale: 1.2,
+    },
+    {
+      name: "young",
+      duration: 40,
+      pattern: saplingHopePatterns.young,
+      // Rich verdant green
+      palette: ["#90C880", "#A8D898", "#C0E8B0"],
+      opacity: 0.95,
+      scale: 1.5,
+    },
+    {
+      name: "mature",
+      duration: 60,
+      pattern: saplingHopePatterns.mature,
+      // Deep forest green with golden highlights
+      palette: ["#80B870", "#98C888", "#B8D8A0"],
+      opacity: 1.0,
+      scale: 1.8,
+    },
+  ],
+};
+
+/**
+ * Weeping Willow
+ *
+ * A tall tree with cascading fronds that sway in a gentle wave.
+ * Rare and calming - creates a sense of shelter and peace.
+ * Scale: 2.5x (tall landmark)
+ */
+const weepingWillow: PlantVariant = {
+  id: "weeping-willow",
+  name: "Weeping Willow",
+  description: "A graceful tree with cascading fronds that dance in invisible wind",
+  rarity: 0.25, // Rare
+  requiresObservationToGerminate: true,
+  loop: true, // Continuous gentle sway
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "sapling",
+      duration: 25,
+      pattern: weepingWillowPatterns.sapling,
+      // Pale willow green
+      palette: ["#B8D0A0", "#C8D8B0", "#D8E8C8"],
+      opacity: 0.5,
+      scale: 1.0,
+    },
+    {
+      name: "growing",
+      duration: 30,
+      pattern: weepingWillowPatterns.growing,
+      // Silvery green
+      palette: ["#A8C898", "#B8D4A8", "#C8E0B8"],
+      opacity: 0.7,
+      scale: 1.5,
+    },
+    {
+      name: "full",
+      duration: 15,
+      pattern: weepingWillowPatterns.full,
+      // Full willow green
+      palette: ["#98C088", "#A8D098", "#B8DCB0"],
+      opacity: 0.9,
+      scale: 2.0,
+    },
+    {
+      name: "sway-left",
+      duration: 8,
+      pattern: weepingWillowPatterns.swayLeft,
+      // Slightly lighter during movement
+      palette: ["#A0C890", "#B0D8A0", "#C0E4B8"],
+      opacity: 1.0,
+      scale: 2.3,
+    },
+    {
+      name: "sway-right",
+      duration: 8,
+      pattern: weepingWillowPatterns.swayRight,
+      // Slightly lighter during movement
+      palette: ["#A0C890", "#B0D8A0", "#C0E4B8"],
+      opacity: 1.0,
+      scale: 2.3,
+    },
+    {
+      name: "rest",
+      duration: 12,
+      pattern: weepingWillowPatterns.full,
+      // Return to full color
+      palette: ["#98C088", "#A8D098", "#B8DCB0"],
+      opacity: 1.0,
+      scale: 2.5,
+    },
+  ],
+};
+
+// ============================================================================
 // ETHEREAL - Rare, magical/quantum elements
 // ============================================================================
 
@@ -1208,9 +1501,10 @@ const pulsingOrb: PlantVariant = {
  * - Grasses: meadowTuft, whisperReed (common, gentle motion)
  * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster
  * - Shrubs: cloudBush, berryThicket (uncommon, mid-ground structure)
+ * - Trees: saplingHope, weepingWillow (rare, landmark elements)
  * - Ethereal: pulsingOrb (rare, magical effects)
  *
- * Total: 12 variants
+ * Total: 14 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -1229,6 +1523,9 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   // Shrubs (uncommon)
   cloudBush,
   berryThicket,
+  // Trees (rare)
+  saplingHope,
+  weepingWillow,
   // Ethereal (rare)
   pulsingOrb,
 ];

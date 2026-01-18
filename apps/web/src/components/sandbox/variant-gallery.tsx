@@ -17,7 +17,7 @@ export function VariantGallery() {
   return (
     <div className="p-6">
       {/* Gallery header with superposed preview */}
-      <div className="mb-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+      <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-gray-800">
             All Variants ({PLANT_VARIANTS.length})
@@ -26,14 +26,14 @@ export function VariantGallery() {
             Click a variant to view its details and lifecycle animation
           </p>
         </div>
-        {/* Superposed preview - desktop only */}
-        <div className="hidden lg:block flex-shrink-0">
+        {/* Superposed preview - tablet and desktop */}
+        <div className="hidden md:block flex-shrink-0">
           <SuperposedPreview />
         </div>
       </div>
 
       {/* Mobile: Full-featured card layout */}
-      <div className="lg:hidden space-y-4">
+      <div className="md:hidden space-y-4">
         {PLANT_VARIANTS.map((variant) => {
           const previewKeyframeIndex = Math.min(
             Math.floor(variant.keyframes.length / 2),
@@ -121,8 +121,8 @@ export function VariantGallery() {
         })}
       </div>
 
-      {/* Desktop: Table layout for comparison */}
-      <div className="hidden lg:block">
+      {/* Tablet/Desktop: Table layout for comparison */}
+      <div className="hidden md:block">
         <table className="w-full border-collapse">
           <thead className="sticky top-0 bg-gray-50 z-10">
             <tr className="border-b border-gray-200 text-left text-sm text-gray-600">

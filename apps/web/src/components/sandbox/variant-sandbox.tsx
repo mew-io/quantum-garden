@@ -101,7 +101,7 @@ export function VariantSandbox() {
 
       {/* Footer with file hints */}
       <footer className="flex-shrink-0 px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">
-        <div className="flex gap-6">
+        <div className="flex flex-col gap-1 md:flex-row md:gap-6">
           <span>
             <strong>Variants:</strong> packages/shared/src/variants/definitions.ts
           </span>
@@ -150,8 +150,8 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
       {/* Main content - scrollable */}
       <div className="flex-1 p-6 overflow-auto min-h-0">
         <div className="max-w-7xl mx-auto">
-          {/* Two-column layout */}
-          <div className="flex flex-col lg:flex-row gap-6">
+          {/* Two-column layout - side by side on tablet and up */}
+          <div className="flex flex-col md:flex-row gap-6">
             {/* Left column - Preview and Timeline */}
             <div className="flex-1 min-w-0 space-y-6">
               {/* Preview and Keyframe Panel row */}
@@ -182,7 +182,7 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
             </div>
 
             {/* Right column - Configuration Panel */}
-            <div className="w-full lg:w-80 flex-shrink-0">
+            <div className="w-full md:w-72 lg:w-80 flex-shrink-0">
               <h2 className="text-sm font-medium text-gray-700 mb-3">Configuration</h2>
               <VariantConfigPanel variant={variant} />
             </div>

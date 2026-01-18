@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 35 - Control Panel Touch Targets)_
+_Last updated: 2026-01-18 (Session 36 - Tablet Breakpoints)_
 
 ## Project Goal
 
@@ -31,7 +31,7 @@ Secondary improvements for sandbox on mobile:
 
 - [x] **Timeline overflow**: Prevent horizontal overflow on small phones - Done
 - [x] **Control panel touch targets**: Increase button sizes for mobile - Done
-- [ ] **Tablet breakpoints**: Add `md:` breakpoints for better tablet layouts
+- [x] **Tablet breakpoints**: Add `md:` breakpoints for better tablet layouts - Done
 
 #### Manual Testing Required
 
@@ -46,6 +46,16 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Tablet Breakpoints
+
+- [x] Add `md:` breakpoints for better tablet layouts in sandbox
+  - Gallery header: Superposed preview shown at tablet size (`md:` instead of `lg:`)
+  - Gallery layout: Table view on tablets (`hidden md:block`), cards only on mobile
+  - Detail view: Two-column layout starts at tablet (`md:flex-row`)
+  - Config panel: Responsive width `md:w-72 lg:w-80` (narrower on tablet)
+  - Footer: Stacks vertically on mobile, horizontal on tablet (`flex-col md:flex-row`)
+- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
 
 ### 2026-01-18 - Control Panel Touch Targets
 

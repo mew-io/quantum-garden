@@ -1,14 +1,17 @@
 /**
  * Glyph pattern definitions for Quantum Garden plants.
  *
- * Each pattern is an 8x8 grid where:
+ * Each pattern is a 64x64 grid where:
  * - 1 = filled pixel
  * - 0 = empty pixel
  *
  * To add a new pattern:
  * 1. Add a new entry to GLYPH_PATTERNS with a descriptive name
- * 2. Define the 8x8 grid
+ * 2. Define the 64x64 grid
  * 3. The pattern will automatically appear in the sandbox at /sandbox
+ *
+ * Note: These sandbox patterns are separate from variant definitions.
+ * For now, they remain as simple 8x8-equivalent patterns for testing.
  */
 
 export interface GlyphPattern {

@@ -20,7 +20,7 @@ export interface GlyphKeyframe {
   /** Duration this keyframe lasts in seconds */
   duration: number;
 
-  /** 8x8 glyph pattern grid (1 = filled, 0 = empty) */
+  /** 64x64 glyph pattern grid (1 = filled, 0 = empty) */
   pattern: number[][];
 
   /** Color palette for this keyframe */

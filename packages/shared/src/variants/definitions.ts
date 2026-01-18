@@ -13,10 +13,218 @@
  * - Fixed-color variants: Define palette in each keyframe
  * - Multi-color variants: Define colorVariations with palette overrides
  *
+ * Pattern approach:
+ * - All patterns are 64x64 grids for high visual quality
+ * - Use pattern-builder utilities for creating patterns programmatically
+ *
  * See docs/variants-and-lifecycle.md for full documentation.
  */
 
 import type { PlantVariant } from "./types";
+import {
+  createEmptyPattern,
+  drawCircle,
+  drawEllipse,
+  drawRect,
+  drawRing,
+  drawPetal,
+  drawGrassBlade,
+  scatterDots,
+  mirrorHorizontal,
+  PATTERN_SIZE,
+} from "../patterns/pattern-builder";
+
+// ============================================================================
+// PATTERN GENERATORS
+// ============================================================================
+
+/**
+ * Generate patterns for Simple Bloom lifecycle
+ */
+function createSimpleBloomPatterns() {
+  // Bud: small central oval + thin stem
+  const bud = createEmptyPattern();
+  drawEllipse(bud, 32, 24, 6, 8); // Small bud
+  drawRect(bud, 30, 32, 33, 52); // Thin stem
+
+  // Sprout: taller with leaves
+  const sprout = createEmptyPattern();
+  drawEllipse(sprout, 32, 18, 8, 10); // Growing bud
+  drawRect(sprout, 30, 28, 33, 54); // Stem
+  // Small leaves
+  drawPetal(sprout, 24, 38, 30, 42, 4);
+  drawPetal(sprout, 40, 38, 34, 42, 4);
+
+  // Bloom: full flower with petals
+  const bloom = createEmptyPattern();
+  // Center
+  drawCircle(bloom, 32, 22, 8);
+  // Petals radiating out
+  drawPetal(bloom, 32, 4, 32, 18, 8); // Top
+  drawPetal(bloom, 48, 12, 38, 20, 8); // Top-right
+  drawPetal(bloom, 52, 26, 40, 24, 8); // Right
+  drawPetal(bloom, 48, 38, 38, 28, 8); // Bottom-right
+  drawPetal(bloom, 16, 12, 26, 20, 8); // Top-left
+  drawPetal(bloom, 12, 26, 24, 24, 8); // Left
+  drawPetal(bloom, 16, 38, 26, 28, 8); // Bottom-left
+  // Stem
+  drawRect(bloom, 30, 30, 33, 56);
+
+  // Fade: wilting, drooping petals
+  const fade = createEmptyPattern();
+  drawCircle(fade, 32, 24, 6);
+  // Drooping petals
+  drawPetal(fade, 22, 32, 28, 24, 5);
+  drawPetal(fade, 42, 32, 36, 24, 5);
+  drawPetal(fade, 32, 8, 32, 20, 5);
+  drawPetal(fade, 18, 18, 26, 22, 4);
+  drawPetal(fade, 46, 18, 38, 22, 4);
+  // Shorter stem
+  drawRect(fade, 30, 32, 33, 50);
+
+  return { bud, sprout, bloom, fade };
+}
+
+/**
+ * Generate patterns for Quantum Tulip lifecycle
+ */
+function createQuantumTulipPatterns() {
+  // Bulb: underground bulb shape
+  const bulb = createEmptyPattern();
+  drawEllipse(bulb, 32, 40, 10, 14);
+  drawRect(bulb, 30, 26, 33, 32); // Small shoot
+
+  // Stem: tall thin stem
+  const stem = createEmptyPattern();
+  drawRect(stem, 30, 14, 33, 56);
+  // Small leaves at base
+  drawPetal(stem, 22, 48, 29, 44, 5);
+  drawPetal(stem, 42, 48, 35, 44, 5);
+
+  // Bloom: classic tulip cup
+  const bloom = createEmptyPattern();
+  // Tulip petals (cup shape)
+  drawPetal(bloom, 20, 8, 28, 28, 10);
+  drawPetal(bloom, 44, 8, 36, 28, 10);
+  drawPetal(bloom, 32, 6, 32, 26, 12);
+  // Center fill
+  drawEllipse(bloom, 32, 22, 10, 8);
+  // Stem
+  drawRect(bloom, 30, 30, 33, 56);
+
+  // Wilt: drooping tulip
+  const wilt = createEmptyPattern();
+  // Drooping head tilted to side
+  drawPetal(wilt, 18, 18, 26, 28, 8);
+  drawPetal(wilt, 24, 12, 28, 26, 8);
+  drawPetal(wilt, 12, 24, 24, 28, 6);
+  // Curved stem
+  drawRect(wilt, 28, 28, 31, 36);
+  drawRect(wilt, 30, 34, 33, 56);
+
+  return { bulb, stem, bloom, wilt };
+}
+
+/**
+ * Generate patterns for Soft Moss lifecycle
+ */
+function createSoftMossPatterns() {
+  // Emerging: small scattered clusters
+  const emerging = createEmptyPattern();
+  scatterDots(emerging, 8, 2, 4, 42);
+
+  // Settled: larger organic spread
+  const settled = createEmptyPattern();
+  scatterDots(settled, 20, 3, 6, 42);
+  // Add some connecting blobs
+  drawCircle(settled, 28, 32, 8);
+  drawCircle(settled, 36, 30, 6);
+  drawCircle(settled, 32, 38, 5);
+
+  return { emerging, settled };
+}
+
+/**
+ * Generate patterns for Pebble Patch
+ */
+function createPebblePatchPatterns() {
+  const stones = createEmptyPattern();
+  // Scattered stones of varying sizes
+  drawEllipse(stones, 12, 20, 5, 4);
+  drawEllipse(stones, 48, 16, 6, 5);
+  drawCircle(stones, 28, 38, 4);
+  drawEllipse(stones, 52, 44, 4, 3);
+  drawCircle(stones, 16, 50, 5);
+  drawEllipse(stones, 40, 32, 3, 4);
+  drawCircle(stones, 8, 36, 3);
+  drawEllipse(stones, 56, 28, 4, 3);
+
+  return { stones };
+}
+
+/**
+ * Generate patterns for Meadow Tuft
+ */
+function createMeadowTuftPatterns() {
+  // Sway left: grass blades leaning left
+  const swayLeft = createEmptyPattern();
+  drawGrassBlade(swayLeft, 24, 56, 32, -0.4, 3);
+  drawGrassBlade(swayLeft, 32, 58, 36, -0.3, 3);
+  drawGrassBlade(swayLeft, 40, 56, 30, -0.5, 3);
+  drawGrassBlade(swayLeft, 28, 54, 28, -0.2, 2);
+  drawGrassBlade(swayLeft, 36, 54, 34, -0.4, 2);
+  // Base clump
+  drawEllipse(swayLeft, 32, 58, 14, 6);
+
+  // Sway right: mirror of sway left
+  const swayRight = mirrorHorizontal(swayLeft);
+
+  return { swayLeft, swayRight };
+}
+
+/**
+ * Generate patterns for Whisper Reed
+ */
+function createWhisperReedPatterns() {
+  // Lean left: tall thin reeds
+  const leanLeft = createEmptyPattern();
+  drawGrassBlade(leanLeft, 22, 60, 50, -0.25, 2);
+  drawGrassBlade(leanLeft, 32, 60, 54, -0.2, 2);
+  drawGrassBlade(leanLeft, 42, 60, 48, -0.3, 2);
+  // Small seed heads at top
+  drawCircle(leanLeft, 10, 10, 3);
+  drawCircle(leanLeft, 22, 6, 3);
+  drawCircle(leanLeft, 30, 12, 3);
+
+  // Lean right: mirror
+  const leanRight = mirrorHorizontal(leanLeft);
+
+  return { leanLeft, leanRight };
+}
+
+/**
+ * Generate patterns for Pulsing Orb
+ */
+function createPulsingOrbPatterns() {
+  // Dim: hollow ring
+  const dim = createEmptyPattern();
+  drawRing(dim, 32, 32, 16, 24);
+
+  // Bright: filled glowing orb
+  const bright = createEmptyPattern();
+  drawCircle(bright, 32, 32, 26);
+
+  return { dim, bright };
+}
+
+// Generate all patterns once at module load
+const simpleBloomPatterns = createSimpleBloomPatterns();
+const quantumTulipPatterns = createQuantumTulipPatterns();
+const softMossPatterns = createSoftMossPatterns();
+const pebblePatchPatterns = createPebblePatchPatterns();
+const meadowTuftPatterns = createMeadowTuftPatterns();
+const whisperReedPatterns = createWhisperReedPatterns();
+const pulsingOrbPatterns = createPulsingOrbPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -40,16 +248,7 @@ const simpleBloom: PlantVariant = {
     {
       name: "bud",
       duration: 15,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: simpleBloomPatterns.bud,
       // Sage palette - quiet growth
       palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
       opacity: 0.6,
@@ -58,16 +257,7 @@ const simpleBloom: PlantVariant = {
     {
       name: "sprout",
       duration: 20,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: simpleBloomPatterns.sprout,
       // Mint palette - fresh clarity
       palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
       opacity: 0.8,
@@ -76,16 +266,7 @@ const simpleBloom: PlantVariant = {
     {
       name: "bloom",
       duration: 45,
-      pattern: [
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-      ],
+      pattern: simpleBloomPatterns.bloom,
       // Sage palette at full
       palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
       opacity: 1.0,
@@ -94,16 +275,7 @@ const simpleBloom: PlantVariant = {
     {
       name: "fade",
       duration: 25,
-      pattern: [
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 0, 0, 1, 1, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: simpleBloomPatterns.fade,
       // Canvas palette - returning to neutral
       palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.5,
@@ -131,16 +303,7 @@ const quantumTulip: PlantVariant = {
     {
       name: "bulb",
       duration: 20,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: quantumTulipPatterns.bulb,
       // Canvas palette - pure potential
       palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.5,
@@ -149,16 +312,7 @@ const quantumTulip: PlantVariant = {
     {
       name: "stem",
       duration: 15,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: quantumTulipPatterns.stem,
       // Mint palette - fresh clarity
       palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
       opacity: 0.7,
@@ -167,16 +321,7 @@ const quantumTulip: PlantVariant = {
     {
       name: "bloom",
       duration: 60,
-      pattern: [
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-      ],
+      pattern: quantumTulipPatterns.bloom,
       // Default: Blossom palette (overridden by colorVariations)
       palette: ["#F0D0E0", "#E0E8F0", "#E8F0E8"],
       opacity: 1.0,
@@ -185,16 +330,7 @@ const quantumTulip: PlantVariant = {
     {
       name: "wilt",
       duration: 30,
-      pattern: [
-        [0, 1, 1, 0, 0, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: quantumTulipPatterns.wilt,
       // Canvas palette - fading to neutral
       palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       opacity: 0.4,
@@ -255,16 +391,7 @@ const softMoss: PlantVariant = {
     {
       name: "emerging",
       duration: 30,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 1, 1, 1, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: softMossPatterns.emerging,
       // Muted olive green - earthy
       palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
       opacity: 0.3,
@@ -273,16 +400,7 @@ const softMoss: PlantVariant = {
     {
       name: "settled",
       duration: 120, // Long duration - just sits there
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 1, 1, 1, 0, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 0, 1, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: softMossPatterns.settled,
       // Muted olive green - earthy
       palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
       opacity: 0.5,
@@ -309,16 +427,7 @@ const pebblePatch: PlantVariant = {
     {
       name: "stones",
       duration: 999, // Effectively permanent
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: pebblePatchPatterns.stones,
       // Warm gray - stone-like
       palette: ["#D8D8D0", "#E0E0D8", "#E8E8E0"],
       opacity: 0.4,
@@ -350,16 +459,7 @@ const meadowTuft: PlantVariant = {
     {
       name: "sway-left",
       duration: 4,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 1, 0, 1, 0],
-        [0, 1, 1, 0, 1, 0, 1, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: meadowTuftPatterns.swayLeft,
       // Soft green - fresh grass
       palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
       opacity: 0.7,
@@ -368,16 +468,7 @@ const meadowTuft: PlantVariant = {
     {
       name: "sway-right",
       duration: 4,
-      pattern: [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 1, 0, 0],
-        [0, 1, 0, 1, 0, 1, 0, 0],
-        [0, 1, 0, 1, 0, 1, 1, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: meadowTuftPatterns.swayRight,
       // Soft green - fresh grass
       palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
       opacity: 0.7,
@@ -405,16 +496,7 @@ const whisperReed: PlantVariant = {
     {
       name: "lean-left",
       duration: 5,
-      pattern: [
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 0, 1, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: whisperReedPatterns.leanLeft,
       // Pale green-gray - reed color
       palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
       opacity: 0.6,
@@ -423,16 +505,7 @@ const whisperReed: PlantVariant = {
     {
       name: "lean-right",
       duration: 5,
-      pattern: [
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0, 1, 0, 0],
-        [0, 0, 0, 1, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0, 0, 1, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-      ],
+      pattern: whisperReedPatterns.leanRight,
       // Pale green-gray - reed color
       palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
       opacity: 0.6,
@@ -464,16 +537,7 @@ const pulsingOrb: PlantVariant = {
     {
       name: "dim",
       duration: 8,
-      pattern: [
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 0, 0, 1, 1, 1],
-        [1, 1, 0, 0, 0, 0, 1, 1],
-        [1, 1, 0, 0, 0, 0, 1, 1],
-        [1, 1, 1, 0, 0, 1, 1, 1],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-      ],
+      pattern: pulsingOrbPatterns.dim,
       // Sky palette - morning light (dimmed)
       palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
       opacity: 0.4,
@@ -482,16 +546,7 @@ const pulsingOrb: PlantVariant = {
     {
       name: "bright",
       duration: 5,
-      pattern: [
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-      ],
+      pattern: pulsingOrbPatterns.bright,
       // Sky palette - morning light (bright)
       palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
       opacity: 1.0,
@@ -543,3 +598,6 @@ export function getVariantById(id: string): PlantVariant | undefined {
 export function getAllVariants(): PlantVariant[] {
   return [...PLANT_VARIANTS];
 }
+
+// Re-export pattern size for consumers that need it
+export { PATTERN_SIZE };

@@ -16,8 +16,8 @@ import {
 } from "@quantum-garden/shared";
 import { prefersReducedMotion } from "@/lib/accessibility";
 
-const GRID_SIZE = 8;
-const DEFAULT_SCALE = 4; // 4 pixels per grid cell = 32x32 plant
+const GRID_SIZE = 64;
+const DEFAULT_SCALE = 1; // 1 pixel per grid cell = 64x64 plant
 
 /**
  * Represents a renderable plant in the garden.

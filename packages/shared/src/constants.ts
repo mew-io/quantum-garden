@@ -61,9 +61,9 @@ export const COOLDOWN = {
 /** Plant glyph configuration */
 export const GLYPH = {
   /** Maximum glyph size in pixels */
-  MAX_SIZE: 32,
+  MAX_SIZE: 64,
   /** Minimum glyph size in pixels */
-  MIN_SIZE: 8,
+  MIN_SIZE: 16,
   /** Opacity for superposed state (multiple faint configurations) */
   SUPERPOSED_OPACITY: 0.3,
   /** Opacity for collapsed state (single resolved form) */

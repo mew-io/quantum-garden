@@ -322,6 +322,150 @@ function createMidnightPoppyPatterns() {
 }
 
 /**
+ * Generate patterns for Cloud Bush
+ * A rounded, puffy shrub with overlapping circular shapes and berry details
+ */
+function createCloudBushPatterns() {
+  // Base: rounded bush foundation
+  const base = createEmptyPattern();
+  // Overlapping circles for cloud-like shape
+  drawCircle(base, 32, 40, 16);
+  drawCircle(base, 20, 38, 12);
+  drawCircle(base, 44, 38, 12);
+  drawCircle(base, 26, 30, 10);
+  drawCircle(base, 38, 30, 10);
+  drawCircle(base, 32, 28, 12);
+
+  // Full: fully expanded bush
+  const full = createEmptyPattern();
+  // Larger cloud shape
+  drawCircle(full, 32, 38, 18);
+  drawCircle(full, 16, 36, 14);
+  drawCircle(full, 48, 36, 14);
+  drawCircle(full, 24, 26, 12);
+  drawCircle(full, 40, 26, 12);
+  drawCircle(full, 32, 22, 14);
+  drawCircle(full, 20, 44, 10);
+  drawCircle(full, 44, 44, 10);
+
+  // Berried: bush with berry details appearing
+  const berried = createEmptyPattern();
+  // Same cloud shape as full
+  drawCircle(berried, 32, 38, 18);
+  drawCircle(berried, 16, 36, 14);
+  drawCircle(berried, 48, 36, 14);
+  drawCircle(berried, 24, 26, 12);
+  drawCircle(berried, 40, 26, 12);
+  drawCircle(berried, 32, 22, 14);
+  drawCircle(berried, 20, 44, 10);
+  drawCircle(berried, 44, 44, 10);
+  // Berry clusters (small dots) - these will show in a different color
+  drawCircle(berried, 18, 32, 3);
+  drawCircle(berried, 22, 36, 2);
+  drawCircle(berried, 46, 32, 3);
+  drawCircle(berried, 42, 36, 2);
+  drawCircle(berried, 30, 20, 2);
+  drawCircle(berried, 36, 22, 3);
+
+  return { base, full, berried };
+}
+
+/**
+ * Generate patterns for Berry Thicket
+ * A dense shrub pattern with fruits that materialize over lifecycle
+ */
+function createBerryThicketPatterns() {
+  // Sparse: initial dense foliage without berries
+  const sparse = createEmptyPattern();
+  // Dense branching pattern
+  drawRect(sparse, 30, 48, 33, 58); // Main trunk
+  // Left branches
+  drawRect(sparse, 20, 40, 30, 43);
+  drawRect(sparse, 12, 32, 22, 35);
+  drawCircle(sparse, 14, 28, 6);
+  drawCircle(sparse, 24, 34, 5);
+  // Right branches
+  drawRect(sparse, 34, 40, 44, 43);
+  drawRect(sparse, 42, 32, 52, 35);
+  drawCircle(sparse, 50, 28, 6);
+  drawCircle(sparse, 40, 34, 5);
+  // Top foliage
+  drawCircle(sparse, 32, 24, 8);
+  drawCircle(sparse, 26, 20, 6);
+  drawCircle(sparse, 38, 20, 6);
+
+  // Growing: more foliage, first berries appearing
+  const growing = createEmptyPattern();
+  drawRect(growing, 30, 48, 33, 58);
+  drawRect(growing, 20, 40, 30, 43);
+  drawRect(growing, 12, 32, 22, 35);
+  drawCircle(growing, 14, 26, 8);
+  drawCircle(growing, 24, 32, 7);
+  drawRect(growing, 34, 40, 44, 43);
+  drawRect(growing, 42, 32, 52, 35);
+  drawCircle(growing, 50, 26, 8);
+  drawCircle(growing, 40, 32, 7);
+  drawCircle(growing, 32, 22, 10);
+  drawCircle(growing, 24, 16, 7);
+  drawCircle(growing, 40, 16, 7);
+  // First berries
+  drawCircle(growing, 10, 28, 3);
+  drawCircle(growing, 54, 28, 3);
+
+  // Fruiting: full berries visible throughout
+  const fruiting = createEmptyPattern();
+  drawRect(fruiting, 30, 48, 33, 58);
+  drawRect(fruiting, 20, 40, 30, 43);
+  drawRect(fruiting, 12, 32, 22, 35);
+  drawCircle(fruiting, 14, 24, 9);
+  drawCircle(fruiting, 24, 30, 8);
+  drawRect(fruiting, 34, 40, 44, 43);
+  drawRect(fruiting, 42, 32, 52, 35);
+  drawCircle(fruiting, 50, 24, 9);
+  drawCircle(fruiting, 40, 30, 8);
+  drawCircle(fruiting, 32, 20, 12);
+  drawCircle(fruiting, 22, 14, 8);
+  drawCircle(fruiting, 42, 14, 8);
+  // Many berries scattered throughout
+  drawCircle(fruiting, 8, 26, 3);
+  drawCircle(fruiting, 12, 20, 3);
+  drawCircle(fruiting, 56, 26, 3);
+  drawCircle(fruiting, 52, 20, 3);
+  drawCircle(fruiting, 20, 12, 3);
+  drawCircle(fruiting, 44, 12, 3);
+  drawCircle(fruiting, 32, 10, 3);
+  drawCircle(fruiting, 28, 26, 2);
+  drawCircle(fruiting, 36, 26, 2);
+
+  // Ripe: berries at peak ripeness (slightly larger berries)
+  const ripe = createEmptyPattern();
+  drawRect(ripe, 30, 48, 33, 58);
+  drawRect(ripe, 20, 40, 30, 43);
+  drawRect(ripe, 12, 32, 22, 35);
+  drawCircle(ripe, 14, 24, 9);
+  drawCircle(ripe, 24, 30, 8);
+  drawRect(ripe, 34, 40, 44, 43);
+  drawRect(ripe, 42, 32, 52, 35);
+  drawCircle(ripe, 50, 24, 9);
+  drawCircle(ripe, 40, 30, 8);
+  drawCircle(ripe, 32, 20, 12);
+  drawCircle(ripe, 22, 14, 8);
+  drawCircle(ripe, 42, 14, 8);
+  // Larger, riper berries
+  drawCircle(ripe, 8, 26, 4);
+  drawCircle(ripe, 12, 18, 4);
+  drawCircle(ripe, 56, 26, 4);
+  drawCircle(ripe, 52, 18, 4);
+  drawCircle(ripe, 18, 10, 4);
+  drawCircle(ripe, 46, 10, 4);
+  drawCircle(ripe, 32, 8, 4);
+  drawCircle(ripe, 26, 24, 3);
+  drawCircle(ripe, 38, 24, 3);
+
+  return { sparse, growing, fruiting, ripe };
+}
+
+/**
  * Generate patterns for Bell Cluster
  * Multiple hanging bell-shaped flowers with staggered blooming
  */
@@ -412,6 +556,8 @@ const pulsingOrbPatterns = createPulsingOrbPatterns();
 const dewdropDaisyPatterns = createDewdropDaisyPatterns();
 const midnightPoppyPatterns = createMidnightPoppyPatterns();
 const bellClusterPatterns = createBellClusterPatterns();
+const cloudBushPatterns = createCloudBushPatterns();
+const berryThicketPatterns = createBerryThicketPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -892,6 +1038,128 @@ const whisperReed: PlantVariant = {
 };
 
 // ============================================================================
+// SHRUBS - Uncommon, mid-ground structure elements with more complex patterns
+// ============================================================================
+
+/**
+ * Cloud Bush
+ *
+ * A rounded, puffy shrub with a breathing scale animation.
+ * Berry details appear at maturity.
+ * Scale: 1.3x (medium structure)
+ */
+const cloudBush: PlantVariant = {
+  id: "cloud-bush",
+  name: "Cloud Bush",
+  description: "A soft, rounded shrub that breathes gently and grows delicate berries",
+  rarity: 0.4, // Uncommon
+  requiresObservationToGerminate: true,
+  loop: true, // Breathing animation loops
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "base",
+      duration: 25,
+      pattern: cloudBushPatterns.base,
+      // Soft sage green - foundation
+      palette: ["#A8C8A8", "#B8D8B8", "#C8E0C8"],
+      opacity: 0.6,
+      scale: 1.0,
+    },
+    {
+      name: "full",
+      duration: 20,
+      pattern: cloudBushPatterns.full,
+      // Richer green - expanded
+      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
+      opacity: 0.8,
+      scale: 1.2,
+    },
+    {
+      name: "breathe-in",
+      duration: 6,
+      pattern: cloudBushPatterns.full,
+      // Same full pattern, slightly smaller scale
+      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
+      opacity: 0.85,
+      scale: 1.15,
+    },
+    {
+      name: "breathe-out",
+      duration: 6,
+      pattern: cloudBushPatterns.full,
+      // Expand slightly
+      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
+      opacity: 0.9,
+      scale: 1.25,
+    },
+    {
+      name: "berried",
+      duration: 40,
+      pattern: cloudBushPatterns.berried,
+      // Green with hints of berry color
+      palette: ["#90B890", "#A0C8A0", "#E0A8B0"],
+      opacity: 1.0,
+      scale: 1.3,
+    },
+  ],
+};
+
+/**
+ * Berry Thicket
+ *
+ * A dense shrub with fruits that materialize over its lifecycle.
+ * More complex than cloud-bush with a full fruiting progression.
+ * Scale: 1.4x (larger structure)
+ */
+const berryThicket: PlantVariant = {
+  id: "berry-thicket",
+  name: "Berry Thicket",
+  description: "A dense thicket that slowly produces clusters of vibrant berries",
+  rarity: 0.4, // Uncommon
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "sparse",
+      duration: 20,
+      pattern: berryThicketPatterns.sparse,
+      // Dark green foliage - dense base
+      palette: ["#708870", "#809880", "#90A890"],
+      opacity: 0.5,
+      scale: 1.0,
+    },
+    {
+      name: "growing",
+      duration: 25,
+      pattern: berryThicketPatterns.growing,
+      // Richer green, first berry hints
+      palette: ["#688868", "#789878", "#88A888"],
+      opacity: 0.7,
+      scale: 1.2,
+    },
+    {
+      name: "fruiting",
+      duration: 30,
+      pattern: berryThicketPatterns.fruiting,
+      // Green with berry accents
+      palette: ["#608060", "#709070", "#C87890"],
+      opacity: 0.9,
+      scale: 1.3,
+    },
+    {
+      name: "ripe",
+      duration: 45,
+      pattern: berryThicketPatterns.ripe,
+      // Full berry colors - rich and vibrant
+      palette: ["#587858", "#689068", "#D86080"],
+      opacity: 1.0,
+      scale: 1.4,
+    },
+  ],
+};
+
+// ============================================================================
 // ETHEREAL - Rare, magical/quantum elements
 // ============================================================================
 
@@ -939,9 +1207,10 @@ const pulsingOrb: PlantVariant = {
  * - Ground Cover: softMoss, pebblePatch (very common, ambient)
  * - Grasses: meadowTuft, whisperReed (common, gentle motion)
  * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster
+ * - Shrubs: cloudBush, berryThicket (uncommon, mid-ground structure)
  * - Ethereal: pulsingOrb (rare, magical effects)
  *
- * Total: 10 variants
+ * Total: 12 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -957,6 +1226,9 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   dewdropDaisy,
   midnightPoppy,
   bellCluster,
+  // Shrubs (uncommon)
+  cloudBush,
+  berryThicket,
   // Ethereal (rare)
   pulsingOrb,
 ];

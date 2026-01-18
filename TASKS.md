@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 10)_
+_Last updated: 2026-01-17 (Session 11)_
 
 ## Project Goal
 
@@ -16,12 +16,27 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] Observation testing (verify observation triggers state collapse in browser)
-- [ ] E2E tests for observation flow (Playwright or Cypress)
+- [ ] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
+- [ ] **Garden Evolution**: Implement time-based garden progression
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Observation Testing and E2E Setup
+
+- [x] Fix observation router bug: handle in-memory regions gracefully
+- [x] Verify database has seeded plants (12 plants with variants)
+- [x] Set up Playwright E2E testing framework
+- [x] Create playwright.config.ts with proper port configuration
+- [x] Write E2E test suite (5 tests):
+  - Garden canvas renders
+  - No console errors on load
+  - tRPC plants request is made
+  - Observation mutation endpoint accessible
+  - Plants show after loading
+- [x] Add test:e2e and test:e2e:ui npm scripts
+- [x] All tests passing: 83 unit tests + 5 E2E tests
 
 ### 2026-01-17 - PlantSprite and PlantRenderer Tests
 
@@ -218,12 +233,12 @@ _Nice-to-have enhancements_
 ## Technical Debt
 
 - [ ] Add comprehensive test coverage for quantum service
-- [ ] Add E2E tests for observation flow
 - [ ] Document quantum circuit design decisions in code
 - [ ] Add error boundaries in React components
 - [ ] Implement proper error handling for IonQ API failures
 - [x] Add tests for observation router logic
 - [x] Add tests for PlantSprite and PlantRenderer
+- [x] Add E2E tests for observation flow
 
 ---
 

@@ -44,6 +44,8 @@ env/
 coverage/
 .nyc_output/
 .pytest_cache/
+playwright-report/
+test-results/
 
 # Logs
 logs/

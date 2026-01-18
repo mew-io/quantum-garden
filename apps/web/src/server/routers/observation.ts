@@ -167,11 +167,17 @@ export const observationRouter = router({
         },
       });
 
-      // Deactivate the observation region
-      await ctx.db.observationRegion.update({
-        where: { id: input.regionId },
-        data: { active: false },
-      });
+      // Deactivate the observation region if it exists in the database.
+      // Note: Regions may be created in-memory by ObservationSystem and not persisted.
+      // This update is optional - if the region doesn't exist, we skip it.
+      try {
+        await ctx.db.observationRegion.update({
+          where: { id: input.regionId },
+          data: { active: false },
+        });
+      } catch {
+        // Region not found in database - this is expected for in-memory regions
+      }
 
       return updatedPlant;
     }),

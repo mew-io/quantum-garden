@@ -286,7 +286,7 @@ _Nice-to-have enhancements_
 - [~] **Visual Polish**: Refine plant aesthetics and animations (shimmer + scale pulse added)
 - [x] **Performance Optimization**: Optimize for large numbers of plants (viewport culling)
 - [ ] **Analytics**: Track observation patterns and garden statistics
-- [ ] **Accessibility**: Screen reader support and reduced motion options
+- [~] **Accessibility**: Screen reader support and reduced motion options (reduced motion done)
 - [x] **Tweening**: Enable smooth interpolation between keyframes (all variants now use tweenBetweenKeyframes)
 
 ---

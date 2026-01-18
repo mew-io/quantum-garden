@@ -14,6 +14,7 @@ import {
   getVariantById,
   GLYPH,
 } from "@quantum-garden/shared";
+import { prefersReducedMotion } from "@/lib/accessibility";
 
 const GRID_SIZE = 8;
 const DEFAULT_SCALE = 4; // 4 pixels per grid cell = 32x32 plant
@@ -108,11 +109,18 @@ export class PlantSprite extends Container {
 
   /**
    * Start the collapse transition animation.
+   * When reduced motion is preferred, transition is instant.
    */
   private startCollapseTransition(): void {
-    this.isTransitioning = true;
-    this.transitionProgress = 0;
-    this.transitionStartTime = performance.now();
+    if (prefersReducedMotion()) {
+      // Instant transition for reduced motion
+      this.isTransitioning = false;
+      this.transitionProgress = 1;
+    } else {
+      this.isTransitioning = true;
+      this.transitionProgress = 0;
+      this.transitionStartTime = performance.now();
+    }
   }
 
   /**
@@ -252,6 +260,7 @@ export class PlantSprite extends Container {
    *
    * Includes a subtle shimmer effect to emphasize quantum uncertainty.
    * Each layer oscillates slightly out of phase for visual interest.
+   * Shimmer is disabled when the user prefers reduced motion.
    */
   private renderSuperposed(): void {
     if (!this.variant) return;
@@ -261,17 +270,20 @@ export class PlantSprite extends Container {
     const keyframes = this.variant.keyframes.slice(0, 3);
     const baseOpacity = GLYPH.SUPERPOSED_OPACITY;
 
+    // Check reduced motion preference
+    const reducedMotion = prefersReducedMotion();
+
     // Shimmer effect: subtle opacity oscillation for quantum uncertainty feel
-    // Use plant ID hash to desync shimmer across plants
+    // Disabled when user prefers reduced motion
     const plantSeed = this.plant.id.charCodeAt(0) + this.plant.id.charCodeAt(1);
-    const time = performance.now() / 1000;
+    const time = reducedMotion ? 0 : performance.now() / 1000;
 
     keyframes.forEach((keyframe, index) => {
       const palette = getEffectivePalette(keyframe, this.variant!, this.plant.colorVariationName);
 
-      // Each layer shimmers at a slightly different phase
+      // Each layer shimmers at a slightly different phase (static when reduced motion)
       const phase = plantSeed + index * 0.7;
-      const shimmer = Math.sin(time * 1.5 + phase) * 0.08;
+      const shimmer = reducedMotion ? 0 : Math.sin(time * 1.5 + phase) * 0.08;
       const opacity = Math.max(0.15, baseOpacity + shimmer);
 
       // Slight offset for visual layering effect

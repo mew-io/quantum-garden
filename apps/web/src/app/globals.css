@@ -33,3 +33,14 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+/* Reduced motion support for CSS animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

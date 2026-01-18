@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 14)_
+_Last updated: 2026-01-17 (Session 15)_
 
 ## Project Goal
 
@@ -21,6 +21,13 @@ _Core features complete. Focus on polish and technical debt._
 ---
 
 ## Completed
+
+### 2026-01-17 - Performance Optimization
+
+- [x] Add viewport culling to PlantRenderer (skip rendering off-screen plants)
+- [x] Add shallow comparison for plant sync (avoid processing on reticle/dwell updates)
+- [x] Define SPRITE_SIZE and CULL_MARGIN constants for clarity
+- [x] All tests passing: 83 tests (45 shared + 38 web)
 
 ### 2026-01-17 - Mobile Support
 
@@ -269,7 +276,7 @@ _Nice-to-have enhancements_
 
 - [ ] **Ambient Audio**: Add generative soundscape
 - [~] **Visual Polish**: Refine plant aesthetics and animations (shimmer + scale pulse added)
-- [ ] **Performance Optimization**: Optimize for large numbers of plants
+- [x] **Performance Optimization**: Optimize for large numbers of plants (viewport culling)
 - [ ] **Analytics**: Track observation patterns and garden statistics
 - [ ] **Accessibility**: Screen reader support and reduced motion options
 - [ ] **Tweening**: Implement smooth interpolation between keyframes (documented but not implemented)

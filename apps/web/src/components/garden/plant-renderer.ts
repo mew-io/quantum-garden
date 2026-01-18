@@ -18,6 +18,12 @@ import { useGardenStore } from "@/stores/garden-store";
  * Plants are synchronized with the Zustand store, and each frame
  * triggers a re-render of all plants to reflect lifecycle changes.
  */
+/** Size of rendered plant sprites in pixels (8x8 grid × 4px cell size) */
+const SPRITE_SIZE = 32;
+
+/** Margin around viewport for culling (render slightly outside visible area) */
+const CULL_MARGIN = 50;
+
 export class PlantRenderer {
   private app: Application;
   private container: Container;
@@ -25,6 +31,7 @@ export class PlantRenderer {
   private ticker: Ticker;
   private isRunning: boolean;
   private storeUnsubscribe: (() => void) | null;
+  private lastPlantIds: Set<string>;
 
   constructor(app: Application) {
     this.app = app;
@@ -34,6 +41,7 @@ export class PlantRenderer {
     this.ticker = new Ticker();
     this.isRunning = false;
     this.storeUnsubscribe = null;
+    this.lastPlantIds = new Set();
 
     // Add container to stage
     this.app.stage.addChild(this.container);
@@ -48,9 +56,12 @@ export class PlantRenderer {
     if (this.isRunning) return;
     this.isRunning = true;
 
-    // Subscribe to store changes
+    // Subscribe to store changes with shallow comparison
+    // Only sync when plant array actually changes (not on reticle/dwell updates)
     this.storeUnsubscribe = useGardenStore.subscribe((state) => {
-      this.syncPlants(state.plants);
+      if (this.shouldSyncPlants(state.plants)) {
+        this.syncPlants(state.plants);
+      }
     });
 
     // Initial sync
@@ -60,6 +71,28 @@ export class PlantRenderer {
     // Start render loop for lifecycle animations
     this.ticker.add(this.update, this);
     this.ticker.start();
+  }
+
+  /**
+   * Check if plants have changed and need syncing.
+   * Uses shallow comparison to avoid processing identical data.
+   */
+  private shouldSyncPlants(plants: unknown[]): boolean {
+    // Check if plant count changed
+    if (plants.length !== this.lastPlantIds.size) {
+      return true;
+    }
+
+    // Check if any plant IDs changed
+    for (const plant of plants) {
+      const p = plant as Record<string, unknown>;
+      const id = p.id as string;
+      if (!this.lastPlantIds.has(id)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -118,19 +151,63 @@ export class PlantRenderer {
         this.container.addChild(sprite);
       }
     }
+
+    // Track current plant IDs for shallow comparison
+    this.lastPlantIds = currentIds;
   }
 
   /**
    * Update loop for lifecycle animations.
    *
-   * Called every frame by the ticker.
+   * Called every frame by the ticker. Uses viewport culling to skip
+   * rendering plants that are outside the visible area.
    */
   private update(): void {
-    // Re-render all sprites to update lifecycle state
-    // This is efficient because lifecycle computation is lightweight
+    // Get viewport bounds with margin for culling
+    const viewportBounds = this.getViewportBounds();
+
+    // Re-render only visible sprites to update lifecycle state
     for (const sprite of this.sprites.values()) {
-      sprite.renderPlant();
+      const inViewport = this.isInViewport(sprite, viewportBounds);
+
+      // Set visibility for GPU-level culling
+      sprite.visible = inViewport;
+
+      // Only update lifecycle rendering for visible sprites
+      if (inViewport) {
+        sprite.renderPlant();
+      }
     }
+  }
+
+  /**
+   * Get the current viewport bounds with culling margin.
+   */
+  private getViewportBounds(): { left: number; right: number; top: number; bottom: number } {
+    return {
+      left: -CULL_MARGIN,
+      right: this.app.screen.width + CULL_MARGIN,
+      top: -CULL_MARGIN,
+      bottom: this.app.screen.height + CULL_MARGIN,
+    };
+  }
+
+  /**
+   * Check if a sprite is within the viewport bounds.
+   */
+  private isInViewport(
+    sprite: PlantSprite,
+    bounds: { left: number; right: number; top: number; bottom: number }
+  ): boolean {
+    const spriteX = sprite.x + SPRITE_SIZE / 2;
+    const spriteY = sprite.y + SPRITE_SIZE / 2;
+
+    return (
+      spriteX >= bounds.left &&
+      spriteX <= bounds.right &&
+      spriteY >= bounds.top &&
+      spriteY <= bounds.bottom
+    );
   }
 
   /**

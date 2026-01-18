@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 27 - Sandbox UX Consolidation)_
+_Last updated: 2026-01-18 (Session 29 - Info Overlay Implementation)_
 
 ## Project Goal
 
@@ -16,6 +16,23 @@ _No tasks currently in progress_
 
 ### Up Next
 
+#### Mobile Experience Improvements
+
+Critical UX feedback missing for touch users:
+
+- [ ] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%)
+- [ ] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode
+- [ ] **Observation feedback**: Visual pulse/glow when observation completes
+- [ ] **Consider haptic feedback**: Vibration on observation complete (if device supports)
+
+#### Sandbox Mobile Polish
+
+Secondary improvements for sandbox on mobile:
+
+- [ ] **Timeline overflow**: Prevent horizontal overflow on small phones
+- [ ] **Control panel touch targets**: Increase button sizes for mobile
+- [ ] **Tablet breakpoints**: Add `md:` breakpoints for better tablet layouts
+
 #### Manual Testing Required
 
 The Garden Ecosystem Expansion is code-complete. Before considering the feature done, manual visual testing is required:
@@ -29,6 +46,25 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Info Overlay Implementation
+
+- [x] Create InfoOverlay component with device-aware messaging
+  - Desktop: Explains autonomous reticle drift and automatic observation
+  - Mobile: Explains touch-and-hold interaction
+  - Touch detection via `useIsTouchDevice` hook
+- [x] Add localStorage persistence for dismissal state
+  - Key: `quantum-garden-info-dismissed`
+  - Dismissal persists across sessions (shows only on first visit)
+- [x] Implement smooth fade-in/fade-out animations
+  - Scale transition (95% to 100%)
+  - Opacity transition (0 to 100%)
+- [x] Match garden's calm visual aesthetic
+  - Dark semi-transparent backdrop (rgba(0, 0, 0, 0.6))
+  - Rounded corners, subtle border
+  - Soft gray color palette
+- [x] Integrate InfoOverlay into main garden page
+- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
 
 ### 2026-01-18 - Sandbox UX Consolidation
 

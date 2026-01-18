@@ -165,6 +165,7 @@ export class PlantSprite extends Container {
    * Render the transition from superposed to collapsed.
    *
    * Uses a smooth crossfade: superposed fades out while collapsed fades in.
+   * Includes a subtle scale pulse effect as the plant "crystallizes" into form.
    */
   private renderTransition(): void {
     if (!this.variant) return;
@@ -172,35 +173,38 @@ export class PlantSprite extends Container {
     // Ease function for smoother transition (ease-out cubic)
     const eased = 1 - Math.pow(1 - this.transitionProgress, 3);
 
-    // Render fading superposed layers
+    // Scale pulse: grows slightly during transition, then settles
+    // Peak at 50% progress, returns to 1.0 at completion
+    const scalePulse = 1 + Math.sin(eased * Math.PI) * 0.12;
+
+    // Render fading superposed layers (shrinking as they fade)
     const superposedOpacity = GLYPH.SUPERPOSED_OPACITY * (1 - eased);
     if (superposedOpacity > 0.01) {
       const keyframes = this.variant.keyframes.slice(0, 3);
       keyframes.forEach((keyframe, index) => {
         const palette = getEffectivePalette(keyframe, this.variant!, this.plant.colorVariationName);
         const offset = index * 1;
-        this.drawKeyframe(
-          keyframe.pattern,
-          palette,
-          superposedOpacity,
-          keyframe.scale ?? 1,
-          offset
-        );
+        // Superposed layers shrink as they fade
+        const shrinkScale = (keyframe.scale ?? 1) * (1 - eased * 0.2);
+        this.drawKeyframe(keyframe.pattern, palette, superposedOpacity, shrinkScale, offset);
       });
     }
 
-    // Render emerging collapsed form
+    // Render emerging collapsed form with scale pulse
     const collapsedOpacity = GLYPH.COLLAPSED_OPACITY * eased;
     if (collapsedOpacity > 0.01) {
-      this.renderCollapsedWithOpacity(collapsedOpacity);
+      this.renderCollapsedWithOpacity(collapsedOpacity, scalePulse);
     }
   }
 
   /**
-   * Render the collapsed state with a specific opacity.
+   * Render the collapsed state with a specific opacity and optional scale multiplier.
    * Used during transition animation.
+   *
+   * @param targetOpacity - Opacity multiplier (0-1)
+   * @param scaleMultiplier - Optional scale multiplier for pulse effect (default 1)
    */
-  private renderCollapsedWithOpacity(targetOpacity: number): void {
+  private renderCollapsedWithOpacity(targetOpacity: number, scaleMultiplier: number = 1): void {
     if (!this.variant) return;
 
     // If the plant has resolved traits from quantum measurement, use those
@@ -208,7 +212,7 @@ export class PlantSprite extends Container {
       const pattern = this.plant.traits.glyphPattern;
       const palette = this.plant.traits.colorPalette ?? ["#888888", "#AAAAAA", "#CCCCCC"];
       const baseOpacity = this.plant.traits.opacity ?? GLYPH.COLLAPSED_OPACITY;
-      this.drawKeyframe(pattern, palette, baseOpacity * targetOpacity, 1, 0);
+      this.drawKeyframe(pattern, palette, baseOpacity * targetOpacity, scaleMultiplier, 0);
       return;
     }
 
@@ -233,11 +237,21 @@ export class PlantSprite extends Container {
       effectiveScale = interpolated.scale;
     }
 
-    this.drawKeyframe(pattern, palette, opacity * targetOpacity, effectiveScale, 0);
+    // Apply scale multiplier for transition pulse effect
+    this.drawKeyframe(
+      pattern,
+      palette,
+      opacity * targetOpacity,
+      effectiveScale * scaleMultiplier,
+      0
+    );
   }
 
   /**
    * Render a superposed plant showing multiple possible states.
+   *
+   * Includes a subtle shimmer effect to emphasize quantum uncertainty.
+   * Each layer oscillates slightly out of phase for visual interest.
    */
   private renderSuperposed(): void {
     if (!this.variant) return;
@@ -245,10 +259,21 @@ export class PlantSprite extends Container {
     // For superposed state, show multiple keyframes at low opacity
     // to suggest the quantum uncertainty of the plant's form
     const keyframes = this.variant.keyframes.slice(0, 3);
-    const opacity = GLYPH.SUPERPOSED_OPACITY;
+    const baseOpacity = GLYPH.SUPERPOSED_OPACITY;
+
+    // Shimmer effect: subtle opacity oscillation for quantum uncertainty feel
+    // Use plant ID hash to desync shimmer across plants
+    const plantSeed = this.plant.id.charCodeAt(0) + this.plant.id.charCodeAt(1);
+    const time = performance.now() / 1000;
 
     keyframes.forEach((keyframe, index) => {
       const palette = getEffectivePalette(keyframe, this.variant!, this.plant.colorVariationName);
+
+      // Each layer shimmers at a slightly different phase
+      const phase = plantSeed + index * 0.7;
+      const shimmer = Math.sin(time * 1.5 + phase) * 0.08;
+      const opacity = Math.max(0.15, baseOpacity + shimmer);
+
       // Slight offset for visual layering effect
       const offset = index * 1;
       this.drawKeyframe(keyframe.pattern, palette, opacity, keyframe.scale ?? 1, offset);

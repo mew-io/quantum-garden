@@ -268,7 +268,7 @@ _Important features for complete experience_
 _Nice-to-have enhancements_
 
 - [ ] **Ambient Audio**: Add generative soundscape
-- [ ] **Visual Polish**: Refine plant aesthetics and animations
+- [~] **Visual Polish**: Refine plant aesthetics and animations (shimmer + scale pulse added)
 - [ ] **Performance Optimization**: Optimize for large numbers of plants
 - [ ] **Analytics**: Track observation patterns and garden statistics
 - [ ] **Accessibility**: Screen reader support and reduced motion options

@@ -8,7 +8,9 @@ import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
 import { createReticleController, type ReticleController } from "./reticle-controller";
 import { createObservationSystem, type ObservationSystem } from "./observation-system";
 import { createEntanglementRenderer, type EntanglementRenderer } from "./entanglement-renderer";
+import { createGardenEvolutionSystem, type GardenEvolutionSystem } from "./garden-evolution";
 import { useObservation } from "@/hooks/use-observation";
+import { useEvolution } from "@/hooks/use-evolution";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 
@@ -26,16 +28,23 @@ export function GardenCanvas() {
   const reticleControllerRef = useRef<ReticleController | null>(null);
   const observationSystemRef = useRef<ObservationSystem | null>(null);
   const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
+  const evolutionSystemRef = useRef<GardenEvolutionSystem | null>(null);
 
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
 
+  // Evolution hook for plant germination
+  const { triggerGermination } = useEvolution();
+
   // Load plants from server into store
   usePlants();
 
-  // Store callback ref to keep it stable across renders
+  // Store callback refs to keep them stable across renders
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
   observationCallbackRef.current = triggerObservation;
+
+  const germinationCallbackRef = useRef<(plantId: string) => Promise<void>>(async () => {});
+  germinationCallbackRef.current = triggerGermination;
 
   // Handle window resize
   const handleResize = useCallback(() => {
@@ -104,6 +113,14 @@ export function GardenCanvas() {
         });
         observationSystem.start();
 
+        // Initialize garden evolution system (runs independently)
+        const evolutionSystem = createGardenEvolutionSystem();
+        evolutionSystemRef.current = evolutionSystem;
+        evolutionSystem.setGerminationCallback(async (plantId) => {
+          await germinationCallbackRef.current(plantId);
+        });
+        evolutionSystem.start();
+
         // Listen for window resize
         window.addEventListener("resize", handleResize);
       } catch (error) {
@@ -136,6 +153,11 @@ export function GardenCanvas() {
       if (entanglementRendererRef.current) {
         entanglementRendererRef.current.destroy();
         entanglementRendererRef.current = null;
+      }
+
+      if (evolutionSystemRef.current) {
+        evolutionSystemRef.current.destroy();
+        evolutionSystemRef.current = null;
       }
 
       if (appRef.current) {

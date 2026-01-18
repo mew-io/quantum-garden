@@ -76,4 +76,36 @@ export const plantsRouter = router({
     });
     return plants.map(transformPlant);
   }),
+
+  /**
+   * Germinate a dormant plant.
+   *
+   * Sets the germinatedAt timestamp, allowing the plant to
+   * begin its lifecycle progression from seed to bloom.
+   */
+  germinate: publicProcedure
+    .input(z.object({ plantId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Find the plant
+      const plant = await ctx.db.plant.findUnique({
+        where: { id: input.plantId },
+      });
+
+      if (!plant) {
+        throw new Error(`Plant not found: ${input.plantId}`);
+      }
+
+      if (plant.germinatedAt) {
+        // Already germinated, return current state
+        return transformPlant(plant);
+      }
+
+      // Update plant with germination timestamp
+      const updatedPlant = await ctx.db.plant.update({
+        where: { id: input.plantId },
+        data: { germinatedAt: new Date() },
+      });
+
+      return transformPlant(updatedPlant);
+    }),
 });

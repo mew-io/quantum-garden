@@ -30,6 +30,7 @@ const simpleBloom: PlantVariant = {
   description: "A gentle plant with a classic bud-bloom-fade lifecycle",
   rarity: 1.0, // Most common
   requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true, // Smooth transitions between lifecycle stages
   keyframes: [
     {
       name: "bud",
@@ -119,6 +120,7 @@ const quantumTulip: PlantVariant = {
   description: "A tulip that blooms in soft pastel colors based on quantum measurement",
   rarity: 0.5, // Less common
   requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true, // Smooth transitions between lifecycle stages
   keyframes: [
     {
       name: "bulb",

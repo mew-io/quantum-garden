@@ -70,10 +70,10 @@ export function VariantTimeline() {
         </span>
       </div>
 
-      {/* Timeline track */}
-      <div className="relative">
+      {/* Timeline track - scrollable on small screens */}
+      <div className="relative overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         {/* Keyframe blocks */}
-        <div className="flex h-24 rounded overflow-hidden">
+        <div className="flex h-24 rounded overflow-hidden min-w-fit">
           {keyframes.map((keyframe, index) => {
             const widthPercent = (keyframe.duration / totalDuration) * 100;
             const isSelected = selectedKeyframeIndex === index;
@@ -102,7 +102,7 @@ export function VariantTimeline() {
                 style={{
                   width: `${widthPercent}%`,
                   backgroundColor: `${previewColor}22`, // 13% opacity version
-                  minWidth: "60px",
+                  minWidth: "48px", // Reduced for mobile, scrollable if needed
                 }}
                 title={`${keyframe.name} (${keyframe.duration}s)`}
               >

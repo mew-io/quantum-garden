@@ -2,7 +2,8 @@
  * useObservation - Hook for triggering observation events
  *
  * Provides a callback to trigger observation via tRPC mutation,
- * handling the quantum measurement flow.
+ * handling the quantum measurement flow. When an entangled plant
+ * is observed, its partners are also revealed with correlated traits.
  */
 
 import { useCallback } from "react";
@@ -18,19 +19,25 @@ import type { ObservationPayload } from "@quantum-garden/shared";
  */
 export function useObservation() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
+  const utils = trpc.useUtils();
 
   const recordObservationMutation = trpc.observation.recordObservation.useMutation({
-    onSuccess: (updatedPlant) => {
+    onSuccess: (result) => {
       // Update plant in local store to reflect observed state
       // Cast through unknown because Prisma JSON type is very broad
-      updatePlant(updatedPlant.id, {
+      updatePlant(result.id, {
         observed: true,
-        observedAt: updatedPlant.observedAt ?? undefined,
+        observedAt: result.observedAt ?? undefined,
         visualState: "collapsed",
-        traits: updatedPlant.traits as unknown as ReturnType<
+        traits: result.traits as unknown as ReturnType<
           typeof useGardenStore.getState
         >["plants"][number]["traits"],
       });
+
+      // If entangled partners were updated, refetch plants to get their new state
+      if (result.entangledPartnersUpdated) {
+        utils.plants.list.invalidate();
+      }
     },
     onError: (error) => {
       console.error("Observation failed:", error);

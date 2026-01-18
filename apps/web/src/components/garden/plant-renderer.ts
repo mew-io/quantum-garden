@@ -173,6 +173,7 @@ function dbPlantToRenderable(plant: unknown): RenderablePlant {
     germinatedAt: p.germinatedAt ? new Date(p.germinatedAt as string | number | Date) : null,
     lifecycleModifier: (p.lifecycleModifier as number) ?? 1.0,
     colorVariationName: (p.colorVariationName as string | null) ?? null,
+    entanglementGroupId: (p.entanglementGroupId as string | undefined) ?? undefined,
     traits: p.traits as RenderablePlant["traits"],
   };
 }

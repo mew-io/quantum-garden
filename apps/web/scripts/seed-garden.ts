@@ -21,6 +21,7 @@ const CANVAS_HEIGHT = 800;
 
 // Seed configuration
 const NUM_PLANTS = 12;
+const NUM_ENTANGLED_PAIRS = 2; // Number of entangled plant pairs
 const MARGIN = 80; // Keep plants away from edges
 
 /**
@@ -157,8 +158,55 @@ async function main() {
     );
   }
 
+  // Create entanglement groups by linking random pairs of plants
+  console.log(`\nCreating ${NUM_ENTANGLED_PAIRS} entanglement groups...`);
+
+  const allPlants = await db.plant.findMany();
+  const unentangledPlants = [...allPlants];
+
+  for (let i = 0; i < NUM_ENTANGLED_PAIRS && unentangledPlants.length >= 2; i++) {
+    // Pick two random plants to entangle
+    const idx1 = Math.floor(Math.random() * unentangledPlants.length);
+    const plant1 = unentangledPlants.splice(idx1, 1)[0]!;
+
+    const idx2 = Math.floor(Math.random() * unentangledPlants.length);
+    const plant2 = unentangledPlants.splice(idx2, 1)[0]!;
+
+    // Create a shared quantum circuit for the entangled pair
+    const entangledSeed = Date.now() + 1000 + i;
+    const sharedCircuit = await db.quantumRecord.create({
+      data: {
+        circuitDefinition: createPlaceholderCircuit(entangledSeed),
+        status: "pending",
+        measurements: [],
+        probabilities: [],
+      },
+    });
+
+    // Create entanglement group linking both plants
+    const group = await db.entanglementGroup.create({
+      data: {
+        quantumCircuitId: sharedCircuit.id,
+      },
+    });
+
+    // Link both plants to the entanglement group
+    await db.plant.update({
+      where: { id: plant1.id },
+      data: { entanglementGroupId: group.id },
+    });
+
+    await db.plant.update({
+      where: { id: plant2.id },
+      data: { entanglementGroupId: group.id },
+    });
+
+    console.log(`  Created entanglement group ${i + 1}: ${plant1.variantId} ↔ ${plant2.variantId}`);
+  }
+
   console.log("\nGarden seeded successfully!");
   console.log(`  Total plants: ${NUM_PLANTS}`);
+  console.log(`  Entangled pairs: ${NUM_ENTANGLED_PAIRS}`);
 
   // Print variant distribution
   const plants = await db.plant.findMany();

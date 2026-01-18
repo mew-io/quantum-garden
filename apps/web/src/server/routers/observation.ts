@@ -34,22 +34,32 @@ function seededRandom(seed: number): () => number {
  * - growthRate: 0.5 to 1.5 (slow to fast lifecycle)
  * - opacity: 0.7 to 1.0 (maintains visibility)
  */
+/**
+ * Generate mock traits with optional offset for entangled partners.
+ *
+ * Entangled plants use the same seed but different offsets to produce
+ * correlated but distinct traits. This simulates quantum entanglement
+ * where measuring one qubit affects the other's outcome.
+ */
 function generateMockTraits(
   circuitDefinition: string,
   variantId: string,
-  colorVariationName: string | null
+  colorVariationName: string | null,
+  seedOffset: number = 0
 ): ResolvedTraits {
   // Extract seed from circuit definition for reproducible randomness
-  let seed = 0;
+  let baseSeed = 0;
   try {
     const decoded = Buffer.from(circuitDefinition, "base64").toString("utf-8");
     const parsed = JSON.parse(decoded) as { seed?: number };
-    seed = parsed.seed ?? Date.now();
+    baseSeed = parsed.seed ?? Date.now();
   } catch {
     // If parsing fails, use current time as seed
-    seed = Date.now();
+    baseSeed = Date.now();
   }
 
+  // Apply offset for entangled partners (creates correlated but distinct traits)
+  const seed = baseSeed + seedOffset * 1000;
   const random = seededRandom(seed);
 
   // Get variant for palette selection
@@ -167,6 +177,53 @@ export const observationRouter = router({
         },
       });
 
+      // If this plant is entangled, also reveal its partners with correlated traits
+      if (plant.entanglementGroupId) {
+        const entangledPartners = await ctx.db.plant.findMany({
+          where: {
+            entanglementGroupId: plant.entanglementGroupId,
+            id: { not: plant.id },
+            observed: false,
+          },
+          include: { quantumCircuit: true },
+        });
+
+        // Update each entangled partner with correlated traits
+        for (let i = 0; i < entangledPartners.length; i++) {
+          const partner = entangledPartners[i]!;
+          const partnerCircuit = partner.quantumCircuit?.circuitDefinition;
+
+          if (partnerCircuit) {
+            // Use seed offset to create correlated but distinct traits
+            const correlatedTraits = generateMockTraits(
+              partnerCircuit as string,
+              partner.variantId,
+              partner.colorVariationName,
+              i + 1 // Offset based on position in entanglement group
+            );
+
+            await ctx.db.plant.update({
+              where: { id: partner.id },
+              data: {
+                observed: true,
+                observedAt: new Date(),
+                visualState: "collapsed",
+                traits: correlatedTraits as unknown as object,
+              },
+            });
+
+            // Record observation event for partner
+            await ctx.db.observationEvent.create({
+              data: {
+                plantId: partner.id,
+                regionId: input.regionId,
+                quantumRecordId: partner.quantumCircuitId,
+              },
+            });
+          }
+        }
+      }
+
       // Deactivate the observation region if it exists in the database.
       // Note: Regions may be created in-memory by ObservationSystem and not persisted.
       // This update is optional - if the region doesn't exist, we skip it.
@@ -179,7 +236,12 @@ export const observationRouter = router({
         // Region not found in database - this is expected for in-memory regions
       }
 
-      return updatedPlant;
+      // Return updated plant with information about entangled partners
+      // The frontend will refetch plants to get the updated partner states
+      return {
+        ...updatedPlant,
+        entangledPartnersUpdated: plant.entanglementGroupId ? true : false,
+      };
     }),
 
   /**

@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 11)_
+_Last updated: 2026-01-17 (Session 12)_
 
 ## Project Goal
 
@@ -16,12 +16,28 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
 - [ ] **Garden Evolution**: Implement time-based garden progression
+- [ ] **Persistence**: Save and restore garden state across sessions
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Entanglement Visualization
+
+- [x] Update seed script to create entanglement groups (2 pairs of plants)
+- [x] Add entanglementGroupId to RenderablePlant interface
+- [x] Create EntanglementRenderer class:
+  - Draws dashed purple lines connecting entangled plants
+  - Pulse animation when observation reveals correlated traits
+  - Renders behind plants (z-order)
+- [x] Integrate EntanglementRenderer into GardenCanvas
+- [x] Implement correlated reveal on observation:
+  - When entangled plant is observed, all partners automatically collapse
+  - Partners receive correlated traits (same base seed, different offset)
+  - Returns entangledPartnersUpdated flag
+- [x] Update useObservation hook to refetch plants when entangled partners updated
+- [x] All tests passing: 88 unit tests (38 web + 45 shared + 5 E2E)
 
 ### 2026-01-17 - Observation Testing and E2E Setup
 
@@ -210,10 +226,10 @@ _Core functionality needed for a working demo_
 
 _Important features for complete experience_
 
-- [ ] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
-- [ ] **Observation Regions**: Implement invisible regions where observation can occur
+- [x] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
+- [x] **Observation Regions**: Implement invisible regions where observation can occur (part of ObservationSystem)
+- [x] **Plant Lifecycle Display**: Show lifecycle keyframes on main canvas (PlantSprite uses lifecycle system)
 - [ ] **Garden Evolution**: Implement time-based garden progression
-- [ ] **Plant Lifecycle Display**: Show lifecycle keyframes on main canvas (integrate sandbox work)
 - [ ] **Persistence**: Save and restore garden state across sessions
 - [ ] **Mobile Support**: Ensure touch-friendly observation on mobile devices
 
@@ -249,6 +265,7 @@ _Nice-to-have enhancements_
 | **Frontend (apps/web)**      |          |                                              |
 | PixiJS canvas initialization | Done     | Full-screen, resize handling                 |
 | Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle   |
+| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation |
 | Variant sandbox              | Done     | Full timeline editor, gallery, playback      |
 | Superposed view              | Done     | Pastel palettes, visual development tool     |
 | Reticle controller           | Done     | Autonomous drift, state machine, edge bounce |
@@ -262,9 +279,10 @@ _Nice-to-have enhancements_
 | Lifecycle tests              | Done     | 45 tests covering all lifecycle functions    |
 | **API Layer**                |          |                                              |
 | tRPC endpoints               | Done     | Plants, observation (tested), health routers |
-| Prisma schema                | Done     | Full schema with lifecycle fields            |
+| Prisma schema                | Done     | Full schema with lifecycle + entanglement    |
 | Prisma client                | Done     | Generated and working                        |
-| Garden seeding               | Done     | 12 plants with variants, `db:seed` script    |
+| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)             |
+| Correlated observation       | Done     | Entangled partners collapse together         |
 | **Quantum Service**          |          |                                              |
 | FastAPI app                  | Done     | Running on port 18742                        |
 | Circuit generation           | Done     | Using Qiskit                                 |

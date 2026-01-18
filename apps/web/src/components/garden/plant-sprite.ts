@@ -28,6 +28,7 @@ export interface RenderablePlant extends PlantWithLifecycle {
   position: { x: number; y: number };
   observed: boolean;
   visualState: "superposed" | "collapsed";
+  entanglementGroupId?: string;
   traits?: {
     glyphPattern?: number[][];
     colorPalette?: string[];

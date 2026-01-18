@@ -7,8 +7,10 @@ import type { ObservationPayload } from "@quantum-garden/shared";
 import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
 import { createReticleController, type ReticleController } from "./reticle-controller";
 import { createObservationSystem, type ObservationSystem } from "./observation-system";
+import { createEntanglementRenderer, type EntanglementRenderer } from "./entanglement-renderer";
 import { useObservation } from "@/hooks/use-observation";
 import { usePlants } from "@/hooks/use-plants";
+import { useGardenStore } from "@/stores/garden-store";
 
 /**
  * Main garden canvas component.
@@ -23,6 +25,7 @@ export function GardenCanvas() {
   const plantRendererRef = useRef<PlantRenderer | null>(null);
   const reticleControllerRef = useRef<ReticleController | null>(null);
   const observationSystemRef = useRef<ObservationSystem | null>(null);
+  const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
 
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
@@ -69,6 +72,11 @@ export function GardenCanvas() {
         container.appendChild(app.canvas);
         appRef.current = app;
 
+        // Initialize entanglement renderer (behind plants)
+        const entanglementRenderer = createEntanglementRenderer(app);
+        entanglementRendererRef.current = entanglementRenderer;
+        entanglementRenderer.start();
+
         // Initialize plant renderer
         const plantRenderer = createPlantRenderer(app);
         plantRendererRef.current = plantRenderer;
@@ -86,6 +94,13 @@ export function GardenCanvas() {
           // Use the ref to call the current observation trigger
           // This allows the callback to access the latest hook reference
           observationCallbackRef.current(payload);
+
+          // Trigger entanglement pulse for correlated plants
+          const plants = useGardenStore.getState().plants;
+          const observedPlant = plants.find((p) => p.id === payload.plantId);
+          if (observedPlant?.entanglementGroupId && entanglementRendererRef.current) {
+            entanglementRendererRef.current.triggerPulse(observedPlant.entanglementGroupId);
+          }
         });
         observationSystem.start();
 
@@ -116,6 +131,11 @@ export function GardenCanvas() {
       if (plantRendererRef.current) {
         plantRendererRef.current.destroy();
         plantRendererRef.current = null;
+      }
+
+      if (entanglementRendererRef.current) {
+        entanglementRendererRef.current.destroy();
+        entanglementRendererRef.current = null;
       }
 
       if (appRef.current) {

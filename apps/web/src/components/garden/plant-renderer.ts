@@ -13,6 +13,42 @@ import { PlantSprite, type RenderablePlant } from "./plant-sprite";
 import { useGardenStore } from "@/stores/garden-store";
 
 /**
+ * Z-order priority by plant category.
+ * Lower values render behind, higher values render in front.
+ * Ground cover is furthest back, ethereal elements are in front.
+ */
+const CATEGORY_Z_ORDER: Record<string, number> = {
+  // Ground Cover (back) - z: 0-9
+  "soft-moss": 0,
+  "pebble-patch": 1,
+  // Grasses - z: 10-19
+  "meadow-tuft": 10,
+  "whisper-reed": 11,
+  // Flowers - z: 20-29
+  "simple-bloom": 20,
+  "quantum-tulip": 21,
+  "dewdrop-daisy": 22,
+  "midnight-poppy": 23,
+  "bell-cluster": 24,
+  // Shrubs - z: 30-39
+  "cloud-bush": 30,
+  "berry-thicket": 31,
+  // Trees - z: 40-49
+  "sapling-hope": 40,
+  "weeping-willow": 41,
+  // Ethereal (front) - z: 50+
+  "pulsing-orb": 50,
+};
+
+/**
+ * Get z-order priority for a variant.
+ * Defaults to 25 (middle of flower range) for unknown variants.
+ */
+function getZOrder(variantId: string): number {
+  return CATEGORY_Z_ORDER[variantId] ?? 25;
+}
+
+/**
  * Manages all plant sprites in the garden.
  *
  * Plants are synchronized with the Zustand store, and each frame
@@ -37,6 +73,8 @@ export class PlantRenderer {
     this.app = app;
     this.container = new Container();
     this.container.label = "plants";
+    // Enable z-ordering: children will be sorted by zIndex
+    this.container.sortableChildren = true;
     this.sprites = new Map();
     this.ticker = new Ticker();
     this.isRunning = false;
@@ -147,6 +185,8 @@ export class PlantRenderer {
         existing.updatePlant(plant);
       } else {
         const sprite = new PlantSprite(plant);
+        // Set z-order based on plant category (ground cover behind, trees in front)
+        sprite.zIndex = getZOrder(plant.variantId);
         this.sprites.set(plant.id, sprite);
         this.container.addChild(sprite);
       }

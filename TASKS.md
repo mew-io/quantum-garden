@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 22)_
+_Last updated: 2026-01-17 (Session 23)_
 
 ## Project Goal
 
@@ -98,14 +98,30 @@ _Ethereal_ (magical, very rare):
 - [x] Design 2 shrub variants (cloud-bush, berry-thicket)
 - [x] Design 1-2 tree variants (sapling-hope, weeping-willow)
 - [x] Update seed script with new variant distribution (24 plants, 3 entangled pairs)
-- [ ] Add scale property to seed script for size variation
-- [ ] Update PlantRenderer to handle scale differences
-- [ ] Consider z-ordering by plant category
+- [x] Update PlantRenderer to handle scale differences (already implemented via lifecycle keyframes)
+- [x] Implement z-ordering by plant category (ground cover behind, trees in front)
 - [ ] Test visual balance in sandbox
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Scale and Z-Ordering Integration
+
+- [x] Verify scale is correctly applied in PlantSprite rendering:
+  - `renderCollapsed()` uses `keyframe.scale ?? 1`
+  - `renderSuperposed()` applies scale to each layer
+  - `drawKeyframe()` calculates `pixelSize = cellSize * keyframeScale`
+- [x] Verify scale interpolation works between keyframes:
+  - `interpolateKeyframes` in lifecycle.ts lerps between `from.scale` and `to.scale`
+  - Returns interpolated scale in result object
+- [x] Add z-ordering by plant category to PlantRenderer:
+  - `CATEGORY_Z_ORDER` map assigns z-index per variant ID
+  - Ground cover: 0-9 (back), Grasses: 10-19, Flowers: 20-29
+  - Shrubs: 30-39, Trees: 40-49, Ethereal: 50+ (front)
+  - Enabled `sortableChildren = true` on plants container
+  - Set `sprite.zIndex` when creating sprites
+- [x] All quality checks passing: TypeScript, 83 tests, lint
 
 ### 2026-01-17 - Seed Distribution Update
 

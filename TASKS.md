@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 34 - Timeline Overflow Fix)_
+_Last updated: 2026-01-18 (Session 35 - Control Panel Touch Targets)_
 
 ## Project Goal
 
@@ -30,7 +30,7 @@ Critical UX feedback missing for touch users:
 Secondary improvements for sandbox on mobile:
 
 - [x] **Timeline overflow**: Prevent horizontal overflow on small phones - Done
-- [ ] **Control panel touch targets**: Increase button sizes for mobile
+- [x] **Control panel touch targets**: Increase button sizes for mobile - Done
 - [ ] **Tablet breakpoints**: Add `md:` breakpoints for better tablet layouts
 
 #### Manual Testing Required
@@ -46,6 +46,15 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Control Panel Touch Targets
+
+- [x] Increase sandbox control panel button sizes for mobile touch targets (44px+ minimum)
+  - Icon buttons: `p-2` to `p-3`, icons `w-4 h-4` to `w-5 h-5`
+  - Speed/scale/background selector buttons: `px-2 py-1 text-xs` to `px-3 py-2 text-sm`
+  - Grid toggle and back button: `px-3 py-1` to `px-4 py-2`
+  - Increased gaps between button groups for better touch separation
+- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
 
 ### 2026-01-18 - Timeline Overflow Fix
 

@@ -10,6 +10,7 @@ import { createObservationSystem, type ObservationSystem } from "./observation-s
 import { createEntanglementRenderer, type EntanglementRenderer } from "./entanglement-renderer";
 import { createDwellIndicator, type DwellIndicator } from "./dwell-indicator";
 import { createTouchModeIndicator, type TouchModeIndicator } from "./touch-mode-indicator";
+import { createObservationFeedback, type ObservationFeedback } from "./observation-feedback";
 import { createGardenEvolutionSystem, type GardenEvolutionSystem } from "./garden-evolution";
 import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
@@ -32,6 +33,7 @@ export function GardenCanvas() {
   const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
   const dwellIndicatorRef = useRef<DwellIndicator | null>(null);
   const touchModeIndicatorRef = useRef<TouchModeIndicator | null>(null);
+  const observationFeedbackRef = useRef<ObservationFeedback | null>(null);
   const evolutionSystemRef = useRef<GardenEvolutionSystem | null>(null);
   const cleanupTouchHandlersRef = useRef<(() => void) | null>(null);
 
@@ -101,6 +103,11 @@ export function GardenCanvas() {
         dwellIndicatorRef.current = dwellIndicator;
         dwellIndicator.start();
 
+        // Initialize observation feedback (celebration on observation complete)
+        const observationFeedback = createObservationFeedback(app);
+        observationFeedbackRef.current = observationFeedback;
+        observationFeedback.start();
+
         // Initialize reticle controller
         const reticleController = createReticleController(app);
         reticleControllerRef.current = reticleController;
@@ -165,9 +172,17 @@ export function GardenCanvas() {
           // This allows the callback to access the latest hook reference
           observationCallbackRef.current(payload);
 
-          // Trigger entanglement pulse for correlated plants
+          // Trigger visual celebration at the observed plant's location
           const plants = useGardenStore.getState().plants;
           const observedPlant = plants.find((p) => p.id === payload.plantId);
+          if (observedPlant && observationFeedbackRef.current) {
+            observationFeedbackRef.current.triggerCelebration(
+              observedPlant.position.x,
+              observedPlant.position.y
+            );
+          }
+
+          // Trigger entanglement pulse for correlated plants
           if (observedPlant?.entanglementGroupId && entanglementRendererRef.current) {
             entanglementRendererRef.current.triggerPulse(observedPlant.entanglementGroupId);
           }
@@ -230,6 +245,11 @@ export function GardenCanvas() {
       if (touchModeIndicatorRef.current) {
         touchModeIndicatorRef.current.destroy();
         touchModeIndicatorRef.current = null;
+      }
+
+      if (observationFeedbackRef.current) {
+        observationFeedbackRef.current.destroy();
+        observationFeedbackRef.current = null;
       }
 
       if (evolutionSystemRef.current) {

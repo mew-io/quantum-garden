@@ -217,6 +217,190 @@ function createPulsingOrbPatterns() {
   return { dim, bright };
 }
 
+/**
+ * Generate patterns for Dewdrop Daisy
+ * A daisy-like flower with clustered thin petals and a prominent center
+ */
+function createDewdropDaisyPatterns() {
+  // Bud: tight cluster of small dots
+  const bud = createEmptyPattern();
+  drawCircle(bud, 32, 28, 6);
+  scatterDots(bud, 5, 2, 3, 101);
+  drawRect(bud, 30, 34, 33, 52);
+
+  // Unfurl: petals starting to emerge
+  const unfurl = createEmptyPattern();
+  drawCircle(unfurl, 32, 26, 7);
+  // Emerging petals
+  drawPetal(unfurl, 32, 14, 32, 22, 4);
+  drawPetal(unfurl, 42, 20, 36, 24, 4);
+  drawPetal(unfurl, 22, 20, 28, 24, 4);
+  drawRect(unfurl, 30, 33, 33, 52);
+
+  // Bloom: full daisy with many thin petals
+  const bloom = createEmptyPattern();
+  // Central disk
+  drawCircle(bloom, 32, 24, 8);
+  // Many thin petals radiating out
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 22;
+    const tipY = 24 + Math.sin(angle) * 22;
+    const baseX = 32 + Math.cos(angle) * 8;
+    const baseY = 24 + Math.sin(angle) * 8;
+    drawPetal(bloom, tipX, tipY, baseX, baseY, 4);
+  }
+  drawRect(bloom, 30, 32, 33, 54);
+
+  // Sparkle: slightly larger and brighter variant for animation
+  const sparkle = createEmptyPattern();
+  drawCircle(sparkle, 32, 24, 9);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 24;
+    const tipY = 24 + Math.sin(angle) * 24;
+    const baseX = 32 + Math.cos(angle) * 9;
+    const baseY = 24 + Math.sin(angle) * 9;
+    drawPetal(sparkle, tipX, tipY, baseX, baseY, 5);
+  }
+  drawRect(sparkle, 30, 33, 33, 54);
+
+  // Fade: wilting daisy
+  const fade = createEmptyPattern();
+  drawCircle(fade, 32, 26, 6);
+  // Drooping petals
+  drawPetal(fade, 20, 32, 28, 26, 4);
+  drawPetal(fade, 44, 32, 36, 26, 4);
+  drawPetal(fade, 32, 12, 32, 22, 4);
+  drawPetal(fade, 24, 18, 28, 24, 3);
+  drawPetal(fade, 40, 18, 36, 24, 3);
+  drawRect(fade, 30, 32, 33, 48);
+
+  return { bud, unfurl, bloom, sparkle, fade };
+}
+
+/**
+ * Generate patterns for Midnight Poppy
+ * A dramatic flower with deep colors and curved, bowl-shaped petals
+ */
+function createMidnightPoppyPatterns() {
+  // Closed: tightly wrapped bud
+  const closed = createEmptyPattern();
+  drawEllipse(closed, 32, 24, 8, 12);
+  drawRect(closed, 30, 36, 33, 56);
+
+  // Opening: petals starting to unfurl
+  const opening = createEmptyPattern();
+  // Bowl shape forming
+  drawPetal(opening, 20, 16, 28, 28, 10);
+  drawPetal(opening, 44, 16, 36, 28, 10);
+  drawEllipse(opening, 32, 26, 10, 6);
+  drawRect(opening, 30, 32, 33, 56);
+
+  // Open: fully bloomed with dramatic curved petals
+  const open = createEmptyPattern();
+  // Large curved petals
+  drawPetal(open, 12, 18, 26, 30, 14);
+  drawPetal(open, 52, 18, 38, 30, 14);
+  drawPetal(open, 32, 6, 32, 24, 12);
+  drawPetal(open, 20, 10, 28, 26, 10);
+  drawPetal(open, 44, 10, 36, 26, 10);
+  // Dark center
+  drawCircle(open, 32, 28, 8);
+  // Stem
+  drawRect(open, 30, 36, 33, 58);
+
+  // Closing: petals curling back
+  const closing = createEmptyPattern();
+  drawPetal(closing, 18, 20, 28, 28, 10);
+  drawPetal(closing, 46, 20, 36, 28, 10);
+  drawPetal(closing, 32, 10, 32, 24, 10);
+  drawEllipse(closing, 32, 26, 8, 6);
+  drawRect(closing, 30, 34, 33, 56);
+
+  return { closed, opening, open, closing };
+}
+
+/**
+ * Generate patterns for Bell Cluster
+ * Multiple hanging bell-shaped flowers with staggered blooming
+ */
+function createBellClusterPatterns() {
+  // Buds: small closed bells hanging
+  const buds = createEmptyPattern();
+  // Main stem
+  drawRect(buds, 30, 8, 33, 24);
+  // Branch stems
+  drawRect(buds, 20, 20, 23, 32);
+  drawRect(buds, 40, 20, 43, 28);
+  drawRect(buds, 32, 24, 35, 36);
+  // Closed buds (teardrop shapes pointing down)
+  drawEllipse(buds, 21, 38, 5, 8);
+  drawEllipse(buds, 41, 34, 4, 6);
+  drawEllipse(buds, 33, 42, 5, 8);
+
+  // First: first bell opens
+  const first = createEmptyPattern();
+  drawRect(first, 30, 8, 33, 24);
+  drawRect(first, 20, 20, 23, 32);
+  drawRect(first, 40, 20, 43, 28);
+  drawRect(first, 32, 24, 35, 36);
+  // First bell open (wider at bottom)
+  drawEllipse(first, 21, 38, 8, 6);
+  drawRect(first, 16, 38, 26, 44);
+  drawRing(first, 21, 44, 0, 8);
+  // Other bells still closed
+  drawEllipse(first, 41, 34, 4, 6);
+  drawEllipse(first, 33, 42, 5, 8);
+
+  // Second: two bells open
+  const second = createEmptyPattern();
+  drawRect(second, 30, 8, 33, 24);
+  drawRect(second, 20, 20, 23, 32);
+  drawRect(second, 40, 20, 43, 28);
+  drawRect(second, 32, 24, 35, 36);
+  // First bell open
+  drawEllipse(second, 21, 38, 8, 6);
+  drawRect(second, 16, 38, 26, 44);
+  drawRing(second, 21, 44, 0, 8);
+  // Second bell open
+  drawEllipse(second, 41, 32, 7, 5);
+  drawRect(second, 36, 32, 46, 38);
+  drawRing(second, 41, 38, 0, 7);
+  // Third bell still closed
+  drawEllipse(second, 33, 42, 5, 8);
+
+  // Full: all bells open
+  const full = createEmptyPattern();
+  drawRect(full, 30, 8, 33, 24);
+  drawRect(full, 20, 20, 23, 32);
+  drawRect(full, 40, 20, 43, 28);
+  drawRect(full, 32, 24, 35, 36);
+  // All bells open
+  drawEllipse(full, 21, 38, 8, 6);
+  drawRect(full, 16, 38, 26, 44);
+  drawRing(full, 21, 44, 0, 8);
+  drawEllipse(full, 41, 32, 7, 5);
+  drawRect(full, 36, 32, 46, 38);
+  drawRing(full, 41, 38, 0, 7);
+  drawEllipse(full, 33, 44, 8, 6);
+  drawRect(full, 28, 44, 38, 50);
+  drawRing(full, 33, 50, 0, 8);
+
+  // Fade: bells wilting
+  const fade = createEmptyPattern();
+  drawRect(fade, 30, 8, 33, 24);
+  drawRect(fade, 20, 20, 23, 32);
+  drawRect(fade, 40, 20, 43, 28);
+  drawRect(fade, 32, 24, 35, 36);
+  // Wilted bells (smaller, less defined)
+  drawEllipse(fade, 21, 40, 5, 4);
+  drawEllipse(fade, 41, 34, 4, 3);
+  drawEllipse(fade, 33, 46, 5, 4);
+
+  return { buds, first, second, full, fade };
+}
+
 // Generate all patterns once at module load
 const simpleBloomPatterns = createSimpleBloomPatterns();
 const quantumTulipPatterns = createQuantumTulipPatterns();
@@ -225,6 +409,9 @@ const pebblePatchPatterns = createPebblePatchPatterns();
 const meadowTuftPatterns = createMeadowTuftPatterns();
 const whisperReedPatterns = createWhisperReedPatterns();
 const pulsingOrbPatterns = createPulsingOrbPatterns();
+const dewdropDaisyPatterns = createDewdropDaisyPatterns();
+const midnightPoppyPatterns = createMidnightPoppyPatterns();
+const bellClusterPatterns = createBellClusterPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -365,6 +552,196 @@ const quantumTulip: PlantVariant = {
         bloom: ["#E0C0F0", "#E0D0F0", "#F0E8F8"],
         wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
+    },
+  ],
+};
+
+/**
+ * Dewdrop Daisy
+ *
+ * A cheerful daisy with clustered thin petals and a sparkle effect.
+ * Moderate rarity - more interesting than basic flowers.
+ * Scale: 1.0x (standard)
+ */
+const dewdropDaisy: PlantVariant = {
+  id: "dewdrop-daisy",
+  name: "Dewdrop Daisy",
+  description: "A cheerful daisy that sparkles like morning dew in the light",
+  rarity: 0.7, // Moderate
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "bud",
+      duration: 12,
+      pattern: dewdropDaisyPatterns.bud,
+      // Soft yellow-green for emerging bud
+      palette: ["#E8F0D0", "#F0F8E0", "#F8FCF0"],
+      opacity: 0.5,
+      scale: 0.6,
+    },
+    {
+      name: "unfurl",
+      duration: 15,
+      pattern: dewdropDaisyPatterns.unfurl,
+      // Warming yellow
+      palette: ["#F8F0D0", "#FCF8E0", "#FFFCF0"],
+      opacity: 0.7,
+      scale: 0.8,
+    },
+    {
+      name: "bloom",
+      duration: 20,
+      pattern: dewdropDaisyPatterns.bloom,
+      // Bright daisy white with golden center
+      palette: ["#F8F0E0", "#FCF8F0", "#FFFFF8"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+    {
+      name: "sparkle",
+      duration: 8,
+      pattern: dewdropDaisyPatterns.sparkle,
+      // Bright white sparkle
+      palette: ["#FFFFF0", "#FFFFF8", "#FFFFFF"],
+      opacity: 1.0,
+      scale: 1.05,
+    },
+    {
+      name: "bloom-2",
+      duration: 25,
+      pattern: dewdropDaisyPatterns.bloom,
+      // Back to normal bloom
+      palette: ["#F8F0E0", "#FCF8F0", "#FFFFF8"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+    {
+      name: "fade",
+      duration: 20,
+      pattern: dewdropDaisyPatterns.fade,
+      // Fading to neutral
+      palette: ["#F0F0E8", "#F8F8F0", "#FCFCF8"],
+      opacity: 0.5,
+      scale: 0.85,
+    },
+  ],
+};
+
+/**
+ * Midnight Poppy
+ *
+ * A dramatic flower with deep, rich colors and a dramatic open/close cycle.
+ * Uncommon rarity - visually striking and memorable.
+ * Scale: 1.1x (slightly larger for drama)
+ */
+const midnightPoppy: PlantVariant = {
+  id: "midnight-poppy",
+  name: "Midnight Poppy",
+  description: "A dramatic poppy with deep colors that opens and closes in a mesmerizing cycle",
+  rarity: 0.4, // Uncommon
+  requiresObservationToGerminate: true,
+  loop: true, // Continuously opens and closes
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "closed",
+      duration: 15,
+      pattern: midnightPoppyPatterns.closed,
+      // Deep burgundy - mysterious
+      palette: ["#8B2252", "#A03060", "#B84070"],
+      opacity: 0.7,
+      scale: 0.75,
+    },
+    {
+      name: "opening",
+      duration: 12,
+      pattern: midnightPoppyPatterns.opening,
+      // Deepening red-purple
+      palette: ["#9B3060", "#B04070", "#C85080"],
+      opacity: 0.85,
+      scale: 0.9,
+    },
+    {
+      name: "open",
+      duration: 30,
+      pattern: midnightPoppyPatterns.open,
+      // Rich, dramatic deep red with dark center
+      palette: ["#A82860", "#C03878", "#D85090"],
+      opacity: 1.0,
+      scale: 1.1,
+    },
+    {
+      name: "closing",
+      duration: 12,
+      pattern: midnightPoppyPatterns.closing,
+      // Returning to deep tones
+      palette: ["#9B3060", "#B04070", "#C85080"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+  ],
+};
+
+/**
+ * Bell Cluster
+ *
+ * Multiple hanging bell-shaped flowers that bloom in sequence.
+ * Uncommon rarity - staggered animation is visually interesting.
+ * Scale: 1.2x (taller due to hanging structure)
+ */
+const bellCluster: PlantVariant = {
+  id: "bell-cluster",
+  name: "Bell Cluster",
+  description: "Delicate bells that bloom one after another in a gentle cascade",
+  rarity: 0.4, // Uncommon
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "buds",
+      duration: 18,
+      pattern: bellClusterPatterns.buds,
+      // Soft lilac for closed buds
+      palette: ["#D8C8E0", "#E0D0E8", "#E8E0F0"],
+      opacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "first",
+      duration: 15,
+      pattern: bellClusterPatterns.first,
+      // First bell opening - brightening
+      palette: ["#E0D0E8", "#E8D8F0", "#F0E8F8"],
+      opacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "second",
+      duration: 15,
+      pattern: bellClusterPatterns.second,
+      // Two bells open - more vibrant
+      palette: ["#E8D8F0", "#F0E0F8", "#F8F0FC"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "full",
+      duration: 40,
+      pattern: bellClusterPatterns.full,
+      // All bells open - full bloom
+      palette: ["#F0E0F8", "#F8E8FC", "#FCF4FF"],
+      opacity: 1.0,
+      scale: 1.2,
+    },
+    {
+      name: "fade",
+      duration: 20,
+      pattern: bellClusterPatterns.fade,
+      // Fading bells
+      palette: ["#E8E0F0", "#F0F0F8", "#F8F8FC"],
+      opacity: 0.4,
+      scale: 1.0,
     },
   ],
 };
@@ -561,9 +938,10 @@ const pulsingOrb: PlantVariant = {
  * Organized by category:
  * - Ground Cover: softMoss, pebblePatch (very common, ambient)
  * - Grasses: meadowTuft, whisperReed (common, gentle motion)
- * - Flowers: simpleBloom, quantumTulip (moderate, lifecycle + color)
+ * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster
  * - Ethereal: pulsingOrb (rare, magical effects)
  *
+ * Total: 10 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -573,9 +951,12 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   // Grasses (common)
   meadowTuft,
   whisperReed,
-  // Flowers (moderate)
+  // Flowers (moderate to uncommon)
   simpleBloom,
   quantumTulip,
+  dewdropDaisy,
+  midnightPoppy,
+  bellCluster,
   // Ethereal (rare)
   pulsingOrb,
 ];

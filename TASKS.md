@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 18)_
+_Last updated: 2026-01-17 (Session 19)_
 
 ## Project Goal
 
@@ -94,7 +94,7 @@ _Ethereal_ (magical, very rare):
 
 - [x] Design 2-3 ground cover variants (soft-moss, pebble-patch)
 - [x] Design 2-3 grass variants (meadow-tuft, whisper-reed)
-- [ ] Design 2-3 new flower variants
+- [x] Design 2-3 new flower variants (dewdrop-daisy, midnight-poppy, bell-cluster)
 - [ ] Design 1-2 shrub variants
 - [ ] Design 1-2 tree variants
 - [ ] Add scale property to seed script for size variation
@@ -128,6 +128,26 @@ _Ethereal_ (magical, very rare):
   - Pulsing Orb: 2 keyframes with ring (dim) and filled circle (bright)
 - [x] Verify all 83 tests passing (45 shared + 38 web)
 - [x] TypeScript and lint checks pass
+
+### 2026-01-17 - Ecosystem Expansion (Phase 2: Flowers)
+
+- [x] Create dewdrop-daisy variant (rarity 0.7, moderate)
+  - 6 keyframes: bud, unfurl, bloom, sparkle, bloom-2, fade
+  - Daisy pattern with 12 thin radiating petals
+  - Sparkle effect with brighter colors and slight scale increase
+  - Soft yellow-white color palette
+- [x] Create midnight-poppy variant (rarity 0.4, uncommon)
+  - 4 keyframes in continuous loop: closed, opening, open, closing
+  - Dramatic curved bowl-shaped petals
+  - Deep burgundy/magenta colors (departure from pastel for drama)
+  - Scale 1.1x for larger presence
+- [x] Create bell-cluster variant (rarity 0.4, uncommon)
+  - 5 keyframes: buds, first, second, full, fade
+  - Staggered blooming - bells open one at a time
+  - Multiple hanging bell shapes on branching stems
+  - Soft lilac color palette, scale 1.2x for taller structure
+- [x] Updated PLANT_VARIANTS array - now 10 total variants
+- [x] All quality checks passing: TypeScript, 83 tests, lint
 
 ### 2026-01-17 - Ecosystem Expansion (Phase 1)
 
@@ -434,41 +454,41 @@ _Nice-to-have enhancements_
 
 ## Implementation Status
 
-| Component                    | Status   | Notes                                                     |
-| ---------------------------- | -------- | --------------------------------------------------------- |
-| **Frontend (apps/web)**      |          |                                                           |
-| PixiJS canvas initialization | Done     | Full-screen, resize handling                              |
-| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle                |
-| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation              |
-| Variant sandbox              | Done     | Full timeline editor, gallery, playback                   |
-| Superposed view              | Done     | Pastel palettes, visual development tool                  |
-| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce              |
-| Observation system           | Done     | Region management, dwell tracking, cooldown               |
-| Evolution system             | Done     | Automatic germination, dormancy tracking                  |
-| Zustand store                | Done     | Plant data, dwell state, cooldown state                   |
-| tRPC client                  | Done     | Connected and working                                     |
-| **Shared (packages/shared)** |          |                                                           |
-| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types              |
-| Variant definitions          | Done     | 7 variants: 2 ground cover, 2 grass, 2 flower, 1 ethereal |
-| Lifecycle computation        | Done     | computeLifecycleState, interpolation                      |
-| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions                 |
-| **API Layer**                |          |                                                           |
-| tRPC endpoints               | Done     | Plants, observation (tested), health routers              |
-| Prisma schema                | Done     | Full schema with lifecycle + entanglement                 |
-| Prisma client                | Done     | Generated and working                                     |
-| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)                          |
-| Correlated observation       | Done     | Entangled partners collapse together                      |
-| **Quantum Service**          |          |                                                           |
-| FastAPI app                  | Done     | Running on port 18742                                     |
-| Circuit generation           | Done     | Using Qiskit                                              |
-| IonQ integration             | Deferred | Client implemented, real execution deferred               |
-| Trait mapping                | Done     | Basic mapping in place                                    |
-| Variant loader               | Done     | Python module to load variant definitions                 |
-| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit                   |
-| **Infrastructure**           |          |                                                           |
-| PostgreSQL                   | Done     | Docker Compose configured                                 |
-| CI/CD                        | Done     | GitHub Actions workflow                                   |
-| Pre-commit hooks             | Done     | Linting, formatting, secrets                              |
+| Component                    | Status   | Notes                                                      |
+| ---------------------------- | -------- | ---------------------------------------------------------- |
+| **Frontend (apps/web)**      |          |                                                            |
+| PixiJS canvas initialization | Done     | Full-screen, resize handling                               |
+| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle                 |
+| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation               |
+| Variant sandbox              | Done     | Full timeline editor, gallery, playback                    |
+| Superposed view              | Done     | Pastel palettes, visual development tool                   |
+| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce               |
+| Observation system           | Done     | Region management, dwell tracking, cooldown                |
+| Evolution system             | Done     | Automatic germination, dormancy tracking                   |
+| Zustand store                | Done     | Plant data, dwell state, cooldown state                    |
+| tRPC client                  | Done     | Connected and working                                      |
+| **Shared (packages/shared)** |          |                                                            |
+| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types               |
+| Variant definitions          | Done     | 10 variants: 2 ground cover, 2 grass, 5 flower, 1 ethereal |
+| Lifecycle computation        | Done     | computeLifecycleState, interpolation                       |
+| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions                  |
+| **API Layer**                |          |                                                            |
+| tRPC endpoints               | Done     | Plants, observation (tested), health routers               |
+| Prisma schema                | Done     | Full schema with lifecycle + entanglement                  |
+| Prisma client                | Done     | Generated and working                                      |
+| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)                           |
+| Correlated observation       | Done     | Entangled partners collapse together                       |
+| **Quantum Service**          |          |                                                            |
+| FastAPI app                  | Done     | Running on port 18742                                      |
+| Circuit generation           | Done     | Using Qiskit                                               |
+| IonQ integration             | Deferred | Client implemented, real execution deferred                |
+| Trait mapping                | Done     | Basic mapping in place                                     |
+| Variant loader               | Done     | Python module to load variant definitions                  |
+| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit                    |
+| **Infrastructure**           |          |                                                            |
+| PostgreSQL                   | Done     | Docker Compose configured                                  |
+| CI/CD                        | Done     | GitHub Actions workflow                                    |
+| Pre-commit hooks             | Done     | Linting, formatting, secrets                               |
 
 ---
 

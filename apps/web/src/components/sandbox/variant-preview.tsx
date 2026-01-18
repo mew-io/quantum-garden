@@ -16,7 +16,7 @@ const BACKGROUND_COLORS: Record<Background, number> = {
   checkerboard: 0xe0e0e0,
 };
 
-const GRID_SIZE = 8;
+const GRID_SIZE = 64;
 
 /**
  * Live preview of the variant at the current playback time.
@@ -166,8 +166,16 @@ export function VariantPreview() {
       for (let x = 0; x < GRID_SIZE; x++) {
         const cellValue = row[x];
         if (cellValue && cellValue > 0) {
-          // Determine color based on cell value or position
-          const colorIndex = Math.min(cellValue - 1, palette.length - 1);
+          // Determine color based on distance from center (gradient effect)
+          // This matches the rendering in plant-sprite.ts
+          const distFromCenter = Math.sqrt(
+            Math.pow(x - GRID_SIZE / 2, 2) + Math.pow(y - GRID_SIZE / 2, 2)
+          );
+          const maxDist = Math.sqrt(2) * (GRID_SIZE / 2);
+          const colorIndex = Math.min(
+            palette.length - 1,
+            Math.floor((distFromCenter / maxDist) * palette.length)
+          );
           const color = palette[colorIndex] || palette[0] || "#888888";
 
           glyphGraphics.rect(

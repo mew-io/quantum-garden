@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 24 - Autowork Ecosystem Complete)_
+_Last updated: 2026-01-17 (Session 25 - Sandbox Visual Polish)_
 
 ## Project Goal
 
@@ -29,6 +29,15 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-17 - Sandbox Visual Polish
+
+- [x] Refactor MiniGlyph to use canvas-based rendering for 64x64 performance
+- [x] Add distance-from-center gradient coloring to MiniGlyph (matches plant-sprite.ts)
+- [x] Update VariantGallery with responsive layout (mobile cards, desktop table)
+- [x] Update VariantPreview GRID_SIZE from 8 to 64
+- [x] Add gradient coloring to VariantPreview (matches plant-sprite.ts)
+- [x] All quality checks passing: TypeScript, 83 tests, lint
 
 ### 2026-01-17 - Autowork: Garden Ecosystem Expansion (7 loops)
 

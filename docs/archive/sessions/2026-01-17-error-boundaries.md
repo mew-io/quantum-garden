@@ -1,7 +1,7 @@
 # Session Archive: Error Boundaries
 
 **Date**: 2026-01-17
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: 431cfe2
 
 ---
 

@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 12)_
+_Last updated: 2026-01-17 (Session 13)_
 
 ## Project Goal
 
@@ -16,12 +16,23 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] **Garden Evolution**: Implement time-based garden progression
 - [ ] **Persistence**: Save and restore garden state across sessions
+- [ ] **Mobile Support**: Ensure touch-friendly observation on mobile devices
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Garden Evolution System
+
+- [x] Create GardenEvolutionSystem class with periodic check interval (30s)
+- [x] Track dormant plants and trigger germination after minimum dormancy (60s)
+- [x] Implement 15% germination chance per eligible plant per check
+- [x] Add `germinate` mutation to plants router
+- [x] Create `useEvolution` hook for triggering germination via tRPC
+- [x] Integrate evolution system into GardenCanvas component
+- [x] Add cleanup on unmount
+- [x] All tests passing: 83 unit tests (45 shared + 38 web)
 
 ### 2026-01-17 - Entanglement Visualization
 
@@ -229,7 +240,7 @@ _Important features for complete experience_
 - [x] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
 - [x] **Observation Regions**: Implement invisible regions where observation can occur (part of ObservationSystem)
 - [x] **Plant Lifecycle Display**: Show lifecycle keyframes on main canvas (PlantSprite uses lifecycle system)
-- [ ] **Garden Evolution**: Implement time-based garden progression
+- [x] **Garden Evolution**: Implement time-based garden progression (dormant plants germinate over time)
 - [ ] **Persistence**: Save and restore garden state across sessions
 - [ ] **Mobile Support**: Ensure touch-friendly observation on mobile devices
 
@@ -270,6 +281,7 @@ _Nice-to-have enhancements_
 | Superposed view              | Done     | Pastel palettes, visual development tool     |
 | Reticle controller           | Done     | Autonomous drift, state machine, edge bounce |
 | Observation system           | Done     | Region management, dwell tracking, cooldown  |
+| Evolution system             | Done     | Automatic germination, dormancy tracking     |
 | Zustand store                | Done     | Plant data, dwell state, cooldown state      |
 | tRPC client                  | Done     | Connected and working                        |
 | **Shared (packages/shared)** |          |                                              |

@@ -18,11 +18,16 @@
 
 import type { PlantVariant } from "./types";
 
+// ============================================================================
+// FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
+// ============================================================================
+
 /**
- * Example: Simple Bloom
+ * Simple Bloom
  *
- * A fixed-color plant that goes through bud → bloom → fade.
- * Uses soft sage greens from the pastel palette.
+ * A fixed-color flower that goes through bud → bloom → fade.
+ * The most common flower type. Uses soft sage greens.
+ * Scale: 1.0x (standard)
  */
 const simpleBloom: PlantVariant = {
   id: "simple-bloom",
@@ -108,11 +113,12 @@ const simpleBloom: PlantVariant = {
 };
 
 /**
- * Example: Quantum Tulip
+ * Quantum Tulip
  *
- * A multi-color variant demonstrating colorVariations.
+ * A multi-color flower with colorVariations.
  * Quantum measurement determines whether it's coral, peach, or lavender.
- * Uses soft pastel palette. Pattern remains the same, only colors change.
+ * Less common than Simple Bloom due to color variation complexity.
+ * Scale: 1.0x (standard)
  */
 const quantumTulip: PlantVariant = {
   id: "quantum-tulip",
@@ -227,11 +233,224 @@ const quantumTulip: PlantVariant = {
   ],
 };
 
+// ============================================================================
+// GROUND COVER - Very common, simple, ambient background elements
+// ============================================================================
+
 /**
- * Example: Pulsing Orb
+ * Soft Moss
  *
- * A looping variant that continuously pulses.
- * Uses the sky palette. Demonstrates the loop feature for infinite animation.
+ * A very common ground cover that slowly fades in and stays static.
+ * Minimal visual interest - just ambient texture.
+ * Scale: 0.4x (small)
+ */
+const softMoss: PlantVariant = {
+  id: "soft-moss",
+  name: "Soft Moss",
+  description: "A gentle ground cover that spreads slowly across the garden floor",
+  rarity: 1.2, // Very common
+  requiresObservationToGerminate: false, // Grows without observation
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "emerging",
+      duration: 30,
+      pattern: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Muted olive green - earthy
+      palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
+      opacity: 0.3,
+      scale: 0.3,
+    },
+    {
+      name: "settled",
+      duration: 120, // Long duration - just sits there
+      pattern: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 0, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Muted olive green - earthy
+      palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
+      opacity: 0.5,
+      scale: 0.4,
+    },
+  ],
+};
+
+/**
+ * Pebble Patch
+ *
+ * Scattered dots representing small stones. Completely static.
+ * The simplest possible variant - no animation at all.
+ * Scale: 0.35x (tiny)
+ */
+const pebblePatch: PlantVariant = {
+  id: "pebble-patch",
+  name: "Pebble Patch",
+  description: "Tiny stones scattered on the garden floor",
+  rarity: 1.3, // Most common
+  requiresObservationToGerminate: false,
+  tweenBetweenKeyframes: false, // No need for tweening - static
+  keyframes: [
+    {
+      name: "stones",
+      duration: 999, // Effectively permanent
+      pattern: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Warm gray - stone-like
+      palette: ["#D8D8D0", "#E0E0D8", "#E8E8E0"],
+      opacity: 0.4,
+      scale: 0.35,
+    },
+  ],
+};
+
+// ============================================================================
+// GRASSES - Common, gentle motion, fill space
+// ============================================================================
+
+/**
+ * Meadow Tuft
+ *
+ * A cluster of grass blades that gently sways back and forth.
+ * Simple 2-frame loop for subtle motion.
+ * Scale: 0.6x
+ */
+const meadowTuft: PlantVariant = {
+  id: "meadow-tuft",
+  name: "Meadow Tuft",
+  description: "A small cluster of grass that sways gently in an invisible breeze",
+  rarity: 1.1, // Very common
+  requiresObservationToGerminate: false,
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "sway-left",
+      duration: 4,
+      pattern: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 1, 0],
+        [0, 1, 1, 0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Soft green - fresh grass
+      palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
+      opacity: 0.7,
+      scale: 0.6,
+    },
+    {
+      name: "sway-right",
+      duration: 4,
+      pattern: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Soft green - fresh grass
+      palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
+      opacity: 0.7,
+      scale: 0.6,
+    },
+  ],
+};
+
+/**
+ * Whisper Reed
+ *
+ * Tall thin reeds that lean slightly in the wind.
+ * Taller and thinner than meadow tuft.
+ * Scale: 0.75x
+ */
+const whisperReed: PlantVariant = {
+  id: "whisper-reed",
+  name: "Whisper Reed",
+  description: "Tall thin reeds that sway with an invisible wind",
+  rarity: 0.9, // Common
+  requiresObservationToGerminate: false,
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "lean-left",
+      duration: 5,
+      pattern: [
+        [0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Pale green-gray - reed color
+      palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
+      opacity: 0.6,
+      scale: 0.75,
+    },
+    {
+      name: "lean-right",
+      duration: 5,
+      pattern: [
+        [0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+      // Pale green-gray - reed color
+      palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
+      opacity: 0.6,
+      scale: 0.75,
+    },
+  ],
+};
+
+// ============================================================================
+// ETHEREAL - Rare, magical/quantum elements
+// ============================================================================
+
+/**
+ * Pulsing Orb
+ *
+ * An ethereal orb that continuously pulses with soft light.
+ * Rare and magical - a special discovery in the garden.
+ * Scale: 1.0x (standard, but feels larger due to glow)
  */
 const pulsingOrb: PlantVariant = {
   id: "pulsing-orb",
@@ -284,9 +503,27 @@ const pulsingOrb: PlantVariant = {
 /**
  * All registered plant variants.
  *
+ * Organized by category:
+ * - Ground Cover: softMoss, pebblePatch (very common, ambient)
+ * - Grasses: meadowTuft, whisperReed (common, gentle motion)
+ * - Flowers: simpleBloom, quantumTulip (moderate, lifecycle + color)
+ * - Ethereal: pulsingOrb (rare, magical effects)
+ *
  * Add new variants here to make them available in the system.
  */
-export const PLANT_VARIANTS: PlantVariant[] = [simpleBloom, quantumTulip, pulsingOrb];
+export const PLANT_VARIANTS: PlantVariant[] = [
+  // Ground Cover (very common)
+  softMoss,
+  pebblePatch,
+  // Grasses (common)
+  meadowTuft,
+  whisperReed,
+  // Flowers (moderate)
+  simpleBloom,
+  quantumTulip,
+  // Ethereal (rare)
+  pulsingOrb,
+];
 
 /**
  * Get a variant by its ID.

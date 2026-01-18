@@ -14,6 +14,20 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ---
 
+## ⚠️ Quantum Integration Status
+
+**Real quantum execution is deferred.** The architecture supports IonQ hardware, but the garden currently uses pseudorandom trait generation seeded from circuit definitions.
+
+This is intentional:
+
+- The observation UX is identical whether traits come from quantum hardware or mock generation
+- Traits are pre-computed at plant creation, not at observation time
+- Real quantum integration will be enabled when we're ready for IonQ submission
+
+**Do not work on the quantum service (`apps/quantum/`) during regular development.** The Qiskit circuit code and IonQ client are scaffolded but not actively used. Changes to quantum behavior require explicit coordination.
+
+---
+
 ## Quick Start
 
 ### Prerequisites

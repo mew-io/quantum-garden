@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 16)_
+_Last updated: 2026-01-17 (Session 17)_
 
 ## Project Goal
 
@@ -16,11 +16,113 @@ _No tasks currently in progress_
 
 ### Up Next
 
-_Core features complete. Focus on polish and technical debt._
+#### Garden Ecosystem Expansion
+
+Expand plant variety to create a richer, more natural garden with visual hierarchy and ecological diversity.
+
+**Design Goals**:
+
+- Maintain calm, pastel aesthetic
+- Create visual depth through plant categories
+- **Rarity = Visual Reward**: Rarer plants have more interesting glyphs and animations
+- Plants should feel like they belong together
+
+**Visual Complexity by Rarity**:
+
+| Rarity      | Animation             | Glyph Complexity           | Effects          |
+| ----------- | --------------------- | -------------------------- | ---------------- |
+| Very Common | Static or simple loop | Basic shapes (dots, lines) | None             |
+| Common      | Gentle sway/pulse     | Simple patterns            | Subtle           |
+| Moderate    | Multi-stage lifecycle | Detailed patterns          | Shimmer          |
+| Uncommon    | Complex transitions   | Intricate designs          | Color shifts     |
+| Rare        | Elaborate sequences   | Unique silhouettes         | Multi-effect     |
+| Very Rare   | Stunning, memorable   | One-of-a-kind              | Layered, magical |
+
+**Proposed Plant Categories**:
+
+| Category         | Role                          | Scale    | Rarity Range | Examples                        |
+| ---------------- | ----------------------------- | -------- | ------------ | ------------------------------- |
+| **Ground Cover** | Background texture            | 0.3-0.5x | Very common  | Moss, lichen, small grasses     |
+| **Grasses**      | Gentle movement, fill space   | 0.5-0.8x | Common       | Meadow grass, reeds, ferns      |
+| **Flowers**      | Focal interest, color variety | 0.8-1.2x | Moderate     | Current blooms + new species    |
+| **Shrubs**       | Mid-ground structure          | 1.0-1.5x | Uncommon     | Bushes, hedges, berry plants    |
+| **Trees**        | Landmarks, rare discoveries   | 1.5-3.0x | Rare         | Saplings, bonsai, ancient trees |
+| **Ethereal**     | Magical/quantum elements      | Variable | Very rare    | Orbs, crystals, anomalies       |
+
+**Variant Ideas by Category**:
+
+_Ground Cover_ (simple, ambient):
+
+- `soft-moss` - Static spreading texture, fades in slowly
+- `pebble-patch` - Tiny dots, no animation
+
+_Grasses_ (gentle motion):
+
+- `meadow-tuft` - 2-frame gentle sway loop
+- `whisper-reed` - Thin lines, subtle lean animation
+- `curled-fern` - Slow unfurl over long duration
+
+_Flowers_ (lifecycle + color):
+
+- `simple-bloom` - (existing) 4-stage lifecycle, sage palette
+- `quantum-tulip` - (existing) multi-color, elegant bloom
+- `dewdrop-daisy` - Cluster pattern, sparkle effect on bloom
+- `midnight-poppy` - Deep colors, dramatic open/close cycle (uncommon)
+- `bell-cluster` - Hanging bells, staggered bloom timing (uncommon)
+
+_Shrubs_ (structure + detail):
+
+- `cloud-bush` - Rounded, breathing scale animation, berry details appear
+- `berry-thicket` - Dense pattern, fruits materialize over lifecycle
+- `crystal-hedge` - Geometric growth, prismatic color shifts (rare shrub)
+
+_Trees_ (impressive, rare):
+
+- `sapling-hope` - Delicate branching, leaves unfurl one by one
+- `weeping-willow` - Cascading fronds with wave animation, tall
+- `bonsai-elder` - Twisted trunk, intricate branch pattern, very slow lifecycle (very rare)
+
+_Ethereal_ (magical, very rare):
+
+- `pulsing-orb` - (existing) looping pulse, sky palette
+- `quantum-crystal` - Rotating geometric facets, prismatic shimmer, color cycling
+- `memory-wisp` - Trailing particles, fade/reform cycle, ghost-like transparency
+- `void-bloom` - Inverted colors, petals appear from nothing, reality-bending (legendary)
+- `memory-wisp` - Fading trails, ghost-like
+
+**Implementation Tasks**:
+
+- [x] Design 2-3 ground cover variants (soft-moss, pebble-patch)
+- [x] Design 2-3 grass variants (meadow-tuft, whisper-reed)
+- [ ] Design 2-3 new flower variants
+- [ ] Design 1-2 shrub variants
+- [ ] Design 1-2 tree variants
+- [ ] Add scale property to seed script for size variation
+- [ ] Update PlantRenderer to handle scale differences
+- [ ] Consider z-ordering by plant category
+- [ ] Update seed script with new variant distribution
+- [ ] Test visual balance in sandbox
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Ecosystem Expansion (Phase 1)
+
+- [x] Implement ground cover variants: soft-moss (rarity 1.2), pebble-patch (rarity 1.3)
+- [x] Implement grass variants: meadow-tuft (rarity 1.1), whisper-reed (rarity 0.9)
+- [x] Add section headers organizing variants by category
+- [x] Document scale properties for each variant
+- [x] Verify all 83 tests passing (45 shared + 38 web)
+- [x] Update README with quantum integration status clarification
+- [x] Define "Rarity = Visual Reward" design principle
+
+### 2026-01-17 - Reduced Motion Accessibility
+
+- [x] Add prefers-reduced-motion detection utility
+- [x] Add disable-animations class support via globals.css
+- [x] Update PlantSprite to skip tweening and effects when reduced motion preferred
+- [x] Calm aesthetic preserved when motion reduced
 
 ### 2026-01-17 - Error Boundaries
 
@@ -293,53 +395,58 @@ _Nice-to-have enhancements_
 
 ## Technical Debt
 
-- [ ] Add comprehensive test coverage for quantum service
-- [ ] Document quantum circuit design decisions in code
 - [x] Add error boundaries in React components
-- [ ] Implement proper error handling for IonQ API failures
 - [x] Add tests for observation router logic
 - [x] Add tests for PlantSprite and PlantRenderer
 - [x] Add E2E tests for observation flow
+
+### Deferred (Quantum Service)
+
+> **⚠️ Do not work on these during autowork.** The quantum service (`apps/quantum/`) is scaffolded but not actively used. Real quantum integration requires explicit coordination.
+
+- [ ] Add comprehensive test coverage for quantum service
+- [ ] Document quantum circuit design decisions in code
+- [ ] Implement proper error handling for IonQ API failures
 
 ---
 
 ## Implementation Status
 
-| Component                    | Status   | Notes                                        |
-| ---------------------------- | -------- | -------------------------------------------- |
-| **Frontend (apps/web)**      |          |                                              |
-| PixiJS canvas initialization | Done     | Full-screen, resize handling                 |
-| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle   |
-| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation |
-| Variant sandbox              | Done     | Full timeline editor, gallery, playback      |
-| Superposed view              | Done     | Pastel palettes, visual development tool     |
-| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce |
-| Observation system           | Done     | Region management, dwell tracking, cooldown  |
-| Evolution system             | Done     | Automatic germination, dormancy tracking     |
-| Zustand store                | Done     | Plant data, dwell state, cooldown state      |
-| tRPC client                  | Done     | Connected and working                        |
-| **Shared (packages/shared)** |          |                                              |
-| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types |
-| Variant definitions          | Done     | 3 example variants defined                   |
-| Lifecycle computation        | Done     | computeLifecycleState, interpolation         |
-| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions    |
-| **API Layer**                |          |                                              |
-| tRPC endpoints               | Done     | Plants, observation (tested), health routers |
-| Prisma schema                | Done     | Full schema with lifecycle + entanglement    |
-| Prisma client                | Done     | Generated and working                        |
-| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)             |
-| Correlated observation       | Done     | Entangled partners collapse together         |
-| **Quantum Service**          |          |                                              |
-| FastAPI app                  | Done     | Running on port 18742                        |
-| Circuit generation           | Done     | Using Qiskit                                 |
-| IonQ integration             | Deferred | Client implemented, real execution deferred  |
-| Trait mapping                | Done     | Basic mapping in place                       |
-| Variant loader               | Done     | Python module to load variant definitions    |
-| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit      |
-| **Infrastructure**           |          |                                              |
-| PostgreSQL                   | Done     | Docker Compose configured                    |
-| CI/CD                        | Done     | GitHub Actions workflow                      |
-| Pre-commit hooks             | Done     | Linting, formatting, secrets                 |
+| Component                    | Status   | Notes                                                     |
+| ---------------------------- | -------- | --------------------------------------------------------- |
+| **Frontend (apps/web)**      |          |                                                           |
+| PixiJS canvas initialization | Done     | Full-screen, resize handling                              |
+| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle                |
+| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation              |
+| Variant sandbox              | Done     | Full timeline editor, gallery, playback                   |
+| Superposed view              | Done     | Pastel palettes, visual development tool                  |
+| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce              |
+| Observation system           | Done     | Region management, dwell tracking, cooldown               |
+| Evolution system             | Done     | Automatic germination, dormancy tracking                  |
+| Zustand store                | Done     | Plant data, dwell state, cooldown state                   |
+| tRPC client                  | Done     | Connected and working                                     |
+| **Shared (packages/shared)** |          |                                                           |
+| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types              |
+| Variant definitions          | Done     | 7 variants: 2 ground cover, 2 grass, 2 flower, 1 ethereal |
+| Lifecycle computation        | Done     | computeLifecycleState, interpolation                      |
+| Lifecycle tests              | Done     | 45 tests covering all lifecycle functions                 |
+| **API Layer**                |          |                                                           |
+| tRPC endpoints               | Done     | Plants, observation (tested), health routers              |
+| Prisma schema                | Done     | Full schema with lifecycle + entanglement                 |
+| Prisma client                | Done     | Generated and working                                     |
+| Garden seeding               | Done     | 12 plants, 4 entangled (2 pairs)                          |
+| Correlated observation       | Done     | Entangled partners collapse together                      |
+| **Quantum Service**          |          |                                                           |
+| FastAPI app                  | Done     | Running on port 18742                                     |
+| Circuit generation           | Done     | Using Qiskit                                              |
+| IonQ integration             | Deferred | Client implemented, real execution deferred               |
+| Trait mapping                | Done     | Basic mapping in place                                    |
+| Variant loader               | Done     | Python module to load variant definitions                 |
+| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit                   |
+| **Infrastructure**           |          |                                                           |
+| PostgreSQL                   | Done     | Docker Compose configured                                 |
+| CI/CD                        | Done     | GitHub Actions workflow                                   |
+| Pre-commit hooks             | Done     | Linting, formatting, secrets                              |
 
 ---
 

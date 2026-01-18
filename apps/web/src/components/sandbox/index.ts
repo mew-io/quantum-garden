@@ -13,4 +13,4 @@ export { VariantPreview } from "./variant-preview";
 export { VariantConfigPanel } from "./variant-config-panel";
 export { KeyframePanel } from "./keyframe-panel";
 export { MiniGlyph } from "./mini-glyph";
-export { SuperposedView } from "./superposed-view";
+export { SuperposedPreview } from "./superposed-preview";

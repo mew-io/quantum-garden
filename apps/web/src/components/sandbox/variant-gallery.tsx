@@ -3,11 +3,12 @@
 import { PLANT_VARIANTS } from "@quantum-garden/shared";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import { MiniGlyph } from "./mini-glyph";
+import { SuperposedPreview } from "./superposed-preview";
 
 /**
  * Gallery view showing all available variants.
  * - Mobile: Full-featured card layout
- * - Desktop: Table layout for comparison
+ * - Desktop: Table layout with superposed preview in header
  * Click a variant to open its detail view.
  */
 export function VariantGallery() {
@@ -15,14 +16,20 @@ export function VariantGallery() {
 
   return (
     <div className="p-6">
-      {/* Gallery header */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">
-          All Variants ({PLANT_VARIANTS.length})
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Click a variant to view its details and lifecycle animation
-        </p>
+      {/* Gallery header with superposed preview */}
+      <div className="mb-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800">
+            All Variants ({PLANT_VARIANTS.length})
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Click a variant to view its details and lifecycle animation
+          </p>
+        </div>
+        {/* Superposed preview - desktop only */}
+        <div className="hidden lg:block flex-shrink-0">
+          <SuperposedPreview />
+        </div>
       </div>
 
       {/* Mobile: Full-featured card layout */}

@@ -2,13 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useVariantSandboxStore, type ViewMode } from "@/stores/variant-sandbox-store";
+import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 
 /**
  * URL parameter names for sandbox state
  */
 const URL_PARAMS = {
-  VIEW: "view",
   VARIANT: "variant",
   COLOR: "color",
 } as const;
@@ -18,7 +17,6 @@ const URL_PARAMS = {
  *
  * URL format:
  * - /sandbox - gallery view
- * - /sandbox?view=superposed - superposed view
  * - /sandbox?variant=simple-bloom - detail view with variant
  * - /sandbox?variant=simple-bloom&color=red - with color variation
  *
@@ -37,8 +35,6 @@ export function useSandboxUrlSync() {
     selectedVariantId,
     selectedColorVariation,
     openVariantDetail,
-    goToGallery,
-    goToSuperposed,
     selectColorVariation,
   } = useVariantSandboxStore();
 
@@ -47,7 +43,6 @@ export function useSandboxUrlSync() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const viewParam = searchParams.get(URL_PARAMS.VIEW);
     const variantParam = searchParams.get(URL_PARAMS.VARIANT);
     const colorParam = searchParams.get(URL_PARAMS.COLOR);
 
@@ -57,11 +52,9 @@ export function useSandboxUrlSync() {
       if (colorParam) {
         selectColorVariation(colorParam);
       }
-    } else if (viewParam === "superposed") {
-      goToSuperposed();
     }
     // Default is gallery view, no action needed
-  }, [searchParams, openVariantDetail, goToGallery, goToSuperposed, selectColorVariation]);
+  }, [searchParams, openVariantDetail, selectColorVariation]);
 
   // Update URL when store state changes
   useEffect(() => {
@@ -70,9 +63,7 @@ export function useSandboxUrlSync() {
 
     const params = new URLSearchParams();
 
-    if (viewMode === "superposed") {
-      params.set(URL_PARAMS.VIEW, "superposed");
-    } else if (viewMode === "detail" && selectedVariantId) {
+    if (viewMode === "detail" && selectedVariantId) {
       params.set(URL_PARAMS.VARIANT, selectedVariantId);
       if (selectedColorVariation) {
         params.set(URL_PARAMS.COLOR, selectedColorVariation);
@@ -92,11 +83,7 @@ export function useSandboxUrlSync() {
  * Build a URL for a specific sandbox state.
  * Useful for generating shareable links.
  */
-export function buildSandboxUrl(options: {
-  view?: ViewMode;
-  variantId?: string;
-  colorVariation?: string;
-}): string {
+export function buildSandboxUrl(options: { variantId?: string; colorVariation?: string }): string {
   const params = new URLSearchParams();
 
   if (options.variantId) {
@@ -104,8 +91,6 @@ export function buildSandboxUrl(options: {
     if (options.colorVariation) {
       params.set(URL_PARAMS.COLOR, options.colorVariation);
     }
-  } else if (options.view === "superposed") {
-    params.set(URL_PARAMS.VIEW, "superposed");
   }
 
   const queryString = params.toString();

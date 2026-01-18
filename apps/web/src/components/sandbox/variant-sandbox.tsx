@@ -7,7 +7,6 @@ import { VariantPreview } from "./variant-preview";
 import { KeyframePanel } from "./keyframe-panel";
 import { VariantGallery } from "./variant-gallery";
 import { VariantConfigPanel } from "./variant-config-panel";
-import { SuperposedView } from "./superposed-view";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import { useSandboxUrlSync } from "@/hooks/use-sandbox-url-sync";
 
@@ -15,17 +14,13 @@ import { useSandboxUrlSync } from "@/hooks/use-sandbox-url-sync";
  * Variant Sandbox
  *
  * A visual development environment for designing plant variants and their
- * lifecycle animations. Features three main views:
+ * lifecycle animations. Features two main views:
  *
  * Gallery View:
  * - Overview of all variants with previews
  * - Quick stats and feature badges
+ * - Superposed preview showing all variants overlaid
  * - Click to open detail view
- *
- * Superposed View:
- * - All variants overlaid in quantum superposition
- * - Visual comparison of all variants at once
- * - Click variant to isolate and view details
  *
  * Detail View:
  * - Live preview with playback controls
@@ -42,7 +37,7 @@ import { useSandboxUrlSync } from "@/hooks/use-sandbox-url-sync";
  * 6. Hot-reload updates the preview immediately
  */
 export function VariantSandbox() {
-  const { viewMode, getSelectedVariant, goToGallery, goToSuperposed } = useVariantSandboxStore();
+  const { viewMode, getSelectedVariant, goToGallery } = useVariantSandboxStore();
   const variant = getSelectedVariant();
 
   // Sync store state with URL query parameters
@@ -52,10 +47,10 @@ export function VariantSandbox() {
     switch (viewMode) {
       case "gallery":
         return "Variant Sandbox";
-      case "superposed":
-        return "Quantum Superposition";
       case "detail":
         return variant?.name || "Variant Detail";
+      default:
+        return "Variant Sandbox";
     }
   };
 
@@ -63,10 +58,10 @@ export function VariantSandbox() {
     switch (viewMode) {
       case "gallery":
         return "Browse and preview plant lifecycle animations";
-      case "superposed":
-        return "All variants overlaid in quantum superposition";
       case "detail":
         return variant?.description || "View and test variant configuration";
+      default:
+        return "";
     }
   };
 
@@ -76,7 +71,7 @@ export function VariantSandbox() {
       <header className="flex-shrink-0 px-6 py-4 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {(viewMode === "detail" || viewMode === "superposed") && (
+            {viewMode === "detail" && (
               <button
                 onClick={goToGallery}
                 className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
@@ -97,30 +92,11 @@ export function VariantSandbox() {
               <p className="text-sm text-gray-600 mt-1">{getSubtitle()}</p>
             </div>
           </div>
-
-          {/* Superposed button (only in gallery view) */}
-          {viewMode === "gallery" && (
-            <button
-              onClick={goToSuperposed}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-                />
-              </svg>
-              <span className="text-sm font-medium">View Superposed</span>
-            </button>
-          )}
         </div>
       </header>
 
       {/* View-specific content */}
       {viewMode === "gallery" && <GalleryView />}
-      {viewMode === "superposed" && <SuperposedView />}
       {viewMode === "detail" && <DetailView variant={variant} />}
 
       {/* Footer with file hints */}

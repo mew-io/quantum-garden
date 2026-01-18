@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 26 - Sandbox URL Sync and Tweening Fixes)_
+_Last updated: 2026-01-18 (Session 27 - Sandbox UX Consolidation)_
 
 ## Project Goal
 
@@ -29,6 +29,24 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Sandbox UX Consolidation
+
+- [x] Consolidate Superposed View into Gallery View
+  - Removed separate "superposed" view mode from sandbox
+  - Created `SuperposedPreview` component as compact, self-contained widget
+  - Integrated SuperposedPreview into VariantGallery header (desktop only)
+  - Superposed preview is now always visible while browsing variants
+- [x] Simplify sandbox URL structure
+  - Removed `?view=superposed` URL parameter (no longer needed)
+  - Now only two views: gallery (default) and detail (`?variant=...`)
+  - Updated `useSandboxUrlSync` hook to remove superposed handling
+- [x] Simplify sandbox state management
+  - Removed `goToSuperposed` action from store
+  - Reduced `ViewMode` type from 3 to 2 options (`gallery` | `detail`)
+  - Removed superposed button from gallery header
+- [x] Delete redundant `superposed-view.tsx` component
+- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
 
 ### 2026-01-17 - Sandbox URL Sync and Tweening Fixes
 

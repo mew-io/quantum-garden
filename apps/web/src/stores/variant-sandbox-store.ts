@@ -4,7 +4,7 @@ import { PLANT_VARIANTS } from "@quantum-garden/shared";
 
 export type PlaybackSpeed = 0.5 | 1 | 2 | 5 | 10;
 export type Background = "white" | "dark" | "checkerboard";
-export type ViewMode = "gallery" | "detail" | "superposed";
+export type ViewMode = "gallery" | "detail";
 
 interface VariantSandboxState {
   // View mode
@@ -58,7 +58,6 @@ interface VariantSandboxState {
   setViewMode: (mode: ViewMode) => void;
   openVariantDetail: (variantId: string) => void;
   goToGallery: () => void;
-  goToSuperposed: () => void;
 }
 
 export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => ({
@@ -208,10 +207,5 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
     set({
       viewMode: "gallery",
       isPlaying: false,
-    }),
-  goToSuperposed: () =>
-    set({
-      viewMode: "superposed",
-      isPlaying: true, // Auto-play in superposed view
     }),
 }));

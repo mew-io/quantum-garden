@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 15)_
+_Last updated: 2026-01-17 (Session 16)_
 
 ## Project Goal
 
@@ -21,6 +21,14 @@ _Core features complete. Focus on polish and technical debt._
 ---
 
 ## Completed
+
+### 2026-01-17 - Error Boundaries
+
+- [x] Create ErrorBoundary component for main garden canvas
+- [x] Create SandboxErrorBoundary for variant sandbox page
+- [x] Integrate error boundaries into page components
+- [x] Calm, minimal error display matching garden aesthetic
+- [x] Developer-friendly error display for sandbox
 
 ### 2026-01-17 - Performance Optimization
 
@@ -279,7 +287,7 @@ _Nice-to-have enhancements_
 - [x] **Performance Optimization**: Optimize for large numbers of plants (viewport culling)
 - [ ] **Analytics**: Track observation patterns and garden statistics
 - [ ] **Accessibility**: Screen reader support and reduced motion options
-- [ ] **Tweening**: Implement smooth interpolation between keyframes (documented but not implemented)
+- [x] **Tweening**: Enable smooth interpolation between keyframes (all variants now use tweenBetweenKeyframes)
 
 ---
 
@@ -287,7 +295,7 @@ _Nice-to-have enhancements_
 
 - [ ] Add comprehensive test coverage for quantum service
 - [ ] Document quantum circuit design decisions in code
-- [ ] Add error boundaries in React components
+- [x] Add error boundaries in React components
 - [ ] Implement proper error handling for IonQ API failures
 - [x] Add tests for observation router logic
 - [x] Add tests for PlantSprite and PlantRenderer

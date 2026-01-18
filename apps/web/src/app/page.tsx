@@ -1,11 +1,14 @@
 "use client";
 
 import { GardenCanvas } from "@/components/garden/garden-canvas";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default function Home() {
   return (
-    <main>
-      <GardenCanvas />
-    </main>
+    <ErrorBoundary>
+      <main>
+        <GardenCanvas />
+      </main>
+    </ErrorBoundary>
   );
 }

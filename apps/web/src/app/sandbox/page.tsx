@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { VariantSandbox } from "@/components/sandbox";
+import { SandboxErrorBoundary } from "./error-boundary";
 
 export const metadata: Metadata = {
   title: "Sandbox | Quantum Garden",
@@ -16,5 +17,9 @@ export const metadata: Metadata = {
  * - Detail view for individual variant inspection
  */
 export default function SandboxPage() {
-  return <VariantSandbox />;
+  return (
+    <SandboxErrorBoundary>
+      <VariantSandbox />
+    </SandboxErrorBoundary>
+  );
 }

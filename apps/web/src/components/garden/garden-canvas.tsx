@@ -29,6 +29,7 @@ export function GardenCanvas() {
   const observationSystemRef = useRef<ObservationSystem | null>(null);
   const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
   const evolutionSystemRef = useRef<GardenEvolutionSystem | null>(null);
+  const cleanupTouchHandlersRef = useRef<(() => void) | null>(null);
 
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
@@ -96,6 +97,45 @@ export function GardenCanvas() {
         reticleControllerRef.current = reticleController;
         reticleController.start();
 
+        // Touch handling: Switch reticle to touch mode on pointer input
+        // PointerEvents work for both touch and mouse, providing unified handling
+        let hasActivatedTouchMode = false;
+
+        const handlePointerDown = (event: PointerEvent) => {
+          // Switch to touch mode on first pointer interaction
+          if (!hasActivatedTouchMode && event.pointerType !== "mouse") {
+            reticleController.setControlMode("touch");
+            hasActivatedTouchMode = true;
+          }
+
+          // Update reticle position if in touch mode
+          if (reticleController.getControlMode() === "touch") {
+            const rect = app.canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * (app.screen.width / rect.width);
+            const y = (event.clientY - rect.top) * (app.screen.height / rect.height);
+            reticleController.setPosition(x, y);
+          }
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+          // Only update position when in touch mode and pointer is down
+          if (reticleController.getControlMode() === "touch" && event.buttons > 0) {
+            const rect = app.canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * (app.screen.width / rect.width);
+            const y = (event.clientY - rect.top) * (app.screen.height / rect.height);
+            reticleController.setPosition(x, y);
+          }
+        };
+
+        app.canvas.addEventListener("pointerdown", handlePointerDown);
+        app.canvas.addEventListener("pointermove", handlePointerMove);
+
+        // Store cleanup function for event listeners
+        cleanupTouchHandlersRef.current = () => {
+          app.canvas.removeEventListener("pointerdown", handlePointerDown);
+          app.canvas.removeEventListener("pointermove", handlePointerMove);
+        };
+
         // Initialize observation system
         const observationSystem = createObservationSystem(app);
         observationSystemRef.current = observationSystem;
@@ -134,6 +174,12 @@ export function GardenCanvas() {
     return () => {
       mounted = false;
       window.removeEventListener("resize", handleResize);
+
+      // Clean up touch event handlers
+      if (cleanupTouchHandlersRef.current) {
+        cleanupTouchHandlersRef.current();
+        cleanupTouchHandlersRef.current = null;
+      }
 
       if (observationSystemRef.current) {
         observationSystemRef.current.destroy();

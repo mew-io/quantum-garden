@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-17 (Session 13)_
+_Last updated: 2026-01-17 (Session 14)_
 
 ## Project Goal
 
@@ -16,12 +16,31 @@ _No tasks currently in progress_
 
 ### Up Next
 
-- [ ] **Persistence**: Save and restore garden state across sessions
-- [ ] **Mobile Support**: Ensure touch-friendly observation on mobile devices
+_Core features complete. Focus on polish and technical debt._
 
 ---
 
 ## Completed
+
+### 2026-01-17 - Mobile Support
+
+- [x] Add viewport meta tag with `user-scalable=false` and `viewport-fit=cover`
+- [x] Add `touch-action: none` CSS to prevent default touch behaviors
+- [x] Add iOS safe area padding for notched devices
+- [x] Modify ReticleController to support control modes (autonomous/touch)
+- [x] Add `setPosition()` and `setControlMode()` methods to ReticleController
+- [x] Add pointer event handlers to GardenCanvas for touch input
+- [x] Auto-switch to touch mode on first non-mouse pointer interaction
+- [x] Verify all 83 tests pass, linting and type checking pass
+
+### 2026-01-17 - Persistence Verification
+
+- [x] **Persistence already implemented**: Database is source of truth for all plant state
+  - Plant positions, observations, traits persist in PostgreSQL
+  - Lifecycle computed from germinatedAt timestamps (no sync issues)
+  - Zustand store intentionally ephemeral - re-hydrates from database on load
+  - Design philosophy: "garden continues to evolve whether anyone is watching"
+- [x] Verified database contains persisted plant state
 
 ### 2026-01-17 - Garden Evolution System
 
@@ -241,8 +260,8 @@ _Important features for complete experience_
 - [x] **Observation Regions**: Implement invisible regions where observation can occur (part of ObservationSystem)
 - [x] **Plant Lifecycle Display**: Show lifecycle keyframes on main canvas (PlantSprite uses lifecycle system)
 - [x] **Garden Evolution**: Implement time-based garden progression (dormant plants germinate over time)
-- [ ] **Persistence**: Save and restore garden state across sessions
-- [ ] **Mobile Support**: Ensure touch-friendly observation on mobile devices
+- [x] **Persistence**: Save and restore garden state across sessions (already implemented via database)
+- [x] **Mobile Support**: Ensure touch-friendly observation on mobile devices
 
 ### Low Priority / Polish
 

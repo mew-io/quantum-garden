@@ -32,9 +32,14 @@ interface Velocity {
 }
 
 type ReticleState = "drifting" | "paused";
+export type ControlMode = "autonomous" | "touch";
 
 /**
  * Controls the autonomous reticle movement and rendering.
+ *
+ * Supports two control modes:
+ * - autonomous: Reticle drifts on its own (default, desktop-focused)
+ * - touch: Reticle follows external position updates (mobile-focused)
  */
 export class ReticleController {
   private app: Application;
@@ -48,6 +53,7 @@ export class ReticleController {
   private state: ReticleState;
   private stateTimer: number; // Seconds until state change
   private reticleSize: number;
+  private controlMode: ControlMode;
 
   // Configuration (from constants with some variation)
   private readonly minSpeed = RETICLE.MIN_SPEED;
@@ -78,6 +84,9 @@ export class ReticleController {
 
     // Use default size
     this.reticleSize = RETICLE.DEFAULT_SIZE;
+
+    // Default to autonomous control (reticle drifts on its own)
+    this.controlMode = "autonomous";
 
     // Parse color from hex string to number
     this.color = parseInt(RETICLE.COLOR.replace("#", ""), 16);
@@ -128,6 +137,14 @@ export class ReticleController {
    * Update loop called each frame.
    */
   private update = (ticker: Ticker): void => {
+    // In touch mode, position is set externally - just sync and render
+    if (this.controlMode === "touch") {
+      this.syncToStore();
+      this.render();
+      return;
+    }
+
+    // Autonomous mode: handle drift and state transitions
     const deltaSeconds = ticker.deltaMS / 1000;
 
     // Update state timer
@@ -266,6 +283,34 @@ export class ReticleController {
     // Horizontal line
     this.graphics.rect(x - halfSize, y - 0.5, this.reticleSize, 1);
     this.graphics.fill({ color: this.color, alpha: 0.8 });
+  }
+
+  /**
+   * Set the control mode for the reticle.
+   *
+   * @param mode - "autonomous" for drift behavior, "touch" for external control
+   */
+  setControlMode(mode: ControlMode): void {
+    this.controlMode = mode;
+  }
+
+  /**
+   * Get the current control mode.
+   */
+  getControlMode(): ControlMode {
+    return this.controlMode;
+  }
+
+  /**
+   * Set the reticle position externally.
+   * Used in touch mode to follow finger position.
+   *
+   * @param x - X coordinate
+   * @param y - Y coordinate
+   */
+  setPosition(x: number, y: number): void {
+    this.position.x = x;
+    this.position.y = y;
   }
 
   /**

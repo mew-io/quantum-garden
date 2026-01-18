@@ -1,6 +1,6 @@
 # Quantum Garden - Task Tracking
 
-_Last updated: 2026-01-18 (Session 29 - Info Overlay Implementation)_
+_Last updated: 2026-01-18 (Session 30 - Dwell Progress Indicator)_
 
 ## Project Goal
 
@@ -20,7 +20,7 @@ _No tasks currently in progress_
 
 Critical UX feedback missing for touch users:
 
-- [ ] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%)
+- [x] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%) - Done
 - [ ] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode
 - [ ] **Observation feedback**: Visual pulse/glow when observation completes
 - [ ] **Consider haptic feedback**: Vibration on observation complete (if device supports)
@@ -46,6 +46,18 @@ The Garden Ecosystem Expansion is code-complete. Before considering the feature 
 ---
 
 ## Completed
+
+### 2026-01-18 - Dwell Progress Indicator
+
+- [x] Create DwellIndicator class following EntanglementRenderer pattern
+  - Subscribes to garden store for `dwellTarget`, `dwellProgress`, and `plants`
+  - Draws circular progress arc around observed plant
+  - Subtle gray background track with soft cyan progress arc
+  - 35px radius, starts from top of circle (12 o'clock position)
+- [x] Integrate DwellIndicator into GardenCanvas
+  - Initialized after plant renderer (above plants, below reticle)
+  - Proper cleanup on unmount
+- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
 
 ### 2026-01-18 - Info Overlay Implementation
 

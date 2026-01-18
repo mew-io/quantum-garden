@@ -8,6 +8,7 @@ import { createPlantRenderer, type PlantRenderer } from "./plant-renderer";
 import { createReticleController, type ReticleController } from "./reticle-controller";
 import { createObservationSystem, type ObservationSystem } from "./observation-system";
 import { createEntanglementRenderer, type EntanglementRenderer } from "./entanglement-renderer";
+import { createDwellIndicator, type DwellIndicator } from "./dwell-indicator";
 import { createGardenEvolutionSystem, type GardenEvolutionSystem } from "./garden-evolution";
 import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
@@ -28,6 +29,7 @@ export function GardenCanvas() {
   const reticleControllerRef = useRef<ReticleController | null>(null);
   const observationSystemRef = useRef<ObservationSystem | null>(null);
   const entanglementRendererRef = useRef<EntanglementRenderer | null>(null);
+  const dwellIndicatorRef = useRef<DwellIndicator | null>(null);
   const evolutionSystemRef = useRef<GardenEvolutionSystem | null>(null);
   const cleanupTouchHandlersRef = useRef<(() => void) | null>(null);
 
@@ -91,6 +93,11 @@ export function GardenCanvas() {
         const plantRenderer = createPlantRenderer(app);
         plantRendererRef.current = plantRenderer;
         plantRenderer.start();
+
+        // Initialize dwell indicator (above plants, below reticle)
+        const dwellIndicator = createDwellIndicator(app);
+        dwellIndicatorRef.current = dwellIndicator;
+        dwellIndicator.start();
 
         // Initialize reticle controller
         const reticleController = createReticleController(app);
@@ -199,6 +206,11 @@ export function GardenCanvas() {
       if (entanglementRendererRef.current) {
         entanglementRendererRef.current.destroy();
         entanglementRendererRef.current = null;
+      }
+
+      if (dwellIndicatorRef.current) {
+        dwellIndicatorRef.current.destroy();
+        dwellIndicatorRef.current = null;
       }
 
       if (evolutionSystemRef.current) {

@@ -14,10 +14,12 @@ import {
 
 const GRID_SIZE = 64;
 const CANVAS_SIZE = 128;
+const MAX_SUPERPOSED_VARIANTS = 10; // Limit for performance
 
 /**
- * Compact superposed preview showing all variants overlaid.
+ * Compact superposed preview showing variants overlaid.
  * Self-contained with its own animation loop.
+ * Shows up to 10 variants to maintain performance.
  */
 export function SuperposedPreview() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,10 @@ export function SuperposedPreview() {
     app.stage.addChild(bg);
 
     const currentTime = currentTimeRef.current;
-    const variantCount = PLANT_VARIANTS.length;
+
+    // Limit variants for performance
+    const variantsToRender = PLANT_VARIANTS.slice(0, MAX_SUPERPOSED_VARIANTS);
+    const variantCount = variantsToRender.length;
     const baseOpacity = 0.7 / variantCount;
 
     const pixelScale = CANVAS_SIZE / GRID_SIZE;
@@ -99,7 +104,7 @@ export function SuperposedPreview() {
       "t" in v;
 
     // Render each variant
-    for (const variant of PLANT_VARIANTS) {
+    for (const variant of variantsToRender) {
       const totalDuration = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
       const variantTime = variant.loop
         ? currentTime % totalDuration
@@ -212,7 +217,10 @@ export function SuperposedPreview() {
         onClick={() => setIsPlaying(!isPlaying)}
         title={isPlaying ? "Click to pause" : "Click to play"}
       />
-      <div className="text-xs text-gray-500 mt-1">{PLANT_VARIANTS.length} variants superposed</div>
+      <div className="text-xs text-gray-500 mt-1">
+        {Math.min(PLANT_VARIANTS.length, MAX_SUPERPOSED_VARIANTS)} of {PLANT_VARIANTS.length}{" "}
+        variants
+      </div>
     </div>
   );
 }

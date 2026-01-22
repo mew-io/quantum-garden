@@ -31,6 +31,11 @@ import {
   drawGrassBlade,
   scatterDots,
   mirrorHorizontal,
+  drawStar,
+  drawSpiral,
+  drawDots,
+  drawGlowRing,
+  drawSmoothRadialBurst,
   PATTERN_SIZE,
 } from "../patterns/pattern-builder";
 
@@ -42,43 +47,65 @@ import {
  * Generate patterns for Simple Bloom lifecycle
  */
 function createSimpleBloomPatterns() {
-  // Bud: small central oval + thin stem
+  // Bud: small gathering energy
   const bud = createEmptyPattern();
-  drawEllipse(bud, 32, 24, 6, 8); // Small bud
-  drawRect(bud, 30, 32, 33, 52); // Thin stem
+  // Soft cluster center
+  drawCircle(bud, 32, 26, 6);
+  // Few potential dots
+  scatterDots(bud, 6, 1, 2, 101);
+  // Thin stem
+  drawRect(bud, 30, 32, 33, 52);
 
-  // Sprout: taller with leaves
+  // Sprout: first rays emerge
   const sprout = createEmptyPattern();
-  drawEllipse(sprout, 32, 18, 8, 10); // Growing bud
-  drawRect(sprout, 30, 28, 33, 54); // Stem
+  // Growing center
+  drawCircle(sprout, 32, 22, 7);
+  // Smooth tapered rays (less jagged)
+  drawSmoothRadialBurst(sprout, 32, 22, 8, 11, 3, 0.5, 22.5);
   // Small leaves
-  drawPetal(sprout, 24, 38, 30, 42, 4);
-  drawPetal(sprout, 40, 38, 34, 42, 4);
+  drawPetal(sprout, 24, 38, 30, 42, 5);
+  drawPetal(sprout, 40, 38, 34, 42, 5);
+  // Thicker stem
+  drawRect(sprout, 30, 28, 34, 54);
 
-  // Bloom: full flower with petals
+  // Bloom: sakura-inspired cherry blossom
   const bloom = createEmptyPattern();
-  // Center
-  drawCircle(bloom, 32, 22, 8);
-  // Petals radiating out
-  drawPetal(bloom, 32, 4, 32, 18, 8); // Top
-  drawPetal(bloom, 48, 12, 38, 20, 8); // Top-right
-  drawPetal(bloom, 52, 26, 40, 24, 8); // Right
-  drawPetal(bloom, 48, 38, 38, 28, 8); // Bottom-right
-  drawPetal(bloom, 16, 12, 26, 20, 8); // Top-left
-  drawPetal(bloom, 12, 26, 24, 24, 8); // Left
-  drawPetal(bloom, 16, 38, 26, 28, 8); // Bottom-left
+  const bloomCenter = 22;
+  // Central star
+  drawStar(bloom, 32, bloomCenter, 5, 7, 3, 0);
+  drawCircle(bloom, 32, bloomCenter, 3);
+  // 5 rounded petals (cherry blossom style)
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+    const tipX = 32 + Math.cos(angle) * 20;
+    const tipY = bloomCenter + Math.sin(angle) * 20;
+    const baseX = 32 + Math.cos(angle) * 8;
+    const baseY = bloomCenter + Math.sin(angle) * 8;
+    drawPetal(bloom, tipX, tipY, baseX, baseY, 10);
+  }
+  // Delicate stamens
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 - Math.PI / 2 + Math.PI / 10;
+    const x = 32 + Math.cos(angle) * 5;
+    const y = bloomCenter + Math.sin(angle) * 5;
+    drawCircle(bloom, Math.round(x), Math.round(y), 1.5);
+  }
+  // Soft glow
+  drawGlowRing(bloom, 32, bloomCenter, 24, 2);
   // Stem
-  drawRect(bloom, 30, 30, 33, 56);
+  drawRect(bloom, 30, 30, 34, 56);
 
-  // Fade: wilting, drooping petals
+  // Fade: gentle cascade
   const fade = createEmptyPattern();
-  drawCircle(fade, 32, 24, 6);
-  // Drooping petals
-  drawPetal(fade, 22, 32, 28, 24, 5);
-  drawPetal(fade, 42, 32, 36, 24, 5);
-  drawPetal(fade, 32, 8, 32, 20, 5);
-  drawPetal(fade, 18, 18, 26, 22, 4);
-  drawPetal(fade, 46, 18, 38, 22, 4);
+  // Smaller center
+  drawCircle(fade, 32, 26, 5);
+  // Fewer drooping petals (more elegant)
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI + Math.PI / 5;
+    const tipX = 32 + Math.cos(angle) * 16;
+    const tipY = 26 + Math.sin(angle) * 14 + 6; // Droop
+    drawPetal(fade, tipX, tipY, 32, 26, 5);
+  }
   // Shorter stem
   drawRect(fade, 30, 32, 33, 50);
 
@@ -89,35 +116,63 @@ function createSimpleBloomPatterns() {
  * Generate patterns for Quantum Tulip lifecycle
  */
 function createQuantumTulipPatterns() {
-  // Bulb: underground bulb shape
+  // Bulb: underground potential
   const bulb = createEmptyPattern();
   drawEllipse(bulb, 32, 40, 10, 14);
-  drawRect(bulb, 30, 26, 33, 32); // Small shoot
+  // Faint energy spiral
+  drawSpiral(bulb, 32, 40, 2, 7, 0.4, 1);
+  drawRect(bulb, 30, 26, 33, 32);
 
-  // Stem: tall thin stem
+  // Stem: rising energy
   const stem = createEmptyPattern();
   drawRect(stem, 30, 14, 33, 56);
-  // Small leaves at base
+  // Elegant leaf pair
   drawPetal(stem, 22, 48, 29, 44, 5);
   drawPetal(stem, 42, 48, 35, 44, 5);
+  // Subtle energy
+  drawDots(
+    stem,
+    [
+      { x: 30, y: 38 },
+      { x: 34, y: 38 },
+    ],
+    1
+  );
 
-  // Bloom: classic tulip cup
+  // Bloom: orchid-inspired exotic flower
   const bloom = createEmptyPattern();
-  // Tulip petals (cup shape)
-  drawPetal(bloom, 20, 8, 28, 28, 10);
-  drawPetal(bloom, 44, 8, 36, 28, 10);
-  drawPetal(bloom, 32, 6, 32, 26, 12);
-  // Center fill
-  drawEllipse(bloom, 32, 22, 10, 8);
+  const bloomY = 20;
+  // Delicate center
+  drawCircle(bloom, 32, bloomY, 4);
+  drawStar(bloom, 32, bloomY, 4, 6, 3, 0);
+  // Top two petals (orchid upper petals)
+  for (let i = 0; i < 2; i++) {
+    const angle = -Math.PI / 2 + ((i - 0.5) * Math.PI) / 3.5;
+    const tipX = 32 + Math.cos(angle) * 20;
+    const tipY = bloomY + Math.sin(angle) * 17;
+    const baseX = 32 + Math.cos(angle) * 8;
+    const baseY = bloomY + Math.sin(angle) * 8;
+    drawPetal(bloom, tipX, tipY, baseX, baseY, 9);
+  }
+  // Bottom lip petal (orchid signature large bottom petal)
+  drawPetal(bloom, 32, bloomY + 22, 32, bloomY + 8, 13);
+  // Side petals (smaller)
+  drawPetal(bloom, 32 - 16, bloomY + 4, 32 - 7, bloomY, 6);
+  drawPetal(bloom, 32 + 16, bloomY + 4, 32 + 7, bloomY, 6);
+  // Elegant glow
+  drawGlowRing(bloom, 32, bloomY + 8, 24, 2);
   // Stem
   drawRect(bloom, 30, 30, 33, 56);
 
-  // Wilt: drooping tulip
+  // Wilt: gentle droop
   const wilt = createEmptyPattern();
-  // Drooping head tilted to side
-  drawPetal(wilt, 18, 18, 26, 28, 8);
-  drawPetal(wilt, 24, 12, 28, 26, 8);
-  drawPetal(wilt, 12, 24, 24, 28, 6);
+  // Softer drooping petals
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI + Math.PI / 5;
+    const tipX = 24 + Math.cos(angle) * 14;
+    const tipY = 24 + Math.sin(angle) * 12 + 6; // Droop
+    drawPetal(wilt, tipX, tipY, 26, 24, 6);
+  }
   // Curved stem
   drawRect(wilt, 28, 28, 31, 36);
   drawRect(wilt, 30, 34, 33, 56);
@@ -129,17 +184,60 @@ function createQuantumTulipPatterns() {
  * Generate patterns for Soft Moss lifecycle
  */
 function createSoftMossPatterns() {
-  // Emerging: small scattered clusters
+  // Emerging: nebula-inspired delicate spore cloud
   const emerging = createEmptyPattern();
-  scatterDots(emerging, 8, 2, 4, 42);
+  // Diffuse center
+  drawCircle(emerging, 32, 32, 6);
+  // Inner glow ring (nebula core)
+  drawGlowRing(emerging, 32, 32, 10, 2);
+  // Mid-layer soft cloud
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const radius = 12 + Math.sin(i * 0.7) * 3;
+    const x = 32 + Math.cos(angle) * radius;
+    const y = 32 + Math.sin(angle) * radius;
+    drawCircle(emerging, Math.round(x), Math.round(y), 2 + Math.sin(i * 1.3));
+  }
+  // Scattered spores (outer diffusion)
+  const sporeCount = 16;
+  for (let i = 0; i < sporeCount; i++) {
+    const angle = (i / sporeCount) * Math.PI * 2 + Math.sin(i * 0.5) * 0.3;
+    const radius = 16 + Math.cos(i * 0.8) * 4;
+    const x = 32 + Math.cos(angle) * radius;
+    const y = 32 + Math.sin(angle) * radius;
+    drawCircle(emerging, Math.round(x), Math.round(y), 1.5);
+  }
+  // Outer haze
+  drawGlowRing(emerging, 32, 32, 20, 1);
 
-  // Settled: larger organic spread
+  // Settled: full nebula spread
   const settled = createEmptyPattern();
-  scatterDots(settled, 20, 3, 6, 42);
-  // Add some connecting blobs
-  drawCircle(settled, 28, 32, 8);
-  drawCircle(settled, 36, 30, 6);
-  drawCircle(settled, 32, 38, 5);
+  // Dense center cluster
+  drawCircle(settled, 32, 32, 8);
+  drawGlowRing(settled, 32, 32, 12, 3);
+  // Multiple organic cloud formations
+  const cloudPositions = [
+    { x: 24, y: 24, r: 6 },
+    { x: 40, y: 26, r: 5 },
+    { x: 28, y: 38, r: 7 },
+    { x: 38, y: 40, r: 6 },
+    { x: 20, y: 36, r: 4 },
+    { x: 44, y: 34, r: 5 },
+  ];
+  cloudPositions.forEach(({ x, y, r }) => {
+    drawCircle(settled, x, y, r);
+    drawGlowRing(settled, x, y, r + 3, 1);
+  });
+  // Connecting wisps (24 organic connection points)
+  for (let i = 0; i < 24; i++) {
+    const angle = (i / 24) * Math.PI * 2;
+    const radius = 18 + Math.sin(i * 0.6) * 5;
+    const x = 32 + Math.cos(angle) * radius;
+    const y = 32 + Math.sin(angle) * radius;
+    drawCircle(settled, Math.round(x), Math.round(y), 1.5 + Math.sin(i * 0.9) * 0.5);
+  }
+  // Outer diffusion
+  drawGlowRing(settled, 32, 32, 26, 2);
 
   return { emerging, settled };
 }
@@ -149,15 +247,48 @@ function createSoftMossPatterns() {
  */
 function createPebblePatchPatterns() {
   const stones = createEmptyPattern();
-  // Scattered stones of varying sizes
-  drawEllipse(stones, 12, 20, 5, 4);
-  drawEllipse(stones, 48, 16, 6, 5);
-  drawCircle(stones, 28, 38, 4);
-  drawEllipse(stones, 52, 44, 4, 3);
-  drawCircle(stones, 16, 50, 5);
-  drawEllipse(stones, 40, 32, 3, 4);
-  drawCircle(stones, 8, 36, 3);
-  drawEllipse(stones, 56, 28, 4, 3);
+  // Crystal-inspired geometric stones with faceted appearance
+
+  // Large central crystal cluster
+  const center = { x: 32, y: 32 };
+  drawCircle(stones, center.x, center.y, 5);
+  // 6-pointed star (crystal structure)
+  drawStar(stones, center.x, center.y, 6, 8, 4, 0);
+
+  // Surrounding crystal formations (8 positions)
+  const crystalFormations = [
+    { x: 14, y: 18, size: 5, points: 5 },
+    { x: 48, y: 14, size: 6, points: 4 },
+    { x: 24, y: 40, size: 4, points: 6 },
+    { x: 54, y: 46, size: 5, points: 5 },
+    { x: 12, y: 50, size: 6, points: 4 },
+    { x: 42, y: 30, size: 4, points: 5 },
+    { x: 8, y: 34, size: 3, points: 6 },
+    { x: 56, y: 26, size: 5, points: 4 },
+  ];
+
+  crystalFormations.forEach(({ x, y, size, points }) => {
+    // Core
+    drawCircle(stones, x, y, size);
+    // Faceted edges
+    drawStar(stones, x, y, points, size + 2, Math.floor(size * 0.6), 0);
+    // Inner detail
+    if (size > 4) {
+      drawCircle(stones, x, y, Math.floor(size * 0.4));
+    }
+  });
+
+  // Small crystal shards scattered between
+  const shards = [
+    { x: 20, y: 26, r: 2 },
+    { x: 38, y: 22, r: 2 },
+    { x: 30, y: 50, r: 2 },
+    { x: 46, y: 38, r: 2 },
+    { x: 18, y: 42, r: 2 },
+  ];
+  shards.forEach(({ x, y, r }) => {
+    drawStar(stones, x, y, 4, r + 1, r, 0);
+  });
 
   return { stones };
 }
@@ -166,18 +297,71 @@ function createPebblePatchPatterns() {
  * Generate patterns for Meadow Tuft
  */
 function createMeadowTuftPatterns() {
-  // Sway left: grass blades leaning left
+  // Sway left: vortex-inspired flowing grass motion
   const swayLeft = createEmptyPattern();
-  drawGrassBlade(swayLeft, 24, 56, 32, -0.4, 3);
-  drawGrassBlade(swayLeft, 32, 58, 36, -0.3, 3);
-  drawGrassBlade(swayLeft, 40, 56, 30, -0.5, 3);
-  drawGrassBlade(swayLeft, 28, 54, 28, -0.2, 2);
-  drawGrassBlade(swayLeft, 36, 54, 34, -0.4, 2);
-  // Base clump
-  drawEllipse(swayLeft, 32, 58, 14, 6);
+  const baseY = 56;
+  const baseX = 32;
 
-  // Sway right: mirror of sway left
-  const swayRight = mirrorHorizontal(swayLeft);
+  // Base clump with subtle vortex pattern
+  drawEllipse(swayLeft, baseX, baseY, 14, 6);
+  drawCircle(swayLeft, baseX, baseY - 2, 8);
+
+  // Curved grass blades following vortex flow (left lean)
+  // Inner spiral blades (tighter curve)
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI - Math.PI / 2;
+    const startX = baseX + Math.cos(angle) * 6;
+    const startY = baseY - 4;
+    const height = 28 + i * 2;
+    const curve = -0.5 - i * 0.08;
+    drawGrassBlade(swayLeft, Math.round(startX), Math.round(startY), height, curve, 2);
+  }
+
+  // Outer spiral blades (wider curve)
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI - Math.PI / 2 + Math.PI / 8;
+    const startX = baseX + Math.cos(angle) * 10;
+    const startY = baseY - 2;
+    const height = 32 + i * 2;
+    const curve = -0.35 - i * 0.05;
+    drawGrassBlade(swayLeft, Math.round(startX), Math.round(startY), height, curve, 3);
+  }
+
+  // Accent blades (flowing ribbons)
+  drawGrassBlade(swayLeft, baseX - 8, baseY - 3, 36, -0.6, 2);
+  drawGrassBlade(swayLeft, baseX + 8, baseY - 3, 30, -0.3, 2);
+
+  // Sway right: vortex-inspired flowing grass motion (mirrored)
+  const swayRight = createEmptyPattern();
+
+  // Base clump
+  drawEllipse(swayRight, baseX, baseY, 14, 6);
+  drawCircle(swayRight, baseX, baseY - 2, 8);
+
+  // Curved grass blades following vortex flow (right lean)
+  // Inner spiral blades
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI - Math.PI / 2;
+    const startX = baseX - Math.cos(angle) * 6; // Mirrored X
+    const startY = baseY - 4;
+    const height = 28 + i * 2;
+    const curve = 0.5 + i * 0.08; // Positive curve for right
+    drawGrassBlade(swayRight, Math.round(startX), Math.round(startY), height, curve, 2);
+  }
+
+  // Outer spiral blades
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI - Math.PI / 2 + Math.PI / 8;
+    const startX = baseX - Math.cos(angle) * 10; // Mirrored X
+    const startY = baseY - 2;
+    const height = 32 + i * 2;
+    const curve = 0.35 + i * 0.05; // Positive curve for right
+    drawGrassBlade(swayRight, Math.round(startX), Math.round(startY), height, curve, 3);
+  }
+
+  // Accent blades
+  drawGrassBlade(swayRight, baseX + 8, baseY - 3, 36, 0.6, 2);
+  drawGrassBlade(swayRight, baseX - 8, baseY - 3, 30, 0.3, 2);
 
   return { swayLeft, swayRight };
 }
@@ -186,18 +370,89 @@ function createMeadowTuftPatterns() {
  * Generate patterns for Whisper Reed
  */
 function createWhisperReedPatterns() {
-  // Lean left: tall thin reeds
+  // Lean left: aurora-inspired flowing reeds with wave patterns
   const leanLeft = createEmptyPattern();
-  drawGrassBlade(leanLeft, 22, 60, 50, -0.25, 2);
-  drawGrassBlade(leanLeft, 32, 60, 54, -0.2, 2);
-  drawGrassBlade(leanLeft, 42, 60, 48, -0.3, 2);
-  // Small seed heads at top
-  drawCircle(leanLeft, 10, 10, 3);
-  drawCircle(leanLeft, 22, 6, 3);
-  drawCircle(leanLeft, 30, 12, 3);
+  const baseY = 60;
 
-  // Lean right: mirror
-  const leanRight = mirrorHorizontal(leanLeft);
+  // Main reeds with flowing aurora curves (left lean)
+  const reedPositions = [
+    { x: 20, height: 52, curve: -0.35, width: 2 },
+    { x: 28, height: 56, curve: -0.28, width: 2 },
+    { x: 36, height: 54, curve: -0.32, width: 2 },
+    { x: 44, height: 50, curve: -0.38, width: 2 },
+  ];
+
+  reedPositions.forEach(({ x, height, curve, width }) => {
+    drawGrassBlade(leanLeft, x, baseY, height, curve, width);
+  });
+
+  // Delicate accent reeds (thinner, more curved)
+  drawGrassBlade(leanLeft, 24, baseY - 2, 48, -0.42, 1.5);
+  drawGrassBlade(leanLeft, 32, baseY - 2, 52, -0.3, 1.5);
+  drawGrassBlade(leanLeft, 40, baseY - 2, 46, -0.45, 1.5);
+
+  // Aurora-inspired seed heads (flowing arrangement)
+  const seedHeads = [
+    { x: 8, y: 8, r: 3.5 },
+    { x: 16, y: 4, r: 3 },
+    { x: 24, y: 6, r: 3.5 },
+    { x: 32, y: 10, r: 3 },
+    { x: 18, y: 12, r: 2.5 },
+  ];
+
+  seedHeads.forEach(({ x, y, r }) => {
+    drawCircle(leanLeft, x, y, r);
+    // Subtle glow around seed heads
+    drawGlowRing(leanLeft, x, y, r + 2, 1);
+  });
+
+  // Connecting flow lines (subtle aurora wave effect)
+  for (let i = 0; i < 3; i++) {
+    const startX = 20 + i * 8;
+    const startY = baseY - 10 - i * 8;
+    drawGlowRing(leanLeft, startX, startY, 4, 1);
+  }
+
+  // Lean right: aurora-inspired flowing reeds (mirrored)
+  const leanRight = createEmptyPattern();
+
+  // Main reeds with flowing aurora curves (right lean)
+  const reedPositionsRight = [
+    { x: 44, height: 52, curve: 0.35, width: 2 },
+    { x: 36, height: 56, curve: 0.28, width: 2 },
+    { x: 28, height: 54, curve: 0.32, width: 2 },
+    { x: 20, height: 50, curve: 0.38, width: 2 },
+  ];
+
+  reedPositionsRight.forEach(({ x, height, curve, width }) => {
+    drawGrassBlade(leanRight, x, baseY, height, curve, width);
+  });
+
+  // Delicate accent reeds
+  drawGrassBlade(leanRight, 40, baseY - 2, 48, 0.42, 1.5);
+  drawGrassBlade(leanRight, 32, baseY - 2, 52, 0.3, 1.5);
+  drawGrassBlade(leanRight, 24, baseY - 2, 46, 0.45, 1.5);
+
+  // Aurora-inspired seed heads (mirrored)
+  const seedHeadsRight = [
+    { x: 56, y: 8, r: 3.5 },
+    { x: 48, y: 4, r: 3 },
+    { x: 40, y: 6, r: 3.5 },
+    { x: 32, y: 10, r: 3 },
+    { x: 46, y: 12, r: 2.5 },
+  ];
+
+  seedHeadsRight.forEach(({ x, y, r }) => {
+    drawCircle(leanRight, x, y, r);
+    drawGlowRing(leanRight, x, y, r + 2, 1);
+  });
+
+  // Connecting flow lines
+  for (let i = 0; i < 3; i++) {
+    const startX = 44 - i * 8;
+    const startY = baseY - 10 - i * 8;
+    drawGlowRing(leanRight, startX, startY, 4, 1);
+  }
 
   return { leanLeft, leanRight };
 }
@@ -206,74 +461,137 @@ function createWhisperReedPatterns() {
  * Generate patterns for Pulsing Orb
  */
 function createPulsingOrbPatterns() {
-  // Dim: hollow ring
+  // Dim: elegant constellation
   const dim = createEmptyPattern();
-  drawRing(dim, 32, 32, 16, 24);
+  // Delicate ring
+  drawRing(dim, 32, 32, 19, 21);
+  // 4-point star reaching to edges
+  drawStar(dim, 32, 32, 4, 27, 16, 0);
+  // Corner stars (smaller)
+  const dimDots = [
+    { x: 12, y: 12 },
+    { x: 52, y: 12 },
+    { x: 12, y: 52 },
+    { x: 52, y: 52 },
+  ];
+  drawDots(dim, dimDots, 2);
 
-  // Bright: filled glowing orb
+  // Bright: supernova-inspired explosive energy
   const bright = createEmptyPattern();
-  drawCircle(bright, 32, 32, 26);
+  // Dense radiating center
+  drawCircle(bright, 32, 32, 7);
+  drawStar(bright, 32, 32, 12, 10, 5, 0);
+  // Inner burst (12 thick rays)
+  drawSmoothRadialBurst(bright, 32, 32, 12, 18, 4, 1, 15);
+  // Outer burst (12 thin rays)
+  drawSmoothRadialBurst(bright, 32, 32, 12, 28, 2, 0.3, 0);
+  // Energy rings
+  drawGlowRing(bright, 32, 32, 22, 2);
+  drawGlowRing(bright, 32, 32, 30, 1);
+  // Scattered energy particles
+  const particles = [
+    { x: 7, y: 32 },
+    { x: 57, y: 32 },
+    { x: 32, y: 7 },
+    { x: 32, y: 57 },
+    { x: 16, y: 16 },
+    { x: 48, y: 16 },
+    { x: 16, y: 48 },
+    { x: 48, y: 48 },
+  ];
+  drawDots(bright, particles, 1.5);
 
   return { dim, bright };
 }
 
 /**
  * Generate patterns for Dewdrop Daisy
- * A daisy-like flower with clustered thin petals and a prominent center
+ * A daisy-like flower with elegant dandelion-burst aesthetics
  */
 function createDewdropDaisyPatterns() {
-  // Bud: tight cluster of small dots
+  // Bud: gentle gathering
   const bud = createEmptyPattern();
   drawCircle(bud, 32, 28, 6);
-  scatterDots(bud, 5, 2, 3, 101);
+  scatterDots(bud, 8, 1, 2, 101);
   drawRect(bud, 30, 34, 33, 52);
 
-  // Unfurl: petals starting to emerge
+  // Unfurl: first rays
   const unfurl = createEmptyPattern();
-  drawCircle(unfurl, 32, 26, 7);
-  // Emerging petals
-  drawPetal(unfurl, 32, 14, 32, 22, 4);
-  drawPetal(unfurl, 42, 20, 36, 24, 4);
-  drawPetal(unfurl, 22, 20, 28, 24, 4);
-  drawRect(unfurl, 30, 33, 33, 52);
+  drawCircle(unfurl, 32, 24, 7);
+  // Delicate star
+  drawStar(unfurl, 32, 24, 5, 9, 5, 0);
+  // Smooth tapered initial rays
+  drawSmoothRadialBurst(unfurl, 32, 24, 10, 12, 3, 0.5, 18);
+  drawRect(unfurl, 30, 33, 34, 52);
 
-  // Bloom: full daisy with many thin petals
+  // Bloom: chrysanthemum-inspired layered petals
   const bloom = createEmptyPattern();
-  // Central disk
-  drawCircle(bloom, 32, 24, 8);
-  // Many thin petals radiating out
-  for (let i = 0; i < 12; i++) {
-    const angle = (i / 12) * Math.PI * 2;
-    const tipX = 32 + Math.cos(angle) * 22;
-    const tipY = 24 + Math.sin(angle) * 22;
-    const baseX = 32 + Math.cos(angle) * 8;
-    const baseY = 24 + Math.sin(angle) * 8;
-    drawPetal(bloom, tipX, tipY, baseX, baseY, 4);
+  const bloomY = 24;
+  // Central star
+  drawStar(bloom, 32, bloomY, 5, 6, 3, 0);
+  drawCircle(bloom, 32, bloomY, 4);
+  // Three layers of petals (8, 12, 16 petals)
+  for (let layer = 0; layer < 3; layer++) {
+    const petalCount = 8 + layer * 4;
+    const length = 10 + layer * 6;
+    const width = 6 - layer * 1.5;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2 + (layer * Math.PI) / 24;
+      const tipX = 32 + Math.cos(angle) * length;
+      const tipY = bloomY + Math.sin(angle) * length;
+      const baseX = 32 + Math.cos(angle) * 5;
+      const baseY = bloomY + Math.sin(angle) * 5;
+      drawPetal(bloom, tipX, tipY, baseX, baseY, width);
+    }
   }
-  drawRect(bloom, 30, 32, 33, 54);
+  // Soft glow
+  drawGlowRing(bloom, 32, bloomY, 24, 2);
+  drawRect(bloom, 30, 32, 34, 54);
 
-  // Sparkle: slightly larger and brighter variant for animation
+  // Sparkle: firework-inspired radiant burst
   const sparkle = createEmptyPattern();
-  drawCircle(sparkle, 32, 24, 9);
-  for (let i = 0; i < 12; i++) {
-    const angle = (i / 12) * Math.PI * 2;
-    const tipX = 32 + Math.cos(angle) * 24;
-    const tipY = 24 + Math.sin(angle) * 24;
-    const baseX = 32 + Math.cos(angle) * 9;
-    const baseY = 24 + Math.sin(angle) * 9;
-    drawPetal(sparkle, tipX, tipY, baseX, baseY, 5);
+  const sparkleY = 24;
+  // Bright center
+  drawStar(sparkle, 32, sparkleY, 8, 8, 4, 22.5);
+  drawCircle(sparkle, 32, sparkleY, 5);
+  // Primary burst rays (12 rays)
+  drawSmoothRadialBurst(sparkle, 32, sparkleY, 12, 20, 3, 0.5, 15);
+  // Secondary sparkle rays (12, between primary)
+  drawSmoothRadialBurst(sparkle, 32, sparkleY, 12, 14, 1.5, 0.3, 0);
+  // Petals at layer positions
+  for (let layer = 0; layer < 2; layer++) {
+    const petalCount = 12;
+    const length = 16 + layer * 6;
+    const width = 4 - layer;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2 + (layer * Math.PI) / 24 + Math.PI / 24;
+      const tipX = 32 + Math.cos(angle) * length;
+      const tipY = sparkleY + Math.sin(angle) * length;
+      const baseX = 32 + Math.cos(angle) * (length - 6);
+      const baseY = sparkleY + Math.sin(angle) * (length - 6);
+      drawPetal(sparkle, tipX, tipY, baseX, baseY, width);
+    }
   }
-  drawRect(sparkle, 30, 33, 33, 54);
+  // Sparkle dots at endpoints
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const x = 32 + Math.cos(angle) * 24;
+    const y = sparkleY + Math.sin(angle) * 24;
+    drawCircle(sparkle, Math.round(x), Math.round(y), 2);
+  }
+  drawGlowRing(sparkle, 32, sparkleY, 26, 3);
+  drawRect(sparkle, 30, 33, 34, 54);
 
-  // Fade: wilting daisy
+  // Fade: gentle cascade
   const fade = createEmptyPattern();
-  drawCircle(fade, 32, 26, 6);
-  // Drooping petals
-  drawPetal(fade, 20, 32, 28, 26, 4);
-  drawPetal(fade, 44, 32, 36, 26, 4);
-  drawPetal(fade, 32, 12, 32, 22, 4);
-  drawPetal(fade, 24, 18, 28, 24, 3);
-  drawPetal(fade, 40, 18, 36, 24, 3);
+  drawCircle(fade, 32, 26, 5);
+  // Fewer, longer drooping rays
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI + Math.PI / 6;
+    const endX = 32 + Math.cos(angle) * 15;
+    const endY = 26 + Math.sin(angle) * 14 + 7; // Droop
+    drawPetal(fade, endX, endY, 32, 26, 4);
+  }
   drawRect(fade, 30, 32, 33, 48);
 
   return { bud, unfurl, bloom, sparkle, fade };
@@ -281,91 +599,156 @@ function createDewdropDaisyPatterns() {
 
 /**
  * Generate patterns for Midnight Poppy
- * A dramatic flower with deep colors and curved, bowl-shaped petals
+ * A dramatic flower with refined sunburst when open
  */
 function createMidnightPoppyPatterns() {
-  // Closed: tightly wrapped bud
+  // Closed: potential energy gathering
   const closed = createEmptyPattern();
   drawEllipse(closed, 32, 24, 8, 12);
+  // Subtle glow
+  drawGlowRing(closed, 32, 24, 13, 1);
   drawRect(closed, 30, 36, 33, 56);
 
-  // Opening: petals starting to unfurl
+  // Opening: first rays
   const opening = createEmptyPattern();
-  // Bowl shape forming
-  drawPetal(opening, 20, 16, 28, 28, 10);
-  drawPetal(opening, 44, 16, 36, 28, 10);
-  drawEllipse(opening, 32, 26, 10, 6);
-  drawRect(opening, 30, 32, 33, 56);
+  // Center expanding
+  drawCircle(opening, 32, 24, 9);
+  // Smooth tapered initial rays
+  drawSmoothRadialBurst(opening, 32, 24, 8, 16, 4, 1, 22.5);
+  // Emerging petals
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 18;
+    const tipY = 24 + Math.sin(angle) * 18;
+    drawPetal(opening, tipX, tipY, 32, 24, 8);
+  }
+  drawRect(opening, 30, 32, 34, 56);
 
-  // Open: fully bloomed with dramatic curved petals
+  // Open: hibiscus-inspired dramatic tropical flower
   const open = createEmptyPattern();
-  // Large curved petals
-  drawPetal(open, 12, 18, 26, 30, 14);
-  drawPetal(open, 52, 18, 38, 30, 14);
-  drawPetal(open, 32, 6, 32, 24, 12);
-  drawPetal(open, 20, 10, 28, 26, 10);
-  drawPetal(open, 44, 10, 36, 26, 10);
-  // Dark center
-  drawCircle(open, 32, 28, 8);
-  // Stem
-  drawRect(open, 30, 36, 33, 58);
+  const openY = 26;
+  // Prominent center
+  drawStar(open, 32, openY, 6, 9, 5, 0);
+  drawCircle(open, 32, openY, 6);
+  drawCircle(open, 32, openY, 3);
+  // 5 large overlapping petals (hibiscus style)
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+    const tipX = 32 + Math.cos(angle) * 24;
+    const tipY = openY + Math.sin(angle) * 24;
+    const baseX = 32 + Math.cos(angle) * 10;
+    const baseY = openY + Math.sin(angle) * 10;
+    drawPetal(open, tipX, tipY, baseX, baseY, 12);
+  }
+  // Dramatic glow
+  drawGlowRing(open, 32, openY, 28, 3);
+  // Smooth tapered rays between petals
+  drawSmoothRadialBurst(open, 32, openY, 5, 20, 2, 0.5, 36);
+  // Thicker stem
+  drawRect(open, 30, 36, 34, 58);
 
-  // Closing: petals curling back
+  // Closing: gentle retraction with smooth rays
   const closing = createEmptyPattern();
-  drawPetal(closing, 18, 20, 28, 28, 10);
-  drawPetal(closing, 46, 20, 36, 28, 10);
-  drawPetal(closing, 32, 10, 32, 24, 10);
-  drawEllipse(closing, 32, 26, 8, 6);
-  drawRect(closing, 30, 34, 33, 56);
+  // Dimmer star
+  drawStar(closing, 32, 26, 5, 9, 5, 0);
+  // Fewer smooth rays
+  drawSmoothRadialBurst(closing, 32, 26, 8, 17, 3, 0.5, 22.5);
+  // Petals curling
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 19;
+    const tipY = 26 + Math.sin(angle) * 19;
+    drawPetal(closing, tipX, tipY, 32, 26, 9);
+  }
+  drawRect(closing, 30, 34, 34, 56);
 
   return { closed, opening, open, closing };
 }
 
 /**
  * Generate patterns for Cloud Bush
- * A rounded, puffy shrub with overlapping circular shapes and berry details
+ * A rounded shrub with elegant mandala structure
  */
 function createCloudBushPatterns() {
-  // Base: rounded bush foundation
+  // Base: simple foundation
   const base = createEmptyPattern();
-  // Overlapping circles for cloud-like shape
-  drawCircle(base, 32, 40, 16);
-  drawCircle(base, 20, 38, 12);
-  drawCircle(base, 44, 38, 12);
-  drawCircle(base, 26, 30, 10);
-  drawCircle(base, 38, 30, 10);
-  drawCircle(base, 32, 28, 12);
+  // Central circle
+  drawCircle(base, 32, 36, 11);
+  // Inner ring (6-fold symmetry)
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 15;
+    const y = 36 + Math.sin(angle) * 15;
+    drawCircle(base, Math.round(x), Math.round(y), 7);
+  }
 
-  // Full: fully expanded bush
+  // Full: intricate mandala pattern
   const full = createEmptyPattern();
-  // Larger cloud shape
-  drawCircle(full, 32, 38, 18);
-  drawCircle(full, 16, 36, 14);
-  drawCircle(full, 48, 36, 14);
-  drawCircle(full, 24, 26, 12);
-  drawCircle(full, 40, 26, 12);
-  drawCircle(full, 32, 22, 14);
-  drawCircle(full, 20, 44, 10);
-  drawCircle(full, 44, 44, 10);
+  // Center star
+  drawStar(full, 32, 32, 8, 10, 5, 0);
+  drawCircle(full, 32, 32, 4);
+  // Inner ring of circles
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 12;
+    const y = 32 + Math.sin(angle) * 12;
+    drawCircle(full, Math.round(x), Math.round(y), 3.5);
+  }
+  // Mid-layer circles
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 18;
+    const y = 32 + Math.sin(angle) * 18;
+    drawCircle(full, Math.round(x), Math.round(y), 4);
+  }
+  // Outer petals
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const tipX = 32 + Math.cos(angle) * 26;
+    const tipY = 32 + Math.sin(angle) * 26;
+    const baseX = 32 + Math.cos(angle) * 20;
+    const baseY = 32 + Math.sin(angle) * 20;
+    drawPetal(full, tipX, tipY, baseX, baseY, 5);
+  }
+  // Thin connecting rays
+  drawSmoothRadialBurst(full, 32, 32, 16, 24, 1, 0.2, 11.25);
+  // Subtle glow
+  drawGlowRing(full, 32, 32, 28, 2);
 
-  // Berried: bush with berry details appearing
+  // Berried: mandala with delicate berries
   const berried = createEmptyPattern();
-  // Same cloud shape as full
-  drawCircle(berried, 32, 38, 18);
-  drawCircle(berried, 16, 36, 14);
-  drawCircle(berried, 48, 36, 14);
-  drawCircle(berried, 24, 26, 12);
-  drawCircle(berried, 40, 26, 12);
-  drawCircle(berried, 32, 22, 14);
-  drawCircle(berried, 20, 44, 10);
-  drawCircle(berried, 44, 44, 10);
-  // Berry clusters (small dots) - these will show in a different color
-  drawCircle(berried, 18, 32, 3);
-  drawCircle(berried, 22, 36, 2);
-  drawCircle(berried, 46, 32, 3);
-  drawCircle(berried, 42, 36, 2);
-  drawCircle(berried, 30, 20, 2);
-  drawCircle(berried, 36, 22, 3);
+  // Same intricate structure as full
+  drawStar(berried, 32, 32, 8, 10, 5, 0);
+  drawCircle(berried, 32, 32, 4);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 12;
+    const y = 32 + Math.sin(angle) * 12;
+    drawCircle(berried, Math.round(x), Math.round(y), 3.5);
+  }
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 18;
+    const y = 32 + Math.sin(angle) * 18;
+    drawCircle(berried, Math.round(x), Math.round(y), 4);
+  }
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const tipX = 32 + Math.cos(angle) * 26;
+    const tipY = 32 + Math.sin(angle) * 26;
+    const baseX = 32 + Math.cos(angle) * 20;
+    const baseY = 32 + Math.sin(angle) * 20;
+    drawPetal(berried, tipX, tipY, baseX, baseY, 5);
+  }
+  drawSmoothRadialBurst(berried, 32, 32, 16, 24, 1, 0.2, 11.25);
+  // Berries at mid-layer positions
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const x = 32 + Math.cos(angle) * 23;
+    const y = 32 + Math.sin(angle) * 23;
+    drawCircle(berried, Math.round(x), Math.round(y), 3.5);
+  }
+  drawGlowRing(berried, 32, 32, 28, 2);
 
   return { base, full, berried };
 }
@@ -375,92 +758,235 @@ function createCloudBushPatterns() {
  * A dense shrub pattern with fruits that materialize over lifecycle
  */
 function createBerryThicketPatterns() {
-  // Sparse: initial dense foliage without berries
+  // Sparse: initial dense foliage without berries (garden-inspired leaf clusters)
   const sparse = createEmptyPattern();
   // Dense branching pattern
   drawRect(sparse, 30, 48, 33, 58); // Main trunk
   // Left branches
   drawRect(sparse, 20, 40, 30, 43);
   drawRect(sparse, 12, 32, 22, 35);
-  drawCircle(sparse, 14, 28, 6);
-  drawCircle(sparse, 24, 34, 5);
+  // Left foliage clusters with petal-like leaves
+  drawCircle(sparse, 14, 28, 7);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 14 + Math.cos(angle) * 8;
+    const tipY = 28 + Math.sin(angle) * 8;
+    const baseX = 14 + Math.cos(angle) * 4;
+    const baseY = 28 + Math.sin(angle) * 4;
+    drawPetal(sparse, tipX, tipY, baseX, baseY, 3);
+  }
+  drawCircle(sparse, 24, 34, 6);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 + Math.PI / 10;
+    const tipX = 24 + Math.cos(angle) * 7;
+    const tipY = 34 + Math.sin(angle) * 7;
+    drawPetal(sparse, tipX, tipY, 24, 34, 2.5);
+  }
   // Right branches
   drawRect(sparse, 34, 40, 44, 43);
   drawRect(sparse, 42, 32, 52, 35);
-  drawCircle(sparse, 50, 28, 6);
-  drawCircle(sparse, 40, 34, 5);
-  // Top foliage
-  drawCircle(sparse, 32, 24, 8);
+  // Right foliage clusters
+  drawCircle(sparse, 50, 28, 7);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 50 + Math.cos(angle) * 8;
+    const tipY = 28 + Math.sin(angle) * 8;
+    const baseX = 50 + Math.cos(angle) * 4;
+    const baseY = 28 + Math.sin(angle) * 4;
+    drawPetal(sparse, tipX, tipY, baseX, baseY, 3);
+  }
+  drawCircle(sparse, 40, 34, 6);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 + Math.PI / 10;
+    const tipX = 40 + Math.cos(angle) * 7;
+    const tipY = 34 + Math.sin(angle) * 7;
+    drawPetal(sparse, tipX, tipY, 40, 34, 2.5);
+  }
+  // Top foliage (larger flower-like cluster)
+  drawCircle(sparse, 32, 24, 9);
+  drawStar(sparse, 32, 24, 6, 10, 6, 0);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 11;
+    const tipY = 24 + Math.sin(angle) * 11;
+    drawPetal(sparse, tipX, tipY, 32, 24, 4);
+  }
   drawCircle(sparse, 26, 20, 6);
   drawCircle(sparse, 38, 20, 6);
 
-  // Growing: more foliage, first berries appearing
+  // Growing: more foliage, first berries appearing (expanding garden clusters)
   const growing = createEmptyPattern();
   drawRect(growing, 30, 48, 33, 58);
   drawRect(growing, 20, 40, 30, 43);
   drawRect(growing, 12, 32, 22, 35);
-  drawCircle(growing, 14, 26, 8);
-  drawCircle(growing, 24, 32, 7);
+  // Left foliage - expanded
+  drawCircle(growing, 14, 26, 9);
+  drawStar(growing, 14, 26, 6, 11, 7, 0);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const tipX = 14 + Math.cos(angle) * 10;
+    const tipY = 26 + Math.sin(angle) * 10;
+    drawPetal(growing, tipX, tipY, 14, 26, 3.5);
+  }
+  drawCircle(growing, 24, 32, 8);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 24 + Math.cos(angle) * 9;
+    const tipY = 32 + Math.sin(angle) * 9;
+    drawPetal(growing, tipX, tipY, 24, 32, 3);
+  }
   drawRect(growing, 34, 40, 44, 43);
   drawRect(growing, 42, 32, 52, 35);
-  drawCircle(growing, 50, 26, 8);
-  drawCircle(growing, 40, 32, 7);
-  drawCircle(growing, 32, 22, 10);
-  drawCircle(growing, 24, 16, 7);
-  drawCircle(growing, 40, 16, 7);
-  // First berries
+  // Right foliage - expanded
+  drawCircle(growing, 50, 26, 9);
+  drawStar(growing, 50, 26, 6, 11, 7, 0);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const tipX = 50 + Math.cos(angle) * 10;
+    const tipY = 26 + Math.sin(angle) * 10;
+    drawPetal(growing, tipX, tipY, 50, 26, 3.5);
+  }
+  drawCircle(growing, 40, 32, 8);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 40 + Math.cos(angle) * 9;
+    const tipY = 32 + Math.sin(angle) * 9;
+    drawPetal(growing, tipX, tipY, 40, 32, 3);
+  }
+  // Top foliage - larger garden burst
+  drawCircle(growing, 32, 22, 11);
+  drawStar(growing, 32, 22, 8, 13, 8, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 13;
+    const tipY = 22 + Math.sin(angle) * 13;
+    drawPetal(growing, tipX, tipY, 32, 22, 4);
+  }
+  drawCircle(growing, 24, 16, 8);
+  drawCircle(growing, 40, 16, 8);
+  // First berries (small sparkles)
   drawCircle(growing, 10, 28, 3);
+  drawStar(growing, 10, 28, 4, 4, 2, 0);
   drawCircle(growing, 54, 28, 3);
+  drawStar(growing, 54, 28, 4, 4, 2, 0);
 
-  // Fruiting: full berries visible throughout
+  // Fruiting: full berries visible throughout (lush garden with fruit sparkles)
   const fruiting = createEmptyPattern();
   drawRect(fruiting, 30, 48, 33, 58);
   drawRect(fruiting, 20, 40, 30, 43);
   drawRect(fruiting, 12, 32, 22, 35);
-  drawCircle(fruiting, 14, 24, 9);
-  drawCircle(fruiting, 24, 30, 8);
+  // Left foliage - full garden clusters
+  drawCircle(fruiting, 14, 24, 10);
+  drawStar(fruiting, 14, 24, 8, 12, 8, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 14 + Math.cos(angle) * 11;
+    const tipY = 24 + Math.sin(angle) * 11;
+    drawPetal(fruiting, tipX, tipY, 14, 24, 4);
+  }
+  drawCircle(fruiting, 24, 30, 9);
+  drawStar(fruiting, 24, 30, 6, 10, 6, 0);
   drawRect(fruiting, 34, 40, 44, 43);
   drawRect(fruiting, 42, 32, 52, 35);
-  drawCircle(fruiting, 50, 24, 9);
-  drawCircle(fruiting, 40, 30, 8);
-  drawCircle(fruiting, 32, 20, 12);
-  drawCircle(fruiting, 22, 14, 8);
-  drawCircle(fruiting, 42, 14, 8);
-  // Many berries scattered throughout
-  drawCircle(fruiting, 8, 26, 3);
-  drawCircle(fruiting, 12, 20, 3);
-  drawCircle(fruiting, 56, 26, 3);
-  drawCircle(fruiting, 52, 20, 3);
-  drawCircle(fruiting, 20, 12, 3);
-  drawCircle(fruiting, 44, 12, 3);
-  drawCircle(fruiting, 32, 10, 3);
-  drawCircle(fruiting, 28, 26, 2);
-  drawCircle(fruiting, 36, 26, 2);
+  // Right foliage - full garden clusters
+  drawCircle(fruiting, 50, 24, 10);
+  drawStar(fruiting, 50, 24, 8, 12, 8, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 50 + Math.cos(angle) * 11;
+    const tipY = 24 + Math.sin(angle) * 11;
+    drawPetal(fruiting, tipX, tipY, 50, 24, 4);
+  }
+  drawCircle(fruiting, 40, 30, 9);
+  drawStar(fruiting, 40, 30, 6, 10, 6, 0);
+  // Top foliage - dramatic mandala burst
+  drawCircle(fruiting, 32, 20, 13);
+  drawStar(fruiting, 32, 20, 12, 15, 9, 0);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 14;
+    const tipY = 20 + Math.sin(angle) * 14;
+    drawPetal(fruiting, tipX, tipY, 32, 20, 4.5);
+  }
+  drawCircle(fruiting, 22, 14, 9);
+  drawCircle(fruiting, 42, 14, 9);
+  // Many berries scattered throughout (with sparkle accents)
+  const berryPositions = [
+    { x: 8, y: 26 },
+    { x: 12, y: 20 },
+    { x: 56, y: 26 },
+    { x: 52, y: 20 },
+    { x: 20, y: 12 },
+    { x: 44, y: 12 },
+    { x: 32, y: 10 },
+    { x: 28, y: 26 },
+    { x: 36, y: 26 },
+  ];
+  berryPositions.forEach(({ x, y }) => {
+    const size = x === 32 || x === 8 || x === 56 ? 3 : 2.5;
+    drawCircle(fruiting, x, y, size);
+    drawStar(fruiting, x, y, 4, size + 1, size - 0.5, 0);
+  });
 
-  // Ripe: berries at peak ripeness (slightly larger berries)
+  // Ripe: berries at peak ripeness (abundant garden with radiant berries)
   const ripe = createEmptyPattern();
   drawRect(ripe, 30, 48, 33, 58);
   drawRect(ripe, 20, 40, 30, 43);
   drawRect(ripe, 12, 32, 22, 35);
-  drawCircle(ripe, 14, 24, 9);
-  drawCircle(ripe, 24, 30, 8);
+  // Left foliage - same lush clusters
+  drawCircle(ripe, 14, 24, 10);
+  drawStar(ripe, 14, 24, 8, 12, 8, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 14 + Math.cos(angle) * 11;
+    const tipY = 24 + Math.sin(angle) * 11;
+    drawPetal(ripe, tipX, tipY, 14, 24, 4);
+  }
+  drawCircle(ripe, 24, 30, 9);
+  drawStar(ripe, 24, 30, 6, 10, 6, 0);
   drawRect(ripe, 34, 40, 44, 43);
   drawRect(ripe, 42, 32, 52, 35);
-  drawCircle(ripe, 50, 24, 9);
-  drawCircle(ripe, 40, 30, 8);
-  drawCircle(ripe, 32, 20, 12);
-  drawCircle(ripe, 22, 14, 8);
-  drawCircle(ripe, 42, 14, 8);
-  // Larger, riper berries
-  drawCircle(ripe, 8, 26, 4);
-  drawCircle(ripe, 12, 18, 4);
-  drawCircle(ripe, 56, 26, 4);
-  drawCircle(ripe, 52, 18, 4);
-  drawCircle(ripe, 18, 10, 4);
-  drawCircle(ripe, 46, 10, 4);
-  drawCircle(ripe, 32, 8, 4);
-  drawCircle(ripe, 26, 24, 3);
-  drawCircle(ripe, 38, 24, 3);
+  // Right foliage - same lush clusters
+  drawCircle(ripe, 50, 24, 10);
+  drawStar(ripe, 50, 24, 8, 12, 8, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 50 + Math.cos(angle) * 11;
+    const tipY = 24 + Math.sin(angle) * 11;
+    drawPetal(ripe, tipX, tipY, 50, 24, 4);
+  }
+  drawCircle(ripe, 40, 30, 9);
+  drawStar(ripe, 40, 30, 6, 10, 6, 0);
+  // Top foliage - same dramatic mandala
+  drawCircle(ripe, 32, 20, 13);
+  drawStar(ripe, 32, 20, 12, 15, 9, 0);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 14;
+    const tipY = 20 + Math.sin(angle) * 14;
+    drawPetal(ripe, tipX, tipY, 32, 20, 4.5);
+  }
+  drawCircle(ripe, 22, 14, 9);
+  drawCircle(ripe, 42, 14, 9);
+  // Larger, riper berries with radiant glow
+  const ripeBerries = [
+    { x: 8, y: 26, r: 4.5 },
+    { x: 12, y: 18, r: 4 },
+    { x: 56, y: 26, r: 4.5 },
+    { x: 52, y: 18, r: 4 },
+    { x: 18, y: 10, r: 4 },
+    { x: 46, y: 10, r: 4 },
+    { x: 32, y: 8, r: 4.5 },
+    { x: 26, y: 24, r: 3.5 },
+    { x: 38, y: 24, r: 3.5 },
+  ];
+  ripeBerries.forEach(({ x, y, r }) => {
+    drawCircle(ripe, x, y, r);
+    // Radiant star around ripe berries
+    drawStar(ripe, x, y, 8, r + 2, r, 0);
+    // Subtle glow
+    drawGlowRing(ripe, x, y, r + 3, 1);
+  });
 
   return { sparse, growing, fruiting, ripe };
 }
@@ -470,18 +996,37 @@ function createBerryThicketPatterns() {
  * Multiple hanging bell-shaped flowers with staggered blooming
  */
 function createBellClusterPatterns() {
-  // Buds: small closed bells hanging
+  // Buds: small closed bells hanging (with delicate star accents)
   const buds = createEmptyPattern();
-  // Main stem
+  // Main stem with decorative top
   drawRect(buds, 30, 8, 33, 24);
+  drawStar(buds, 31.5, 10, 4, 4, 2, 0);
   // Branch stems
   drawRect(buds, 20, 20, 23, 32);
   drawRect(buds, 40, 20, 43, 28);
   drawRect(buds, 32, 24, 35, 36);
-  // Closed buds (teardrop shapes pointing down)
+  // Closed buds (teardrop shapes with petal texture)
   drawEllipse(buds, 21, 38, 5, 8);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 21 + Math.cos(angle) * 6;
+    const tipY = 38 + Math.sin(angle) * 9;
+    drawPetal(buds, tipX, tipY, 21, 38, 2);
+  }
   drawEllipse(buds, 41, 34, 4, 6);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 41 + Math.cos(angle) * 5;
+    const tipY = 34 + Math.sin(angle) * 7;
+    drawPetal(buds, tipX, tipY, 41, 34, 1.5);
+  }
   drawEllipse(buds, 33, 42, 5, 8);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 33 + Math.cos(angle) * 6;
+    const tipY = 42 + Math.sin(angle) * 9;
+    drawPetal(buds, tipX, tipY, 33, 42, 2);
+  }
 
   // First: first bell opens
   const first = createEmptyPattern();
@@ -514,22 +1059,40 @@ function createBellClusterPatterns() {
   // Third bell still closed
   drawEllipse(second, 33, 42, 5, 8);
 
-  // Full: all bells open
+  // Full: all bells open (with radiant inner patterns)
   const full = createEmptyPattern();
   drawRect(full, 30, 8, 33, 24);
+  drawStar(full, 31.5, 10, 6, 5, 3, 0);
   drawRect(full, 20, 20, 23, 32);
   drawRect(full, 40, 20, 43, 28);
   drawRect(full, 32, 24, 35, 36);
-  // All bells open
+  // First bell open (with inner starburst)
   drawEllipse(full, 21, 38, 8, 6);
   drawRect(full, 16, 38, 26, 44);
   drawRing(full, 21, 44, 0, 8);
+  // Inner starburst
+  drawStar(full, 21, 41, 8, 6, 3, 0);
+  drawCircle(full, 21, 41, 2);
+  // Second bell open (with inner mandala)
   drawEllipse(full, 41, 32, 7, 5);
   drawRect(full, 36, 32, 46, 38);
   drawRing(full, 41, 38, 0, 7);
+  // Inner mandala
+  drawStar(full, 41, 35, 6, 5, 2.5, 0);
+  drawCircle(full, 41, 35, 2);
+  // Third bell open (with inner rosette)
   drawEllipse(full, 33, 44, 8, 6);
   drawRect(full, 28, 44, 38, 50);
   drawRing(full, 33, 50, 0, 8);
+  // Inner rosette
+  drawStar(full, 33, 47, 8, 6, 3, 22.5);
+  drawCircle(full, 33, 47, 2);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = 33 + Math.cos(angle) * 4;
+    const y = 47 + Math.sin(angle) * 4;
+    drawCircle(full, Math.round(x), Math.round(y), 1);
+  }
 
   // Fade: bells wilting
   const fade = createEmptyPattern();
@@ -602,22 +1165,63 @@ function createSaplingHopePatterns() {
   drawPetal(young, 22, 12, 28, 20, 7);
   drawPetal(young, 42, 12, 36, 20, 7);
 
-  // Mature: full tree with lush foliage
+  // Mature: full tree with lush foliage (garden-inspired leaf clusters)
   const mature = createEmptyPattern();
   drawRect(mature, 28, 34, 35, 62); // Strong trunk
-  // Dense left canopy
-  drawCircle(mature, 18, 28, 12);
-  drawCircle(mature, 12, 36, 10);
-  drawCircle(mature, 22, 40, 8);
-  // Dense right canopy
-  drawCircle(mature, 46, 28, 12);
-  drawCircle(mature, 52, 36, 10);
-  drawCircle(mature, 42, 40, 8);
-  // Top canopy
-  drawCircle(mature, 32, 16, 14);
-  drawCircle(mature, 24, 22, 10);
-  drawCircle(mature, 40, 22, 10);
-  drawCircle(mature, 32, 8, 8);
+  // Dense left canopy with radial leaf patterns
+  drawCircle(mature, 18, 28, 13);
+  drawStar(mature, 18, 28, 12, 15, 10, 0);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 18 + Math.cos(angle) * 14;
+    const tipY = 28 + Math.sin(angle) * 14;
+    drawPetal(mature, tipX, tipY, 18, 28, 4);
+  }
+  drawCircle(mature, 12, 36, 11);
+  drawStar(mature, 12, 36, 8, 12, 8, 0);
+  drawCircle(mature, 22, 40, 9);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 22 + Math.cos(angle) * 10;
+    const tipY = 40 + Math.sin(angle) * 10;
+    drawPetal(mature, tipX, tipY, 22, 40, 3);
+  }
+  // Dense right canopy with radial leaf patterns
+  drawCircle(mature, 46, 28, 13);
+  drawStar(mature, 46, 28, 12, 15, 10, 0);
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const tipX = 46 + Math.cos(angle) * 14;
+    const tipY = 28 + Math.sin(angle) * 14;
+    drawPetal(mature, tipX, tipY, 46, 28, 4);
+  }
+  drawCircle(mature, 52, 36, 11);
+  drawStar(mature, 52, 36, 8, 12, 8, 0);
+  drawCircle(mature, 42, 40, 9);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 42 + Math.cos(angle) * 10;
+    const tipY = 40 + Math.sin(angle) * 10;
+    drawPetal(mature, tipX, tipY, 42, 40, 3);
+  }
+  // Top canopy - magnificent crown with mandala-inspired pattern
+  drawCircle(mature, 32, 16, 15);
+  drawStar(mature, 32, 16, 16, 18, 12, 0);
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 16;
+    const tipY = 16 + Math.sin(angle) * 16;
+    drawPetal(mature, tipX, tipY, 32, 16, 5);
+  }
+  // Surrounding canopy clusters
+  drawCircle(mature, 24, 22, 11);
+  drawStar(mature, 24, 22, 8, 12, 8, 0);
+  drawCircle(mature, 40, 22, 11);
+  drawStar(mature, 40, 22, 8, 12, 8, 0);
+  // Crown top with sparkle
+  drawCircle(mature, 32, 8, 9);
+  drawStar(mature, 32, 8, 12, 11, 7, 0);
+  drawGlowRing(mature, 32, 8, 12, 2);
 
   return { seedling, sprout, growing, young, mature };
 }
@@ -652,11 +1256,19 @@ function createWeepingWillowPatterns() {
   // Top
   drawCircle(growing, 32, 12, 6);
 
-  // SwayLeft: full willow with fronds leaning left
+  // SwayLeft: full willow with fronds leaning left (decorative crown)
   const swayLeft = createEmptyPattern();
   drawRect(swayLeft, 28, 10, 35, 62); // Full trunk
-  // Crown
-  drawCircle(swayLeft, 32, 8, 8);
+  // Crown with radiant burst pattern
+  drawCircle(swayLeft, 32, 8, 9);
+  drawStar(swayLeft, 32, 8, 8, 11, 7, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 10;
+    const tipY = 8 + Math.sin(angle) * 10;
+    drawPetal(swayLeft, tipX, tipY, 32, 8, 3);
+  }
+  drawGlowRing(swayLeft, 32, 8, 12, 2);
   // Left-leaning fronds (longer cascade)
   for (let i = 0; i < 8; i++) {
     const baseX = 20 + i * 3;
@@ -675,10 +1287,19 @@ function createWeepingWillowPatterns() {
   // SwayRight: mirror of swayLeft
   const swayRight = mirrorHorizontal(swayLeft);
 
-  // Full: neutral position (average of sway positions)
+  // Full: neutral position with decorative crown
   const full = createEmptyPattern();
   drawRect(full, 28, 10, 35, 62); // Full trunk
-  drawCircle(full, 32, 8, 8);
+  // Crown with radiant burst pattern
+  drawCircle(full, 32, 8, 9);
+  drawStar(full, 32, 8, 8, 11, 7, 0);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 10;
+    const tipY = 8 + Math.sin(angle) * 10;
+    drawPetal(full, tipX, tipY, 32, 8, 3);
+  }
+  drawGlowRing(full, 32, 8, 12, 2);
   // Balanced fronds
   for (let i = 0; i < 7; i++) {
     const baseX = 18 + i * 2;
@@ -696,6 +1317,726 @@ function createWeepingWillowPatterns() {
   return { sapling, growing, swayLeft, swayRight, full };
 }
 
+/**
+ * Generate patterns for Fractal Bloom
+ * A recursive self-similar pattern that grows outward
+ */
+function createFractalBloomPatterns() {
+  // Seed: simple center
+  const seed = createEmptyPattern();
+  drawCircle(seed, 32, 32, 4);
+  drawStar(seed, 32, 32, 5, 6, 3, 0);
+
+  // Sprout: first level of recursion
+  const sprout = createEmptyPattern();
+  drawCircle(sprout, 32, 32, 5);
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 16;
+    const tipY = 32 + Math.sin(angle) * 16;
+    drawPetal(sprout, tipX, tipY, 32, 32, 7);
+    drawCircle(sprout, Math.round(tipX), Math.round(tipY), 2);
+  }
+
+  // Bloom: full fractal pattern
+  const bloom = createEmptyPattern();
+  drawCircle(bloom, 32, 32, 5);
+  // First level - 5 petals
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 24;
+    const tipY = 32 + Math.sin(angle) * 24;
+    const baseX = 32 + Math.cos(angle) * 10;
+    const baseY = 32 + Math.sin(angle) * 10;
+    drawPetal(bloom, tipX, tipY, baseX, baseY, 10);
+
+    // Second level - smaller petals at endpoints
+    const miniTipX = tipX + Math.cos(angle) * 6;
+    const miniTipY = tipY + Math.sin(angle) * 6;
+    drawPetal(bloom, miniTipX, miniTipY, tipX, tipY, 4);
+
+    // Side mini petals
+    const leftAngle = angle - Math.PI / 3;
+    const rightAngle = angle + Math.PI / 3;
+    drawPetal(
+      bloom,
+      tipX + Math.cos(leftAngle) * 5,
+      tipY + Math.sin(leftAngle) * 5,
+      32 + Math.cos(angle) * 17,
+      32 + Math.sin(angle) * 17,
+      3
+    );
+    drawPetal(
+      bloom,
+      tipX + Math.cos(rightAngle) * 5,
+      tipY + Math.sin(rightAngle) * 5,
+      32 + Math.cos(angle) * 17,
+      32 + Math.sin(angle) * 17,
+      3
+    );
+  }
+
+  return { seed, sprout, bloom };
+}
+
+/**
+ * Generate patterns for Phoenix Flame
+ * Rising fire-like pattern with wing animations
+ */
+function createPhoenixFlamePatterns() {
+  // Ember: small spark
+  const ember = createEmptyPattern();
+  drawCircle(ember, 32, 36, 6);
+  drawStar(ember, 32, 36, 5, 8, 4, 0);
+  drawGlowRing(ember, 32, 36, 10, 2);
+
+  // Rising: flames begin to spread
+  const rising = createEmptyPattern();
+  drawCircle(rising, 32, 32, 7);
+  drawPetal(rising, 32, 20, 32, 28, 9);
+  // Side flames
+  for (let side = -1; side <= 1; side += 2) {
+    const angle = (side * Math.PI) / 4;
+    const tipX = 32 + Math.cos(angle) * 16;
+    const tipY = 28 + Math.sin(angle) * 12;
+    drawPetal(rising, tipX, tipY, 32, 30, 7);
+  }
+  drawGlowRing(rising, 32, 30, 18, 2);
+
+  // Blaze: full phoenix with spread wings
+  const blaze = createEmptyPattern();
+  drawCircle(blaze, 32, 32, 8);
+  // Body flame
+  drawPetal(blaze, 32, 12, 32, 26, 12);
+  // Wing-like flames (both sides)
+  for (let side = -1; side <= 1; side += 2) {
+    for (let i = 0; i < 4; i++) {
+      const baseAngle = side * (Math.PI / 4 + (i * Math.PI) / 8);
+      const yOffset = 24 - i * 3;
+      const length = 20 - i * 2;
+      const tipX = 32 + Math.cos(baseAngle) * length;
+      const tipY = yOffset + Math.sin(baseAngle) * length;
+      drawPetal(blaze, tipX, tipY, 32, yOffset, 7 - i);
+    }
+  }
+  // Tail flames
+  for (let i = 0; i < 3; i++) {
+    const angle = Math.PI / 2 + ((i - 1) * Math.PI) / 6;
+    drawPetal(blaze, 32 + Math.cos(angle) * 8, 44 + i * 4, 32, 36, 6);
+  }
+  drawGlowRing(blaze, 32, 28, 28, 3);
+
+  return { ember, rising, blaze };
+}
+
+/**
+ * Generate patterns for Crystal Cluster
+ * Geometric crystal growth with faceted forms
+ */
+function createCrystalClusterPatterns() {
+  // Nucleation: tiny crystal seed
+  const nucleation = createEmptyPattern();
+  drawCircle(nucleation, 32, 32, 4);
+  drawStar(nucleation, 32, 32, 6, 6, 3, 0);
+
+  // Formation: crystals begin to form
+  const formation = createEmptyPattern();
+  drawCircle(formation, 32, 32, 6);
+  drawStar(formation, 32, 32, 6, 12, 7, 0);
+  // Small crystals at cardinal points
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 14;
+    const y = 32 + Math.sin(angle) * 14;
+    drawStar(formation, Math.round(x), Math.round(y), 4, 5, 3, 0);
+  }
+
+  // Growth: full crystal cluster
+  const growth = createEmptyPattern();
+  drawCircle(growth, 32, 32, 7);
+  drawStar(growth, 32, 32, 8, 14, 8, 0);
+  // Crystal formations at 8 positions
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 20;
+    const y = 32 + Math.sin(angle) * 20;
+    drawCircle(growth, Math.round(x), Math.round(y), 5);
+    drawStar(growth, Math.round(x), Math.round(y), 6, 7, 4, 0);
+  }
+  // Connecting rays
+  drawSmoothRadialBurst(growth, 32, 32, 8, 24, 2, 0.5, 22.5);
+
+  return { nucleation, formation, growth };
+}
+
+/**
+ * Generate patterns for Kaleidoscope Star
+ * Rotating geometric-organic hybrid
+ */
+function createKaleidoscopeStarPatterns() {
+  // Rotate1: first rotation position
+  const rotate1 = createEmptyPattern();
+  drawCircle(rotate1, 32, 32, 5);
+  drawStar(rotate1, 32, 32, 8, 12, 6, 0);
+  // Mid-layer circles
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 16;
+    const y = 32 + Math.sin(angle) * 16;
+    drawCircle(rotate1, Math.round(x), Math.round(y), 4);
+  }
+  // Outer petals
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const tipX = 32 + Math.cos(angle) * 28;
+    const tipY = 32 + Math.sin(angle) * 28;
+    const baseX = 32 + Math.cos(angle) * 18;
+    const baseY = 32 + Math.sin(angle) * 18;
+    drawPetal(rotate1, tipX, tipY, baseX, baseY, 6);
+  }
+  drawSmoothRadialBurst(rotate1, 32, 32, 16, 26, 1, 0.2, 11.25);
+
+  // Rotate2: 22.5° rotation
+  const rotate2 = createEmptyPattern();
+  drawCircle(rotate2, 32, 32, 5);
+  drawStar(rotate2, 32, 32, 8, 12, 6, 22.5);
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+    const x = 32 + Math.cos(angle) * 16;
+    const y = 32 + Math.sin(angle) * 16;
+    drawCircle(rotate2, Math.round(x), Math.round(y), 4);
+  }
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + Math.PI / 8;
+    const tipX = 32 + Math.cos(angle) * 28;
+    const tipY = 32 + Math.sin(angle) * 28;
+    const baseX = 32 + Math.cos(angle) * 18;
+    const baseY = 32 + Math.sin(angle) * 18;
+    drawPetal(rotate2, tipX, tipY, baseX, baseY, 6);
+  }
+  drawSmoothRadialBurst(rotate2, 32, 32, 16, 26, 1, 0.2, 0);
+
+  return { rotate1, rotate2 };
+}
+
+/**
+ * Generate patterns for Vortex Spiral
+ * Swirling energy pattern with dynamic motion
+ */
+function createVortexSpiralPatterns() {
+  // Calm: gentle center
+  const calm = createEmptyPattern();
+  drawCircle(calm, 32, 32, 6);
+  drawStar(calm, 32, 32, 5, 10, 5, 0);
+  // Single spiral arm
+  for (let step = 0; step < 6; step++) {
+    const t = step / 6;
+    const angle = t * Math.PI * 1.2;
+    const radius = 10 + t * 16;
+    const x = 32 + Math.cos(angle) * radius;
+    const y = 32 + Math.sin(angle) * radius;
+    drawCircle(calm, Math.round(x), Math.round(y), 5 - t * 2);
+  }
+
+  // Spin: multiple spiral arms
+  const spin = createEmptyPattern();
+  drawCircle(spin, 32, 32, 5);
+  drawStar(spin, 32, 32, 5, 9, 4, 0);
+  // 5 spiral arms
+  for (let arm = 0; arm < 5; arm++) {
+    const baseAngle = (arm / 5) * Math.PI * 2;
+    for (let step = 0; step < 8; step++) {
+      const t = step / 8;
+      const angle = baseAngle + t * Math.PI * 1.2;
+      const radius = 8 + t * 18;
+      const x = 32 + Math.cos(angle) * radius;
+      const y = 32 + Math.sin(angle) * radius;
+      drawCircle(spin, Math.round(x), Math.round(y), 6 - t * 3);
+    }
+  }
+
+  // Whirl: intense vortex
+  const whirl = createEmptyPattern();
+  drawCircle(whirl, 32, 32, 7);
+  drawStar(whirl, 32, 32, 8, 11, 5, 0);
+  // Dense spiral pattern
+  for (let arm = 0; arm < 8; arm++) {
+    const baseAngle = (arm / 8) * Math.PI * 2;
+    for (let step = 0; step < 10; step++) {
+      const t = step / 10;
+      const angle = baseAngle + t * Math.PI * 1.5;
+      const radius = 10 + t * 22;
+      const x = 32 + Math.cos(angle) * radius;
+      const y = 32 + Math.sin(angle) * radius;
+      drawCircle(whirl, Math.round(x), Math.round(y), 7 - t * 4);
+    }
+  }
+  drawGlowRing(whirl, 32, 32, 28, 2);
+
+  return { calm, spin, whirl };
+}
+
+/**
+ * Generate patterns for Nebula Bloom
+ * Cosmic cloud-flower hybrid
+ */
+function createNebulaBloomPatterns() {
+  // Drift: diffuse cloud forming
+  const drift = createEmptyPattern();
+  const driftCenters = [
+    { x: 32, y: 32, r: 10 },
+    { x: 24, y: 28, r: 7 },
+    { x: 40, y: 28, r: 7 },
+  ];
+  driftCenters.forEach(({ x, y, r }) => {
+    drawCircle(drift, x, y, r);
+    drawGlowRing(drift, x, y, r + 4, 2);
+  });
+
+  // Coalescence: cloud forms taking shape
+  const coalescence = createEmptyPattern();
+  const coalCenters = [
+    { x: 32, y: 32, r: 12 },
+    { x: 22, y: 24, r: 9 },
+    { x: 42, y: 24, r: 9 },
+    { x: 24, y: 40, r: 8 },
+    { x: 40, y: 40, r: 8 },
+  ];
+  coalCenters.forEach(({ x, y, r }) => {
+    drawCircle(coalescence, x, y, r);
+    drawGlowRing(coalescence, x, y, r + 3, 2);
+  });
+  // Emerging points
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 20;
+    const y = 32 + Math.sin(angle) * 20;
+    drawCircle(coalescence, Math.round(x), Math.round(y), 2);
+  }
+
+  // Radiance: full nebula bloom
+  const radiance = createEmptyPattern();
+  const radCenters = [
+    { x: 32, y: 32, r: 14 },
+    { x: 20, y: 20, r: 11 },
+    { x: 44, y: 20, r: 10 },
+    { x: 18, y: 38, r: 12 },
+    { x: 46, y: 38, r: 11 },
+    { x: 32, y: 46, r: 9 },
+  ];
+  radCenters.forEach(({ x, y, r }) => {
+    drawCircle(radiance, x, y, r);
+    drawGlowRing(radiance, x, y, r + 4, 2);
+  });
+  // Radiant points
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 28;
+    const y = 32 + Math.sin(angle) * 28;
+    drawCircle(radiance, Math.round(x), Math.round(y), 2.5);
+    drawStar(radiance, Math.round(x), Math.round(y), 4, 4, 2, 0);
+  }
+
+  return { drift, coalescence, radiance };
+}
+
+/**
+ * Generate patterns for Aurora Wisp
+ * Northern lights captured as ethereal flowing ribbons
+ */
+function createAuroraWispPatterns() {
+  // Shimmer: faint glow
+  const shimmer = createEmptyPattern();
+  drawCircle(shimmer, 32, 32, 5);
+  drawGlowRing(shimmer, 32, 32, 12, 2);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 8;
+    const y = 32 + Math.sin(angle) * 8;
+    drawCircle(shimmer, Math.round(x), Math.round(y), 1.5);
+  }
+
+  // Flow: ribbons beginning to wave
+  const flow = createEmptyPattern();
+  drawCircle(flow, 32, 32, 4);
+  // Flowing ribbons at 4 cardinal directions
+  for (let dir = 0; dir < 4; dir++) {
+    const baseAngle = (dir / 4) * Math.PI * 2;
+    for (let segment = 0; segment < 4; segment++) {
+      const offset = segment * 5;
+      const wave = Math.sin(segment * 0.8) * 3;
+      const angle = baseAngle + wave * 0.1;
+      const x = 32 + Math.cos(angle) * (8 + offset);
+      const y = 32 + Math.sin(angle) * (8 + offset);
+      drawCircle(flow, Math.round(x), Math.round(y), 2 - segment * 0.3);
+    }
+  }
+
+  // Dance: full aurora ribbons
+  const dance = createEmptyPattern();
+  drawCircle(dance, 32, 32, 5);
+  drawGlowRing(dance, 32, 32, 8, 1);
+  // Complex flowing ribbons
+  for (let dir = 0; dir < 8; dir++) {
+    const baseAngle = (dir / 8) * Math.PI * 2;
+    for (let segment = 0; segment < 6; segment++) {
+      const offset = segment * 4;
+      const wave = Math.sin(segment * 1.2 + dir * 0.5) * 4;
+      const perpWave = Math.cos(segment * 0.9) * 2;
+      const angle = baseAngle + wave * 0.08;
+      const x = 32 + Math.cos(angle) * (6 + offset) + Math.cos(angle + Math.PI / 2) * perpWave;
+      const y = 32 + Math.sin(angle) * (6 + offset) + Math.sin(angle + Math.PI / 2) * perpWave;
+      drawCircle(dance, Math.round(x), Math.round(y), 2.5 - segment * 0.3);
+    }
+  }
+  // Add sparkles
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const r = 24 + (i % 3) * 3;
+    const x = 32 + Math.cos(angle) * r;
+    const y = 32 + Math.sin(angle) * r;
+    drawStar(dance, Math.round(x), Math.round(y), 4, 3, 1.5, 0);
+  }
+
+  return { shimmer, flow, dance };
+}
+
+/**
+ * Generate patterns for Prismatic Fern
+ * Rainbow light refracted through crystalline fronds
+ */
+function createPrismaticFernPatterns() {
+  // Sprout: simple frond
+  const sprout = createEmptyPattern();
+  drawCircle(sprout, 32, 40, 4);
+  // Single frond
+  for (let i = 0; i < 8; i++) {
+    const y = 40 - i * 4;
+    const width = 2 + Math.sin(i * 0.5) * 1.5;
+    for (let side = -1; side <= 1; side += 2) {
+      const x = 32 + side * (width + i * 0.5);
+      drawCircle(sprout, Math.round(x), y, 1.5);
+    }
+  }
+
+  // Unfurling: multiple fronds
+  const unfurling = createEmptyPattern();
+  drawCircle(unfurling, 32, 38, 5);
+  // Three fronds
+  for (let frond = 0; frond < 3; frond++) {
+    const frondAngle = ((frond - 1) * Math.PI) / 6;
+    for (let i = 0; i < 10; i++) {
+      const distance = i * 3;
+      const x = 32 + Math.sin(frondAngle) * distance;
+      const y = 38 - Math.cos(frondAngle) * distance;
+      const width = 2 + Math.sin(i * 0.4) * 1.2;
+      // Leaflets on both sides
+      for (let side = -1; side <= 1; side += 2) {
+        const perpAngle = frondAngle + (side * Math.PI) / 2;
+        const leafX = x + Math.sin(perpAngle) * (width + i * 0.3);
+        const leafY = y + Math.cos(perpAngle) * (width + i * 0.3);
+        drawCircle(unfurling, Math.round(leafX), Math.round(leafY), 1.5);
+      }
+    }
+  }
+
+  // Prismatic: full rainbow fern
+  const prismatic = createEmptyPattern();
+  drawCircle(prismatic, 32, 36, 6);
+  drawGlowRing(prismatic, 32, 36, 10, 1);
+  // Five radial fronds
+  for (let frond = 0; frond < 5; frond++) {
+    const frondAngle = (frond / 5) * Math.PI * 2 - Math.PI / 2;
+    for (let i = 0; i < 12; i++) {
+      const distance = i * 2.5;
+      const x = 32 + Math.cos(frondAngle) * distance;
+      const y = 36 + Math.sin(frondAngle) * distance;
+      const width = 2.5 + Math.sin(i * 0.3) * 1.5;
+      // Crystal leaflets with sparkles
+      for (let side = -1; side <= 1; side += 2) {
+        const perpAngle = frondAngle + (side * Math.PI) / 2;
+        const leafX = x + Math.cos(perpAngle) * (width + i * 0.2);
+        const leafY = y + Math.sin(perpAngle) * (width + i * 0.2);
+        drawCircle(prismatic, Math.round(leafX), Math.round(leafY), 1.8);
+        // Add sparkle at tip
+        if (i > 6 && i % 2 === 0) {
+          drawStar(prismatic, Math.round(leafX), Math.round(leafY), 3, 2, 1, 0);
+        }
+      }
+    }
+  }
+
+  return { sprout, unfurling, prismatic };
+}
+
+/**
+ * Generate patterns for Quantum Rose
+ * Rose petals existing in quantum superposition
+ */
+function createQuantumRosePatterns() {
+  // Bud: tightly furled
+  const bud = createEmptyPattern();
+  drawCircle(bud, 32, 32, 6);
+  // Spiraling bud petals
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2 + i * 0.3;
+    const r = 8 + i * 0.5;
+    const x = 32 + Math.cos(angle) * r;
+    const y = 32 + Math.sin(angle) * r;
+    drawPetal(bud, x, y, 32, 32, 4);
+  }
+
+  // Superposed: multiple quantum states visible
+  const superposed = createEmptyPattern();
+  drawCircle(superposed, 32, 32, 5);
+  // Three overlapping rose patterns
+  for (let state = 0; state < 3; state++) {
+    const rotationOffset = (state / 3) * Math.PI * 2;
+    for (let layer = 0; layer < 3; layer++) {
+      const petalCount = 5 + layer * 2;
+      const radius = 10 + layer * 6;
+      for (let i = 0; i < petalCount; i++) {
+        const angle = (i / petalCount) * Math.PI * 2 + rotationOffset;
+        const tipX = 32 + Math.cos(angle) * radius;
+        const tipY = 32 + Math.sin(angle) * radius;
+        const baseX = 32 + Math.cos(angle) * (radius - 5);
+        const baseY = 32 + Math.sin(angle) * (radius - 5);
+        drawPetal(superposed, tipX, tipY, baseX, baseY, 6 - layer);
+      }
+    }
+  }
+
+  // Collapsed: beautiful classical rose
+  const collapsed = createEmptyPattern();
+  drawCircle(collapsed, 32, 32, 4);
+  // Tight spiral center
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2 + i * 0.4;
+    const r = 5 + i * 0.8;
+    const x = 32 + Math.cos(angle) * r;
+    const y = 32 + Math.sin(angle) * r;
+    drawCircle(collapsed, Math.round(x), Math.round(y), 2);
+  }
+  // Outer petals in perfect arrangement
+  for (let layer = 0; layer < 4; layer++) {
+    const petalCount = 5 + layer * 2;
+    const radius = 16 + layer * 5;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2 + layer * 0.3;
+      const tipX = 32 + Math.cos(angle) * radius;
+      const tipY = 32 + Math.sin(angle) * radius;
+      const baseX = 32 + Math.cos(angle) * (radius - 6);
+      const baseY = 32 + Math.sin(angle) * (radius - 6);
+      drawPetal(collapsed, tipX, tipY, baseX, baseY, 7 - layer);
+    }
+  }
+
+  return { bud, superposed, collapsed };
+}
+
+/**
+ * Generate patterns for Star Moss
+ * Bioluminescent moss forming constellation patterns
+ */
+function createStarMossPatterns() {
+  // Sparse: few stars
+  const sparse = createEmptyPattern();
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const r = 12 + (i % 2) * 6;
+    const x = 32 + Math.cos(angle) * r;
+    const y = 32 + Math.sin(angle) * r;
+    drawStar(sparse, Math.round(x), Math.round(y), 5, 4, 2, 0);
+    drawGlowRing(sparse, Math.round(x), Math.round(y), 6, 1);
+  }
+
+  // Growing: constellation forming
+  const growing = createEmptyPattern();
+  // Multiple star clusters
+  for (let cluster = 0; cluster < 4; cluster++) {
+    const clusterAngle = (cluster / 4) * Math.PI * 2;
+    const clusterX = 32 + Math.cos(clusterAngle) * 16;
+    const clusterY = 32 + Math.sin(clusterAngle) * 16;
+    drawStar(growing, Math.round(clusterX), Math.round(clusterY), 6, 5, 2.5, 0);
+    drawGlowRing(growing, Math.round(clusterX), Math.round(clusterY), 8, 2);
+    // Surrounding mini stars
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2;
+      const x = clusterX + Math.cos(angle) * 6;
+      const y = clusterY + Math.sin(angle) * 6;
+      drawStar(growing, Math.round(x), Math.round(y), 4, 3, 1.5, 0);
+    }
+  }
+
+  // Galaxy: dense starfield
+  const galaxy = createEmptyPattern();
+  drawCircle(galaxy, 32, 32, 8);
+  drawGlowRing(galaxy, 32, 32, 14, 3);
+  // Spiral pattern of stars
+  for (let i = 0; i < 32; i++) {
+    const angle = (i / 32) * Math.PI * 2 * 3; // 3 arms
+    const r = 4 + i * 0.8;
+    const x = 32 + Math.cos(angle) * r;
+    const y = 32 + Math.sin(angle) * r;
+    const size = 3 + Math.sin(i * 0.5) * 1;
+    drawStar(galaxy, Math.round(x), Math.round(y), 5, size, size * 0.6, 0);
+    // Add glow for larger stars
+    if (i % 4 === 0) {
+      drawGlowRing(galaxy, Math.round(x), Math.round(y), size * 2, 1);
+    }
+  }
+
+  return { sparse, growing, galaxy };
+}
+
+/**
+ * Generate patterns for Dream Vine
+ * Ethereal flowing vines with dreamlike quality
+ */
+function createDreamVinePatterns() {
+  // Tendril: single vine
+  const tendril = createEmptyPattern();
+  drawCircle(tendril, 32, 44, 4);
+  // Curling vine upward
+  for (let i = 0; i < 16; i++) {
+    const t = i / 16;
+    const angle = Math.sin(t * Math.PI * 2) * 0.4;
+    const x = 32 + Math.sin(angle) * (i * 1.2);
+    const y = 44 - i * 2.5;
+    drawCircle(tendril, Math.round(x), Math.round(y), 2);
+    // Small leaves
+    if (i % 4 === 0 && i > 0) {
+      const leafX = x + Math.cos(angle + Math.PI / 2) * 4;
+      const leafY = y + Math.sin(angle + Math.PI / 2) * 4;
+      drawPetal(tendril, leafX, leafY, x, y, 3);
+    }
+  }
+
+  // Weaving: multiple intertwined vines
+  const weaving = createEmptyPattern();
+  drawCircle(weaving, 32, 40, 5);
+  // Three intertwining vines
+  for (let vine = 0; vine < 3; vine++) {
+    const vineOffset = (vine / 3) * Math.PI * 2;
+    for (let i = 0; i < 14; i++) {
+      const t = i / 14;
+      const spiralAngle = t * Math.PI * 3 + vineOffset;
+      const radius = 4 + i * 1.5;
+      const x = 32 + Math.cos(spiralAngle) * radius;
+      const y = 40 - i * 2;
+      drawCircle(weaving, Math.round(x), Math.round(y), 2);
+      // Leaves along vine
+      if (i % 3 === 0) {
+        const leafAngle = spiralAngle + Math.PI / 2;
+        const leafX = x + Math.cos(leafAngle) * 4;
+        const leafY = y + Math.sin(leafAngle) * 4;
+        drawPetal(weaving, leafX, leafY, x, y, 3.5);
+      }
+    }
+  }
+
+  // Cascade: full flowing garden
+  const cascade = createEmptyPattern();
+  drawCircle(cascade, 32, 32, 6);
+  drawGlowRing(cascade, 32, 32, 10, 2);
+  // Five major vines flowing outward
+  for (let vine = 0; vine < 5; vine++) {
+    const baseAngle = (vine / 5) * Math.PI * 2;
+    for (let i = 0; i < 16; i++) {
+      const t = i / 16;
+      // Flowing curve
+      const curveAngle = baseAngle + Math.sin(t * Math.PI * 2) * 0.6;
+      const distance = 6 + i * 1.8;
+      const x = 32 + Math.cos(curveAngle) * distance;
+      const y = 32 + Math.sin(curveAngle) * distance;
+      drawCircle(cascade, Math.round(x), Math.round(y), 2.5 - i * 0.1);
+      // Leaves and blossoms
+      if (i % 2 === 0) {
+        const perpAngle = curveAngle + Math.PI / 2;
+        const leafX = x + Math.cos(perpAngle) * 5;
+        const leafY = y + Math.sin(perpAngle) * 5;
+        drawPetal(cascade, leafX, leafY, x, y, 4);
+      }
+      // Flowers at ends
+      if (i > 12) {
+        drawStar(cascade, Math.round(x), Math.round(y), 5, 3, 1.5, 0);
+      }
+    }
+  }
+
+  return { tendril, weaving, cascade };
+}
+
+/**
+ * Generate patterns for Cosmic Lotus
+ * Sacred geometry meets cosmic bloom
+ */
+function createCosmicLotusPatterns() {
+  // Seed: sacred geometry core
+  const seed = createEmptyPattern();
+  drawCircle(seed, 32, 32, 6);
+  drawStar(seed, 32, 32, 6, 8, 4, 0);
+  drawCircle(seed, 32, 32, 3);
+  // Hexagonal pattern
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 10;
+    const y = 32 + Math.sin(angle) * 10;
+    drawCircle(seed, Math.round(x), Math.round(y), 2);
+  }
+
+  // Opening: petals unfurling in sacred pattern
+  const opening = createEmptyPattern();
+  drawCircle(opening, 32, 32, 5);
+  // Flower of life pattern
+  for (let ring = 0; ring < 3; ring++) {
+    const count = 6 * (ring + 1);
+    const radius = 8 + ring * 8;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const x = 32 + Math.cos(angle) * radius;
+      const y = 32 + Math.sin(angle) * radius;
+      drawCircle(opening, Math.round(x), Math.round(y), 3 - ring * 0.5);
+    }
+  }
+  // Petals emerging
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const tipX = 32 + Math.cos(angle) * 18;
+    const tipY = 32 + Math.sin(angle) * 18;
+    drawPetal(opening, tipX, tipY, 32, 32, 8);
+  }
+
+  // Transcendent: full cosmic bloom
+  const transcendent = createEmptyPattern();
+  drawCircle(transcendent, 32, 32, 6);
+  drawGlowRing(transcendent, 32, 32, 12, 3);
+  // Multiple layers of petals
+  for (let layer = 0; layer < 3; layer++) {
+    const petalCount = 8 + layer * 4;
+    const radius = 14 + layer * 8;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2 + layer * 0.2;
+      const tipX = 32 + Math.cos(angle) * radius;
+      const tipY = 32 + Math.sin(angle) * radius;
+      const baseX = 32 + Math.cos(angle) * (radius - 8);
+      const baseY = 32 + Math.sin(angle) * (radius - 8);
+      drawPetal(transcendent, tipX, tipY, baseX, baseY, 10 - layer * 2);
+    }
+  }
+  // Sacred geometry overlay
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const x = 32 + Math.cos(angle) * 28;
+    const y = 32 + Math.sin(angle) * 28;
+    drawStar(transcendent, Math.round(x), Math.round(y), 6, 4, 2, 0);
+  }
+  // Central mandala
+  drawStar(transcendent, 32, 32, 12, 8, 4, 0);
+
+  return { seed, opening, transcendent };
+}
+
 // Generate all patterns once at module load
 const simpleBloomPatterns = createSimpleBloomPatterns();
 const quantumTulipPatterns = createQuantumTulipPatterns();
@@ -711,6 +2052,18 @@ const cloudBushPatterns = createCloudBushPatterns();
 const berryThicketPatterns = createBerryThicketPatterns();
 const saplingHopePatterns = createSaplingHopePatterns();
 const weepingWillowPatterns = createWeepingWillowPatterns();
+const fractalBloomPatterns = createFractalBloomPatterns();
+const phoenixFlamePatterns = createPhoenixFlamePatterns();
+const crystalClusterPatterns = createCrystalClusterPatterns();
+const kaleidoscopeStarPatterns = createKaleidoscopeStarPatterns();
+const vortexSpiralPatterns = createVortexSpiralPatterns();
+const nebulaBloomPatterns = createNebulaBloomPatterns();
+const auroraWispPatterns = createAuroraWispPatterns();
+const prismaticFernPatterns = createPrismaticFernPatterns();
+const quantumRosePatterns = createQuantumRosePatterns();
+const starMossPatterns = createStarMossPatterns();
+const dreamVinePatterns = createDreamVinePatterns();
+const cosmicLotusPatterns = createCosmicLotusPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -1494,6 +2847,537 @@ const pulsingOrb: PlantVariant = {
 };
 
 /**
+ * Fractal Bloom
+ *
+ * A self-similar recursive pattern that grows in complexity.
+ * Rare abstract ethereal variant.
+ * Scale: 1.0x (standard)
+ */
+const fractalBloom: PlantVariant = {
+  id: "fractal-bloom",
+  name: "Fractal Bloom",
+  description: "A mesmerizing recursive pattern that grows in self-similar complexity",
+  rarity: 0.2, // Rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "seed",
+      duration: 15,
+      pattern: fractalBloomPatterns.seed,
+      // Lavender - mysterious origin
+      palette: ["#E0C0F0", "#E8D0F0", "#F0E0F8"],
+      opacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "sprout",
+      duration: 20,
+      pattern: fractalBloomPatterns.sprout,
+      // Brightening purple
+      palette: ["#D0B0E8", "#E0C0F0", "#E8D0F8"],
+      opacity: 0.75,
+      scale: 0.85,
+    },
+    {
+      name: "bloom",
+      duration: 60,
+      pattern: fractalBloomPatterns.bloom,
+      // Full vibrant purple
+      palette: ["#C8A8E0", "#D8B8F0", "#E8C8F8"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Phoenix Flame
+ *
+ * A rising fire-like pattern with wing animations.
+ * Very rare abstract ethereal variant.
+ * Scale: 1.1x (slightly larger for drama)
+ */
+const phoenixFlame: PlantVariant = {
+  id: "phoenix-flame",
+  name: "Phoenix Flame",
+  description: "Rising flames take the form of a mythical bird spreading its wings",
+  rarity: 0.15, // Very rare
+  requiresObservationToGerminate: true,
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "ember",
+      duration: 12,
+      pattern: phoenixFlamePatterns.ember,
+      // Warm ember orange
+      palette: ["#F0A850", "#F8B860", "#FCC870"],
+      opacity: 0.6,
+      scale: 0.75,
+    },
+    {
+      name: "rising",
+      duration: 15,
+      pattern: phoenixFlamePatterns.rising,
+      // Brightening flame
+      palette: ["#F89840", "#FCA850", "#FCB860"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "blaze",
+      duration: 25,
+      pattern: phoenixFlamePatterns.blaze,
+      // Full radiant flame
+      palette: ["#F88830", "#FC9840", "#FCA850"],
+      opacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Crystal Cluster
+ *
+ * Geometric crystal growth with faceted forms.
+ * Rare abstract ethereal variant.
+ * Scale: 0.9x (compact gem)
+ */
+const crystalCluster: PlantVariant = {
+  id: "crystal-cluster",
+  name: "Crystal Cluster",
+  description: "Geometric crystals that grow with angular precision and inner light",
+  rarity: 0.25, // Rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "nucleation",
+      duration: 18,
+      pattern: crystalClusterPatterns.nucleation,
+      // Ice blue - crystal seed
+      palette: ["#B0D8F0", "#C0E0F8", "#D0E8FC"],
+      opacity: 0.4,
+      scale: 0.6,
+    },
+    {
+      name: "formation",
+      duration: 25,
+      pattern: crystalClusterPatterns.formation,
+      // Brightening crystalline
+      palette: ["#A0D0E8", "#B0D8F0", "#C0E0F8"],
+      opacity: 0.7,
+      scale: 0.75,
+    },
+    {
+      name: "growth",
+      duration: 50,
+      pattern: crystalClusterPatterns.growth,
+      // Full radiant crystal
+      palette: ["#90C8E0", "#A0D0E8", "#B0D8F0"],
+      opacity: 1.0,
+      scale: 0.9,
+    },
+  ],
+};
+
+/**
+ * Kaleidoscope Star
+ *
+ * Rotating geometric-organic hybrid pattern.
+ * Rare abstract ethereal variant with continuous rotation.
+ * Scale: 1.15x (prominent display)
+ */
+const kaleidoscopeStar: PlantVariant = {
+  id: "kaleidoscope-star",
+  name: "Kaleidoscope Star",
+  description: "A complex geometric pattern that rotates in mesmerizing symmetry",
+  rarity: 0.2, // Rare
+  requiresObservationToGerminate: true,
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "rotate1",
+      duration: 10,
+      pattern: kaleidoscopeStarPatterns.rotate1,
+      // Rainbow pastel - shifting colors
+      palette: ["#F0C0D0", "#D0E0F0", "#E0F0D0"],
+      opacity: 0.9,
+      scale: 1.1,
+    },
+    {
+      name: "rotate2",
+      duration: 10,
+      pattern: kaleidoscopeStarPatterns.rotate2,
+      // Shifted pastel colors
+      palette: ["#E0D0F0", "#F0E0C0", "#C0F0E0"],
+      opacity: 1.0,
+      scale: 1.15,
+    },
+  ],
+};
+
+/**
+ * Vortex Spiral
+ *
+ * Swirling energy pattern with dynamic motion.
+ * Rare abstract ethereal variant with pulsing spiral arms.
+ * Scale: 1.0x (standard)
+ */
+const vortexSpiral: PlantVariant = {
+  id: "vortex-spiral",
+  name: "Vortex Spiral",
+  description: "Swirling energy spirals that pulse with hypnotic rhythm",
+  rarity: 0.25, // Rare
+  requiresObservationToGerminate: true,
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "calm",
+      duration: 12,
+      pattern: vortexSpiralPatterns.calm,
+      // Deep blue-purple - calm center
+      palette: ["#9080C0", "#A090D0", "#B0A0E0"],
+      opacity: 0.6,
+      scale: 0.85,
+    },
+    {
+      name: "spin",
+      duration: 8,
+      pattern: vortexSpiralPatterns.spin,
+      // Vibrant purple - spinning
+      palette: ["#A090D0", "#B0A0E0", "#C0B0F0"],
+      opacity: 0.85,
+      scale: 1.0,
+    },
+    {
+      name: "whirl",
+      duration: 6,
+      pattern: vortexSpiralPatterns.whirl,
+      // Bright radiant purple - peak intensity
+      palette: ["#B0A0E0", "#C0B0F0", "#D0C0F8"],
+      opacity: 1.0,
+      scale: 1.05,
+    },
+  ],
+};
+
+/**
+ * Nebula Bloom
+ *
+ * Cosmic cloud-flower hybrid that forms from diffuse clouds.
+ * Very rare abstract ethereal variant.
+ * Scale: 1.2x (large cosmic display)
+ */
+const nebulaBloom: PlantVariant = {
+  id: "nebula-bloom",
+  name: "Nebula Bloom",
+  description: "Cosmic clouds coalesce into a radiant bloom of stellar light",
+  rarity: 0.15, // Very rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "drift",
+      duration: 20,
+      pattern: nebulaBloomPatterns.drift,
+      // Soft nebula colors - diffuse
+      palette: ["#D0C0E0", "#E0D0F0", "#E8E0F8"],
+      opacity: 0.3,
+      scale: 0.8,
+    },
+    {
+      name: "coalescence",
+      duration: 25,
+      pattern: nebulaBloomPatterns.coalescence,
+      // Forming nebula - brightening
+      palette: ["#C0B0D8", "#D0C0E8", "#E0D0F8"],
+      opacity: 0.6,
+      scale: 1.0,
+    },
+    {
+      name: "radiance",
+      duration: 60,
+      pattern: nebulaBloomPatterns.radiance,
+      // Full stellar bloom - radiant
+      palette: ["#B0A0D0", "#C0B0E0", "#D0C0F0"],
+      opacity: 1.0,
+      scale: 1.2,
+    },
+  ],
+};
+
+/**
+ * Aurora Wisp
+ *
+ * Northern lights captured as flowing ethereal ribbons.
+ * Shimmers and dances with aurora-like movement.
+ * Loops for continuous ethereal flow.
+ */
+const auroraWisp: PlantVariant = {
+  id: "aurora-wisp",
+  name: "Aurora Wisp",
+  description: "Northern lights captured in flowing ribbons of ethereal beauty",
+  rarity: 0.18, // Very rare
+  requiresObservationToGerminate: true,
+  loop: true, // Continuous flowing animation
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "shimmer",
+      duration: 18,
+      pattern: auroraWispPatterns.shimmer,
+      // Soft cyan-green aurora
+      palette: ["#B8E8E0", "#C8F0E8", "#D8F8F0"],
+      opacity: 0.5,
+      scale: 0.85,
+    },
+    {
+      name: "flow",
+      duration: 22,
+      pattern: auroraWispPatterns.flow,
+      // Brightening aurora
+      palette: ["#A8E0D8", "#B8E8E0", "#C8F0E8"],
+      opacity: 0.75,
+      scale: 1.0,
+    },
+    {
+      name: "dance",
+      duration: 30,
+      pattern: auroraWispPatterns.dance,
+      // Full aurora brilliance
+      palette: ["#98D8D0", "#A8E0D8", "#B8E8E0"],
+      opacity: 1.0,
+      scale: 1.15,
+    },
+  ],
+};
+
+/**
+ * Prismatic Fern
+ *
+ * Rainbow light refracted through crystalline fronds.
+ * Each frond acts as a living prism.
+ */
+const prismaticFern: PlantVariant = {
+  id: "prismatic-fern",
+  name: "Prismatic Fern",
+  description: "Crystal fronds that refract light into rainbow patterns",
+  rarity: 0.2, // Rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "sprout",
+      duration: 20,
+      pattern: prismaticFernPatterns.sprout,
+      // Soft pastel rainbow start
+      palette: ["#E8D0F0", "#F0D8F8", "#F8E0FF"],
+      opacity: 0.6,
+      scale: 0.75,
+    },
+    {
+      name: "unfurling",
+      duration: 25,
+      pattern: prismaticFernPatterns.unfurling,
+      // Vibrant spectrum emerging
+      palette: ["#D8C0E8", "#E8D0F0", "#F0D8F8"],
+      opacity: 0.8,
+      scale: 0.9,
+    },
+    {
+      name: "prismatic",
+      duration: 55,
+      pattern: prismaticFernPatterns.prismatic,
+      // Full rainbow refraction
+      palette: ["#C8B0E0", "#D8C0E8", "#E8D0F0"],
+      opacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Quantum Rose
+ *
+ * Rose petals existing in quantum superposition until observed.
+ * Collapses into a classical rose when measured.
+ */
+const quantumRose: PlantVariant = {
+  id: "quantum-rose",
+  name: "Quantum Rose",
+  description: "A rose existing in superposition, collapsing into beauty when observed",
+  rarity: 0.12, // Very rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "bud",
+      duration: 18,
+      pattern: quantumRosePatterns.bud,
+      // Rose petal colors - soft
+      palette: ["#F0C8D8", "#F8D0E0", "#FFD8E8"],
+      opacity: 0.6,
+      scale: 0.7,
+    },
+    {
+      name: "superposed",
+      duration: 28,
+      pattern: quantumRosePatterns.superposed,
+      // Quantum shimmer - multiple states
+      palette: ["#E8B8D0", "#F0C0D8", "#F8C8E0"],
+      opacity: 0.7,
+      scale: 0.95,
+    },
+    {
+      name: "collapsed",
+      duration: 60,
+      pattern: quantumRosePatterns.collapsed,
+      // Classical rose - deep color
+      palette: ["#E0A8C8", "#E8B0D0", "#F0B8D8"],
+      opacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Star Moss
+ *
+ * Bioluminescent moss forming living constellations.
+ * Grows from sparse stars to dense galaxy.
+ */
+const starMoss: PlantVariant = {
+  id: "star-moss",
+  name: "Star Moss",
+  description: "Bioluminescent moss forming constellations across the ground",
+  rarity: 0.3, // Uncommon
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "sparse",
+      duration: 25,
+      pattern: starMossPatterns.sparse,
+      // Soft starlight
+      palette: ["#D0D8F0", "#D8E0F8", "#E0E8FF"],
+      opacity: 0.5,
+      scale: 0.85,
+    },
+    {
+      name: "growing",
+      duration: 30,
+      pattern: starMossPatterns.growing,
+      // Constellation forming
+      palette: ["#C0D0E8", "#C8D8F0", "#D0E0F8"],
+      opacity: 0.75,
+      scale: 1.0,
+    },
+    {
+      name: "galaxy",
+      duration: 50,
+      pattern: starMossPatterns.galaxy,
+      // Dense starfield
+      palette: ["#B0C8E0", "#B8D0E8", "#C0D8F0"],
+      opacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Dream Vine
+ *
+ * Ethereal vines that flow like liquid dreams.
+ * Weaves through space with impossible grace.
+ */
+const dreamVine: PlantVariant = {
+  id: "dream-vine",
+  name: "Dream Vine",
+  description: "Ethereal vines flowing through space like liquid dreams",
+  rarity: 0.22, // Rare
+  requiresObservationToGerminate: true,
+  loop: true, // Continuous flowing
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "tendril",
+      duration: 20,
+      pattern: dreamVinePatterns.tendril,
+      // Soft dreamy purple
+      palette: ["#D8C8E8", "#E0D0F0", "#E8D8F8"],
+      opacity: 0.5,
+      scale: 0.8,
+    },
+    {
+      name: "weaving",
+      duration: 25,
+      pattern: dreamVinePatterns.weaving,
+      // Flowing lavender
+      palette: ["#C8B8E0", "#D0C0E8", "#D8C8F0"],
+      opacity: 0.75,
+      scale: 1.0,
+    },
+    {
+      name: "cascade",
+      duration: 35,
+      pattern: dreamVinePatterns.cascade,
+      // Full ethereal bloom
+      palette: ["#B8A8D8", "#C0B0E0", "#C8B8E8"],
+      opacity: 1.0,
+      scale: 1.15,
+    },
+  ],
+};
+
+/**
+ * Cosmic Lotus
+ *
+ * Sacred geometry meets cosmic bloom.
+ * Unfolds according to the flower of life pattern.
+ */
+const cosmicLotus: PlantVariant = {
+  id: "cosmic-lotus",
+  name: "Cosmic Lotus",
+  description: "Sacred geometry blooming into transcendent cosmic flower",
+  rarity: 0.1, // Very rare
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "seed",
+      duration: 22,
+      pattern: cosmicLotusPatterns.seed,
+      // Sacred gold tones
+      palette: ["#F0E0C8", "#F8E8D0", "#FFF0D8"],
+      opacity: 0.6,
+      scale: 0.75,
+    },
+    {
+      name: "opening",
+      duration: 30,
+      pattern: cosmicLotusPatterns.opening,
+      // Brightening sacred light
+      palette: ["#E8D8B8", "#F0E0C0", "#F8E8C8"],
+      opacity: 0.8,
+      scale: 0.95,
+    },
+    {
+      name: "transcendent",
+      duration: 65,
+      pattern: cosmicLotusPatterns.transcendent,
+      // Full cosmic radiance
+      palette: ["#E0D0B0", "#E8D8B8", "#F0E0C0"],
+      opacity: 1.0,
+      scale: 1.2,
+    },
+  ],
+};
+
+/**
  * All registered plant variants.
  *
  * Organized by category:
@@ -1502,9 +3386,12 @@ const pulsingOrb: PlantVariant = {
  * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster
  * - Shrubs: cloudBush, berryThicket (uncommon, mid-ground structure)
  * - Trees: saplingHope, weepingWillow (rare, landmark elements)
- * - Ethereal: pulsingOrb (rare, magical effects)
+ * - Ethereal: pulsingOrb, fractalBloom, phoenixFlame, crystalCluster,
+ *             kaleidoscopeStar, vortexSpiral, nebulaBloom, auroraWisp,
+ *             prismaticFern, quantumRose, starMoss, dreamVine, cosmicLotus
+ *             (rare, abstract magical effects)
  *
- * Total: 14 variants
+ * Total: 26 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -1526,8 +3413,20 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   // Trees (rare)
   saplingHope,
   weepingWillow,
-  // Ethereal (rare)
+  // Ethereal (rare - abstract artistic patterns)
   pulsingOrb,
+  fractalBloom,
+  phoenixFlame,
+  crystalCluster,
+  kaleidoscopeStar,
+  vortexSpiral,
+  nebulaBloom,
+  auroraWisp,
+  prismaticFern,
+  quantumRose,
+  starMoss,
+  dreamVine,
+  cosmicLotus,
 ];
 
 /**

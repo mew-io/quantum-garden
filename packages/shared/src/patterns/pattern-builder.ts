@@ -161,7 +161,7 @@ export function drawCurve(
   thickness: number = 1,
   fill: number = 1
 ): void {
-  const steps = 50;
+  const steps = 150; // Increased for smoother curves
   let prevX = x1;
   let prevY = y1;
 
@@ -330,4 +330,189 @@ export function mirrorHorizontal(pattern: number[][]): number[][] {
     }
   }
   return result;
+}
+
+/**
+ * Draw multiple rays radiating from a center point (firework burst effect)
+ */
+export function drawRadialBurst(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  rayCount: number,
+  minLength: number,
+  maxLength: number,
+  thickness: number = 1,
+  angleOffset: number = 0,
+  fill: number = 1
+): void {
+  for (let i = 0; i < rayCount; i++) {
+    const angle = (((i * 360) / rayCount + angleOffset) * Math.PI) / 180;
+    // Vary length slightly for organic feel
+    const length = minLength + (maxLength - minLength) * (0.8 + Math.random() * 0.4);
+    const endX = Math.round(centerX + Math.cos(angle) * length);
+    const endY = Math.round(centerY + Math.sin(angle) * length);
+    drawLine(pattern, centerX, centerY, endX, endY, thickness, fill);
+  }
+}
+
+/**
+ * Draw a multi-pointed star shape
+ */
+export function drawStar(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  points: number,
+  outerRadius: number,
+  innerRadius: number,
+  rotation: number = 0,
+  fill: number = 1
+): void {
+  const angleStep = Math.PI / points;
+  const rotRad = (rotation * Math.PI) / 180;
+
+  for (let i = 0; i < points * 2; i++) {
+    const angle = i * angleStep + rotRad;
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const x1 = Math.round(centerX + Math.cos(angle) * radius);
+    const y1 = Math.round(centerY + Math.sin(angle) * radius);
+
+    const nextAngle = ((i + 1) % (points * 2)) * angleStep + rotRad;
+    const nextRadius = (i + 1) % 2 === 0 ? outerRadius : innerRadius;
+    const x2 = Math.round(centerX + Math.cos(nextAngle) * nextRadius);
+    const y2 = Math.round(centerY + Math.sin(nextAngle) * nextRadius);
+
+    drawLine(pattern, x1, y1, x2, y2, 1, fill);
+  }
+
+  // Fill the star center
+  drawCircle(pattern, centerX, centerY, innerRadius * 0.6, fill);
+}
+
+/**
+ * Draw a spiral curve (logarithmic or Archimedean)
+ */
+export function drawSpiral(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  startRadius: number,
+  endRadius: number,
+  rotations: number,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const steps = 200; // Increased for smoother spirals
+  let prevX = Math.round(centerX + startRadius);
+  let prevY = centerY;
+
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    const angle = t * rotations * 2 * Math.PI;
+    const radius = startRadius + (endRadius - startRadius) * t;
+
+    const x = Math.round(centerX + Math.cos(angle) * radius);
+    const y = Math.round(centerY + Math.sin(angle) * radius);
+
+    drawLine(pattern, prevX, prevY, x, y, thickness, fill);
+    prevX = x;
+    prevY = y;
+  }
+}
+
+/**
+ * Draw dots at specific positions (controlled placement)
+ */
+export function drawDots(
+  pattern: number[][],
+  positions: Array<{ x: number; y: number }>,
+  radius: number = 1,
+  fill: number = 1
+): void {
+  for (const pos of positions) {
+    drawCircle(pattern, pos.x, pos.y, radius, fill);
+  }
+}
+
+/**
+ * Draw concentric glow rings (simulated opacity with ring density)
+ */
+export function drawGlowRing(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  radius: number,
+  ringCount: number = 3,
+  fill: number = 1
+): void {
+  for (let i = 0; i < ringCount; i++) {
+    const ringRadius = radius - i * (radius / (ringCount + 1));
+    // Draw thin rings to simulate glow effect
+    drawRing(pattern, centerX, centerY, ringRadius - 0.5, ringRadius + 0.5, fill);
+  }
+}
+
+/**
+ * Draw a smooth tapered ray (for less jagged radial bursts)
+ */
+export function drawTaperedRay(
+  pattern: number[][],
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  startWidth: number,
+  endWidth: number,
+  fill: number = 1
+): void {
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len === 0) return;
+
+  const nx = dx / len;
+  const ny = dy / len;
+  const px = -ny;
+  const py = nx;
+
+  // Fill the tapered ray area
+  for (let y = 0; y < PATTERN_SIZE; y++) {
+    for (let x = 0; x < PATTERN_SIZE; x++) {
+      const relX = x - startX;
+      const relY = y - startY;
+      const along = relX * nx + relY * ny;
+      const perp = Math.abs(relX * px + relY * py);
+
+      if (along >= 0 && along <= len) {
+        const t = along / len;
+        const widthAtT = startWidth + (endWidth - startWidth) * t;
+        if (perp <= widthAtT) {
+          pattern[y]![x] = fill;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Draw smooth radial burst with tapered rays
+ */
+export function drawSmoothRadialBurst(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  rayCount: number,
+  length: number,
+  baseWidth: number,
+  tipWidth: number,
+  angleOffset: number = 0,
+  fill: number = 1
+): void {
+  for (let i = 0; i < rayCount; i++) {
+    const angle = (((i * 360) / rayCount + angleOffset) * Math.PI) / 180;
+    const endX = Math.round(centerX + Math.cos(angle) * length);
+    const endY = Math.round(centerY + Math.sin(angle) * length);
+    drawTaperedRay(pattern, centerX, centerY, endX, endY, baseWidth, tipWidth, fill);
+  }
 }

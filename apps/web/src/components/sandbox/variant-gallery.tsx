@@ -104,9 +104,9 @@ export function VariantGallery() {
                 </div>
               </div>
 
-              {/* Keyframe strip */}
+              {/* Keyframe strip (limit to 6 for performance) */}
               <div className="mt-4 flex gap-1">
-                {variant.keyframes.map((kf, i) => (
+                {variant.keyframes.slice(0, 6).map((kf, i) => (
                   <div
                     key={i}
                     className="flex-shrink-0 bg-gray-800 rounded overflow-hidden"
@@ -115,6 +115,11 @@ export function VariantGallery() {
                     <MiniGlyph keyframe={kf} size={32} />
                   </div>
                 ))}
+                {variant.keyframes.length > 6 && (
+                  <div className="flex items-center px-2 text-xs text-gray-400">
+                    +{variant.keyframes.length - 6}
+                  </div>
+                )}
               </div>
             </button>
           );

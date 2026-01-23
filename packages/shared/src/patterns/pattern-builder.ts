@@ -516,3 +516,98 @@ export function drawSmoothRadialBurst(
     drawTaperedRay(pattern, centerX, centerY, endX, endY, baseWidth, tipWidth, fill);
   }
 }
+
+/**
+ * Draw a brush stroke arc with variable thickness (for calligraphic effects)
+ *
+ * Creates a Ghibli-style ink brush stroke along an arc path.
+ * Thickness varies along the stroke: thin at start, thick in middle, thin at end.
+ *
+ * @param pattern - The pattern to draw on
+ * @param centerX - Center X of the arc's circle
+ * @param centerY - Center Y of the arc's circle
+ * @param radius - Radius of the arc
+ * @param startAngle - Starting angle in degrees (0 = right, 90 = down)
+ * @param endAngle - Ending angle in degrees
+ * @param startThickness - Brush thickness at the start
+ * @param peakThickness - Maximum brush thickness (at middle of stroke)
+ * @param endThickness - Brush thickness at the end
+ * @param fill - Fill value (default 1)
+ */
+export function drawBrushArc(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  startThickness: number,
+  peakThickness: number,
+  endThickness: number,
+  fill: number = 1
+): void {
+  const steps = 200;
+  const startRad = (startAngle * Math.PI) / 180;
+  const endRad = (endAngle * Math.PI) / 180;
+  const totalAngle = endRad - startRad;
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const angle = startRad + totalAngle * t;
+
+    // Calculate thickness using a sine curve for organic brush feel
+    // Peak at t=0.5 (middle of stroke)
+    let thickness: number;
+    if (t < 0.5) {
+      // Ramp up from start to peak
+      const localT = t * 2; // 0 to 1 over first half
+      thickness =
+        startThickness + (peakThickness - startThickness) * Math.sin(localT * Math.PI * 0.5);
+    } else {
+      // Ramp down from peak to end
+      const localT = (t - 0.5) * 2; // 0 to 1 over second half
+      thickness = peakThickness - (peakThickness - endThickness) * Math.sin(localT * Math.PI * 0.5);
+    }
+
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+
+    drawCircle(pattern, Math.round(x), Math.round(y), thickness / 2, fill);
+  }
+}
+
+/**
+ * Draw ink splatters near a point (for organic brush effects)
+ *
+ * Creates small dots scattered around a position to simulate ink splatter.
+ */
+export function drawInkSplatter(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  count: number,
+  minDist: number,
+  maxDist: number,
+  minRadius: number,
+  maxRadius: number,
+  seed: number = 42,
+  fill: number = 1
+): void {
+  let s = seed;
+  const random = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+
+  for (let i = 0; i < count; i++) {
+    const angle = random() * Math.PI * 2;
+    const dist = minDist + random() * (maxDist - minDist);
+    const x = Math.round(centerX + Math.cos(angle) * dist);
+    const y = Math.round(centerY + Math.sin(angle) * dist);
+    const radius = minRadius + random() * (maxRadius - minRadius);
+
+    if (x >= 0 && x < PATTERN_SIZE && y >= 0 && y < PATTERN_SIZE) {
+      drawCircle(pattern, x, y, radius, fill);
+    }
+  }
+}

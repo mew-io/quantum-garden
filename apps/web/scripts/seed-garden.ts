@@ -20,8 +20,8 @@ const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 800;
 
 // Seed configuration
-// With 14 variants, 24 plants gives good distribution across rarities
-const NUM_PLANTS = 24;
+// With 28 variants, use at least 28 plants to ensure all variants can appear
+const NUM_PLANTS = 28;
 const NUM_ENTANGLED_PAIRS = 3; // Number of entangled plant pairs
 const MARGIN = 80; // Keep plants away from edges
 
@@ -100,12 +100,13 @@ async function main() {
   console.log("Seeding garden...");
 
   // Clear existing plants and quantum records
+  // Order matters due to foreign key constraints
   console.log("Clearing existing data...");
   await db.observationEvent.deleteMany({});
   await db.plant.deleteMany({});
+  await db.entanglementGroup.deleteMany({});
   await db.quantumRecord.deleteMany({});
   await db.observationRegion.deleteMany({});
-  await db.entanglementGroup.deleteMany({});
 
   // Generate positions
   const positions = generatePositions(NUM_PLANTS);

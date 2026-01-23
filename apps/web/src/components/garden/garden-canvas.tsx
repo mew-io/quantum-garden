@@ -161,13 +161,50 @@ export function GardenCanvas() {
           }
         };
 
+        // Click handler: observe plant directly when clicked
+        const handleClick = (event: MouseEvent) => {
+          if (!observationSystemRef.current) return;
+
+          const rect = app.canvas.getBoundingClientRect();
+          const x = (event.clientX - rect.left) * (app.screen.width / rect.width);
+          const y = (event.clientY - rect.top) * (app.screen.height / rect.height);
+
+          // Check if a plant was clicked
+          const clickedPlant = observationSystemRef.current.findPlantAtPosition(x, y);
+          if (clickedPlant && !clickedPlant.observed) {
+            const wasObserved = observationSystemRef.current.triggerDirectObservation(
+              clickedPlant.id
+            );
+
+            if (wasObserved) {
+              // Trigger haptic feedback
+              hapticSuccess();
+
+              // Trigger visual celebration
+              if (observationFeedbackRef.current) {
+                observationFeedbackRef.current.triggerCelebration(
+                  clickedPlant.position.x,
+                  clickedPlant.position.y
+                );
+              }
+
+              // Trigger entanglement pulse if applicable
+              if (clickedPlant.entanglementGroupId && entanglementRendererRef.current) {
+                entanglementRendererRef.current.triggerPulse(clickedPlant.entanglementGroupId);
+              }
+            }
+          }
+        };
+
         app.canvas.addEventListener("pointerdown", handlePointerDown);
         app.canvas.addEventListener("pointermove", handlePointerMove);
+        app.canvas.addEventListener("click", handleClick);
 
         // Store cleanup function for event listeners
         cleanupTouchHandlersRef.current = () => {
           app.canvas.removeEventListener("pointerdown", handlePointerDown);
           app.canvas.removeEventListener("pointermove", handlePointerMove);
+          app.canvas.removeEventListener("click", handleClick);
         };
 
         // Initialize observation system

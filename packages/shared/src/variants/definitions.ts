@@ -36,6 +36,8 @@ import {
   drawDots,
   drawGlowRing,
   drawSmoothRadialBurst,
+  drawBrushArc,
+  drawInkSplatter,
   PATTERN_SIZE,
 } from "../patterns/pattern-builder";
 
@@ -3377,21 +3379,468 @@ const cosmicLotus: PlantVariant = {
   ],
 };
 
+// ============================================================================
+// SUMI SPIRIT (ENSO)
+// ============================================================================
+
+/**
+ * Generate patterns for Sumi Spirit (Enso) lifecycle
+ *
+ * Ghibli-inspired ink brush stroke forming an incomplete circle (enso).
+ * The gap represents Zen imperfection - the beauty of incompleteness.
+ */
+function createSumiSpiritPatterns() {
+  const center = PATTERN_SIZE / 2;
+  const radius = 22;
+
+  // Touch: Initial ink pool where brush contacts paper
+  const touch = createEmptyPattern();
+  // Small ink pool at the starting point (right side of where arc will begin)
+  const touchX = center + radius * Math.cos((-135 * Math.PI) / 180);
+  const touchY = center + radius * Math.sin((-135 * Math.PI) / 180);
+  drawCircle(touch, Math.round(touchX), Math.round(touchY), 4);
+  // Tiny splatter from initial contact
+  drawInkSplatter(touch, Math.round(touchX), Math.round(touchY), 3, 4, 8, 0.5, 1.5, 111);
+
+  // Draw: Arc begins extending (about 90 degrees)
+  const draw = createEmptyPattern();
+  // Short arc from bottom-left, variable thickness
+  drawBrushArc(draw, center, center, radius, -135, -45, 2, 5, 3);
+  // Small ink pool at start
+  drawCircle(
+    draw,
+    Math.round(center + radius * Math.cos((-135 * Math.PI) / 180)),
+    Math.round(center + radius * Math.sin((-135 * Math.PI) / 180)),
+    3
+  );
+
+  // Flow: Most of the circle formed (about 220 degrees)
+  const flow = createEmptyPattern();
+  // Longer arc with thick middle section
+  drawBrushArc(flow, center, center, radius, -135, 85, 2, 7, 3);
+  // Slight ink pooling at start
+  drawCircle(
+    flow,
+    Math.round(center + radius * Math.cos((-135 * Math.PI) / 180)),
+    Math.round(center + radius * Math.sin((-135 * Math.PI) / 180)),
+    2.5
+  );
+
+  // Settle: Complete enso with gap, ink splatters appear
+  const settle = createEmptyPattern();
+  // Full enso arc (~270 degrees, gap at top-right)
+  drawBrushArc(settle, center, center, radius, -135, 135, 2, 7, 1.5);
+  // Ink splatter near the thick part of the stroke
+  const splatterAngle = (-25 * Math.PI) / 180;
+  const splatterX = center + (radius + 8) * Math.cos(splatterAngle);
+  const splatterY = center + (radius + 8) * Math.sin(splatterAngle);
+  drawInkSplatter(settle, Math.round(splatterX), Math.round(splatterY), 4, 2, 10, 0.5, 1.5, 222);
+  // Small splatter on inner edge too
+  const innerSplatterX = center + (radius - 10) * Math.cos(splatterAngle + 0.5);
+  const innerSplatterY = center + (radius - 10) * Math.sin(splatterAngle + 0.5);
+  drawInkSplatter(
+    settle,
+    Math.round(innerSplatterX),
+    Math.round(innerSplatterY),
+    2,
+    2,
+    6,
+    0.5,
+    1,
+    333
+  );
+
+  // Rest: Final settled form (same as settle but with subtle differences)
+  const rest = createEmptyPattern();
+  // Full enso arc
+  drawBrushArc(rest, center, center, radius, -135, 135, 2, 7, 1.5);
+  // Settled ink splatters (slightly different positions for visual variety)
+  drawInkSplatter(rest, Math.round(splatterX), Math.round(splatterY), 5, 2, 12, 0.5, 1.5, 444);
+  drawInkSplatter(
+    rest,
+    Math.round(innerSplatterX),
+    Math.round(innerSplatterY),
+    3,
+    2,
+    7,
+    0.5,
+    1,
+    555
+  );
+
+  return { touch, draw, flow, settle, rest };
+}
+
+const sumiSpiritPatterns = createSumiSpiritPatterns();
+
+/**
+ * Sumi Spirit
+ *
+ * A Ghibli-inspired ink brush stroke forming an enso (incomplete circle).
+ * The gap represents the Zen concept of imperfection and incompleteness.
+ * Quantum measurement determines the color variation.
+ *
+ * Inspired by the calligraphic elements in Studio Ghibli films.
+ */
+const sumiSpirit: PlantVariant = {
+  id: "sumi-spirit",
+  name: "Sumi Spirit",
+  description: "An ink brush stroke enso that embodies the beauty of imperfection",
+  rarity: 0.15, // Rare - contemplative piece
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "touch",
+      duration: 8,
+      pattern: sumiSpiritPatterns.touch,
+      // Spirit blue - initial ink touch
+      palette: ["#1E3A5F", "#2D4A6F", "#3D5A7F"],
+      opacity: 0.6,
+      scale: 0.8,
+    },
+    {
+      name: "draw",
+      duration: 12,
+      pattern: sumiSpiritPatterns.draw,
+      // Spirit blue - stroke extending
+      palette: ["#1E3A5F", "#3A5A8F", "#5A7AAF"],
+      opacity: 0.75,
+      scale: 0.9,
+    },
+    {
+      name: "flow",
+      duration: 18,
+      pattern: sumiSpiritPatterns.flow,
+      // Spirit blue - flowing ink
+      palette: ["#1E3A5F", "#4A6FA5", "#7A9FC5"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "settle",
+      duration: 25,
+      pattern: sumiSpiritPatterns.settle,
+      // Spirit blue - settling
+      palette: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
+      opacity: 0.95,
+      scale: 1.0,
+    },
+    {
+      name: "rest",
+      duration: 60,
+      pattern: sumiSpiritPatterns.rest,
+      // Spirit blue - final form
+      palette: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+  // Color variations - quantum selects one
+  colorVariations: [
+    {
+      name: "spirit-blue",
+      weight: 1.0, // Primary (most common)
+      palettes: {
+        // Deep indigo to pale blue - like Haku's dragon form
+        touch: ["#1E3A5F", "#2D4A6F", "#3D5A7F"],
+        draw: ["#1E3A5F", "#3A5A8F", "#5A7AAF"],
+        flow: ["#1E3A5F", "#4A6FA5", "#7A9FC5"],
+        settle: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
+        rest: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
+      },
+    },
+    {
+      name: "classic-sumi",
+      weight: 0.7, // Traditional ink
+      palettes: {
+        // Deep black to gray wash - traditional sumi ink
+        touch: ["#1A1A2E", "#2A2A3E", "#3A3A4E"],
+        draw: ["#1A1A2E", "#3A3A4E", "#5A5A6E"],
+        flow: ["#1A1A2E", "#4A4A5E", "#6A6A7E"],
+        settle: ["#1A1A2E", "#4A4A5E", "#8A8A9E"],
+        rest: ["#1A1A2E", "#4A4A5E", "#8A8A9E"],
+      },
+    },
+    {
+      name: "autumn-red",
+      weight: 0.4, // Rare - vermillion seal ink
+      palettes: {
+        // Vermillion to pale gold - like autumn leaves or seal ink
+        touch: ["#8B2635", "#9B3645", "#AB4655"],
+        draw: ["#8B2635", "#A84A3C", "#C56A5C"],
+        flow: ["#8B2635", "#C85A3C", "#D89070"],
+        settle: ["#8B2635", "#C85A3C", "#E8C4A8"],
+        rest: ["#8B2635", "#C85A3C", "#E8C4A8"],
+      },
+    },
+  ],
+};
+
+// ============================================================================
+// ZEN LOTUS
+// ============================================================================
+
+/**
+ * Generate patterns for Zen Lotus lifecycle
+ *
+ * Simple, geometric lotus with clean lines and perfect symmetry.
+ * 6 petals arranged in a hexagonal pattern for meditative clarity.
+ * Extended 8-stage lifecycle for slow, meditative unfolding.
+ */
+function createZenLotusPatterns() {
+  const center = PATTERN_SIZE / 2;
+
+  // Seed: Simple circular seed, potential contained
+  const seed = createEmptyPattern();
+  drawCircle(seed, center, center, 4);
+  drawCircle(seed, center, center + 8, 2);
+
+  // Bud: Teardrop shape forming
+  const bud = createEmptyPattern();
+  drawEllipse(bud, center, center - 2, 6, 12);
+  drawCircle(bud, center, center + 12, 3);
+
+  // Rise: Bud elongating upward
+  const rise = createEmptyPattern();
+  drawEllipse(rise, center, center - 4, 7, 14);
+  drawCircle(rise, center, center + 12, 3);
+  drawCircle(rise, center, center - 16, 2);
+
+  // Open: First petals separating
+  const open = createEmptyPattern();
+  drawCircle(open, center, center, 5);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 14;
+    const tipY = center + Math.sin(angle) * 14;
+    const baseX = center + Math.cos(angle) * 5;
+    const baseY = center + Math.sin(angle) * 5;
+    drawPetal(open, tipX, tipY, baseX, baseY, 6);
+  }
+
+  // Unfurl: Petals extending outward
+  const unfurl = createEmptyPattern();
+  drawCircle(unfurl, center, center, 5);
+  drawRing(unfurl, center, center, 2, 3);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 18;
+    const tipY = center + Math.sin(angle) * 18;
+    const baseX = center + Math.cos(angle) * 5;
+    const baseY = center + Math.sin(angle) * 5;
+    drawPetal(unfurl, tipX, tipY, baseX, baseY, 7);
+  }
+
+  // Bloom: Full symmetric bloom
+  const bloom = createEmptyPattern();
+  drawCircle(bloom, center, center, 6);
+  drawRing(bloom, center, center, 3, 4);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 22;
+    const tipY = center + Math.sin(angle) * 22;
+    const baseX = center + Math.cos(angle) * 6;
+    const baseY = center + Math.sin(angle) * 6;
+    drawPetal(bloom, tipX, tipY, baseX, baseY, 9);
+  }
+
+  // Breathe: Subtle expansion
+  const breathe = createEmptyPattern();
+  drawCircle(breathe, center, center, 6);
+  drawRing(breathe, center, center, 3, 4);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 24;
+    const tipY = center + Math.sin(angle) * 24;
+    const baseX = center + Math.cos(angle) * 6;
+    const baseY = center + Math.sin(angle) * 6;
+    drawPetal(breathe, tipX, tipY, baseX, baseY, 10);
+  }
+
+  // Rest: Settling inward
+  const rest = createEmptyPattern();
+  drawCircle(rest, center, center, 5);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 18;
+    const tipY = center + Math.sin(angle) * 18;
+    const baseX = center + Math.cos(angle) * 5;
+    const baseY = center + Math.sin(angle) * 5;
+    drawPetal(rest, tipX, tipY, baseX, baseY, 7);
+  }
+
+  // Close: Returning toward bud
+  const close = createEmptyPattern();
+  drawCircle(close, center, center, 5);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const tipX = center + Math.cos(angle) * 12;
+    const tipY = center + Math.sin(angle) * 12;
+    const baseX = center + Math.cos(angle) * 5;
+    const baseY = center + Math.sin(angle) * 5;
+    drawPetal(close, tipX, tipY, baseX, baseY, 5);
+  }
+
+  return { seed, bud, rise, open, unfurl, bloom, breathe, rest, close };
+}
+
+const zenLotusPatterns = createZenLotusPatterns();
+
+/**
+ * Zen Lotus
+ *
+ * A simple, geometric lotus with clean lines and perfect 6-fold symmetry.
+ * Embodies meditative clarity and stillness.
+ * Distinct from Cosmic Lotus - no sacred geometry overlays, just pure form.
+ */
+const zenLotus: PlantVariant = {
+  id: "zen-lotus",
+  name: "Zen Lotus",
+  description: "A geometric lotus of pure form and meditative symmetry",
+  rarity: 0.2, // Uncommon
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "seed",
+      duration: 10,
+      pattern: zenLotusPatterns.seed,
+      palette: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
+      opacity: 0.5,
+      scale: 0.5,
+    },
+    {
+      name: "bud",
+      duration: 12,
+      pattern: zenLotusPatterns.bud,
+      palette: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
+      opacity: 0.6,
+      scale: 0.65,
+    },
+    {
+      name: "rise",
+      duration: 12,
+      pattern: zenLotusPatterns.rise,
+      palette: ["#E4E9E6", "#ECEFE9", "#F2F5F2"],
+      opacity: 0.7,
+      scale: 0.75,
+    },
+    {
+      name: "open",
+      duration: 15,
+      pattern: zenLotusPatterns.open,
+      palette: ["#E0E5E2", "#E8EDE9", "#F0F5F1"],
+      opacity: 0.8,
+      scale: 0.85,
+    },
+    {
+      name: "unfurl",
+      duration: 18,
+      pattern: zenLotusPatterns.unfurl,
+      palette: ["#DCE2DC", "#E6ECE6", "#F0F6F0"],
+      opacity: 0.9,
+      scale: 0.92,
+    },
+    {
+      name: "bloom",
+      duration: 40,
+      pattern: zenLotusPatterns.bloom,
+      palette: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+    {
+      name: "breathe",
+      duration: 25,
+      pattern: zenLotusPatterns.breathe,
+      palette: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
+      opacity: 1.0,
+      scale: 1.05,
+    },
+    {
+      name: "rest",
+      duration: 20,
+      pattern: zenLotusPatterns.rest,
+      palette: ["#E0E5E0", "#E8EDE8", "#F0F5F0"],
+      opacity: 0.9,
+      scale: 0.95,
+    },
+    {
+      name: "close",
+      duration: 15,
+      pattern: zenLotusPatterns.close,
+      palette: ["#E4E9E4", "#ECEFEC", "#F2F5F2"],
+      opacity: 0.7,
+      scale: 0.8,
+    },
+  ],
+  // Color variations - quantum selects one
+  colorVariations: [
+    {
+      name: "white-jade",
+      weight: 1.0,
+      palettes: {
+        seed: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
+        bud: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
+        rise: ["#E4E9E6", "#ECEFE9", "#F2F5F2"],
+        open: ["#E0E5E2", "#E8EDE9", "#F0F5F1"],
+        unfurl: ["#DCE2DC", "#E6ECE6", "#F0F6F0"],
+        bloom: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
+        breathe: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
+        rest: ["#E0E5E0", "#E8EDE8", "#F0F5F0"],
+        close: ["#E4E9E4", "#ECEFEC", "#F2F5F2"],
+      },
+    },
+    {
+      name: "blush-pink",
+      weight: 0.7,
+      palettes: {
+        seed: ["#F2E4E8", "#F6EAEE", "#FAF0F4"],
+        bud: ["#F0E0E4", "#F4E6EA", "#F8ECF0"],
+        rise: ["#EEE0E6", "#F2E6EC", "#F6ECF2"],
+        open: ["#EADCE2", "#F0E4EA", "#F6ECF2"],
+        unfurl: ["#E8D8E0", "#EEE0E8", "#F4E8F0"],
+        bloom: ["#E4D4DC", "#ECDCE6", "#F4E4EE"],
+        breathe: ["#E4D4DC", "#ECDCE6", "#F4E4EE"],
+        rest: ["#E8DAE0", "#EEE2E8", "#F4EAF0"],
+        close: ["#ECE0E6", "#F0E6EC", "#F4ECF2"],
+      },
+    },
+    {
+      name: "morning-gold",
+      weight: 0.5,
+      palettes: {
+        seed: ["#F2ECE4", "#F6F0EA", "#FAF4F0"],
+        bud: ["#F0EAE0", "#F4EEE6", "#F8F2EC"],
+        rise: ["#EEE8DE", "#F2ECE4", "#F6F0EA"],
+        open: ["#EAE4D8", "#F0EAE0", "#F6F0E8"],
+        unfurl: ["#E8E2D4", "#EEE8DC", "#F4EEE6"],
+        bloom: ["#E4DED0", "#ECE6DA", "#F4EEE4"],
+        breathe: ["#E4DED0", "#ECE6DA", "#F4EEE4"],
+        rest: ["#E8E2D8", "#EEE8E0", "#F4EEE8"],
+        close: ["#ECE6DE", "#F0EAE4", "#F4EEEA"],
+      },
+    },
+  ],
+};
+
 /**
  * All registered plant variants.
  *
  * Organized by category:
  * - Ground Cover: softMoss, pebblePatch (very common, ambient)
  * - Grasses: meadowTuft, whisperReed (common, gentle motion)
- * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster
+ * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster,
+ *            zenLotus
  * - Shrubs: cloudBush, berryThicket (uncommon, mid-ground structure)
  * - Trees: saplingHope, weepingWillow (rare, landmark elements)
  * - Ethereal: pulsingOrb, fractalBloom, phoenixFlame, crystalCluster,
  *             kaleidoscopeStar, vortexSpiral, nebulaBloom, auroraWisp,
- *             prismaticFern, quantumRose, starMoss, dreamVine, cosmicLotus
- *             (rare, abstract magical effects)
+ *             prismaticFern, quantumRose, starMoss, dreamVine, cosmicLotus,
+ *             sumiSpirit (rare, abstract magical effects)
  *
- * Total: 26 variants
+ * Total: 28 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -3407,6 +3856,7 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   dewdropDaisy,
   midnightPoppy,
   bellCluster,
+  zenLotus,
   // Shrubs (uncommon)
   cloudBush,
   berryThicket,
@@ -3427,6 +3877,7 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   starMoss,
   dreamVine,
   cosmicLotus,
+  sumiSpirit,
 ];
 
 /**

@@ -413,6 +413,95 @@ export class ObservationSystem {
       duration: this.dwellDuration,
     };
   }
+
+  /**
+   * Trigger observation directly on a plant (e.g., from a click).
+   *
+   * This bypasses the dwell requirement and immediately observes the plant
+   * if it is unobserved and not currently in cooldown.
+   *
+   * @param plantId - The ID of the plant to observe
+   * @returns true if observation was triggered, false otherwise
+   */
+  triggerDirectObservation(plantId: string): boolean {
+    // Cannot observe during cooldown
+    if (this.isInCooldown) {
+      return false;
+    }
+
+    const store = useGardenStore.getState();
+    const { plants, reticle } = store;
+
+    // Find the plant
+    const plant = plants.find((p) => p.id === plantId);
+    if (!plant) {
+      return false;
+    }
+
+    // Cannot observe already-observed plants
+    if (plant.observed) {
+      return false;
+    }
+
+    // Create a region ID (use active region if available, otherwise create a synthetic one)
+    const regionId = this.activeRegion?.id ?? `direct-${Date.now()}`;
+    const reticleId = reticle?.id ?? `direct-reticle-${Date.now()}`;
+
+    const payload: ObservationPayload = {
+      plantId: plant.id,
+      regionId,
+      reticleId,
+      timestamp: new Date(),
+    };
+
+    // Invoke callback if set
+    if (this.onObservation) {
+      this.onObservation(payload);
+    }
+
+    // Reset any ongoing dwell
+    this.resetDwell();
+
+    // Start cooldown
+    this.isInCooldown = true;
+    this.cooldownTimer = this.cooldownDuration;
+    this.syncCooldownToStore(true);
+
+    // Relocate region after observation
+    this.relocateRegion();
+
+    return true;
+  }
+
+  /**
+   * Check if a point overlaps with a plant.
+   *
+   * @param x - X coordinate to check
+   * @param y - Y coordinate to check
+   * @returns The plant at this position, or null if none
+   */
+  findPlantAtPosition(x: number, y: number): Plant | null {
+    const store = useGardenStore.getState();
+    const { plants } = store;
+
+    const clickPoint = { x, y };
+
+    for (const plant of plants) {
+      const plantBounds = this.getPlantBounds(plant.position);
+
+      // Check if click point is within plant bounds
+      if (
+        clickPoint.x >= plantBounds.x &&
+        clickPoint.x <= plantBounds.x + plantBounds.width &&
+        clickPoint.y >= plantBounds.y &&
+        clickPoint.y <= plantBounds.y + plantBounds.height
+      ) {
+        return plant;
+      }
+    }
+
+    return null;
+  }
 }
 
 /**

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
-import { Application, Graphics } from "pixi.js";
+import { useEffect, useRef, useCallback } from "react";
 import { useVariantSandboxStore, type Background } from "@/stores/variant-sandbox-store";
 import {
   computeLifecycleState,
@@ -12,24 +11,22 @@ import {
   type GlyphKeyframe,
 } from "@quantum-garden/shared";
 
-const BACKGROUND_COLORS: Record<Background, number> = {
-  white: 0xffffff,
-  dark: 0x1a1a1a,
-  checkerboard: 0xe0e0e0,
+const BACKGROUND_COLORS: Record<Background, string> = {
+  white: "#ffffff",
+  dark: "#1a1a1a",
+  checkerboard: "#e0e0e0",
 };
 
 const GRID_SIZE = 64;
 
 /**
  * Live preview of the variant at the current playback time.
- * Uses PixiJS for rendering and updates during playback.
+ * Uses Canvas2D for rendering.
  */
 export function VariantPreview() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const appRef = useRef<Application | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
-  const [isReady, setIsReady] = useState(false);
 
   const {
     getSelectedVariant,
@@ -45,83 +42,40 @@ export function VariantPreview() {
   } = useVariantSandboxStore();
 
   const variant = getSelectedVariant();
-  const canvasSize = GRID_SIZE * scale + 32; // Add padding
-
-  // Initialize PixiJS
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    const app = new Application();
-    let mounted = true;
-
-    const initApp = async () => {
-      try {
-        await app.init({
-          width: canvasSize,
-          height: canvasSize,
-          backgroundColor: BACKGROUND_COLORS[background],
-          antialias: false,
-          resolution: window.devicePixelRatio || 1,
-          autoDensity: true,
-        });
-
-        if (!mounted) {
-          app.destroy(true);
-          return;
-        }
-
-        container.appendChild(app.canvas);
-        appRef.current = app;
-        setIsReady(true);
-      } catch (error) {
-        console.error("Failed to initialize PixiJS:", error);
-      }
-    };
-
-    initApp();
-
-    return () => {
-      mounted = false;
-      setIsReady(false);
-      if (appRef.current) {
-        appRef.current.destroy(true);
-        appRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const canvasSize = GRID_SIZE * scale + 32;
 
   // Render function
   const render = useCallback(() => {
-    if (!appRef.current || !variant) return;
+    const canvas = canvasRef.current;
+    if (!canvas || !variant) return;
 
-    const app = appRef.current;
-    app.stage.removeChildren();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Resize if needed
-    app.renderer.resize(canvasSize, canvasSize);
+    // Set canvas size with device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvasSize * dpr;
+    canvas.height = canvasSize * dpr;
+    canvas.style.width = `${canvasSize}px`;
+    canvas.style.height = `${canvasSize}px`;
+    ctx.scale(dpr, dpr);
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
 
     // Draw background
-    const bg = new Graphics();
     if (background === "checkerboard") {
       const checkSize = 8;
       for (let y = 0; y < canvasSize / checkSize; y++) {
         for (let x = 0; x < canvasSize / checkSize; x++) {
-          if ((x + y) % 2 === 0) {
-            bg.rect(x * checkSize, y * checkSize, checkSize, checkSize);
-            bg.fill(0xcccccc);
-          } else {
-            bg.rect(x * checkSize, y * checkSize, checkSize, checkSize);
-            bg.fill(0xffffff);
-          }
+          ctx.fillStyle = (x + y) % 2 === 0 ? "#cccccc" : "#ffffff";
+          ctx.fillRect(x * checkSize, y * checkSize, checkSize, checkSize);
         }
       }
     } else {
-      bg.rect(0, 0, canvasSize, canvasSize);
-      bg.fill(BACKGROUND_COLORS[background]);
+      ctx.fillStyle = BACKGROUND_COLORS[background];
+      ctx.fillRect(0, 0, canvasSize, canvasSize);
     }
-    app.stage.addChild(bg);
 
     // Create mock plant for lifecycle computation
     const mockPlant: PlantWithLifecycle = {
@@ -135,10 +89,10 @@ export function VariantPreview() {
     // Compute lifecycle state
     const state = computeLifecycleState(mockPlant, variant, new Date());
 
-    // Get the active visual (handles edge-only tweening)
+    // Get the active visual
     const visual = getActiveVisual(state, variant);
 
-    // Type guard to check if visual is interpolated
+    // Type guard for interpolated visual
     const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
       "t" in v;
 
@@ -147,20 +101,16 @@ export function VariantPreview() {
     const effectiveOpacity = visual.opacity ?? 1.0;
     const effectiveScale = visual.scale ?? 1.0;
 
-    // Get palette: use effective palette for keyframes, interpolated palette for tweens
+    // Get palette
     let palette: string[];
     if (isInterpolated(visual)) {
-      // During interpolation, use the interpolated palette
       palette = visual.palette;
     } else {
-      // Normal keyframe: apply color variation if selected
       palette = getEffectivePalette(visual, variant, selectedColorVariation);
     }
 
     // Draw the glyph
-    const glyphGraphics = new Graphics();
-    glyphGraphics.alpha = effectiveOpacity;
-
+    ctx.globalAlpha = effectiveOpacity;
     const pixelScale = scale * effectiveScale;
     const offset = (canvasSize - GRID_SIZE * pixelScale) / 2;
 
@@ -170,8 +120,7 @@ export function VariantPreview() {
       for (let x = 0; x < GRID_SIZE; x++) {
         const cellValue = row[x];
         if (cellValue && cellValue > 0) {
-          // Determine color based on distance from center (gradient effect)
-          // This matches the rendering in plant-sprite.ts
+          // Determine color based on distance from center
           const distFromCenter = Math.sqrt(
             Math.pow(x - GRID_SIZE / 2, 2) + Math.pow(y - GRID_SIZE / 2, 2)
           );
@@ -182,34 +131,29 @@ export function VariantPreview() {
           );
           const color = palette[colorIndex] || palette[0] || "#888888";
 
-          glyphGraphics.rect(
-            offset + x * pixelScale,
-            offset + y * pixelScale,
-            pixelScale,
-            pixelScale
-          );
-          glyphGraphics.fill(hexToNumber(color));
+          ctx.fillStyle = color;
+          ctx.fillRect(offset + x * pixelScale, offset + y * pixelScale, pixelScale, pixelScale);
         }
       }
     }
 
-    app.stage.addChild(glyphGraphics);
+    ctx.globalAlpha = 1.0;
 
     // Draw grid overlay if enabled
     if (showGrid) {
-      const gridGraphics = new Graphics();
-      gridGraphics.setStrokeStyle({ width: 1, color: 0x888888, alpha: 0.5 });
+      ctx.strokeStyle = "rgba(136, 136, 136, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
 
       for (let x = 0; x <= GRID_SIZE; x++) {
-        gridGraphics.moveTo(offset + x * pixelScale, offset);
-        gridGraphics.lineTo(offset + x * pixelScale, offset + GRID_SIZE * pixelScale);
+        ctx.moveTo(offset + x * pixelScale, offset);
+        ctx.lineTo(offset + x * pixelScale, offset + GRID_SIZE * pixelScale);
       }
       for (let y = 0; y <= GRID_SIZE; y++) {
-        gridGraphics.moveTo(offset, offset + y * pixelScale);
-        gridGraphics.lineTo(offset + GRID_SIZE * pixelScale, offset + y * pixelScale);
+        ctx.moveTo(offset, offset + y * pixelScale);
+        ctx.lineTo(offset + GRID_SIZE * pixelScale, offset + y * pixelScale);
       }
-      gridGraphics.stroke();
-      app.stage.addChild(gridGraphics);
+      ctx.stroke();
     }
   }, [variant, currentTime, selectedColorVariation, scale, background, showGrid, canvasSize]);
 
@@ -229,7 +173,6 @@ export function VariantPreview() {
       const deltaMs = timestamp - lastTimeRef.current;
       lastTimeRef.current = timestamp;
 
-      // Update current time based on playback speed
       const deltaSeconds = (deltaMs / 1000) * playbackSpeed;
       const totalDuration = getTotalDuration();
       const newTime = currentTime + deltaSeconds;
@@ -240,7 +183,6 @@ export function VariantPreview() {
         setCurrentTime(newTime);
       } else {
         setCurrentTime(totalDuration);
-        // Stop playback when reaching the end
         useVariantSandboxStore.getState().pause();
         return;
       }
@@ -257,12 +199,10 @@ export function VariantPreview() {
     };
   }, [isPlaying, playbackSpeed, currentTime, setCurrentTime, getTotalDuration, variant?.loop]);
 
-  // Render when state changes (only after app is ready)
+  // Render when state changes
   useEffect(() => {
-    if (isReady) {
-      render();
-    }
-  }, [render, isReady]);
+    render();
+  }, [render]);
 
   if (!variant) {
     return (
@@ -278,11 +218,11 @@ export function VariantPreview() {
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        ref={containerRef}
         className="rounded-lg overflow-hidden shadow-lg"
         style={{ width: canvasSize, height: canvasSize }}
-      />
-      {/* Current keyframe info */}
+      >
+        <canvas ref={canvasRef} />
+      </div>
       <div className="text-center">
         <span className="text-sm text-gray-400">
           {
@@ -302,8 +242,4 @@ export function VariantPreview() {
       </div>
     </div>
   );
-}
-
-function hexToNumber(hex: string): number {
-  return parseInt(hex.replace("#", ""), 16);
 }

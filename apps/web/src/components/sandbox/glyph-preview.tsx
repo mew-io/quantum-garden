@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Application } from "pixi.js";
 import type { GlyphPattern, ColorPalette } from "@quantum-garden/shared";
 import type { VisualState, Background } from "@/stores/sandbox-store";
 import { renderGlyph, getGlyphSize } from "./glyph-renderer";
@@ -19,8 +18,8 @@ interface GlyphPreviewProps {
 }
 
 /**
- * React wrapper for PixiJS glyph rendering.
- * Manages PixiJS lifecycle and re-renders on prop changes.
+ * React wrapper for Canvas2D glyph rendering.
+ * Manages canvas lifecycle and re-renders on prop changes.
  */
 export function GlyphPreview({
   pattern,
@@ -33,71 +32,27 @@ export function GlyphPreview({
   onClick,
   className = "",
 }: GlyphPreviewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const appRef = useRef<Application | null>(null);
-  const initializingRef = useRef(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const size = getGlyphSize(pattern, scale);
 
-  // Initialize PixiJS application
+  // Render when props change
   useEffect(() => {
-    if (!containerRef.current || initializingRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    initializingRef.current = true;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    const app = new Application();
+    // Set canvas size with device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.width = `${size}px`;
+    canvas.style.height = `${size}px`;
+    ctx.scale(dpr, dpr);
 
-    const initApp = async () => {
-      try {
-        await app.init({
-          width: size,
-          height: size,
-          backgroundAlpha: 0,
-          antialias: false,
-          resolution: window.devicePixelRatio || 1,
-          autoDensity: true,
-        });
-
-        if (containerRef.current && !appRef.current) {
-          containerRef.current.appendChild(app.canvas);
-          appRef.current = app;
-
-          // Initial render
-          renderGlyph(app, {
-            pattern,
-            palette,
-            scale,
-            visualState,
-            showGrid,
-            background,
-            superposedPatterns,
-          });
-        }
-      } finally {
-        initializingRef.current = false;
-      }
-    };
-
-    initApp();
-
-    return () => {
-      if (appRef.current) {
-        appRef.current.destroy(true);
-        appRef.current = null;
-      }
-      initializingRef.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally only runs once to initialize PixiJS app
-  }, []);
-
-  // Re-render when props change
-  useEffect(() => {
-    if (!appRef.current) return;
-
-    // Resize canvas if scale changed
-    appRef.current.renderer.resize(size, size);
-
-    renderGlyph(appRef.current, {
+    renderGlyph(ctx, {
       pattern,
       palette,
       scale,
@@ -110,11 +65,12 @@ export function GlyphPreview({
 
   return (
     <div
-      ref={containerRef}
       onClick={onClick}
       className={`inline-block ${onClick ? "cursor-pointer hover:ring-2 hover:ring-blue-500 rounded" : ""} ${className}`}
       style={{ width: size, height: size }}
       title={`${pattern.name} - ${palette.name}`}
-    />
+    >
+      <canvas ref={canvasRef} />
+    </div>
   );
 }

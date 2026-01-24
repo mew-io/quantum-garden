@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
-import { Application, Graphics } from "pixi.js";
 import {
   PLANT_VARIANTS,
   computeLifecycleState,
@@ -20,75 +19,34 @@ const MAX_SUPERPOSED_VARIANTS = 10; // Limit for performance
  * Compact superposed preview showing variants overlaid.
  * Self-contained with its own animation loop.
  * Shows up to 10 variants to maintain performance.
+ * Uses Canvas2D for rendering.
  */
 export function SuperposedPreview() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const appRef = useRef<Application | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const currentTimeRef = useRef<number>(0);
-  const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-
-  // Initialize PixiJS
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    const app = new Application();
-    let mounted = true;
-
-    const initApp = async () => {
-      try {
-        await app.init({
-          width: CANVAS_SIZE,
-          height: CANVAS_SIZE,
-          backgroundColor: 0x1a1a1a,
-          antialias: false,
-          resolution: window.devicePixelRatio || 1,
-          autoDensity: true,
-        });
-
-        if (!mounted) {
-          app.destroy(true);
-          return;
-        }
-
-        container.appendChild(app.canvas);
-        appRef.current = app;
-        setIsReady(true);
-      } catch (error) {
-        console.error("Failed to initialize PixiJS:", error);
-      }
-    };
-
-    initApp();
-
-    return () => {
-      mounted = false;
-      setIsReady(false);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (appRef.current) {
-        appRef.current.destroy(true);
-        appRef.current = null;
-      }
-    };
-  }, []);
 
   // Render all variants superposed
   const render = useCallback(() => {
-    if (!appRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const app = appRef.current;
-    app.stage.removeChildren();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Set canvas size with device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = CANVAS_SIZE * dpr;
+    canvas.height = CANVAS_SIZE * dpr;
+    canvas.style.width = `${CANVAS_SIZE}px`;
+    canvas.style.height = `${CANVAS_SIZE}px`;
+    ctx.scale(dpr, dpr);
 
     // Draw background
-    const bg = new Graphics();
-    bg.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    bg.fill(0x1a1a1a);
-    app.stage.addChild(bg);
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     const currentTime = currentTimeRef.current;
 
@@ -132,8 +90,7 @@ export function SuperposedPreview() {
         palette = getEffectivePalette(visual, variant, null);
       }
 
-      const glyphGraphics = new Graphics();
-      glyphGraphics.alpha = effectiveOpacity * (baseOpacity + 0.3);
+      ctx.globalAlpha = effectiveOpacity * (baseOpacity + 0.3);
 
       const scaledPixelSize = pixelScale * effectiveScale;
       const offset = (CANVAS_SIZE - GRID_SIZE * scaledPixelSize) / 2;
@@ -154,24 +111,24 @@ export function SuperposedPreview() {
             );
             const color = palette[colorIndex] || palette[0] || "#888888";
 
-            glyphGraphics.rect(
+            ctx.fillStyle = color;
+            ctx.fillRect(
               offset + x * scaledPixelSize,
               offset + y * scaledPixelSize,
               scaledPixelSize,
               scaledPixelSize
             );
-            glyphGraphics.fill(hexToNumber(color));
           }
         }
       }
-
-      app.stage.addChild(glyphGraphics);
     }
+
+    ctx.globalAlpha = 1.0;
   }, []);
 
   // Animation loop
   useEffect(() => {
-    if (!isPlaying || !isReady) {
+    if (!isPlaying) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -199,32 +156,27 @@ export function SuperposedPreview() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying, render, isReady]);
+  }, [isPlaying, render]);
 
   // Initial render
   useEffect(() => {
-    if (isReady) {
-      render();
-    }
-  }, [render, isReady]);
+    render();
+  }, [render]);
 
   return (
     <div className="flex flex-col items-center">
       <div
-        ref={containerRef}
         className="rounded-lg overflow-hidden cursor-pointer"
         style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
         onClick={() => setIsPlaying(!isPlaying)}
         title={isPlaying ? "Click to pause" : "Click to play"}
-      />
+      >
+        <canvas ref={canvasRef} />
+      </div>
       <div className="text-xs text-gray-500 mt-1">
         {Math.min(PLANT_VARIANTS.length, MAX_SUPERPOSED_VARIANTS)} of {PLANT_VARIANTS.length}{" "}
         variants
       </div>
     </div>
   );
-}
-
-function hexToNumber(hex: string): number {
-  return parseInt(hex.replace("#", ""), 16);
 }

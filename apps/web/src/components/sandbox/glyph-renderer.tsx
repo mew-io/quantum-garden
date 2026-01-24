@@ -1,7 +1,5 @@
 "use client";
 
-import type { Application } from "pixi.js";
-import { Graphics } from "pixi.js";
 import type { GlyphPattern, ColorPalette } from "@quantum-garden/shared";
 import type { VisualState, Background } from "@/stores/sandbox-store";
 
@@ -22,91 +20,80 @@ interface RenderOptions {
 }
 
 /**
- * Render a glyph pattern to a PixiJS application
+ * Render a glyph pattern to a Canvas2D context
  */
-export function renderGlyph(app: Application, options: RenderOptions): void {
+export function renderGlyph(ctx: CanvasRenderingContext2D, options: RenderOptions): void {
   const { pattern, palette, scale, visualState, showGrid, background, superposedPatterns } =
     options;
-
-  // Clear existing graphics
-  app.stage.removeChildren();
 
   const gridSize = pattern.grid.length;
   const totalSize = gridSize * scale;
 
+  // Clear canvas
+  ctx.clearRect(0, 0, totalSize, totalSize);
+
   // Draw background
-  const bg = new Graphics();
   if (background === "checkerboard") {
     // Draw checkerboard pattern
     const checkSize = scale / 2;
     for (let y = 0; y < gridSize * 2; y++) {
       for (let x = 0; x < gridSize * 2; x++) {
         const isLight = (x + y) % 2 === 0;
-        bg.rect(x * checkSize, y * checkSize, checkSize, checkSize);
-        bg.fill(isLight ? "#FFFFFF" : "#E0E0E0");
+        ctx.fillStyle = isLight ? "#FFFFFF" : "#E0E0E0";
+        ctx.fillRect(x * checkSize, y * checkSize, checkSize, checkSize);
       }
     }
   } else {
-    bg.rect(0, 0, totalSize, totalSize);
-    bg.fill(BACKGROUND_COLORS[background]);
+    ctx.fillStyle = BACKGROUND_COLORS[background];
+    ctx.fillRect(0, 0, totalSize, totalSize);
   }
-  app.stage.addChild(bg);
 
   if (visualState === "superposed" && superposedPatterns) {
     // Render multiple overlapping patterns at low opacity
     const patterns = [pattern, ...superposedPatterns.slice(0, 2)];
     patterns.forEach((p, idx) => {
-      const graphics = createGlyphGraphics(
-        p.grid,
-        palette.colors,
-        scale,
-        0.3 // Superposed opacity
-      );
-      // Slight offset for visual distinction
-      graphics.x = idx * 1;
-      graphics.y = idx * 1;
-      app.stage.addChild(graphics);
+      ctx.globalAlpha = 0.3;
+      renderGlyphPattern(ctx, p.grid, palette.colors, scale, idx, idx);
     });
+    ctx.globalAlpha = 1.0;
   } else {
     // Render single pattern at full opacity
-    const graphics = createGlyphGraphics(pattern.grid, palette.colors, scale, 1.0);
-    app.stage.addChild(graphics);
+    renderGlyphPattern(ctx, pattern.grid, palette.colors, scale, 0, 0);
   }
 
   // Draw grid overlay if enabled
   if (showGrid) {
-    const gridGraphics = new Graphics();
-    gridGraphics.setStrokeStyle({ width: 1, color: 0x888888, alpha: 0.5 });
+    ctx.strokeStyle = "rgba(136, 136, 136, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
 
     // Draw vertical lines
     for (let x = 0; x <= gridSize; x++) {
-      gridGraphics.moveTo(x * scale, 0);
-      gridGraphics.lineTo(x * scale, totalSize);
+      ctx.moveTo(x * scale, 0);
+      ctx.lineTo(x * scale, totalSize);
     }
 
     // Draw horizontal lines
     for (let y = 0; y <= gridSize; y++) {
-      gridGraphics.moveTo(0, y * scale);
-      gridGraphics.lineTo(totalSize, y * scale);
+      ctx.moveTo(0, y * scale);
+      ctx.lineTo(totalSize, y * scale);
     }
 
-    gridGraphics.stroke();
-    app.stage.addChild(gridGraphics);
+    ctx.stroke();
   }
 }
 
 /**
- * Create a Graphics object for a single glyph pattern
+ * Render a single glyph pattern to the canvas
  */
-function createGlyphGraphics(
+function renderGlyphPattern(
+  ctx: CanvasRenderingContext2D,
   grid: number[][],
   colors: [string, string, string],
   scale: number,
-  opacity: number
-): Graphics {
-  const graphics = new Graphics();
-  graphics.alpha = opacity;
-
+  offsetX: number,
+  offsetY: number
+): void {
   const gridSize = grid.length;
 
   for (let y = 0; y < gridSize; y++) {
@@ -121,14 +108,12 @@ function createGlyphGraphics(
         const maxDist = Math.sqrt(2) * (gridSize / 2);
         const colorIndex = Math.min(2, Math.floor((distFromCenter / maxDist) * 3));
 
-        const color = colors[colorIndex];
-        graphics.rect(x * scale, y * scale, scale, scale);
-        graphics.fill(color);
+        const color = colors[colorIndex] ?? colors[0];
+        ctx.fillStyle = color;
+        ctx.fillRect(offsetX + x * scale, offsetY + y * scale, scale, scale);
       }
     }
   }
-
-  return graphics;
 }
 
 /**

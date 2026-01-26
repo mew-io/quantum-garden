@@ -20,7 +20,7 @@
  * See docs/variants-and-lifecycle.md for full documentation.
  */
 
-import type { PlantVariant } from "./types";
+import type { PlantVariant, VectorPrimitive } from "./types";
 import {
   createEmptyPattern,
   drawCircle,
@@ -4546,6 +4546,383 @@ const metatronsCubeVector: PlantVariant = {
   ],
 };
 
+// ============================================================================
+// COLORFUL VECTOR VARIANTS
+// ============================================================================
+
+/**
+ * Pulsing Orb (Vector) - Smooth vector version
+ * Simple pulsing circles with sky blue tones
+ */
+const pulsingOrbVector: PlantVariant = {
+  id: "pulsing-orb-vector",
+  name: "Pulsing Orb (Vector)",
+  description: "An ethereal orb rendered with smooth vector circles",
+  rarity: 0.08,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "dim",
+      duration: 8,
+      primitives: [
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+      ],
+      strokeColor: "#C0D8F0",
+      strokeOpacity: 0.4,
+      scale: 0.9,
+    },
+    {
+      name: "bright",
+      duration: 5,
+      primitives: [
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 16),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 11),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 2),
+      ],
+      strokeColor: "#E8F0F8",
+      strokeOpacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Phoenix Flame (Vector) - Smooth vector version
+ * Rising flame shapes with wing-like radiating lines
+ */
+const phoenixFlameVector: PlantVariant = {
+  id: "phoenix-flame-vector",
+  name: "Phoenix Flame (Vector)",
+  description: "Rising flames rendered with smooth vector lines",
+  rarity: 0.05,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "ember",
+      duration: 12,
+      primitives: [
+        // Core ember
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 6),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 8, 14),
+        // Small flame tips
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER + 8, 4, 6, 12, -90),
+      ],
+      strokeColor: "#F0A850",
+      strokeOpacity: 0.6,
+      scale: 0.75,
+    },
+    {
+      name: "rising",
+      duration: 15,
+      primitives: [
+        // Rising core
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 4, 12, 22),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 8),
+        // Wing-like extensions
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 16, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 16, VECTOR_CENTER - 12),
+        // Flame tips
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER + 6, 6, 8, 16, -90),
+      ],
+      strokeColor: "#FCA850",
+      strokeOpacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "blaze",
+      duration: 25,
+      primitives: [
+        // Full flame body
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 8, 16, 28),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 4, 10),
+        // Spread wings
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 4, VECTOR_CENTER - 22, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 4, VECTOR_CENTER + 22, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER - 6),
+        // Crown of flames
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER + 4, 8, 10, 20, -90),
+        // Inner glow
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER - 6, 6, 8, 4, -90),
+      ],
+      strokeColor: "#FC9840",
+      strokeOpacity: 1.0,
+      scale: 1.1,
+    },
+  ],
+};
+
+/**
+ * Kaleidoscope Star (Vector) - Smooth vector version
+ * Rotating star patterns with shifting pastel colors
+ */
+const kaleidoscopeStarVector: PlantVariant = {
+  id: "kaleidoscope-star-vector",
+  name: "Kaleidoscope Star (Vector)",
+  description: "Mesmerizing rotating star patterns with smooth vector lines",
+  rarity: 0.06,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "rotate1",
+      duration: 10,
+      primitives: [
+        // Central star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 20, 10, 0),
+        // Inner star rotated
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 12, 6, 22.5),
+        // Core circle
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        // Outer ring
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 24),
+      ],
+      strokeColor: "#F0C0D0",
+      strokeOpacity: 0.9,
+      scale: 1.1,
+    },
+    {
+      name: "rotate2",
+      duration: 10,
+      primitives: [
+        // Central star rotated
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 22, 11, 22.5),
+        // Inner star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 14, 7, 0),
+        // Core circle
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        // Outer ring
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 26),
+        // Radial accents
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 22, 26, 0),
+      ],
+      strokeColor: "#D0E0F0",
+      strokeOpacity: 1.0,
+      scale: 1.15,
+    },
+  ],
+};
+
+/**
+ * Vortex Spiral (Vector) - Smooth vector version
+ * Concentric circles creating spiral illusion with purple tones
+ */
+const vortexSpiralVector: PlantVariant = {
+  id: "vortex-spiral-vector",
+  name: "Vortex Spiral (Vector)",
+  description: "Swirling vortex patterns with smooth vector circles",
+  rarity: 0.07,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  loop: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "calm",
+      duration: 12,
+      primitives: [
+        // Concentric circles - calm state
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [4, 10, 16]),
+        // Subtle spiral arms
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 8),
+      ],
+      strokeColor: "#9080C0",
+      strokeOpacity: 0.6,
+      scale: 0.85,
+    },
+    {
+      name: "spin",
+      duration: 8,
+      primitives: [
+        // More circles - spinning up
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [3, 8, 14, 20]),
+        // Spiral arms extending
+        vectorLine(VECTOR_CENTER + 3, VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER - 3, VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 3, VECTOR_CENTER + 12, VECTOR_CENTER + 20),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 3, VECTOR_CENTER - 12, VECTOR_CENTER - 20),
+      ],
+      strokeColor: "#A090D0",
+      strokeOpacity: 0.85,
+      scale: 1.0,
+    },
+    {
+      name: "whirl",
+      duration: 6,
+      primitives: [
+        // Dense circles - whirling
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [2, 6, 11, 17, 24]),
+        // Full spiral arms
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 24, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER, VECTOR_CENTER - 24, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER + 14, VECTOR_CENTER + 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER - 14, VECTOR_CENTER - 24),
+        // Core star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 4, 6, 3, 0),
+      ],
+      strokeColor: "#C0B0F0",
+      strokeOpacity: 1.0,
+      scale: 1.05,
+    },
+  ],
+};
+
+// ============================================================================
+// SUMI SPIRIT VECTOR
+// ============================================================================
+
+/**
+ * Helper function to generate arc segments (lines along a circular path).
+ * Used to create enso (incomplete circle) brush stroke effects.
+ *
+ * @param cx - Center X
+ * @param cy - Center Y
+ * @param radius - Radius of the arc
+ * @param startAngle - Start angle in degrees (0 = right, 90 = bottom)
+ * @param endAngle - End angle in degrees
+ * @param segments - Number of line segments to use
+ */
+function vectorArcSegments(
+  cx: number,
+  cy: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  segments: number
+): VectorPrimitive[] {
+  const lines: VectorPrimitive[] = [];
+  const startRad = (startAngle * Math.PI) / 180;
+  const endRad = (endAngle * Math.PI) / 180;
+  const angleStep = (endRad - startRad) / segments;
+
+  for (let i = 0; i < segments; i++) {
+    const a1 = startRad + i * angleStep;
+    const a2 = startRad + (i + 1) * angleStep;
+    lines.push(
+      vectorLine(
+        cx + Math.cos(a1) * radius,
+        cy + Math.sin(a1) * radius,
+        cx + Math.cos(a2) * radius,
+        cy + Math.sin(a2) * radius
+      )
+    );
+  }
+  return lines;
+}
+
+/**
+ * Sumi Spirit (Vector)
+ *
+ * A vector version of the Sumi Spirit - an enso (incomplete circle) brush stroke
+ * rendered with smooth vector lines. The gap represents the Zen concept of
+ * imperfection and incompleteness (wabi-sabi).
+ *
+ * Colors match the pixel version's spirit-blue palette.
+ */
+const sumiSpiritVector: PlantVariant = {
+  id: "sumi-spirit-vector",
+  name: "Sumi Spirit (Vector)",
+  description: "An enso brush stroke rendered with smooth vector lines",
+  rarity: 0.1, // Rarer than pixel version
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "touch",
+      duration: 8,
+      primitives: [
+        // Initial brush touch - small arc starting the stroke
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 180, 240, 6),
+        // Small dot where brush touches
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 2),
+      ],
+      strokeColor: "#1E3A5F", // Deep indigo
+      strokeOpacity: 0.6,
+      scale: 0.8,
+    },
+    {
+      name: "draw",
+      duration: 12,
+      primitives: [
+        // Brush extending - larger arc
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 150, 300, 12),
+        // Inner stroke following the arc
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 160, 280, 8),
+      ],
+      strokeColor: "#3A5A8F", // Mid indigo-blue
+      strokeOpacity: 0.75,
+      scale: 0.9,
+    },
+    {
+      name: "flow",
+      duration: 18,
+      primitives: [
+        // Flowing ink - most of the enso
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 120, 350, 18),
+        // Inner flow
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 130, 340, 14),
+        // Brush thickness variation
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 12, 150, 320, 10),
+      ],
+      strokeColor: "#4A6FA5", // Spirit blue
+      strokeOpacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "settle",
+      duration: 25,
+      primitives: [
+        // Nearly complete enso with characteristic gap at top
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 22, 100, 380, 22),
+        // Inner rings showing brush texture
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 110, 370, 18),
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 120, 360, 14),
+        // Small accent at brush end
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 21, 2),
+      ],
+      strokeColor: "#5A8FC5", // Lighter spirit blue
+      strokeOpacity: 0.95,
+      scale: 1.0,
+    },
+    {
+      name: "rest",
+      duration: 60,
+      primitives: [
+        // Final enso form - beautiful imperfection with gap at ~70° (top-right)
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 24, 80, 400, 24),
+        // Inner strokes showing brush character
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 90, 390, 20),
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 100, 380, 16),
+        // Subtle inner detail
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 11, 120, 360, 10),
+        // Brush lift point
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 13, 1.5),
+      ],
+      strokeColor: "#7A9FC5", // Pale spirit blue
+      strokeOpacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
 /**
  * All registered plant variants.
  *
@@ -4565,8 +4942,12 @@ const metatronsCubeVector: PlantVariant = {
  * - Geometric Vector: sacredMandalaVector, crystalLatticeVector,
  *                     stellarGeometryVector, metatronsCubeVector
  *                     (very rare, smooth vector line rendering)
+ * - Ethereal Vector: pulsingOrbVector, phoenixFlameVector,
+ *                    kaleidoscopeStarVector, vortexSpiralVector,
+ *                    sumiSpiritVector
+ *                    (very rare, colorful smooth vector with looping)
  *
- * Total: 36 variants
+ * Total: 41 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -4614,6 +4995,12 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   crystalLatticeVector,
   stellarGeometryVector,
   metatronsCubeVector,
+  // Ethereal Vector (very rare - colorful smooth vectors with looping)
+  pulsingOrbVector,
+  phoenixFlameVector,
+  kaleidoscopeStarVector,
+  vortexSpiralVector,
+  sumiSpiritVector,
 ];
 
 /**

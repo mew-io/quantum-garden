@@ -611,3 +611,152 @@ export function drawInkSplatter(
     }
   }
 }
+
+// ============================================================================
+// GEOMETRIC LINE-WORK UTILITIES
+// ============================================================================
+
+/**
+ * Draw a thin circle outline (wrapper around drawRing for clarity)
+ */
+export function drawCircleOutline(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  radius: number,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const halfThick = thickness / 2;
+  drawRing(pattern, centerX, centerY, radius - halfThick, radius + halfThick, fill);
+}
+
+/**
+ * Draw a diamond/rhombus outline using 4 lines
+ */
+export function drawDiamondOutline(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  width: number,
+  height: number,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const halfW = width / 2;
+  const halfH = height / 2;
+  const top = { x: Math.round(centerX), y: Math.round(centerY - halfH) };
+  const right = { x: Math.round(centerX + halfW), y: Math.round(centerY) };
+  const bottom = { x: Math.round(centerX), y: Math.round(centerY + halfH) };
+  const left = { x: Math.round(centerX - halfW), y: Math.round(centerY) };
+
+  drawLine(pattern, top.x, top.y, right.x, right.y, thickness, fill);
+  drawLine(pattern, right.x, right.y, bottom.x, bottom.y, thickness, fill);
+  drawLine(pattern, bottom.x, bottom.y, left.x, left.y, thickness, fill);
+  drawLine(pattern, left.x, left.y, top.x, top.y, thickness, fill);
+}
+
+/**
+ * Draw a regular polygon outline (hexagon, octagon, etc.)
+ */
+export function drawPolygonOutline(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  sides: number,
+  radius: number,
+  rotation: number = 0,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const rotRad = (rotation * Math.PI) / 180;
+  const angleStep = (2 * Math.PI) / sides;
+
+  for (let i = 0; i < sides; i++) {
+    const angle1 = i * angleStep + rotRad;
+    const angle2 = ((i + 1) % sides) * angleStep + rotRad;
+
+    const x1 = Math.round(centerX + Math.cos(angle1) * radius);
+    const y1 = Math.round(centerY + Math.sin(angle1) * radius);
+    const x2 = Math.round(centerX + Math.cos(angle2) * radius);
+    const y2 = Math.round(centerY + Math.sin(angle2) * radius);
+
+    drawLine(pattern, x1, y1, x2, y2, thickness, fill);
+  }
+}
+
+/**
+ * Draw multiple concentric circle outlines
+ */
+export function drawConcentricCircles(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  radii: number[],
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  for (const radius of radii) {
+    drawCircleOutline(pattern, centerX, centerY, radius, thickness, fill);
+  }
+}
+
+/**
+ * Draw radial lines from center (uniform length, no randomness)
+ */
+export function drawRadialLines(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  count: number,
+  innerRadius: number,
+  outerRadius: number,
+  angleOffset: number = 0,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const offsetRad = (angleOffset * Math.PI) / 180;
+  const angleStep = (2 * Math.PI) / count;
+
+  for (let i = 0; i < count; i++) {
+    const angle = i * angleStep + offsetRad;
+    const x1 = Math.round(centerX + Math.cos(angle) * innerRadius);
+    const y1 = Math.round(centerY + Math.sin(angle) * innerRadius);
+    const x2 = Math.round(centerX + Math.cos(angle) * outerRadius);
+    const y2 = Math.round(centerY + Math.sin(angle) * outerRadius);
+
+    drawLine(pattern, x1, y1, x2, y2, thickness, fill);
+  }
+}
+
+/**
+ * Draw a star outline (not filled) - connects outer points through inner points
+ */
+export function drawStarOutline(
+  pattern: number[][],
+  centerX: number,
+  centerY: number,
+  points: number,
+  outerRadius: number,
+  innerRadius: number,
+  rotation: number = 0,
+  thickness: number = 1,
+  fill: number = 1
+): void {
+  const rotRad = (rotation * Math.PI) / 180;
+  const angleStep = Math.PI / points;
+
+  for (let i = 0; i < points * 2; i++) {
+    const angle = i * angleStep + rotRad;
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const x1 = Math.round(centerX + Math.cos(angle) * radius);
+    const y1 = Math.round(centerY + Math.sin(angle) * radius);
+
+    const nextAngle = ((i + 1) % (points * 2)) * angleStep + rotRad;
+    const nextRadius = (i + 1) % 2 === 0 ? outerRadius : innerRadius;
+    const x2 = Math.round(centerX + Math.cos(nextAngle) * nextRadius);
+    const y2 = Math.round(centerY + Math.sin(nextAngle) * nextRadius);
+
+    drawLine(pattern, x1, y1, x2, y2, thickness, fill);
+  }
+}

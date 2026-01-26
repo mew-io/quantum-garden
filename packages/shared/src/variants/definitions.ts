@@ -38,6 +38,13 @@ import {
   drawSmoothRadialBurst,
   drawBrushArc,
   drawInkSplatter,
+  drawCircleOutline,
+  drawDiamondOutline,
+  drawPolygonOutline,
+  drawConcentricCircles,
+  drawRadialLines,
+  drawStarOutline,
+  drawLine,
   PATTERN_SIZE,
 } from "../patterns/pattern-builder";
 
@@ -3825,6 +3832,432 @@ const zenLotus: PlantVariant = {
   ],
 };
 
+// ============================================================================
+// GEOMETRIC LINE-WORK VARIANTS
+// ============================================================================
+// Modern minimalist geometric illustrations using fine gray line work.
+// Symmetrical radial compositions built from circles, diamonds, and angular patterns.
+// No color fills - just outlines. Evokes generative art and sacred geometry.
+
+/**
+ * Generate patterns for Sacred Mandala
+ * Concentric circle outlines with 8-fold radial symmetry
+ */
+function createSacredMandalaPatterns() {
+  const center = PATTERN_SIZE / 2;
+
+  // Seed: Single thin ring
+  const seed = createEmptyPattern();
+  drawCircleOutline(seed, center, center, 8);
+
+  // Rings: Concentric circles emerge
+  const rings = createEmptyPattern();
+  drawConcentricCircles(rings, center, center, [6, 12, 18]);
+
+  // Radiate: Add 8-fold radial lines
+  const radiate = createEmptyPattern();
+  drawConcentricCircles(radiate, center, center, [6, 12, 18, 24]);
+  drawRadialLines(radiate, center, center, 8, 6, 26);
+
+  // Complete: Full mandala with diamonds at cardinal points
+  const complete = createEmptyPattern();
+  drawConcentricCircles(complete, center, center, [5, 10, 15, 20, 26]);
+  drawRadialLines(complete, center, center, 8, 5, 28);
+  // Add small diamonds at cardinal points
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    const dx = center + Math.cos(angle) * 18;
+    const dy = center + Math.sin(angle) * 18;
+    drawDiamondOutline(complete, dx, dy, 5, 7);
+  }
+
+  return { seed, rings, radiate, complete };
+}
+
+const sacredMandalaPatterns = createSacredMandalaPatterns();
+
+/**
+ * Sacred Mandala - Concentric circles and radiating lines forming a contemplative pattern
+ */
+const sacredMandala: PlantVariant = {
+  id: "sacred-mandala",
+  name: "Sacred Mandala",
+  description: "Precise geometric circles and radiating lines forming a contemplative pattern",
+  rarity: 0.1,
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "seed",
+      duration: 10,
+      pattern: sacredMandalaPatterns.seed,
+      palette: ["#909090", "#909090", "#909090"],
+      opacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "rings",
+      duration: 15,
+      pattern: sacredMandalaPatterns.rings,
+      palette: ["#808080", "#808080", "#808080"],
+      opacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "radiate",
+      duration: 20,
+      pattern: sacredMandalaPatterns.radiate,
+      palette: ["#707070", "#707070", "#707070"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "complete",
+      duration: 60,
+      pattern: sacredMandalaPatterns.complete,
+      palette: ["#606060", "#606060", "#606060"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Generate patterns for Crystal Lattice
+ * Interlocking diamond grid pattern
+ */
+function createCrystalLatticePatterns() {
+  const center = PATTERN_SIZE / 2;
+
+  // Diamond: Single central diamond
+  const diamond = createEmptyPattern();
+  drawDiamondOutline(diamond, center, center, 14, 18);
+
+  // Grid: 2x2 diamond arrangement
+  const grid = createEmptyPattern();
+  drawDiamondOutline(grid, center, center, 12, 16);
+  drawDiamondOutline(grid, center - 10, center, 8, 12);
+  drawDiamondOutline(grid, center + 10, center, 8, 12);
+  drawDiamondOutline(grid, center, center - 10, 8, 12);
+  drawDiamondOutline(grid, center, center + 10, 8, 12);
+
+  // Expand: Larger interconnected lattice
+  const expand = createEmptyPattern();
+  // Central diamond
+  drawDiamondOutline(expand, center, center, 10, 14);
+  // Cardinal diamonds
+  const offset = 14;
+  drawDiamondOutline(expand, center - offset, center, 10, 14);
+  drawDiamondOutline(expand, center + offset, center, 10, 14);
+  drawDiamondOutline(expand, center, center - offset, 10, 14);
+  drawDiamondOutline(expand, center, center + offset, 10, 14);
+  // Connecting lines
+  drawLine(expand, center - 5, center, center - offset + 5, center);
+  drawLine(expand, center + 5, center, center + offset - 5, center);
+  drawLine(expand, center, center - 7, center, center - offset + 7);
+  drawLine(expand, center, center + 7, center, center + offset - 7);
+
+  // Full: Complete lattice with corner elements
+  const full = createEmptyPattern();
+  // Core structure
+  drawDiamondOutline(full, center, center, 8, 12);
+  const off = 12;
+  drawDiamondOutline(full, center - off, center, 8, 12);
+  drawDiamondOutline(full, center + off, center, 8, 12);
+  drawDiamondOutline(full, center, center - off, 8, 12);
+  drawDiamondOutline(full, center, center + off, 8, 12);
+  // Diagonal diamonds
+  const diagOff = 9;
+  drawDiamondOutline(full, center - diagOff, center - diagOff, 6, 8);
+  drawDiamondOutline(full, center + diagOff, center - diagOff, 6, 8);
+  drawDiamondOutline(full, center - diagOff, center + diagOff, 6, 8);
+  drawDiamondOutline(full, center + diagOff, center + diagOff, 6, 8);
+  // Connecting lines
+  drawLine(full, center - 4, center, center - off + 4, center);
+  drawLine(full, center + 4, center, center + off - 4, center);
+  drawLine(full, center, center - 6, center, center - off + 6);
+  drawLine(full, center, center + 6, center, center + off - 6);
+
+  return { diamond, grid, expand, full };
+}
+
+const crystalLatticePatterns = createCrystalLatticePatterns();
+
+/**
+ * Crystal Lattice - Interlocking diamond grid with thin connecting lines
+ */
+const crystalLattice: PlantVariant = {
+  id: "crystal-lattice",
+  name: "Crystal Lattice",
+  description: "Interlocking diamond grid evoking crystalline molecular structures",
+  rarity: 0.1,
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "diamond",
+      duration: 10,
+      pattern: crystalLatticePatterns.diamond,
+      palette: ["#888888", "#888888", "#888888"],
+      opacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "grid",
+      duration: 15,
+      pattern: crystalLatticePatterns.grid,
+      palette: ["#787878", "#787878", "#787878"],
+      opacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "expand",
+      duration: 20,
+      pattern: crystalLatticePatterns.expand,
+      palette: ["#686868", "#686868", "#686868"],
+      opacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "full",
+      duration: 60,
+      pattern: crystalLatticePatterns.full,
+      palette: ["#585858", "#585858", "#585858"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Generate patterns for Stellar Geometry
+ * Star outlines with radiating lines
+ */
+function createStellarGeometryPatterns() {
+  const center = PATTERN_SIZE / 2;
+
+  // Point: Central dot with tiny star hint
+  const point = createEmptyPattern();
+  drawCircleOutline(point, center, center, 3);
+  drawRadialLines(point, center, center, 6, 4, 7, 0);
+
+  // Star: First 6-pointed star outline
+  const star = createEmptyPattern();
+  drawStarOutline(star, center, center, 6, 16, 8, -90);
+  drawCircleOutline(star, center, center, 4);
+
+  // Rays: Add radiating lines to star points
+  const rays = createEmptyPattern();
+  drawStarOutline(rays, center, center, 6, 18, 9, -90);
+  drawCircleOutline(rays, center, center, 5);
+  drawRadialLines(rays, center, center, 6, 18, 26, -90);
+
+  // Nested: Multiple nested star outlines
+  const nested = createEmptyPattern();
+  drawStarOutline(nested, center, center, 6, 24, 12, -90);
+  drawStarOutline(nested, center, center, 6, 16, 8, -90);
+  drawStarOutline(nested, center, center, 6, 10, 5, -90);
+  drawCircleOutline(nested, center, center, 3);
+  // Subtle outer rays
+  drawRadialLines(nested, center, center, 12, 24, 28, -90);
+
+  return { point, star, rays, nested };
+}
+
+const stellarGeometryPatterns = createStellarGeometryPatterns();
+
+/**
+ * Stellar Geometry - Star outlines with radiating lines
+ */
+const stellarGeometry: PlantVariant = {
+  id: "stellar-geometry",
+  name: "Stellar Geometry",
+  description: "Nested star outlines radiating with precise mathematical beauty",
+  rarity: 0.1,
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "point",
+      duration: 8,
+      pattern: stellarGeometryPatterns.point,
+      palette: ["#909090", "#909090", "#909090"],
+      opacity: 0.5,
+      scale: 0.6,
+    },
+    {
+      name: "star",
+      duration: 12,
+      pattern: stellarGeometryPatterns.star,
+      palette: ["#808080", "#808080", "#808080"],
+      opacity: 0.7,
+      scale: 0.8,
+    },
+    {
+      name: "rays",
+      duration: 18,
+      pattern: stellarGeometryPatterns.rays,
+      palette: ["#707070", "#707070", "#707070"],
+      opacity: 0.85,
+      scale: 0.9,
+    },
+    {
+      name: "nested",
+      duration: 60,
+      pattern: stellarGeometryPatterns.nested,
+      palette: ["#606060", "#606060", "#606060"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Generate patterns for Metatron's Cube
+ * Overlapping circles with connecting lines (sacred geometry)
+ */
+function createMetatronsCubePatterns() {
+  const center = PATTERN_SIZE / 2;
+  const r = 8; // Base circle radius
+
+  // Circle: Central circle
+  const circle = createEmptyPattern();
+  drawCircleOutline(circle, center, center, r);
+
+  // Six: Flower of Life base - 6 circles around center
+  const six = createEmptyPattern();
+  drawCircleOutline(six, center, center, r);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const cx = center + Math.cos(angle) * r;
+    const cy = center + Math.sin(angle) * r;
+    drawCircleOutline(six, cx, cy, r);
+  }
+
+  // Connect: Add connecting lines between circle centers
+  const connect = createEmptyPattern();
+  // Draw the circles
+  drawCircleOutline(connect, center, center, r);
+  const centers: { x: number; y: number }[] = [{ x: center, y: center }];
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const cx = center + Math.cos(angle) * r;
+    const cy = center + Math.sin(angle) * r;
+    drawCircleOutline(connect, cx, cy, r);
+    centers.push({ x: cx, y: cy });
+  }
+  // Connect all centers to form hexagon + star
+  for (let i = 1; i <= 6; i++) {
+    // Connect to center
+    drawLine(
+      connect,
+      Math.round(centers[0]!.x),
+      Math.round(centers[0]!.y),
+      Math.round(centers[i]!.x),
+      Math.round(centers[i]!.y)
+    );
+    // Connect to neighbors
+    const next = i === 6 ? 1 : i + 1;
+    drawLine(
+      connect,
+      Math.round(centers[i]!.x),
+      Math.round(centers[i]!.y),
+      Math.round(centers[next]!.x),
+      Math.round(centers[next]!.y)
+    );
+  }
+
+  // Complete: Full Metatron's Cube with outer hexagon
+  const complete = createEmptyPattern();
+  // Inner flower of life
+  drawCircleOutline(complete, center, center, r - 1);
+  const innerCenters: { x: number; y: number }[] = [{ x: center, y: center }];
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const cx = center + Math.cos(angle) * (r - 1);
+    const cy = center + Math.sin(angle) * (r - 1);
+    drawCircleOutline(complete, cx, cy, r - 1);
+    innerCenters.push({ x: cx, y: cy });
+  }
+  // Outer larger circles
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const cx = center + Math.cos(angle) * (r * 2 - 2);
+    const cy = center + Math.sin(angle) * (r * 2 - 2);
+    drawCircleOutline(complete, cx, cy, r - 1);
+  }
+  // Connect all points - inner hexagon
+  for (let i = 1; i <= 6; i++) {
+    drawLine(
+      complete,
+      Math.round(innerCenters[0]!.x),
+      Math.round(innerCenters[0]!.y),
+      Math.round(innerCenters[i]!.x),
+      Math.round(innerCenters[i]!.y)
+    );
+    const next = i === 6 ? 1 : i + 1;
+    drawLine(
+      complete,
+      Math.round(innerCenters[i]!.x),
+      Math.round(innerCenters[i]!.y),
+      Math.round(innerCenters[next]!.x),
+      Math.round(innerCenters[next]!.y)
+    );
+  }
+  // Outer hexagon
+  drawPolygonOutline(complete, center, center, 6, r * 2 - 2, -90);
+
+  return { circle, six, connect, complete };
+}
+
+const metatronsCubePatterns = createMetatronsCubePatterns();
+
+/**
+ * Metatron's Cube - Sacred geometry pattern of overlapping circles and lines
+ */
+const metatronsCube: PlantVariant = {
+  id: "metatrons-cube",
+  name: "Metatron's Cube",
+  description: "Sacred geometry of overlapping circles forming the Flower of Life",
+  rarity: 0.08,
+  requiresObservationToGerminate: true,
+  tweenBetweenKeyframes: true,
+  keyframes: [
+    {
+      name: "circle",
+      duration: 10,
+      pattern: metatronsCubePatterns.circle,
+      palette: ["#888888", "#888888", "#888888"],
+      opacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "six",
+      duration: 15,
+      pattern: metatronsCubePatterns.six,
+      palette: ["#787878", "#787878", "#787878"],
+      opacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "connect",
+      duration: 20,
+      pattern: metatronsCubePatterns.connect,
+      palette: ["#686868", "#686868", "#686868"],
+      opacity: 0.85,
+      scale: 0.92,
+    },
+    {
+      name: "complete",
+      duration: 60,
+      pattern: metatronsCubePatterns.complete,
+      palette: ["#585858", "#585858", "#585858"],
+      opacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
 /**
  * All registered plant variants.
  *
@@ -3839,8 +4272,10 @@ const zenLotus: PlantVariant = {
  *             kaleidoscopeStar, vortexSpiral, nebulaBloom, auroraWisp,
  *             prismaticFern, quantumRose, starMoss, dreamVine, cosmicLotus,
  *             sumiSpirit (rare, abstract magical effects)
+ * - Geometric: sacredMandala, crystalLattice, stellarGeometry, metatronsCube
+ *              (rare, minimalist line-work patterns)
  *
- * Total: 28 variants
+ * Total: 32 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -3878,6 +4313,11 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   dreamVine,
   cosmicLotus,
   sumiSpirit,
+  // Geometric (rare - minimalist line-work patterns)
+  sacredMandala,
+  crystalLattice,
+  stellarGeometry,
+  metatronsCube,
 ];
 
 /**

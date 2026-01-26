@@ -7,12 +7,14 @@ import {
   getEffectivePalette,
   getActiveVisual,
   isVectorVariant,
+  getActiveVectorVisual,
   getVectorKeyframe,
   type PlantWithLifecycle,
   type InterpolatedKeyframe,
   type GlyphKeyframe,
   type VectorKeyframe,
   type VectorPrimitive,
+  type InterpolatedVectorKeyframe,
 } from "@quantum-garden/shared";
 
 const BACKGROUND_COLORS: Record<Background, string> = {
@@ -24,11 +26,11 @@ const BACKGROUND_COLORS: Record<Background, string> = {
 const GRID_SIZE = 64;
 
 /**
- * Render a vector keyframe to a Canvas2D context.
+ * Render a vector keyframe (or interpolated vector keyframe) to a Canvas2D context.
  */
 function renderVectorKeyframe(
   ctx: CanvasRenderingContext2D,
-  keyframe: VectorKeyframe,
+  keyframe: VectorKeyframe | InterpolatedVectorKeyframe,
   canvasSize: number,
   displayScale: number
 ): void {
@@ -202,11 +204,9 @@ export function VariantPreview() {
 
     // Check if this is a vector variant
     if (isVectorVariant(variant)) {
-      // Render vector variant
-      const vectorKeyframe = getVectorKeyframe(variant, state.keyframeIndex);
-      if (vectorKeyframe) {
-        renderVectorKeyframe(ctx, vectorKeyframe, canvasSize, scale);
-      }
+      // Render vector variant with tweening support
+      const vectorVisual = getActiveVectorVisual(state, variant);
+      renderVectorKeyframe(ctx, vectorVisual, canvasSize, scale);
     } else {
       // Render pixel variant
       // Get the active visual

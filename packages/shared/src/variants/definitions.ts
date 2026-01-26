@@ -4286,6 +4286,7 @@ const sacredMandalaVector: PlantVariant = {
   rarity: 0.06,
   requiresObservationToGerminate: true,
   renderMode: "vector",
+  tweenBetweenKeyframes: true,
   keyframes: [], // Required but unused for vector mode
   vectorKeyframes: [
     {
@@ -4345,6 +4346,7 @@ const crystalLatticeVector: PlantVariant = {
   rarity: 0.06,
   requiresObservationToGerminate: true,
   renderMode: "vector",
+  tweenBetweenKeyframes: true,
   keyframes: [],
   vectorKeyframes: [
     {
@@ -4427,6 +4429,7 @@ const stellarGeometryVector: PlantVariant = {
   rarity: 0.06,
   requiresObservationToGerminate: true,
   renderMode: "vector",
+  tweenBetweenKeyframes: true,
   keyframes: [],
   vectorKeyframes: [
     {
@@ -4491,6 +4494,7 @@ const metatronsCubeVector: PlantVariant = {
   rarity: 0.05,
   requiresObservationToGerminate: true,
   renderMode: "vector",
+  tweenBetweenKeyframes: true,
   keyframes: [],
   vectorKeyframes: [
     {

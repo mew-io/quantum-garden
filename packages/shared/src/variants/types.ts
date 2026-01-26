@@ -316,3 +316,29 @@ export interface VectorKeyframe {
   /** Optional scale override (default 1.0) */
   scale?: number;
 }
+
+/**
+ * Result of interpolating between two vector keyframes for tweening.
+ */
+export interface InterpolatedVectorKeyframe {
+  /** Interpolated primitives (positions and sizes blended) */
+  primitives: VectorPrimitive[];
+
+  /** Interpolated stroke color */
+  strokeColor: string;
+
+  /** Interpolated stroke opacity */
+  strokeOpacity: number;
+
+  /** Interpolated scale */
+  scale: number;
+
+  /** Source keyframe name */
+  fromKeyframe: string;
+
+  /** Target keyframe name */
+  toKeyframe: string;
+
+  /** Interpolation progress (0.0 - 1.0) */
+  t: number;
+}

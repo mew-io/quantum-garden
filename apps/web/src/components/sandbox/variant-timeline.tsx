@@ -1,12 +1,20 @@
 "use client";
 
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
+import {
+  isVectorVariant,
+  getEffectiveKeyframes,
+  type VectorKeyframe,
+  type GlyphKeyframe,
+} from "@quantum-garden/shared";
 import { MiniGlyph } from "./mini-glyph";
+import { VectorMiniGlyph } from "./vector-mini-glyph";
 
 /**
  * Timeline view showing keyframes as horizontal blocks with sprite previews.
  * Width of each block is proportional to its duration.
  * Click a keyframe to select it for editing.
+ * Supports both pixel and vector variants.
  */
 export function VariantTimeline() {
   const {
@@ -28,11 +36,12 @@ export function VariantTimeline() {
   }
 
   const totalDuration = getTotalDuration();
-  const keyframes = variant.keyframes;
+  const isVector = isVectorVariant(variant);
+  const effectiveKeyframes = getEffectiveKeyframes(variant);
 
   // Calculate cumulative times for positioning
   let cumulativeTime = 0;
-  const keyframeTimes = keyframes.map((kf) => {
+  const keyframeTimes = effectiveKeyframes.map((kf) => {
     const startTime = cumulativeTime;
     cumulativeTime += kf.duration;
     return { startTime, endTime: cumulativeTime };
@@ -46,8 +55,19 @@ export function VariantTimeline() {
   // Playhead position as percentage
   const playheadPosition = totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0;
 
-  // Get effective keyframe with color variation applied
-  const getKeyframeWithColors = (keyframe: (typeof keyframes)[0]) => {
+  // Get the actual keyframe data (pixel or vector)
+  const getPixelKeyframe = (index: number): GlyphKeyframe | null => {
+    if (isVector) return null;
+    return variant.keyframes[index] ?? null;
+  };
+
+  const getVectorKeyframe = (index: number): VectorKeyframe | null => {
+    if (!isVector) return null;
+    return variant.vectorKeyframes?.[index] ?? null;
+  };
+
+  // Get effective pixel keyframe with color variation applied
+  const getKeyframeWithColors = (keyframe: GlyphKeyframe): GlyphKeyframe => {
     if (!selectedColorVariation || !variant.colorVariations) {
       return keyframe;
     }
@@ -74,15 +94,23 @@ export function VariantTimeline() {
       <div className="relative overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         {/* Keyframe blocks */}
         <div className="flex h-24 rounded overflow-hidden min-w-fit">
-          {keyframes.map((keyframe, index) => {
-            const widthPercent = (keyframe.duration / totalDuration) * 100;
+          {effectiveKeyframes.map((kf, index) => {
+            const widthPercent = (kf.duration / totalDuration) * 100;
             const isSelected = selectedKeyframeIndex === index;
             const isCurrent = currentKeyframeIndex === index;
-            const keyframeWithColors = getKeyframeWithColors(keyframe);
 
-            // Get a color from the keyframe palette for visual feedback
-            const previewColor =
-              keyframeWithColors.palette[1] || keyframeWithColors.palette[0] || "#666";
+            // Get preview color and keyframe data based on variant type
+            let previewColor = "#666";
+            const pixelKf = getPixelKeyframe(index);
+            const vectorKf = getVectorKeyframe(index);
+
+            if (pixelKf) {
+              const keyframeWithColors = getKeyframeWithColors(pixelKf);
+              previewColor =
+                keyframeWithColors.palette[1] || keyframeWithColors.palette[0] || "#666";
+            } else if (vectorKf) {
+              previewColor = vectorKf.strokeColor;
+            }
 
             return (
               <button
@@ -104,19 +132,23 @@ export function VariantTimeline() {
                   backgroundColor: `${previewColor}22`, // 13% opacity version
                   minWidth: "48px", // Reduced for mobile, scrollable if needed
                 }}
-                title={`${keyframe.name} (${keyframe.duration}s)`}
+                title={`${kf.name} (${kf.duration}s)`}
               >
                 {/* Mini sprite preview */}
                 <div className="bg-gray-950 rounded p-1">
-                  <MiniGlyph keyframe={keyframeWithColors} size={40} />
+                  {isVector && vectorKf ? (
+                    <VectorMiniGlyph keyframe={vectorKf} size={40} />
+                  ) : pixelKf ? (
+                    <MiniGlyph keyframe={getKeyframeWithColors(pixelKf)} size={40} />
+                  ) : null}
                 </div>
 
                 {/* Keyframe name and duration */}
                 <div className="flex flex-col items-center">
                   <span className="text-[10px] font-medium text-white truncate px-1 max-w-full">
-                    {keyframe.name}
+                    {kf.name}
                   </span>
-                  <span className="text-[9px] text-gray-500">{keyframe.duration}s</span>
+                  <span className="text-[9px] text-gray-500">{kf.duration}s</span>
                 </div>
 
                 {/* Color preview bar */}

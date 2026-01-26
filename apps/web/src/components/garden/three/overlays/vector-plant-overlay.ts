@@ -11,8 +11,10 @@ import {
   type PlantVariant,
   type VectorPrimitive,
   type VectorKeyframe,
+  type InterpolatedVectorKeyframe,
   getVariantById,
   computeLifecycleState,
+  getActiveVectorVisual,
   type PlantWithLifecycle,
 } from "@quantum-garden/shared";
 
@@ -109,9 +111,12 @@ export class VectorPlantOverlay {
   }
 
   /**
-   * Get the current vector keyframe for a plant.
+   * Get the current vector visual for a plant (with tweening support).
    */
-  private getCurrentKeyframe(plant: Plant, variant: PlantVariant): VectorKeyframe | null {
+  private getCurrentKeyframe(
+    plant: Plant,
+    variant: PlantVariant
+  ): VectorKeyframe | InterpolatedVectorKeyframe | null {
     if (!variant.vectorKeyframes?.length) return null;
 
     // Convert Plant to PlantWithLifecycle
@@ -123,8 +128,7 @@ export class VectorPlantOverlay {
       colorVariationName: plant.colorVariationName ?? null,
     };
 
-    // Create a temporary variant with regular keyframes for lifecycle calculation
-    // The keyframe index will be the same for vectorKeyframes
+    // Create a temporary variant with placeholder keyframes for lifecycle calculation
     const tempVariant: PlantVariant = {
       ...variant,
       keyframes: variant.vectorKeyframes.map((vk) => ({
@@ -138,13 +142,24 @@ export class VectorPlantOverlay {
     };
 
     const lifecycleState = computeLifecycleState(plantWithLifecycle, tempVariant);
-    return variant.vectorKeyframes[lifecycleState.keyframeIndex] ?? null;
+
+    // Use getActiveVectorVisual for tweening support
+    try {
+      return getActiveVectorVisual(lifecycleState, variant);
+    } catch {
+      // Fallback to direct keyframe access if tweening fails
+      return variant.vectorKeyframes[lifecycleState.keyframeIndex] ?? null;
+    }
   }
 
   /**
    * Update a plant's mesh group with the current keyframe visuals.
    */
-  private updatePlantGroup(plantGroup: THREE.Group, plant: Plant, keyframe: VectorKeyframe): void {
+  private updatePlantGroup(
+    plantGroup: THREE.Group,
+    plant: Plant,
+    keyframe: VectorKeyframe | InterpolatedVectorKeyframe
+  ): void {
     // Clear existing children
     while (plantGroup.children.length > 0) {
       const child = plantGroup.children[0];

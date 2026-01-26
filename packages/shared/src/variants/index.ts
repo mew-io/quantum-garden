@@ -23,6 +23,7 @@ export type {
   VectorStar,
   VectorDiamond,
   VectorKeyframe,
+  InterpolatedVectorKeyframe,
 } from "./types";
 
 // Lifecycle computation
@@ -43,6 +44,10 @@ export {
   getKeyframeCount,
   getBaseTotalDuration,
   getVectorKeyframe,
+  // Vector tweening
+  getActiveVectorVisual,
+  interpolateVectorKeyframes,
+  isInterpolatedVectorKeyframe,
 } from "./lifecycle";
 
 // Variant definitions

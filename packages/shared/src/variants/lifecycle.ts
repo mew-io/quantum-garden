@@ -14,6 +14,8 @@ import type {
   GlyphKeyframe,
   InterpolatedKeyframe,
   VectorKeyframe,
+  InterpolatedVectorKeyframe,
+  VectorPrimitive,
 } from "./types";
 
 // =============================================================================
@@ -413,6 +415,212 @@ function rgbToHex(r: number, g: number, b: number): string {
  */
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
+}
+
+// =============================================================================
+// Vector Tweening
+// =============================================================================
+
+/**
+ * Get the active vector visual for a plant, handling tweening.
+ *
+ * Similar to getActiveVisual but for vector variants.
+ * Interpolates between vector keyframes during transitions.
+ *
+ * @param state - Computed lifecycle state
+ * @param variant - Plant variant (must be vector mode)
+ * @returns Either the current vector keyframe or an interpolated result
+ */
+export function getActiveVectorVisual(
+  state: ComputedLifecycleState,
+  variant: PlantVariant
+): VectorKeyframe | InterpolatedVectorKeyframe {
+  const vectorKeyframes = variant.vectorKeyframes;
+  if (!vectorKeyframes?.length) {
+    throw new Error(`Variant ${variant.id} has no vector keyframes`);
+  }
+
+  const currentVectorKf = vectorKeyframes[state.keyframeIndex];
+  if (!currentVectorKf) {
+    throw new Error(`Vector keyframe ${state.keyframeIndex} not found`);
+  }
+
+  // No tweening enabled - return current keyframe as-is
+  if (!variant.tweenBetweenKeyframes) {
+    return currentVectorKf;
+  }
+
+  const progress = state.keyframeProgress;
+
+  // First 10%: Tween in from previous keyframe
+  if (progress < TWEEN_EDGE_FRACTION && state.keyframeIndex > 0) {
+    const prevVectorKf = vectorKeyframes[state.keyframeIndex - 1];
+    if (prevVectorKf) {
+      // Map 0.0-0.1 to 0.0-1.0 for interpolation
+      const t = progress / TWEEN_EDGE_FRACTION;
+      return interpolateVectorKeyframes(prevVectorKf, currentVectorKf, t);
+    }
+  }
+
+  // Remaining 90%: Return stable current keyframe
+  return currentVectorKf;
+}
+
+/**
+ * Interpolate between two vector keyframes for smooth transitions.
+ *
+ * @param from - Starting vector keyframe
+ * @param to - Ending vector keyframe
+ * @param t - Interpolation factor (0.0 - 1.0)
+ * @returns Interpolated vector keyframe data
+ */
+export function interpolateVectorKeyframes(
+  from: VectorKeyframe,
+  to: VectorKeyframe,
+  t: number
+): InterpolatedVectorKeyframe {
+  // Clamp t to valid range
+  const progress = Math.max(0, Math.min(1, t));
+
+  // Interpolate stroke color
+  const strokeColor = interpolateColor(from.strokeColor, to.strokeColor, progress);
+
+  // Interpolate stroke opacity
+  const strokeOpacity = lerp(from.strokeOpacity, to.strokeOpacity, progress);
+
+  // Interpolate scale
+  const fromScale = from.scale ?? 1;
+  const toScale = to.scale ?? 1;
+  const scale = lerp(fromScale, toScale, progress);
+
+  // Interpolate primitives
+  const primitives = interpolateVectorPrimitives(from.primitives, to.primitives, progress);
+
+  return {
+    primitives,
+    strokeColor,
+    strokeOpacity,
+    scale,
+    fromKeyframe: from.name,
+    toKeyframe: to.name,
+    t: progress,
+  };
+}
+
+/**
+ * Interpolate between two arrays of vector primitives.
+ *
+ * Strategy:
+ * - If same number of primitives and same types in order, interpolate positions/sizes
+ * - If different, cross-fade by using 'from' primitives for t<0.5, 'to' for t>=0.5
+ *
+ * @param from - Starting primitives array
+ * @param to - Ending primitives array
+ * @param t - Interpolation factor
+ * @returns Interpolated primitives array
+ */
+function interpolateVectorPrimitives(
+  from: VectorPrimitive[],
+  to: VectorPrimitive[],
+  t: number
+): VectorPrimitive[] {
+  // Check if we can interpolate directly (same types in same order)
+  const canInterpolateDirect =
+    from.length === to.length &&
+    from.every((p, i) => {
+      const toP = to[i];
+      return toP && p.type === toP.type;
+    });
+
+  if (canInterpolateDirect) {
+    // Interpolate each primitive
+    return from.map((fromP, i) => {
+      const toP = to[i]!;
+      return interpolateSinglePrimitive(fromP, toP, t);
+    });
+  }
+
+  // Different structures - cross-fade at midpoint
+  if (t < 0.5) {
+    return from;
+  } else {
+    return to;
+  }
+}
+
+/**
+ * Interpolate a single primitive between two states of the same type.
+ */
+function interpolateSinglePrimitive(
+  from: VectorPrimitive,
+  to: VectorPrimitive,
+  t: number
+): VectorPrimitive {
+  switch (from.type) {
+    case "circle":
+      if (to.type !== "circle") return from;
+      return {
+        type: "circle",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        radius: lerp(from.radius, to.radius, t),
+      };
+
+    case "line":
+      if (to.type !== "line") return from;
+      return {
+        type: "line",
+        x1: lerp(from.x1, to.x1, t),
+        y1: lerp(from.y1, to.y1, t),
+        x2: lerp(from.x2, to.x2, t),
+        y2: lerp(from.y2, to.y2, t),
+      };
+
+    case "polygon":
+      if (to.type !== "polygon") return from;
+      return {
+        type: "polygon",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        sides: Math.round(lerp(from.sides, to.sides, t)),
+        radius: lerp(from.radius, to.radius, t),
+        rotation: lerp(from.rotation ?? 0, to.rotation ?? 0, t),
+      };
+
+    case "star":
+      if (to.type !== "star") return from;
+      return {
+        type: "star",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        points: Math.round(lerp(from.points, to.points, t)),
+        outerRadius: lerp(from.outerRadius, to.outerRadius, t),
+        innerRadius: lerp(from.innerRadius, to.innerRadius, t),
+        rotation: lerp(from.rotation ?? 0, to.rotation ?? 0, t),
+      };
+
+    case "diamond":
+      if (to.type !== "diamond") return from;
+      return {
+        type: "diamond",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        width: lerp(from.width, to.width, t),
+        height: lerp(from.height, to.height, t),
+      };
+
+    default:
+      return from;
+  }
+}
+
+/**
+ * Type guard to check if a vector visual is interpolated.
+ */
+export function isInterpolatedVectorKeyframe(
+  visual: VectorKeyframe | InterpolatedVectorKeyframe
+): visual is InterpolatedVectorKeyframe {
+  return "t" in visual && "fromKeyframe" in visual;
 }
 
 /**

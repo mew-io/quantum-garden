@@ -169,3 +169,155 @@ export interface EntanglementGroup {
   quantumCircuitId: string;
   createdAt: Date;
 }
+
+// =============================================================================
+// Quantum Circuit Types
+// =============================================================================
+
+/**
+ * Complexity levels for quantum circuits.
+ *
+ * Each level teaches a different quantum concept:
+ * - 1: Superposition (single qubit)
+ * - 2: Entanglement (Bell pairs)
+ * - 3: Multi-party entanglement (GHZ states)
+ * - 4: Quantum interference
+ * - 5: Variational/parameterized circuits
+ */
+export type CircuitComplexityLevel = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * Metadata for a registered quantum circuit type.
+ *
+ * Each circuit type is a self-contained module that can be
+ * contributed by the community.
+ */
+export interface CircuitMetadata {
+  /** Unique identifier (e.g., "superposition", "bell_pair") */
+  id: string;
+  /** Display name (e.g., "Single Qubit Superposition") */
+  name: string;
+  /** Complexity level (1-5) */
+  level: CircuitComplexityLevel;
+  /** Number of qubits used */
+  qubitCount: number;
+  /** Quantum concept being taught */
+  concept: string;
+  /** Educational description */
+  description: string;
+  /** Minimum plant variant rarity for this circuit */
+  minRarity: number;
+  /** Maximum plant variant rarity for this circuit */
+  maxRarity: number;
+}
+
+/**
+ * Response from listing all available circuits.
+ */
+export interface ListCircuitsResponse {
+  circuits: CircuitMetadata[];
+  executionMode: "mock" | "simulator" | "hardware";
+}
+
+/**
+ * Request to generate a quantum circuit.
+ */
+export interface GenerateCircuitRequest {
+  seed: number;
+  /** Specific circuit type to use */
+  circuitId?: string;
+  /** Auto-select circuit based on plant rarity */
+  rarity?: number;
+}
+
+/**
+ * Response from generating a circuit.
+ */
+export interface GenerateCircuitResponse {
+  circuitId: string;
+  circuitDefinition: string;
+  numQubits: number;
+  level: CircuitComplexityLevel;
+  concept: string;
+}
+
+/**
+ * Request to measure a plant's quantum circuit.
+ */
+export interface MeasureCircuitRequest {
+  plantId: string;
+  circuitDefinition: string;
+  circuitId: string;
+  shots?: number;
+}
+
+/**
+ * Response from measuring a circuit.
+ */
+export interface MeasureCircuitResponse {
+  plantId: string;
+  success: boolean;
+  traits?: ResolvedTraits;
+  executionMode?: "mock" | "simulator" | "hardware";
+  error?: string;
+}
+
+// =============================================================================
+// Quantum Job Types (Async Execution)
+// =============================================================================
+
+/**
+ * Status of a quantum job.
+ */
+export type JobStatus = "pending" | "submitted" | "running" | "completed" | "failed" | "timeout";
+
+/**
+ * Request to submit a quantum job.
+ */
+export interface SubmitJobRequest {
+  plantId: string;
+  circuitId?: string;
+  rarity?: number;
+  seed: number;
+  shots?: number;
+}
+
+/**
+ * Response from submitting a job.
+ */
+export interface SubmitJobResponse {
+  jobId: string;
+  status: JobStatus;
+  circuitId: string;
+  executionMode: "mock" | "simulator" | "hardware";
+}
+
+/**
+ * Job status and results.
+ */
+export interface JobStatusResponse {
+  jobId: string;
+  plantId: string;
+  circuitId: string;
+  status: JobStatus;
+  createdAt: string;
+  submittedAt?: string;
+  completedAt?: string;
+  executionMode?: "mock" | "simulator" | "hardware";
+  traits?: ResolvedTraits;
+  error?: string;
+}
+
+/**
+ * Job queue statistics.
+ */
+export interface JobStatsResponse {
+  pending: number;
+  submitted: number;
+  running: number;
+  completed: number;
+  failed: number;
+  timeout: number;
+  total: number;
+  executionMode: "mock" | "simulator" | "hardware";
+}

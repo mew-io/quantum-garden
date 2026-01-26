@@ -5,16 +5,45 @@ FastAPI service for quantum circuit generation and IonQ execution.
 Handles plant genome creation, entanglement groups, and measurement.
 """
 
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .jobs.worker import get_job_worker
 from .routers import circuits, health, jobs
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Manage application lifecycle - start/stop background worker."""
+    # Startup: Start the job worker
+    worker = get_job_worker()
+    await worker.start()
+    logger.info("Quantum service started with background job worker")
+
+    yield
+
+    # Shutdown: Stop the job worker
+    await worker.stop()
+    logger.info("Quantum service shutdown complete")
+
 
 app = FastAPI(
     title="Quantum Garden - Quantum Service",
     description="Quantum circuit service using Qiskit and IonQ",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # CORS configuration for local development

@@ -7,6 +7,7 @@ import {
   getVariantById,
   getEffectivePalette,
 } from "@quantum-garden/shared";
+import { measureCircuit } from "../../lib/quantum-client";
 
 /**
  * Simple seeded pseudo-random number generator.
@@ -21,25 +22,47 @@ function seededRandom(seed: number): () => number {
 }
 
 /**
- * Generate mock traits that simulate quantum measurement outcomes.
+ * Resolve traits by calling the quantum service.
+ *
+ * This executes the quantum circuit (on IonQ simulator/hardware or mock)
+ * and maps the measurement results to visual traits based on the circuit type.
+ *
+ * @param plantId - Unique plant identifier for the measurement request
+ * @param circuitDefinition - Base64 encoded circuit definition
+ * @param circuitId - Circuit type ID for trait mapping (e.g., "superposition", "bell_pair")
+ * @returns Resolved traits from quantum measurement
+ * @throws If quantum service call fails
+ */
+async function resolveTraitsFromQuantum(
+  plantId: string,
+  circuitDefinition: string,
+  circuitId: string
+): Promise<ResolvedTraits> {
+  const response = await measureCircuit({
+    plantId,
+    circuitDefinition,
+    circuitId,
+  });
+
+  if (!response.success || !response.traits) {
+    throw new Error(response.error ?? "Quantum measurement failed");
+  }
+
+  return response.traits;
+}
+
+/**
+ * Generate fallback mock traits when quantum service is unavailable.
  *
  * This uses pseudorandom generation seeded from the circuit definition
- * to produce reproducible, deterministic trait values. When real quantum
- * integration is enabled, this function will be replaced with actual
- * measurement results.
+ * to produce reproducible, deterministic trait values. Used as fallback
+ * when quantum service is unreachable or returns an error.
  *
  * The traits generated are:
  * - glyphPattern: Selected from predefined patterns based on variant/seed
  * - colorPalette: Uses variant's palette or falls back to randomized selection
  * - growthRate: 0.5 to 1.5 (slow to fast lifecycle)
  * - opacity: 0.7 to 1.0 (maintains visibility)
- */
-/**
- * Generate mock traits with optional offset for entangled partners.
- *
- * Entangled plants use the same seed but different offsets to produce
- * correlated but distinct traits. This simulates quantum entanglement
- * where measuring one qubit affects the other's outcome.
  */
 function generateMockTraits(
   circuitDefinition: string,
@@ -147,15 +170,33 @@ export const observationRouter = router({
         throw new Error("Plant has no quantum circuit definition");
       }
 
-      // Generate resolved traits using mock quantum measurement
-      // When real quantum integration is enabled, this will use actual
-      // measurement results from IonQ hardware. For now, we use
-      // deterministic pseudorandom generation seeded from the circuit.
-      const resolvedTraits = generateMockTraits(
-        circuitDefinition as string,
-        plant.variantId,
-        plant.colorVariationName
-      );
+      // Get the circuit ID for trait mapping (defaults to "variational")
+      // The circuit ID determines which trait mapper is used based on complexity level
+      const circuitId = plant.quantumCircuit?.circuitId ?? "variational";
+
+      // Try to resolve traits via quantum service, fall back to mock if unavailable
+      let resolvedTraits: ResolvedTraits;
+      try {
+        resolvedTraits = await resolveTraitsFromQuantum(
+          plant.id,
+          circuitDefinition as string,
+          circuitId as string
+        );
+        console.log(
+          `[Quantum] Plant ${plant.id} observed via quantum service (circuit: ${circuitId})`
+        );
+      } catch (error) {
+        // Quantum service unavailable - fall back to mock traits
+        console.warn(
+          `[Quantum] Service unavailable for plant ${plant.id}, using mock traits:`,
+          error instanceof Error ? error.message : error
+        );
+        resolvedTraits = generateMockTraits(
+          circuitDefinition as string,
+          plant.variantId,
+          plant.colorVariationName
+        );
+      }
 
       const updatedPlant = await ctx.db.plant.update({
         where: { id: input.plantId },
@@ -194,13 +235,30 @@ export const observationRouter = router({
           const partnerCircuit = partner.quantumCircuit?.circuitDefinition;
 
           if (partnerCircuit) {
-            // Use seed offset to create correlated but distinct traits
-            const correlatedTraits = generateMockTraits(
-              partnerCircuit as string,
-              partner.variantId,
-              partner.colorVariationName,
-              i + 1 // Offset based on position in entanglement group
-            );
+            const partnerCircuitId = partner.quantumCircuit?.circuitId ?? "variational";
+
+            // Try quantum service for entangled partner, fall back to mock
+            let correlatedTraits: ResolvedTraits;
+            try {
+              correlatedTraits = await resolveTraitsFromQuantum(
+                partner.id,
+                partnerCircuit as string,
+                partnerCircuitId as string
+              );
+              console.log(`[Quantum] Entangled partner ${partner.id} resolved via quantum service`);
+            } catch (error) {
+              // Fall back to mock with seed offset for correlation
+              console.warn(
+                `[Quantum] Service unavailable for partner ${partner.id}, using mock:`,
+                error instanceof Error ? error.message : error
+              );
+              correlatedTraits = generateMockTraits(
+                partnerCircuit as string,
+                partner.variantId,
+                partner.colorVariationName,
+                i + 1 // Offset based on position in entanglement group
+              );
+            }
 
             await ctx.db.plant.update({
               where: { id: partner.id },

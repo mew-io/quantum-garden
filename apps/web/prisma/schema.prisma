@@ -45,6 +45,7 @@ model Plant {
 // Quantum circuit record for IonQ execution
 model QuantumRecord {
   id                String    @id @default(cuid())
+  circuitId         String    @default("variational") // Circuit type ID for trait mapping
   circuitDefinition Json      // Qiskit circuit serialized
   ionqJobId         String?   @unique
   status            String    @default("pending") // pending, submitted, running, completed, failed
@@ -59,6 +60,7 @@ model QuantumRecord {
 
   @@index([status])
   @@index([ionqJobId])
+  @@index([circuitId])
 }
 
 // Observation event - when a plant's quantum state was observed

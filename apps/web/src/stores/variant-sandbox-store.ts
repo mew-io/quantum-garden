@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import type { PlantVariant, GlyphKeyframe } from "@quantum-garden/shared";
-import { PLANT_VARIANTS } from "@quantum-garden/shared";
+import {
+  PLANT_VARIANTS,
+  getEffectiveKeyframes,
+  getBaseTotalDuration,
+} from "@quantum-garden/shared";
 
 export type PlaybackSpeed = 0.5 | 1 | 2 | 5 | 10;
 export type Background = "white" | "dark" | "checkerboard";
@@ -90,11 +94,12 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
     const variant = get().getSelectedVariant();
     if (!variant) return 0;
 
+    const keyframes = getEffectiveKeyframes(variant);
     const { currentTime } = get();
     let accumulated = 0;
 
-    for (let i = 0; i < variant.keyframes.length; i++) {
-      const keyframe = variant.keyframes[i];
+    for (let i = 0; i < keyframes.length; i++) {
+      const keyframe = keyframes[i];
       if (!keyframe) continue;
       const duration = keyframe.duration;
       if (currentTime < accumulated + duration) {
@@ -112,19 +117,19 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       }
     }
 
-    return variant.keyframes.length - 1;
+    return keyframes.length - 1;
   },
 
   getKeyframeDurations: () => {
     const variant = get().getSelectedVariant();
     if (!variant) return [];
-    return variant.keyframes.map((kf) => kf.duration);
+    return getEffectiveKeyframes(variant).map((kf) => kf.duration);
   },
 
   getTotalDuration: () => {
     const variant = get().getSelectedVariant();
     if (!variant) return 0;
-    return variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+    return getBaseTotalDuration(variant);
   },
 
   // Actions
@@ -166,9 +171,10 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
     const variant = get().getSelectedVariant();
     if (!variant) return;
 
+    const keyframes = getEffectiveKeyframes(variant);
     let time = 0;
-    for (let i = 0; i < index && i < variant.keyframes.length; i++) {
-      time += variant.keyframes[i]?.duration ?? 0;
+    for (let i = 0; i < index && i < keyframes.length; i++) {
+      time += keyframes[i]?.duration ?? 0;
     }
     set({ currentTime: time, selectedKeyframeIndex: index });
   },

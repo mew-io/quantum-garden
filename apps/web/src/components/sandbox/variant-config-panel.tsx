@@ -1,6 +1,11 @@
 "use client";
 
-import type { PlantVariant } from "@quantum-garden/shared";
+import {
+  type PlantVariant,
+  isVectorVariant,
+  getKeyframeCount,
+  getBaseTotalDuration,
+} from "@quantum-garden/shared";
 
 interface VariantConfigPanelProps {
   variant: PlantVariant;
@@ -11,7 +16,9 @@ interface VariantConfigPanelProps {
  * Displays all options (enabled or disabled) so designers can see the full config.
  */
 export function VariantConfigPanel({ variant }: VariantConfigPanelProps) {
-  const totalDuration = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+  const isVector = isVectorVariant(variant);
+  const keyframeCount = getKeyframeCount(variant);
+  const totalDuration = getBaseTotalDuration(variant);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -49,8 +56,11 @@ export function VariantConfigPanel({ variant }: VariantConfigPanelProps) {
 
         {/* Animation Settings */}
         <ConfigSection title="Animation Settings">
-          <ConfigRow label="Keyframes" value={`${variant.keyframes.length}`} />
+          <ConfigRow label="Keyframes" value={`${keyframeCount}`} />
           <ConfigRow label="Total Duration" value={`${totalDuration}s`} />
+          {isVector && (
+            <ConfigRow label="Render Mode" value="Vector" badge="vector" badgeColor="blue" />
+          )}
           <ConfigToggle
             label="Loop"
             enabled={!!variant.loop}
@@ -103,31 +113,56 @@ export function VariantConfigPanel({ variant }: VariantConfigPanelProps) {
         {/* Keyframe Summary */}
         <ConfigSection title="Keyframe Summary">
           <div className="space-y-1">
-            {variant.keyframes.map((kf, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between py-1.5 px-3 bg-gray-50 rounded text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400 w-4">{i + 1}</span>
-                  <span className="font-medium text-gray-700">{kf.name}</span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  <span>{kf.duration}s</span>
-                  {kf.opacity !== undefined && kf.opacity !== 1 && <span>α{kf.opacity}</span>}
-                  {kf.scale !== undefined && kf.scale !== 1 && <span>×{kf.scale}</span>}
-                  <div className="flex gap-0.5">
-                    {kf.palette.slice(0, 3).map((color, ci) => (
+            {isVector
+              ? // Vector keyframes
+                variant.vectorKeyframes?.map((kf, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between py-1.5 px-3 bg-gray-50 rounded text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400 w-4">{i + 1}</span>
+                      <span className="font-medium text-gray-700">{kf.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>{kf.duration}s</span>
+                      {kf.strokeOpacity !== 1 && <span>α{kf.strokeOpacity}</span>}
+                      {kf.scale !== undefined && kf.scale !== 1 && <span>×{kf.scale}</span>}
                       <div
-                        key={ci}
                         className="w-3 h-3 rounded-sm border border-gray-300"
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: kf.strokeColor }}
+                        title={kf.strokeColor}
                       />
-                    ))}
+                      <span className="text-gray-400">{kf.primitives.length} shapes</span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))
+              : // Pixel keyframes
+                variant.keyframes.map((kf, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between py-1.5 px-3 bg-gray-50 rounded text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400 w-4">{i + 1}</span>
+                      <span className="font-medium text-gray-700">{kf.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>{kf.duration}s</span>
+                      {kf.opacity !== undefined && kf.opacity !== 1 && <span>α{kf.opacity}</span>}
+                      {kf.scale !== undefined && kf.scale !== 1 && <span>×{kf.scale}</span>}
+                      <div className="flex gap-0.5">
+                        {kf.palette.slice(0, 3).map((color, ci) => (
+                          <div
+                            key={ci}
+                            className="w-3 h-3 rounded-sm border border-gray-300"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
           </div>
         </ConfigSection>
       </div>

@@ -10,3 +10,4 @@
 export * from "./glyphs";
 export * from "./palettes";
 export * from "./pattern-builder";
+export * from "./vector-builder";

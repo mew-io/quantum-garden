@@ -73,11 +73,26 @@ export interface PlantVariant {
   requiresObservationToGerminate: boolean;
 
   /**
+   * Render mode determines how the plant is displayed.
+   * - 'pixel': Traditional 64x64 binary patterns (default)
+   * - 'vector': Smooth vector lines using Three.js Line primitives
+   */
+  renderMode?: "pixel" | "vector";
+
+  /**
    * Ordered array of keyframes defining the lifecycle animation.
    * Any number of keyframes (2, 6, 20+).
    * Durations are in seconds, modified by individual plant's lifecycleModifier.
+   * Required for pixel mode variants.
    */
   keyframes: GlyphKeyframe[];
+
+  /**
+   * Vector keyframes for vector mode variants.
+   * Uses vector primitives instead of binary patterns for smooth rendering.
+   * Required when renderMode is 'vector'.
+   */
+  vectorKeyframes?: VectorKeyframe[];
 
   /**
    * Optional color variations for multi-color variants.
@@ -217,4 +232,87 @@ export interface InterpolatedKeyframe {
 
   /** Interpolation progress (0.0 - 1.0) */
   t: number;
+}
+
+// ============================================================================
+// VECTOR RENDERING TYPES
+// ============================================================================
+
+/**
+ * Vector primitives for true vector rendering (no pixelation).
+ * Coordinates are in a 64x64 space to match pixel pattern dimensions.
+ */
+export type VectorPrimitive =
+  | VectorCircle
+  | VectorLine
+  | VectorPolygon
+  | VectorStar
+  | VectorDiamond;
+
+export interface VectorCircle {
+  type: "circle";
+  cx: number;
+  cy: number;
+  radius: number;
+}
+
+export interface VectorLine {
+  type: "line";
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface VectorPolygon {
+  type: "polygon";
+  cx: number;
+  cy: number;
+  sides: number;
+  radius: number;
+  /** Rotation in degrees */
+  rotation?: number;
+}
+
+export interface VectorStar {
+  type: "star";
+  cx: number;
+  cy: number;
+  points: number;
+  outerRadius: number;
+  innerRadius: number;
+  /** Rotation in degrees */
+  rotation?: number;
+}
+
+export interface VectorDiamond {
+  type: "diamond";
+  cx: number;
+  cy: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * A keyframe for vector variants.
+ * Uses vector primitives instead of binary patterns.
+ */
+export interface VectorKeyframe {
+  /** Descriptive name for this keyframe */
+  name: string;
+
+  /** Duration this keyframe lasts in seconds */
+  duration: number;
+
+  /** Vector primitives to render */
+  primitives: VectorPrimitive[];
+
+  /** Stroke color (hex string, e.g., "#707070") */
+  strokeColor: string;
+
+  /** Stroke opacity (0-1) */
+  strokeOpacity: number;
+
+  /** Optional scale override (default 1.0) */
+  scale?: number;
 }

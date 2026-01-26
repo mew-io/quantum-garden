@@ -47,6 +47,17 @@ import {
   drawLine,
   PATTERN_SIZE,
 } from "../patterns/pattern-builder";
+import {
+  vectorCircle,
+  vectorLine,
+  vectorPolygon,
+  vectorStar,
+  vectorDiamond,
+  vectorConcentricCircles,
+  vectorRadialLines,
+  vectorFlowerOfLife,
+  VECTOR_CENTER,
+} from "../patterns/vector-builder";
 
 // ============================================================================
 // PATTERN GENERATORS
@@ -4258,6 +4269,279 @@ const metatronsCube: PlantVariant = {
   ],
 };
 
+// ============================================================================
+// VECTOR VARIANTS
+// ============================================================================
+// True vector rendering using Three.js Line primitives.
+// These render with smooth lines, no pixelation.
+
+/**
+ * Sacred Mandala (Vector) - Smooth vector version
+ * Concentric circles with 8-fold radial symmetry
+ */
+const sacredMandalaVector: PlantVariant = {
+  id: "sacred-mandala-vector",
+  name: "Sacred Mandala (Vector)",
+  description: "Precise geometric circles rendered with smooth vector lines",
+  rarity: 0.06,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  keyframes: [], // Required but unused for vector mode
+  vectorKeyframes: [
+    {
+      name: "seed",
+      duration: 10,
+      primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
+      strokeColor: "#909090",
+      strokeOpacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "rings",
+      duration: 15,
+      primitives: [...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18])],
+      strokeColor: "#808080",
+      strokeOpacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "radiate",
+      duration: 20,
+      primitives: [
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18, 24]),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 6, 26),
+      ],
+      strokeColor: "#707070",
+      strokeOpacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "complete",
+      duration: 60,
+      primitives: [
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [5, 10, 15, 20, 26]),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 5, 28),
+        // Diamonds at cardinal points
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 18, 5, 7),
+        vectorDiamond(VECTOR_CENTER + 18, VECTOR_CENTER, 5, 7),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 18, 5, 7),
+        vectorDiamond(VECTOR_CENTER - 18, VECTOR_CENTER, 5, 7),
+      ],
+      strokeColor: "#606060",
+      strokeOpacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Crystal Lattice (Vector) - Smooth vector version
+ * Interlocking diamond grid pattern
+ */
+const crystalLatticeVector: PlantVariant = {
+  id: "crystal-lattice-vector",
+  name: "Crystal Lattice (Vector)",
+  description: "Interlocking diamond grid with smooth vector lines",
+  rarity: 0.06,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "diamond",
+      duration: 10,
+      primitives: [vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 14, 18)],
+      strokeColor: "#888888",
+      strokeOpacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "grid",
+      duration: 15,
+      primitives: [
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 12, 16),
+        vectorDiamond(VECTOR_CENTER - 10, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER + 10, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 10, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 10, 8, 12),
+      ],
+      strokeColor: "#787878",
+      strokeOpacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "expand",
+      duration: 20,
+      primitives: [
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER - 14, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER + 14, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 14, 10, 14),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 14, 10, 14),
+        // Connecting lines
+        vectorLine(VECTOR_CENTER - 5, VECTOR_CENTER, VECTOR_CENTER - 9, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER + 5, VECTOR_CENTER, VECTOR_CENTER + 9, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 7, VECTOR_CENTER, VECTOR_CENTER - 7),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 7, VECTOR_CENTER, VECTOR_CENTER + 7),
+      ],
+      strokeColor: "#686868",
+      strokeOpacity: 0.85,
+      scale: 0.95,
+    },
+    {
+      name: "full",
+      duration: 60,
+      primitives: [
+        // Core structure
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER - 12, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER + 12, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 12, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 12, 8, 12),
+        // Diagonal diamonds
+        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER - 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER - 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER + 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER + 9, 6, 8),
+        // Connecting lines
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 6),
+      ],
+      strokeColor: "#585858",
+      strokeOpacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Stellar Geometry (Vector) - Smooth vector version
+ * Star outlines with radiating lines
+ */
+const stellarGeometryVector: PlantVariant = {
+  id: "stellar-geometry-vector",
+  name: "Stellar Geometry (Vector)",
+  description: "Nested star outlines with smooth vector rendering",
+  rarity: 0.06,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "point",
+      duration: 8,
+      primitives: [
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 4, 7),
+      ],
+      strokeColor: "#909090",
+      strokeOpacity: 0.5,
+      scale: 0.6,
+    },
+    {
+      name: "star",
+      duration: 12,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+      ],
+      strokeColor: "#808080",
+      strokeOpacity: 0.7,
+      scale: 0.8,
+    },
+    {
+      name: "rays",
+      duration: 18,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 9, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 26, -90),
+      ],
+      strokeColor: "#707070",
+      strokeOpacity: 0.85,
+      scale: 0.9,
+    },
+    {
+      name: "nested",
+      duration: 60,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 24, 12, -90),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 10, 5, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 12, 24, 28, -90),
+      ],
+      strokeColor: "#606060",
+      strokeOpacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
+/**
+ * Metatron's Cube (Vector) - Smooth vector version
+ * Flower of Life pattern with connecting lines
+ */
+const metatronsCubeVector: PlantVariant = {
+  id: "metatrons-cube-vector",
+  name: "Metatron's Cube (Vector)",
+  description: "Sacred geometry Flower of Life with smooth vector lines",
+  rarity: 0.05,
+  requiresObservationToGerminate: true,
+  renderMode: "vector",
+  keyframes: [],
+  vectorKeyframes: [
+    {
+      name: "circle",
+      duration: 10,
+      primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
+      strokeColor: "#888888",
+      strokeOpacity: 0.5,
+      scale: 0.7,
+    },
+    {
+      name: "six",
+      duration: 15,
+      primitives: [...vectorFlowerOfLife(VECTOR_CENTER, VECTOR_CENTER, 8, 1)],
+      strokeColor: "#787878",
+      strokeOpacity: 0.7,
+      scale: 0.85,
+    },
+    {
+      name: "connect",
+      duration: 20,
+      primitives: [
+        ...vectorFlowerOfLife(VECTOR_CENTER, VECTOR_CENTER, 8, 1),
+        // Connect center to outer circles
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 0, 8, -90),
+        // Hexagon outline
+        vectorPolygon(VECTOR_CENTER, VECTOR_CENTER, 6, 8, -90),
+      ],
+      strokeColor: "#686868",
+      strokeOpacity: 0.85,
+      scale: 0.92,
+    },
+    {
+      name: "complete",
+      duration: 60,
+      primitives: [
+        ...vectorFlowerOfLife(VECTOR_CENTER, VECTOR_CENTER, 7, 2),
+        // Inner hexagon
+        vectorPolygon(VECTOR_CENTER, VECTOR_CENTER, 6, 7, -90),
+        // Outer hexagon
+        vectorPolygon(VECTOR_CENTER, VECTOR_CENTER, 6, 14, -90),
+        // Radial connections
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 0, 14, -90),
+      ],
+      strokeColor: "#585858",
+      strokeOpacity: 1.0,
+      scale: 1.0,
+    },
+  ],
+};
+
 /**
  * All registered plant variants.
  *
@@ -4274,8 +4558,11 @@ const metatronsCube: PlantVariant = {
  *             sumiSpirit (rare, abstract magical effects)
  * - Geometric: sacredMandala, crystalLattice, stellarGeometry, metatronsCube
  *              (rare, minimalist line-work patterns)
+ * - Geometric Vector: sacredMandalaVector, crystalLatticeVector,
+ *                     stellarGeometryVector, metatronsCubeVector
+ *                     (very rare, smooth vector line rendering)
  *
- * Total: 32 variants
+ * Total: 36 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -4318,6 +4605,11 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   crystalLattice,
   stellarGeometry,
   metatronsCube,
+  // Geometric Vector (very rare - smooth vector line-work)
+  sacredMandalaVector,
+  crystalLatticeVector,
+  stellarGeometryVector,
+  metatronsCubeVector,
 ];
 
 /**

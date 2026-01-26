@@ -6,9 +6,13 @@ import {
   computeLifecycleState,
   getEffectivePalette,
   getActiveVisual,
+  isVectorVariant,
+  getVectorKeyframe,
   type PlantWithLifecycle,
   type InterpolatedKeyframe,
   type GlyphKeyframe,
+  type VectorKeyframe,
+  type VectorPrimitive,
 } from "@quantum-garden/shared";
 
 const BACKGROUND_COLORS: Record<Background, string> = {
@@ -18,6 +22,109 @@ const BACKGROUND_COLORS: Record<Background, string> = {
 };
 
 const GRID_SIZE = 64;
+
+/**
+ * Render a vector keyframe to a Canvas2D context.
+ */
+function renderVectorKeyframe(
+  ctx: CanvasRenderingContext2D,
+  keyframe: VectorKeyframe,
+  canvasSize: number,
+  displayScale: number
+): void {
+  const { primitives, strokeColor, strokeOpacity, scale: keyframeScale = 1.0 } = keyframe;
+
+  // Calculate offset to center the 64x64 coordinate space in the canvas
+  const effectiveScale = displayScale * keyframeScale;
+  const offset = (canvasSize - GRID_SIZE * effectiveScale) / 2;
+
+  ctx.save();
+  ctx.translate(offset, offset);
+  ctx.scale(effectiveScale, effectiveScale);
+
+  ctx.strokeStyle = strokeColor;
+  ctx.globalAlpha = strokeOpacity;
+  ctx.lineWidth = 1 / effectiveScale; // Keep consistent line width regardless of scale
+
+  for (const primitive of primitives) {
+    renderPrimitive(ctx, primitive);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Render a single vector primitive to a Canvas2D context.
+ */
+function renderPrimitive(ctx: CanvasRenderingContext2D, primitive: VectorPrimitive): void {
+  ctx.beginPath();
+
+  switch (primitive.type) {
+    case "circle":
+      ctx.arc(primitive.cx, primitive.cy, primitive.radius, 0, Math.PI * 2);
+      break;
+
+    case "line":
+      ctx.moveTo(primitive.x1, primitive.y1);
+      ctx.lineTo(primitive.x2, primitive.y2);
+      break;
+
+    case "polygon": {
+      const { cx, cy, sides, radius, rotation = 0 } = primitive;
+      const rotRad = (rotation * Math.PI) / 180;
+
+      for (let i = 0; i <= sides; i++) {
+        const angle = (i / sides) * Math.PI * 2 + rotRad - Math.PI / 2;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+      break;
+    }
+
+    case "star": {
+      const { cx, cy, points, outerRadius, innerRadius, rotation = 0 } = primitive;
+      const rotRad = (rotation * Math.PI) / 180;
+      const totalPoints = points * 2;
+
+      for (let i = 0; i <= totalPoints; i++) {
+        const angle = (i / totalPoints) * Math.PI * 2 + rotRad - Math.PI / 2;
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+      break;
+    }
+
+    case "diamond": {
+      const { cx, cy, width, height } = primitive;
+      const halfW = width / 2;
+      const halfH = height / 2;
+
+      ctx.moveTo(cx, cy - halfH); // Top
+      ctx.lineTo(cx + halfW, cy); // Right
+      ctx.lineTo(cx, cy + halfH); // Bottom
+      ctx.lineTo(cx - halfW, cy); // Left
+      ctx.closePath();
+      break;
+    }
+  }
+
+  ctx.stroke();
+}
 
 /**
  * Live preview of the variant at the current playback time.
@@ -89,55 +196,69 @@ export function VariantPreview() {
     // Compute lifecycle state
     const state = computeLifecycleState(mockPlant, variant, new Date());
 
-    // Get the active visual
-    const visual = getActiveVisual(state, variant);
+    // Grid drawing needs these values regardless of render mode
+    const gridScale = scale;
+    const gridOffset = (canvasSize - GRID_SIZE * gridScale) / 2;
 
-    // Type guard for interpolated visual
-    const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
-      "t" in v;
-
-    // Extract pattern, opacity, scale from the visual
-    const pattern = visual.pattern;
-    const effectiveOpacity = visual.opacity ?? 1.0;
-    const effectiveScale = visual.scale ?? 1.0;
-
-    // Get palette
-    let palette: string[];
-    if (isInterpolated(visual)) {
-      palette = visual.palette;
+    // Check if this is a vector variant
+    if (isVectorVariant(variant)) {
+      // Render vector variant
+      const vectorKeyframe = getVectorKeyframe(variant, state.keyframeIndex);
+      if (vectorKeyframe) {
+        renderVectorKeyframe(ctx, vectorKeyframe, canvasSize, scale);
+      }
     } else {
-      palette = getEffectivePalette(visual, variant, selectedColorVariation);
-    }
+      // Render pixel variant
+      // Get the active visual
+      const visual = getActiveVisual(state, variant);
 
-    // Draw the glyph
-    ctx.globalAlpha = effectiveOpacity;
-    const pixelScale = scale * effectiveScale;
-    const offset = (canvasSize - GRID_SIZE * pixelScale) / 2;
+      // Type guard for interpolated visual
+      const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
+        "t" in v;
 
-    for (let y = 0; y < GRID_SIZE; y++) {
-      const row = pattern[y];
-      if (!row) continue;
-      for (let x = 0; x < GRID_SIZE; x++) {
-        const cellValue = row[x];
-        if (cellValue && cellValue > 0) {
-          // Determine color based on distance from center
-          const distFromCenter = Math.sqrt(
-            Math.pow(x - GRID_SIZE / 2, 2) + Math.pow(y - GRID_SIZE / 2, 2)
-          );
-          const maxDist = Math.sqrt(2) * (GRID_SIZE / 2);
-          const colorIndex = Math.min(
-            palette.length - 1,
-            Math.floor((distFromCenter / maxDist) * palette.length)
-          );
-          const color = palette[colorIndex] || palette[0] || "#888888";
+      // Extract pattern, opacity, scale from the visual
+      const pattern = visual.pattern;
+      const effectiveOpacity = visual.opacity ?? 1.0;
+      const effectiveScale = visual.scale ?? 1.0;
 
-          ctx.fillStyle = color;
-          ctx.fillRect(offset + x * pixelScale, offset + y * pixelScale, pixelScale, pixelScale);
+      // Get palette
+      let palette: string[];
+      if (isInterpolated(visual)) {
+        palette = visual.palette;
+      } else {
+        palette = getEffectivePalette(visual, variant, selectedColorVariation);
+      }
+
+      // Draw the glyph
+      ctx.globalAlpha = effectiveOpacity;
+      const pixelScale = scale * effectiveScale;
+      const offset = (canvasSize - GRID_SIZE * pixelScale) / 2;
+
+      for (let y = 0; y < GRID_SIZE; y++) {
+        const row = pattern[y];
+        if (!row) continue;
+        for (let x = 0; x < GRID_SIZE; x++) {
+          const cellValue = row[x];
+          if (cellValue && cellValue > 0) {
+            // Determine color based on distance from center
+            const distFromCenter = Math.sqrt(
+              Math.pow(x - GRID_SIZE / 2, 2) + Math.pow(y - GRID_SIZE / 2, 2)
+            );
+            const maxDist = Math.sqrt(2) * (GRID_SIZE / 2);
+            const colorIndex = Math.min(
+              palette.length - 1,
+              Math.floor((distFromCenter / maxDist) * palette.length)
+            );
+            const color = palette[colorIndex] || palette[0] || "#888888";
+
+            ctx.fillStyle = color;
+            ctx.fillRect(offset + x * pixelScale, offset + y * pixelScale, pixelScale, pixelScale);
+          }
         }
       }
-    }
 
-    ctx.globalAlpha = 1.0;
+      ctx.globalAlpha = 1.0;
+    }
 
     // Draw grid overlay if enabled
     if (showGrid) {
@@ -146,12 +267,12 @@ export function VariantPreview() {
       ctx.beginPath();
 
       for (let x = 0; x <= GRID_SIZE; x++) {
-        ctx.moveTo(offset + x * pixelScale, offset);
-        ctx.lineTo(offset + x * pixelScale, offset + GRID_SIZE * pixelScale);
+        ctx.moveTo(gridOffset + x * gridScale, gridOffset);
+        ctx.lineTo(gridOffset + x * gridScale, gridOffset + GRID_SIZE * gridScale);
       }
       for (let y = 0; y <= GRID_SIZE; y++) {
-        ctx.moveTo(offset, offset + y * pixelScale);
-        ctx.lineTo(offset + GRID_SIZE * pixelScale, offset + y * pixelScale);
+        ctx.moveTo(gridOffset, gridOffset + y * gridScale);
+        ctx.lineTo(gridOffset + GRID_SIZE * gridScale, gridOffset + y * gridScale);
       }
       ctx.stroke();
     }
@@ -225,8 +346,8 @@ export function VariantPreview() {
       </div>
       <div className="text-center">
         <span className="text-sm text-gray-400">
-          {
-            computeLifecycleState(
+          {(() => {
+            const state = computeLifecycleState(
               {
                 id: "preview",
                 variantId: variant.id,
@@ -236,8 +357,14 @@ export function VariantPreview() {
               },
               variant,
               new Date()
-            ).currentKeyframe.name
-          }
+            );
+            // For vector variants, get name from vectorKeyframes
+            if (isVectorVariant(variant)) {
+              const vectorKf = getVectorKeyframe(variant, state.keyframeIndex);
+              return vectorKf?.name ?? "unknown";
+            }
+            return state.currentKeyframe.name;
+          })()}
         </span>
       </div>
     </div>

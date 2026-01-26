@@ -11,11 +11,13 @@
  */
 
 import * as THREE from "three";
+import type { Plant } from "@quantum-garden/shared";
 import type { SceneManager } from "../core/scene-manager";
 import { ReticleOverlay } from "./reticle-overlay";
 import { EntanglementOverlay } from "./entanglement-overlay";
 import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
+import { VectorPlantOverlay } from "./vector-plant-overlay";
 
 /**
  * Manages all overlay elements in a unified way.
@@ -29,6 +31,7 @@ export class OverlayManager {
   public entanglement: EntanglementOverlay;
   public dwell: DwellOverlay;
   public feedback: FeedbackOverlay;
+  public vectorPlants: VectorPlantOverlay;
 
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
@@ -41,12 +44,14 @@ export class OverlayManager {
     this.entanglement = new EntanglementOverlay();
     this.dwell = new DwellOverlay();
     this.feedback = new FeedbackOverlay();
+    this.vectorPlants = new VectorPlantOverlay();
 
     // Add all overlay meshes to the overlay scene
     this.overlayScene.add(this.reticle.getObject());
     this.overlayScene.add(this.entanglement.getObject());
     this.overlayScene.add(this.dwell.getObject());
     this.overlayScene.add(this.feedback.getObject());
+    this.overlayScene.add(this.vectorPlants.getObject());
   }
 
   /**
@@ -57,6 +62,14 @@ export class OverlayManager {
     this.entanglement.update(time);
     this.dwell.update(time);
     this.feedback.update(time);
+    this.vectorPlants.update(time);
+  }
+
+  /**
+   * Set plants for the vector plant overlay.
+   */
+  setPlants(plants: Plant[]): void {
+    this.vectorPlants.setPlants(plants);
   }
 
   /**
@@ -81,5 +94,6 @@ export class OverlayManager {
     this.entanglement.dispose();
     this.dwell.dispose();
     this.feedback.dispose();
+    this.vectorPlants.dispose();
   }
 }

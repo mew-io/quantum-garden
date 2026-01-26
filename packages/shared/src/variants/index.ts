@@ -15,6 +15,14 @@ export type {
   ComputedLifecycleState,
   PlantWithLifecycle,
   InterpolatedKeyframe,
+  // Vector rendering types
+  VectorPrimitive,
+  VectorCircle,
+  VectorLine,
+  VectorPolygon,
+  VectorStar,
+  VectorDiamond,
+  VectorKeyframe,
 } from "./types";
 
 // Lifecycle computation
@@ -29,6 +37,12 @@ export {
   selectColorVariation,
   getEffectivePalette,
   getKeyframeWithEffectivePalette,
+  // Vector/pixel abstraction helpers
+  isVectorVariant,
+  getEffectiveKeyframes,
+  getKeyframeCount,
+  getBaseTotalDuration,
+  getVectorKeyframe,
 } from "./lifecycle";
 
 // Variant definitions

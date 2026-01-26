@@ -13,17 +13,72 @@ import type {
   ComputedLifecycleState,
   GlyphKeyframe,
   InterpolatedKeyframe,
+  VectorKeyframe,
 } from "./types";
+
+// =============================================================================
+// Variant Mode Helpers
+// =============================================================================
+
+/**
+ * Check if a variant uses vector rendering mode.
+ */
+export function isVectorVariant(variant: PlantVariant): boolean {
+  return variant.renderMode === "vector";
+}
+
+/**
+ * Get the effective keyframes for a variant (pixel or vector).
+ * For vector variants, creates compatible keyframe objects from vectorKeyframes.
+ */
+export function getEffectiveKeyframes(
+  variant: PlantVariant
+): Array<{ name: string; duration: number }> {
+  if (isVectorVariant(variant) && variant.vectorKeyframes?.length) {
+    return variant.vectorKeyframes.map((vk) => ({
+      name: vk.name,
+      duration: vk.duration,
+    }));
+  }
+  return variant.keyframes;
+}
+
+/**
+ * Get the number of keyframes in a variant (pixel or vector).
+ */
+export function getKeyframeCount(variant: PlantVariant): number {
+  if (isVectorVariant(variant) && variant.vectorKeyframes?.length) {
+    return variant.vectorKeyframes.length;
+  }
+  return variant.keyframes.length;
+}
+
+/**
+ * Get the base total duration of a variant's lifecycle (without modifier).
+ */
+export function getBaseTotalDuration(variant: PlantVariant): number {
+  const keyframes = getEffectiveKeyframes(variant);
+  return keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+}
+
+/**
+ * Get a vector keyframe by index.
+ */
+export function getVectorKeyframe(variant: PlantVariant, index: number): VectorKeyframe | null {
+  if (!variant.vectorKeyframes?.length) return null;
+  return variant.vectorKeyframes[index] ?? null;
+}
 
 /**
  * Calculate the total duration of a variant's lifecycle.
+ * Works with both pixel and vector variants.
  *
  * @param variant - The plant variant
  * @param lifecycleModifier - Speed multiplier (1.0 = normal)
  * @returns Total duration in seconds
  */
 export function getTotalDuration(variant: PlantVariant, lifecycleModifier: number = 1.0): number {
-  const baseTotal = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+  const baseTotal = getBaseTotalDuration(variant);
   return baseTotal / Math.max(0.1, lifecycleModifier);
 }
 
@@ -42,10 +97,24 @@ export function getEffectiveDuration(
 }
 
 /**
+ * Helper to create a placeholder GlyphKeyframe from effective keyframe data.
+ * Used for vector variants which don't have actual GlyphKeyframes.
+ */
+function createPlaceholderKeyframe(kf: { name: string; duration: number }): GlyphKeyframe {
+  return {
+    name: kf.name,
+    duration: kf.duration,
+    pattern: [],
+    palette: [],
+  };
+}
+
+/**
  * Compute the current lifecycle state for a plant.
  *
  * This is the core calculation function. Given a plant, its variant,
  * and the current time, it returns the active keyframe and progress.
+ * Works with both pixel and vector variants.
  *
  * @param plant - Plant with lifecycle fields
  * @param variant - The plant's variant definition
@@ -59,10 +128,21 @@ export function computeLifecycleState(
 ): ComputedLifecycleState {
   const { germinatedAt, lifecycleModifier } = plant;
   const totalDuration = getTotalDuration(variant, lifecycleModifier);
+  const effectiveKeyframes = getEffectiveKeyframes(variant);
+  const isVector = isVectorVariant(variant);
+
+  // Helper to get keyframe (real or placeholder)
+  const getKeyframe = (index: number): GlyphKeyframe | undefined => {
+    if (isVector) {
+      const kf = effectiveKeyframes[index];
+      return kf ? createPlaceholderKeyframe(kf) : undefined;
+    }
+    return variant.keyframes[index];
+  };
 
   // Not germinated - return first keyframe at 0 progress
   if (!germinatedAt) {
-    const firstKeyframe = variant.keyframes[0];
+    const firstKeyframe = getKeyframe(0);
     if (!firstKeyframe) {
       throw new Error(`Variant ${variant.id} has no keyframes`);
     }
@@ -74,7 +154,7 @@ export function computeLifecycleState(
       elapsedSeconds: 0,
       totalDurationSeconds: totalDuration,
       prevKeyframe: undefined,
-      nextKeyframe: variant.keyframes[1],
+      nextKeyframe: getKeyframe(1),
       isComplete: false,
     };
   }
@@ -92,8 +172,8 @@ export function computeLifecycleState(
 
   // Walk through keyframes to find current one
   let accumulated = 0;
-  for (let i = 0; i < variant.keyframes.length; i++) {
-    const keyframe = variant.keyframes[i];
+  for (let i = 0; i < effectiveKeyframes.length; i++) {
+    const keyframe = effectiveKeyframes[i];
     if (!keyframe) continue;
 
     const effectiveDuration = getEffectiveDuration(keyframe.duration, lifecycleModifier);
@@ -108,20 +188,23 @@ export function computeLifecycleState(
       // if we've actually completed at least one loop
       let prevKeyframe: GlyphKeyframe | undefined;
       if (i > 0) {
-        prevKeyframe = variant.keyframes[i - 1];
+        prevKeyframe = getKeyframe(i - 1);
       } else if (variant.loop && hasLooped) {
-        prevKeyframe = variant.keyframes[variant.keyframes.length - 1];
+        prevKeyframe = getKeyframe(effectiveKeyframes.length - 1);
       }
 
+      const currentKeyframe = getKeyframe(i);
+      if (!currentKeyframe) continue;
+
       return {
-        currentKeyframe: keyframe,
+        currentKeyframe,
         keyframeIndex: i,
         keyframeProgress: Math.min(1, keyframeProgress),
         totalProgress: totalDuration > 0 ? elapsedSeconds / totalDuration : 1,
         elapsedSeconds,
         totalDurationSeconds: totalDuration,
         prevKeyframe,
-        nextKeyframe: variant.keyframes[i + 1],
+        nextKeyframe: getKeyframe(i + 1),
         isComplete: false,
       };
     }
@@ -130,19 +213,19 @@ export function computeLifecycleState(
   }
 
   // Past all keyframes - lifecycle complete
-  const lastKeyframe = variant.keyframes[variant.keyframes.length - 1];
+  const lastKeyframe = getKeyframe(effectiveKeyframes.length - 1);
   if (!lastKeyframe) {
     throw new Error(`Variant ${variant.id} has no keyframes`);
   }
 
   return {
     currentKeyframe: lastKeyframe,
-    keyframeIndex: variant.keyframes.length - 1,
+    keyframeIndex: effectiveKeyframes.length - 1,
     keyframeProgress: 1,
     totalProgress: 1,
     elapsedSeconds,
     totalDurationSeconds: totalDuration,
-    prevKeyframe: variant.keyframes[variant.keyframes.length - 2],
+    prevKeyframe: getKeyframe(effectiveKeyframes.length - 2),
     nextKeyframe: undefined,
     isComplete: true,
   };

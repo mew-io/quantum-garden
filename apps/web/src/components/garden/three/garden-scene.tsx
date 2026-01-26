@@ -89,7 +89,9 @@ export function GardenScene() {
     };
 
     // Initial sync
-    plantInstancer.syncPlants(convertToRenderable(useGardenStore.getState().plants));
+    const initialPlants = useGardenStore.getState().plants;
+    plantInstancer.syncPlants(convertToRenderable(initialPlants));
+    overlayManager.setPlants(initialPlants);
 
     // Subscribe to store changes
     const unsubscribe = useGardenStore.subscribe((state, prevState) => {
@@ -97,6 +99,7 @@ export function GardenScene() {
       // Only update if plants changed
       if (state.plants !== prevState.plants) {
         plantInstancer.syncPlants(convertToRenderable(state.plants));
+        overlayManager.setPlants(state.plants);
       }
     });
 
@@ -113,9 +116,11 @@ export function GardenScene() {
 
       // Re-sync to update transition animations
       // This is needed because transitions are time-based, not state-based
-      plantInstancer.syncPlants(convertToRenderable(useGardenStore.getState().plants));
+      const currentPlants = useGardenStore.getState().plants;
+      plantInstancer.syncPlants(convertToRenderable(currentPlants));
 
-      // Update overlays
+      // Update overlays (vector plants need plants for lifecycle updates)
+      overlayManager.setPlants(currentPlants);
       overlayManager.update(time, deltaTime);
     };
     sceneManager.addUpdateCallback(updateCallback);

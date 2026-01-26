@@ -1,8 +1,16 @@
 "use client";
 
-import { PLANT_VARIANTS } from "@quantum-garden/shared";
+import {
+  PLANT_VARIANTS,
+  isVectorVariant,
+  getKeyframeCount,
+  getBaseTotalDuration,
+  type VectorKeyframe,
+  type GlyphKeyframe,
+} from "@quantum-garden/shared";
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import { MiniGlyph } from "./mini-glyph";
+import { VectorMiniGlyph } from "./vector-mini-glyph";
 import { SuperposedPreview } from "./superposed-preview";
 
 /**
@@ -35,12 +43,20 @@ export function VariantGallery() {
       {/* Mobile: Full-featured card layout */}
       <div className="md:hidden space-y-4">
         {PLANT_VARIANTS.map((variant) => {
-          const previewKeyframeIndex = Math.min(
-            Math.floor(variant.keyframes.length / 2),
-            variant.keyframes.length - 1
-          );
-          const previewKeyframe = variant.keyframes[previewKeyframeIndex];
-          const totalDuration = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+          const isVector = isVectorVariant(variant);
+          const keyframeCount = getKeyframeCount(variant);
+          const totalDuration = getBaseTotalDuration(variant);
+
+          // Get preview keyframe (middle keyframe)
+          const previewKeyframeIndex = Math.min(Math.floor(keyframeCount / 2), keyframeCount - 1);
+          const previewKeyframe = isVector
+            ? variant.vectorKeyframes?.[previewKeyframeIndex]
+            : variant.keyframes[previewKeyframeIndex];
+
+          // Get keyframe strip (first 6 keyframes)
+          const keyframeStrip = isVector
+            ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
+            : variant.keyframes.slice(0, 6);
 
           return (
             <button
@@ -51,7 +67,12 @@ export function VariantGallery() {
               <div className="flex gap-4">
                 {/* Preview */}
                 <div className="flex-shrink-0 bg-gray-900 rounded-lg p-2">
-                  {previewKeyframe && <MiniGlyph keyframe={previewKeyframe} size={64} />}
+                  {previewKeyframe &&
+                    (isVector ? (
+                      <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={64} />
+                    ) : (
+                      <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={64} />
+                    ))}
                 </div>
 
                 {/* Info */}
@@ -66,7 +87,7 @@ export function VariantGallery() {
                   {/* Stats row */}
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      {variant.keyframes.length} keyframes
+                      {keyframeCount} keyframes
                     </span>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
                       {totalDuration}s
@@ -80,6 +101,11 @@ export function VariantGallery() {
 
                   {/* Features */}
                   <div className="flex flex-wrap gap-1.5 mt-2">
+                    {isVector && (
+                      <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded">
+                        Vector
+                      </span>
+                    )}
                     {variant.loop && (
                       <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
                         Loops
@@ -106,18 +132,22 @@ export function VariantGallery() {
 
               {/* Keyframe strip (limit to 6 for performance) */}
               <div className="mt-4 flex gap-1">
-                {variant.keyframes.slice(0, 6).map((kf, i) => (
+                {keyframeStrip.map((kf, i) => (
                   <div
                     key={i}
                     className="flex-shrink-0 bg-gray-800 rounded overflow-hidden"
                     title={`${kf.name} (${kf.duration}s)`}
                   >
-                    <MiniGlyph keyframe={kf} size={32} />
+                    {isVector ? (
+                      <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={32} />
+                    ) : (
+                      <MiniGlyph keyframe={kf as GlyphKeyframe} size={32} />
+                    )}
                   </div>
                 ))}
-                {variant.keyframes.length > 6 && (
+                {keyframeCount > 6 && (
                   <div className="flex items-center px-2 text-xs text-gray-400">
-                    +{variant.keyframes.length - 6}
+                    +{keyframeCount - 6}
                   </div>
                 )}
               </div>
@@ -143,12 +173,23 @@ export function VariantGallery() {
           </thead>
           <tbody>
             {PLANT_VARIANTS.map((variant) => {
+              const isVector = isVectorVariant(variant);
+              const keyframeCount = getKeyframeCount(variant);
+              const totalDuration = getBaseTotalDuration(variant);
+
+              // Get preview keyframe (middle keyframe)
               const previewKeyframeIndex = Math.min(
-                Math.floor(variant.keyframes.length / 2),
-                variant.keyframes.length - 1
+                Math.floor(keyframeCount / 2),
+                keyframeCount - 1
               );
-              const previewKeyframe = variant.keyframes[previewKeyframeIndex];
-              const totalDuration = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
+              const previewKeyframe = isVector
+                ? variant.vectorKeyframes?.[previewKeyframeIndex]
+                : variant.keyframes[previewKeyframeIndex];
+
+              // Get keyframe strip (first 6 keyframes)
+              const keyframeStrip = isVector
+                ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
+                : variant.keyframes.slice(0, 6);
 
               return (
                 <tr
@@ -159,7 +200,12 @@ export function VariantGallery() {
                   {/* Preview */}
                   <td className="py-3 px-4">
                     <div className="bg-gray-900 rounded-lg p-1.5 inline-block">
-                      {previewKeyframe && <MiniGlyph keyframe={previewKeyframe} size={48} />}
+                      {previewKeyframe &&
+                        (isVector ? (
+                          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={48} />
+                        ) : (
+                          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={48} />
+                        ))}
                     </div>
                   </td>
 
@@ -179,7 +225,7 @@ export function VariantGallery() {
 
                   {/* Keyframes */}
                   <td className="py-3 px-4 text-center">
-                    <span className="text-sm text-gray-700">{variant.keyframes.length}</span>
+                    <span className="text-sm text-gray-700">{keyframeCount}</span>
                   </td>
 
                   {/* Duration */}
@@ -201,6 +247,11 @@ export function VariantGallery() {
                   {/* Features */}
                   <td className="py-3 px-4">
                     <div className="flex flex-wrap gap-1">
+                      {isVector && (
+                        <span className="text-xs bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded whitespace-nowrap">
+                          Vector
+                        </span>
+                      )}
                       {variant.loop && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded whitespace-nowrap">
                           Loop
@@ -227,18 +278,22 @@ export function VariantGallery() {
                   {/* Lifecycle Preview (keyframe strip) - don't squish */}
                   <td className="py-3 px-4">
                     <div className="flex gap-0.5 flex-shrink-0">
-                      {variant.keyframes.slice(0, 6).map((kf, i) => (
+                      {keyframeStrip.map((kf, i) => (
                         <div
                           key={i}
                           className="flex-shrink-0 bg-gray-800 rounded overflow-hidden"
                           title={`${kf.name} (${kf.duration}s)`}
                         >
-                          <MiniGlyph keyframe={kf} size={28} />
+                          {isVector ? (
+                            <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={28} />
+                          ) : (
+                            <MiniGlyph keyframe={kf as GlyphKeyframe} size={28} />
+                          )}
                         </div>
                       ))}
-                      {variant.keyframes.length > 6 && (
+                      {keyframeCount > 6 && (
                         <div className="flex-shrink-0 flex items-center px-1 text-xs text-gray-400 whitespace-nowrap">
-                          +{variant.keyframes.length - 6}
+                          +{keyframeCount - 6}
                         </div>
                       )}
                     </div>

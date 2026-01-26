@@ -163,10 +163,16 @@ export class PlantInstancer {
     const time = performance.now() / 1000;
     const reducedMotion = prefersReducedMotion();
 
+    // Filter out vector-mode plants (they're rendered by VectorPlantOverlay)
+    const pixelPlants = plants.filter((plant) => {
+      const variant = getVariantById(plant.variantId);
+      return variant?.renderMode !== "vector";
+    });
+
     // Track which plants are still active
     const activePlantIds = new Set<string>();
 
-    plants.forEach((plant) => {
+    pixelPlants.forEach((plant) => {
       activePlantIds.add(plant.id);
 
       // Get or create instance index for this plant

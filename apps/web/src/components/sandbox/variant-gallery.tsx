@@ -58,6 +58,14 @@ export function VariantGallery() {
             ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
             : variant.keyframes.slice(0, 6);
 
+          // Get transition hint info for tooltip
+          const transitionHint = isVector
+            ? variant.vectorKeyframes?.find((kf) => kf.transitionHint)?.transitionHint
+            : null;
+          const transitionInfo = transitionHint
+            ? `Strategy: ${transitionHint.strategy}${transitionHint.easing ? `, Easing: ${transitionHint.easing}` : ""}`
+            : null;
+
           return (
             <button
               key={variant.id}
@@ -116,6 +124,16 @@ export function VariantGallery() {
                         Tweens
                       </span>
                     )}
+                    {isVector &&
+                      variant.vectorKeyframes?.some((kf) => kf.transitionHint) &&
+                      transitionInfo && (
+                        <span
+                          className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"
+                          title={transitionInfo}
+                        >
+                          Progressive
+                        </span>
+                      )}
                     {variant.colorVariations && variant.colorVariations.length > 0 && (
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
                         {variant.colorVariations.length} colors
@@ -163,6 +181,7 @@ export function VariantGallery() {
             <tr className="border-b border-gray-200 text-left text-sm text-gray-600">
               <th className="py-3 px-4 font-medium">Preview</th>
               <th className="py-3 px-4 font-medium whitespace-nowrap">Name</th>
+              <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Renderer</th>
               <th className="py-3 px-4 font-medium">Description</th>
               <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Keyframes</th>
               <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Duration</th>
@@ -191,6 +210,11 @@ export function VariantGallery() {
                 ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
                 : variant.keyframes.slice(0, 6);
 
+              // Get transition hint for progressive drawing
+              const transitionHint = isVector
+                ? variant.vectorKeyframes?.find((kf) => kf.transitionHint)?.transitionHint
+                : null;
+
               return (
                 <tr
                   key={variant.id}
@@ -214,6 +238,27 @@ export function VariantGallery() {
                     <span className="font-medium text-gray-900 group-hover:text-blue-600">
                       {variant.name}
                     </span>
+                  </td>
+
+                  {/* Renderer */}
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <span
+                        className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${
+                          isVector ? "bg-cyan-100 text-cyan-700" : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {isVector ? "Vector" : "Raster"}
+                      </span>
+                      {transitionHint && (
+                        <span
+                          className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold"
+                          title={`Strategy: ${transitionHint.strategy}${transitionHint.easing ? `, Easing: ${transitionHint.easing}` : ""}`}
+                        >
+                          P
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Description */}
@@ -247,11 +292,6 @@ export function VariantGallery() {
                   {/* Features */}
                   <td className="py-3 px-4">
                     <div className="flex flex-wrap gap-1">
-                      {isVector && (
-                        <span className="text-xs bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                          Vector
-                        </span>
-                      )}
                       {variant.loop && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded whitespace-nowrap">
                           Loop

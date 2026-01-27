@@ -15,6 +15,7 @@ import {
   getVariantById,
   computeLifecycleState,
   getActiveVectorVisual,
+  isInterpolatedVectorKeyframe,
   type PlantWithLifecycle,
 } from "@quantum-garden/shared";
 
@@ -174,17 +175,32 @@ export class VectorPlantOverlay {
       }
     }
 
-    // Create material for this keyframe
+    // Get draw fractions if this is an interpolated keyframe
+    const drawFractions = isInterpolatedVectorKeyframe(keyframe)
+      ? keyframe.drawFractions
+      : undefined;
+
+    // Create base material for this keyframe
     const color = new THREE.Color(keyframe.strokeColor);
-    const material = new THREE.LineBasicMaterial({
-      color,
-      transparent: true,
-      opacity: keyframe.strokeOpacity,
-    });
 
     // Generate geometry for each primitive
-    for (const primitive of keyframe.primitives) {
-      const lineObject = this.createPrimitiveGeometry(primitive, material);
+    for (let i = 0; i < keyframe.primitives.length; i++) {
+      const primitive = keyframe.primitives[i];
+      if (!primitive) continue;
+
+      const drawFraction = drawFractions?.[i] ?? 1;
+
+      // Skip primitives that are fully hidden
+      if (drawFraction <= 0) continue;
+
+      // Create material - adjust opacity for partially drawn primitives
+      const material = new THREE.LineBasicMaterial({
+        color,
+        transparent: true,
+        opacity: keyframe.strokeOpacity * Math.min(1, drawFraction * 2), // Fade in during first half of draw
+      });
+
+      const lineObject = this.createPrimitiveGeometry(primitive, material, drawFraction);
       if (lineObject) {
         plantGroup.add(lineObject);
       }
@@ -198,16 +214,34 @@ export class VectorPlantOverlay {
 
   /**
    * Create Three.js geometry for a vector primitive.
+   *
+   * @param primitive - The vector primitive to render
+   * @param material - The line material
+   * @param drawFraction - How much of the primitive to draw (0-1), used for progressive drawing
    */
   private createPrimitiveGeometry(
     primitive: VectorPrimitive,
-    material: THREE.LineBasicMaterial
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
   ): THREE.Line | THREE.LineLoop | null {
     switch (primitive.type) {
       case "circle":
-        return this.createCircle(primitive.cx, primitive.cy, primitive.radius, material);
+        return this.createCircle(
+          primitive.cx,
+          primitive.cy,
+          primitive.radius,
+          material,
+          drawFraction
+        );
       case "line":
-        return this.createLine(primitive.x1, primitive.y1, primitive.x2, primitive.y2, material);
+        return this.createLine(
+          primitive.x1,
+          primitive.y1,
+          primitive.x2,
+          primitive.y2,
+          material,
+          drawFraction
+        );
       case "polygon":
         return this.createPolygon(
           primitive.cx,
@@ -241,18 +275,22 @@ export class VectorPlantOverlay {
   }
 
   /**
-   * Create a circle LineLoop.
+   * Create a circle LineLoop (or partial arc for progressive drawing).
+   *
+   * @param drawFraction - How much of the circle to draw (0-1)
    */
   private createCircle(
     cx: number,
     cy: number,
     radius: number,
-    material: THREE.LineBasicMaterial
-  ): THREE.LineLoop {
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
+  ): THREE.LineLoop | THREE.Line {
     const vertices: number[] = [];
     const segments = VECTOR_PLANT_CONFIG.CIRCLE_SEGMENTS;
+    const segmentsToDraw = Math.ceil(segments * Math.max(0, Math.min(1, drawFraction)));
 
-    for (let i = 0; i <= segments; i++) {
+    for (let i = 0; i <= segmentsToDraw; i++) {
       const angle = (i / segments) * Math.PI * 2;
       // Offset from center of 64x64 space
       const x = cx - 32 + Math.cos(angle) * radius;
@@ -262,21 +300,35 @@ export class VectorPlantOverlay {
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+
+    // Use Line instead of LineLoop for partial circles
+    if (drawFraction < 1) {
+      return new THREE.Line(geometry, material);
+    }
     return new THREE.LineLoop(geometry, material);
   }
 
   /**
-   * Create a line segment.
+   * Create a line segment (with progressive drawing support).
+   *
+   * @param drawFraction - How much of the line to draw (0-1).
+   *                       Line draws from (x1,y1) toward (x2,y2).
    */
   private createLine(
     x1: number,
     y1: number,
     x2: number,
     y2: number,
-    material: THREE.LineBasicMaterial
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
   ): THREE.Line {
+    // Calculate actual end point based on draw fraction
+    const fraction = Math.max(0, Math.min(1, drawFraction));
+    const actualX2 = x1 + (x2 - x1) * fraction;
+    const actualY2 = y1 + (y2 - y1) * fraction;
+
     // Offset from center of 64x64 space
-    const vertices = [x1 - 32, -(y1 - 32), 0, x2 - 32, -(y2 - 32), 0];
+    const vertices = [x1 - 32, -(y1 - 32), 0, actualX2 - 32, -(actualY2 - 32), 0];
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));

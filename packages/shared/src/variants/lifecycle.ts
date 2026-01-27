@@ -16,7 +16,43 @@ import type {
   VectorKeyframe,
   InterpolatedVectorKeyframe,
   VectorPrimitive,
+  VectorGlyphSnapshot,
+  EasingType,
+  VectorTransitionHint,
 } from "./types";
+
+// =============================================================================
+// Easing Functions
+// =============================================================================
+
+/**
+ * Easing function collection for transitions.
+ */
+const easingFunctions: Record<EasingType, (t: number) => number> = {
+  /** Linear interpolation - constant speed */
+  linear: (t: number) => t,
+
+  /** Smooth ease in/out - accelerate then decelerate */
+  easeInOut: (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+
+  /**
+   * Brush stroke easing - mimics natural brush movement.
+   * Slow start (ink touching paper), fluid middle, gentle end (lift).
+   */
+  brushStroke: (t: number) => {
+    if (t < 0.15) return t * t * 4.44; // Slow ink touch
+    if (t > 0.85) return 1 - Math.pow(1 - t, 2) * 4.44; // Slow lift
+    return 0.1 + (t - 0.15) * 1.143; // Fluid middle
+  },
+};
+
+/**
+ * Apply an easing function to a progress value.
+ */
+function applyEasing(t: number, easing: EasingType = "easeInOut"): number {
+  const fn = easingFunctions[easing] ?? easingFunctions.easeInOut;
+  return fn(Math.max(0, Math.min(1, t)));
+}
 
 // =============================================================================
 // Variant Mode Helpers
@@ -226,6 +262,111 @@ export function computeLifecycleState(
     keyframeProgress: 1,
     totalProgress: 1,
     elapsedSeconds,
+    totalDurationSeconds: totalDuration,
+    prevKeyframe: getKeyframe(effectiveKeyframes.length - 2),
+    nextKeyframe: undefined,
+    isComplete: true,
+  };
+}
+
+/**
+ * Compute lifecycle state from a progress percentage (for time travel).
+ *
+ * This is a pure function that computes the lifecycle state from a normalized
+ * progress value (0.0 - 1.0), independent of real time. This enables:
+ * - Deterministic rendering at any point in the lifecycle
+ * - Timeline scrubbing without Date.now()
+ * - Future orchestrator integration
+ *
+ * @param variant - The plant variant definition
+ * @param progress - Total lifecycle progress (0.0 = start, 1.0 = complete)
+ * @returns Computed lifecycle state
+ */
+export function computeLifecycleStateFromProgress(
+  variant: PlantVariant,
+  progress: number
+): ComputedLifecycleState {
+  const clampedProgress = Math.max(0, Math.min(1, progress));
+  const effectiveKeyframes = getEffectiveKeyframes(variant);
+  const isVector = isVectorVariant(variant);
+
+  // Calculate total duration for reference (used for elapsedSeconds/totalDuration)
+  const totalDuration = effectiveKeyframes.reduce((sum, kf) => sum + kf.duration, 0);
+
+  // Helper to get keyframe (real or placeholder)
+  const getKeyframe = (index: number): GlyphKeyframe | undefined => {
+    if (isVector) {
+      const kf = effectiveKeyframes[index];
+      return kf ? createPlaceholderKeyframe(kf) : undefined;
+    }
+    return variant.keyframes[index];
+  };
+
+  // Handle edge case: no keyframes
+  const firstKeyframe = getKeyframe(0);
+  if (!firstKeyframe) {
+    throw new Error(`Variant ${variant.id} has no keyframes`);
+  }
+
+  // Handle start of lifecycle
+  if (clampedProgress === 0) {
+    return {
+      currentKeyframe: firstKeyframe,
+      keyframeIndex: 0,
+      keyframeProgress: 0,
+      totalProgress: 0,
+      elapsedSeconds: 0,
+      totalDurationSeconds: totalDuration,
+      prevKeyframe: undefined,
+      nextKeyframe: getKeyframe(1),
+      isComplete: false,
+    };
+  }
+
+  // Walk through keyframes based on their relative durations
+  let accumulated = 0;
+  for (let i = 0; i < effectiveKeyframes.length; i++) {
+    const kf = effectiveKeyframes[i];
+    if (!kf) continue;
+
+    const keyframeFraction = kf.duration / totalDuration;
+
+    if (clampedProgress < accumulated + keyframeFraction) {
+      // Found the active keyframe
+      const keyframeProgress =
+        keyframeFraction > 0 ? (clampedProgress - accumulated) / keyframeFraction : 1;
+
+      const currentKeyframe = getKeyframe(i);
+      if (!currentKeyframe) continue;
+
+      return {
+        currentKeyframe,
+        keyframeIndex: i,
+        keyframeProgress: Math.min(1, keyframeProgress),
+        totalProgress: clampedProgress,
+        elapsedSeconds: clampedProgress * totalDuration,
+        totalDurationSeconds: totalDuration,
+        prevKeyframe: getKeyframe(i - 1),
+        nextKeyframe: getKeyframe(i + 1),
+        isComplete: false,
+      };
+    }
+
+    accumulated += keyframeFraction;
+  }
+
+  // At end of lifecycle (progress = 1.0)
+  const lastKeyframe = getKeyframe(effectiveKeyframes.length - 1);
+  if (!lastKeyframe) {
+    throw new Error(`Variant ${variant.id} has no keyframes`);
+  }
+
+  return {
+    currentKeyframe: lastKeyframe,
+    keyframeIndex: effectiveKeyframes.length - 1,
+    keyframeProgress: 1,
+    totalProgress: 1,
+    elapsedSeconds: totalDuration,
     totalDurationSeconds: totalDuration,
     prevKeyframe: getKeyframe(effectiveKeyframes.length - 2),
     nextKeyframe: undefined,
@@ -493,8 +634,14 @@ export function interpolateVectorKeyframes(
   const toScale = to.scale ?? 1;
   const scale = lerp(fromScale, toScale, progress);
 
-  // Interpolate primitives
-  const primitives = interpolateVectorPrimitives(from.primitives, to.primitives, progress);
+  // Interpolate primitives with transition hints
+  const hint = to.transitionHint;
+  const { primitives, drawFractions } = interpolateVectorPrimitivesWithHint(
+    from.primitives,
+    to.primitives,
+    progress,
+    hint
+  );
 
   return {
     primitives,
@@ -504,48 +651,131 @@ export function interpolateVectorKeyframes(
     fromKeyframe: from.name,
     toKeyframe: to.name,
     t: progress,
+    drawFractions,
   };
 }
 
 /**
- * Interpolate between two arrays of vector primitives.
+ * Interpolate between two arrays of vector primitives with transition hints.
  *
- * Strategy:
- * - If same number of primitives and same types in order, interpolate positions/sizes
- * - If different, cross-fade by using 'from' primitives for t<0.5, 'to' for t>=0.5
+ * Supports three strategies:
+ * - 'progressive': Lines draw/undraw sequentially (for brush stroke effects)
+ * - 'morph': Vertices travel to new positions
+ * - 'fade': Simple crossfade (default)
  *
  * @param from - Starting primitives array
  * @param to - Ending primitives array
  * @param t - Interpolation factor
- * @returns Interpolated primitives array
+ * @param hint - Optional transition hints
+ * @returns Object with interpolated primitives and draw fractions
  */
-function interpolateVectorPrimitives(
+function interpolateVectorPrimitivesWithHint(
   from: VectorPrimitive[],
   to: VectorPrimitive[],
-  t: number
-): VectorPrimitive[] {
-  // Check if we can interpolate directly (same types in same order)
-  const canInterpolateDirect =
+  t: number,
+  hint?: VectorTransitionHint
+): { primitives: VectorPrimitive[]; drawFractions: number[] } {
+  const strategy = hint?.strategy ?? detectTransitionStrategy(from, to);
+  const easing = hint?.easing ?? "easeInOut";
+  const easedT = applyEasing(t, easing);
+
+  if (strategy === "progressive" && to.length > from.length) {
+    return interpolateProgressive(from, to, easedT);
+  }
+
+  if (strategy === "morph" || canInterpolateDirect(from, to)) {
+    // Direct interpolation with full draw fractions
+    const primitives = from.map((fromP, i) => {
+      const toP = to[i];
+      return toP ? interpolateSinglePrimitive(fromP, toP, easedT) : fromP;
+    });
+    return {
+      primitives,
+      drawFractions: primitives.map(() => 1),
+    };
+  }
+
+  // Fallback: fade/crossfade at midpoint
+  const primitives = easedT < 0.5 ? from : to;
+  return {
+    primitives,
+    drawFractions: primitives.map(() => 1),
+  };
+}
+
+/**
+ * Check if two primitive arrays can be directly interpolated.
+ */
+function canInterpolateDirect(from: VectorPrimitive[], to: VectorPrimitive[]): boolean {
+  return (
     from.length === to.length &&
     from.every((p, i) => {
       const toP = to[i];
       return toP && p.type === toP.type;
-    });
+    })
+  );
+}
 
-  if (canInterpolateDirect) {
-    // Interpolate each primitive
-    return from.map((fromP, i) => {
-      const toP = to[i]!;
-      return interpolateSinglePrimitive(fromP, toP, t);
-    });
+/**
+ * Auto-detect the best transition strategy based on primitive structures.
+ */
+function detectTransitionStrategy(
+  from: VectorPrimitive[],
+  to: VectorPrimitive[]
+): "progressive" | "morph" | "fade" {
+  // If primitives are growing and mostly lines, use progressive
+  if (to.length > from.length) {
+    const toLineCount = to.filter((p) => p.type === "line").length;
+    if (toLineCount > to.length * 0.5) {
+      return "progressive";
+    }
   }
 
-  // Different structures - cross-fade at midpoint
-  if (t < 0.5) {
-    return from;
-  } else {
-    return to;
+  // If same count and types, use morph
+  if (canInterpolateDirect(from, to)) {
+    return "morph";
   }
+
+  // Default to fade
+  return "fade";
+}
+
+/**
+ * Progressive drawing interpolation.
+ *
+ * Lines draw sequentially: existing primitives stay visible,
+ * new primitives progressively reveal based on their index.
+ *
+ * @param from - Starting primitives
+ * @param to - Ending primitives (should have more than from)
+ * @param t - Eased interpolation factor (0-1)
+ * @returns Primitives with draw fractions
+ */
+function interpolateProgressive(
+  from: VectorPrimitive[],
+  to: VectorPrimitive[],
+  t: number
+): { primitives: VectorPrimitive[]; drawFractions: number[] } {
+  const drawFractions: number[] = [];
+  const newCount = to.length - from.length;
+
+  for (let i = 0; i < to.length; i++) {
+    if (i < from.length) {
+      // Existing primitive - fully visible
+      // Also morph position if types match
+      drawFractions.push(1);
+    } else {
+      // New primitive - progressively reveal based on order
+      const newIndex = i - from.length;
+      const revealPoint = newCount > 0 ? newIndex / newCount : 0;
+      // Each primitive reveals over 20% of the remaining time
+      const fraction = Math.max(0, Math.min(1, (t - revealPoint * 0.8) / 0.2));
+      drawFractions.push(fraction);
+    }
+  }
+
+  // Return the target primitives with draw fractions
+  return { primitives: to, drawFractions };
 }
 
 /**
@@ -621,6 +851,116 @@ export function isInterpolatedVectorKeyframe(
   visual: VectorKeyframe | InterpolatedVectorKeyframe
 ): visual is InterpolatedVectorKeyframe {
   return "t" in visual && "fromKeyframe" in visual;
+}
+
+// =============================================================================
+// Time Travel / Progress-Based Rendering
+// =============================================================================
+
+/**
+ * Render a vector glyph at a specific progress percentage.
+ *
+ * This is the main entry point for time-addressable rendering.
+ * Pure function - same inputs always produce same output, independent of real time.
+ *
+ * @param variant - The plant variant definition (must be vector mode)
+ * @param progress - Lifecycle completion (0.0 = start, 1.0 = complete)
+ * @returns Complete visual state for rendering
+ *
+ * @example
+ * // Render at 50% completion
+ * const snapshot = renderVectorGlyphAtProgress(sumiSpiritVariant, 0.5);
+ * // snapshot.primitives - shapes to render
+ * // snapshot.drawFractions - how much of each primitive to draw
+ */
+export function renderVectorGlyphAtProgress(
+  variant: PlantVariant,
+  progress: number
+): VectorGlyphSnapshot {
+  if (!isVectorVariant(variant)) {
+    throw new Error(`renderVectorGlyphAtProgress requires a vector variant, got: ${variant.id}`);
+  }
+
+  const clampedProgress = Math.max(0, Math.min(1, progress));
+  const state = computeLifecycleStateFromProgress(variant, clampedProgress);
+
+  // Get the vector visual with draw fractions
+  const visual = getActiveVectorVisualWithDrawFractions(state, variant);
+
+  return {
+    primitives: visual.primitives,
+    drawFractions: visual.drawFractions,
+    strokeColor: visual.strokeColor,
+    strokeOpacity: visual.strokeOpacity,
+    scale: visual.scale ?? 1,
+    keyframeName: state.currentKeyframe.name,
+    progress: clampedProgress,
+  };
+}
+
+/**
+ * Get the active vector visual with draw fractions for progressive drawing.
+ *
+ * Similar to getActiveVectorVisual but always returns draw fractions.
+ */
+function getActiveVectorVisualWithDrawFractions(
+  state: ComputedLifecycleState,
+  variant: PlantVariant
+): {
+  primitives: VectorPrimitive[];
+  drawFractions: number[];
+  strokeColor: string;
+  strokeOpacity: number;
+  scale?: number;
+} {
+  const vectorKeyframes = variant.vectorKeyframes;
+  if (!vectorKeyframes?.length) {
+    throw new Error(`Variant ${variant.id} has no vector keyframes`);
+  }
+
+  const currentVectorKf = vectorKeyframes[state.keyframeIndex];
+  if (!currentVectorKf) {
+    throw new Error(`Vector keyframe ${state.keyframeIndex} not found`);
+  }
+
+  // No tweening enabled - return current keyframe with full draw fractions
+  if (!variant.tweenBetweenKeyframes) {
+    return {
+      primitives: currentVectorKf.primitives,
+      drawFractions: currentVectorKf.primitives.map(() => 1),
+      strokeColor: currentVectorKf.strokeColor,
+      strokeOpacity: currentVectorKf.strokeOpacity,
+      scale: currentVectorKf.scale,
+    };
+  }
+
+  const progress = state.keyframeProgress;
+
+  // First 10%: Tween in from previous keyframe
+  if (progress < TWEEN_EDGE_FRACTION && state.keyframeIndex > 0) {
+    const prevVectorKf = vectorKeyframes[state.keyframeIndex - 1];
+    if (prevVectorKf) {
+      // Map 0.0-0.1 to 0.0-1.0 for interpolation
+      const t = progress / TWEEN_EDGE_FRACTION;
+      const interpolated = interpolateVectorKeyframes(prevVectorKf, currentVectorKf, t);
+      return {
+        primitives: interpolated.primitives,
+        drawFractions: interpolated.drawFractions ?? interpolated.primitives.map(() => 1),
+        strokeColor: interpolated.strokeColor,
+        strokeOpacity: interpolated.strokeOpacity,
+        scale: interpolated.scale,
+      };
+    }
+  }
+
+  // Remaining 90%: Return stable current keyframe
+  return {
+    primitives: currentVectorKf.primitives,
+    drawFractions: currentVectorKf.primitives.map(() => 1),
+    strokeColor: currentVectorKf.strokeColor,
+    strokeOpacity: currentVectorKf.strokeOpacity,
+    scale: currentVectorKf.scale,
+  };
 }
 
 /**

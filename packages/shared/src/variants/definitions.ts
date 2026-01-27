@@ -4857,6 +4857,7 @@ const sumiSpiritVector: PlantVariant = {
       strokeColor: "#1E3A5F", // Deep indigo
       strokeOpacity: 0.6,
       scale: 0.8,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "draw",
@@ -4870,6 +4871,7 @@ const sumiSpiritVector: PlantVariant = {
       strokeColor: "#3A5A8F", // Mid indigo-blue
       strokeOpacity: 0.75,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "flow",
@@ -4885,6 +4887,7 @@ const sumiSpiritVector: PlantVariant = {
       strokeColor: "#4A6FA5", // Spirit blue
       strokeOpacity: 0.85,
       scale: 0.95,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "settle",
@@ -4901,6 +4904,7 @@ const sumiSpiritVector: PlantVariant = {
       strokeColor: "#5A8FC5", // Lighter spirit blue
       strokeOpacity: 0.95,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "rest",
@@ -4919,6 +4923,7 @@ const sumiSpiritVector: PlantVariant = {
       strokeColor: "#7A9FC5", // Pale spirit blue
       strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
   ],
 };

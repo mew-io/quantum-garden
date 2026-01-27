@@ -24,6 +24,11 @@ export type {
   VectorDiamond,
   VectorKeyframe,
   InterpolatedVectorKeyframe,
+  // Progressive drawing types
+  VectorGlyphSnapshot,
+  VectorTransitionHint,
+  EasingType,
+  TransitionStrategy,
 } from "./types";
 
 // Lifecycle computation
@@ -48,6 +53,9 @@ export {
   getActiveVectorVisual,
   interpolateVectorKeyframes,
   isInterpolatedVectorKeyframe,
+  // Time travel / progress-based rendering
+  computeLifecycleStateFromProgress,
+  renderVectorGlyphAtProgress,
 } from "./lifecycle";
 
 // Variant definitions

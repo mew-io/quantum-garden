@@ -294,6 +294,30 @@ export interface VectorDiamond {
 }
 
 /**
+ * Easing function types for transitions.
+ */
+export type EasingType = "linear" | "easeInOut" | "brushStroke";
+
+/**
+ * Transition strategy types for vector keyframes.
+ * - 'progressive': Lines draw/undraw sequentially (like brush strokes)
+ * - 'morph': Vertices travel to new positions
+ * - 'fade': Simple crossfade (default behavior)
+ */
+export type TransitionStrategy = "progressive" | "morph" | "fade";
+
+/**
+ * Hints for how to transition into this keyframe.
+ */
+export interface VectorTransitionHint {
+  /** How primitives should transition */
+  strategy: TransitionStrategy;
+
+  /** Easing function for the transition */
+  easing?: EasingType;
+}
+
+/**
  * A keyframe for vector variants.
  * Uses vector primitives instead of binary patterns.
  */
@@ -315,6 +339,9 @@ export interface VectorKeyframe {
 
   /** Optional scale override (default 1.0) */
   scale?: number;
+
+  /** Optional transition hints for progressive drawing */
+  transitionHint?: VectorTransitionHint;
 }
 
 /**
@@ -341,4 +368,38 @@ export interface InterpolatedVectorKeyframe {
 
   /** Interpolation progress (0.0 - 1.0) */
   t: number;
+
+  /**
+   * Per-primitive draw fraction for progressive drawing.
+   * Each value is 0-1 where 0 = hidden, 1 = fully visible.
+   * For lines, this controls how much of the line is drawn.
+   */
+  drawFractions?: number[];
+}
+
+/**
+ * Time-addressable snapshot for rendering a vector glyph.
+ * Pure output from renderVectorGlyphAtProgress() - deterministic given inputs.
+ */
+export interface VectorGlyphSnapshot {
+  /** Primitives to render */
+  primitives: VectorPrimitive[];
+
+  /** Per-primitive draw fraction (0 = hidden, 1 = fully drawn) */
+  drawFractions: number[];
+
+  /** Stroke color */
+  strokeColor: string;
+
+  /** Stroke opacity */
+  strokeOpacity: number;
+
+  /** Scale */
+  scale: number;
+
+  /** Name of the current keyframe */
+  keyframeName: string;
+
+  /** Lifecycle progress (0.0 = start, 1.0 = complete) */
+  progress: number;
 }

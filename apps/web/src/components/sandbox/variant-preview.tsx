@@ -9,6 +9,7 @@ import {
   isVectorVariant,
   getActiveVectorVisual,
   getVectorKeyframe,
+  isInterpolatedVectorKeyframe,
   type PlantWithLifecycle,
   type InterpolatedKeyframe,
   type GlyphKeyframe,
@@ -36,6 +37,9 @@ function renderVectorKeyframe(
 ): void {
   const { primitives, strokeColor, strokeOpacity, scale: keyframeScale = 1.0 } = keyframe;
 
+  // Get draw fractions if this is an interpolated keyframe
+  const drawFractions = isInterpolatedVectorKeyframe(keyframe) ? keyframe.drawFractions : undefined;
+
   // Calculate offset to center the 64x64 coordinate space in the canvas
   const effectiveScale = displayScale * keyframeScale;
   const offset = (canvasSize - GRID_SIZE * effectiveScale) / 2;
@@ -45,11 +49,21 @@ function renderVectorKeyframe(
   ctx.scale(effectiveScale, effectiveScale);
 
   ctx.strokeStyle = strokeColor;
-  ctx.globalAlpha = strokeOpacity;
   ctx.lineWidth = 1 / effectiveScale; // Keep consistent line width regardless of scale
 
-  for (const primitive of primitives) {
-    renderPrimitive(ctx, primitive);
+  for (let i = 0; i < primitives.length; i++) {
+    const primitive = primitives[i];
+    if (!primitive) continue;
+
+    const drawFraction = drawFractions?.[i] ?? 1;
+
+    // Skip primitives that are fully hidden
+    if (drawFraction <= 0) continue;
+
+    // Adjust opacity for partially drawn primitives (fade in during first half of draw)
+    ctx.globalAlpha = strokeOpacity * Math.min(1, drawFraction * 2);
+
+    renderPrimitive(ctx, primitive, drawFraction);
   }
 
   ctx.restore();
@@ -57,19 +71,39 @@ function renderVectorKeyframe(
 
 /**
  * Render a single vector primitive to a Canvas2D context.
+ *
+ * @param ctx - Canvas rendering context
+ * @param primitive - The vector primitive to render
+ * @param drawFraction - How much of the primitive to draw (0-1), used for progressive drawing
  */
-function renderPrimitive(ctx: CanvasRenderingContext2D, primitive: VectorPrimitive): void {
+function renderPrimitive(
+  ctx: CanvasRenderingContext2D,
+  primitive: VectorPrimitive,
+  drawFraction: number = 1
+): void {
   ctx.beginPath();
 
   switch (primitive.type) {
-    case "circle":
-      ctx.arc(primitive.cx, primitive.cy, primitive.radius, 0, Math.PI * 2);
+    case "circle": {
+      // For partial circles, draw as an arc
+      if (drawFraction < 1) {
+        const endAngle = 2 * Math.PI * Math.max(0, Math.min(1, drawFraction));
+        ctx.arc(primitive.cx, primitive.cy, primitive.radius, 0, endAngle);
+      } else {
+        ctx.arc(primitive.cx, primitive.cy, primitive.radius, 0, Math.PI * 2);
+      }
       break;
+    }
 
-    case "line":
+    case "line": {
+      // For partial lines, calculate the end point based on draw fraction
+      const fraction = Math.max(0, Math.min(1, drawFraction));
+      const x2 = primitive.x1 + (primitive.x2 - primitive.x1) * fraction;
+      const y2 = primitive.y1 + (primitive.y2 - primitive.y1) * fraction;
       ctx.moveTo(primitive.x1, primitive.y1);
-      ctx.lineTo(primitive.x2, primitive.y2);
+      ctx.lineTo(x2, y2);
       break;
+    }
 
     case "polygon": {
       const { cx, cy, sides, radius, rotation = 0 } = primitive;

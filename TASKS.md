@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-28 (Sprint 5.3 Complete - Performance Optimization)_
+_Last updated: 2026-01-28 (Automated Validation Tests Added)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Sprint 5.3 complete (performance optimization with frustum culling, dirty-tracking, and spatial indexing). Next priority is manual testing and validation of new features, followed by additional polish and production readiness.
+**Current Focus**: Added automated validation tests for quantum pool selection and spatial indexing (27 new tests, 86 total). Core systems verified through automated testing. Next priority is extended manual testing and production readiness.
 
 ## Strategic Roadmap
 
@@ -41,9 +41,11 @@ Build a slow-evolving generative environment where plants exist in quantum super
 
 ### Medium-Term Goals (Next 2 Weeks)
 
-1. **Manual Testing & Validation** (HIGH PRIORITY - NEXT)
-   - Test quantum pool selection (deterministic, even distribution)
-   - Validate instant observation → trait reveal flow
+1. **Manual Testing & Validation** (IN PROGRESS)
+   - ✅ Test quantum pool selection (deterministic, even distribution) - **11 automated tests added**
+   - ✅ Test spatial grid for observation system - **16 automated tests added**
+   - ✅ Refactored SpatialGrid class for testability (extracted to separate module)
+   - Validate instant observation → trait reveal flow (manual)
    - Test vector rendering in live garden (verify all 9 variants work)
    - Test lifecycle animations across all plant types and variants
    - Verify smart germination behaviors (proximity, clustering, wave patterns)
@@ -56,11 +58,11 @@ Build a slow-evolving generative environment where plants exist in quantum super
 
 ### Long-Term Vision (Next Month)
 
-1. **Sprint 5: Educational & Polish** (IN PROGRESS)
+1. **Sprint 5: Educational & Polish** (COMPLETED)
    - ✅ Task 5.1: Post-observation context panel (COMPLETED 2026-01-28)
    - ✅ Enhanced debug system with live logging (COMPLETED 2026-01-28)
-   - Task 5.2: Observation feedback enhancements (NEXT)
-   - Task 5.3: Performance optimization
+   - ✅ Task 5.2: Observation feedback enhancements (COMPLETED 2026-01-28)
+   - ✅ Task 5.3: Performance optimization (COMPLETED 2026-01-28)
 
 2. **Production Readiness**
    - Comprehensive testing
@@ -601,6 +603,45 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Automated Validation Tests (Autowork Loop 4)
+
+**Quantum Pool Selection Tests** (`packages/shared/src/types/quantum-pool.test.ts`):
+
+- [x] 11 new tests for `selectFromPool` function
+- [x] Deterministic selection verification (same plant ID = same result)
+- [x] Even distribution verification (no index > 5x expected frequency)
+- [x] Edge case coverage: empty strings, long IDs, special characters, unicode/emoji
+- [x] CUID-format plant ID testing (actual production format)
+
+**Spatial Grid Tests** (`apps/web/src/components/garden/__tests__/spatial-grid.test.ts`):
+
+- [x] 16 new tests for `SpatialGrid` class
+- [x] Basic operations: create, add, query
+- [x] Region queries: circular region plant lookups
+- [x] Performance characteristics: efficient with 1000 plants
+- [x] Rebuild behavior: clearing old data on refresh
+- [x] Edge cases: origin, negative coords, large coords, small cell size, zero-radius
+
+**Code Refactoring**:
+
+- [x] Extracted `SpatialGrid` class from `observation-system.ts` to `spatial-grid.ts`
+- [x] Improved testability while maintaining same functionality
+- [x] No functional changes to production code
+
+**Test Suite Growth**:
+
+| Package                | Before | After  | New Tests |
+| ---------------------- | ------ | ------ | --------- |
+| @quantum-garden/shared | 49     | 60     | +11       |
+| web                    | 10     | 26     | +16       |
+| **Total**              | **59** | **86** | **+27**   |
+
+**Quality Checks**:
+
+- [x] TypeScript: PASS
+- [x] ESLint: PASS
+- [x] All 86 tests: PASS
 
 ### 2026-01-28 - Sprint 5.3: Performance Optimization (Complete)
 

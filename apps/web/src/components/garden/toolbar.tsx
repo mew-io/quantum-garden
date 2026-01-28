@@ -4,10 +4,17 @@ import { useState, useMemo } from "react";
 import { useGardenStore } from "@/stores/garden-store";
 
 /**
+ * Check if debug mode is enabled via environment variable.
+ * In production, debug features are hidden by default.
+ */
+const isDebugEnabled =
+  process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false" && process.env.NODE_ENV !== "production";
+
+/**
  * Toolbar - Persistent control bar for the Quantum Garden.
  *
  * Provides visible buttons for:
- * - Debug panel toggle
+ * - Debug panel toggle (hidden in production)
  * - Time-travel toggle
  * - Help/info toggle
  * - Status indicator showing garden activity
@@ -73,15 +80,17 @@ export function Toolbar({
           active={false}
         />
 
-        {/* Debug Button */}
-        <ToolbarButton
-          icon={<BugIcon />}
-          label="Debug"
-          shortcut="`"
-          onClick={onDebugToggle}
-          active={isDebugOpen}
-          activeColor="green"
-        />
+        {/* Debug Button - hidden in production */}
+        {isDebugEnabled && (
+          <ToolbarButton
+            icon={<BugIcon />}
+            label="Debug"
+            shortcut="`"
+            onClick={onDebugToggle}
+            active={isDebugOpen}
+            activeColor="green"
+          />
+        )}
 
         {/* Time Travel Button */}
         <ToolbarButton

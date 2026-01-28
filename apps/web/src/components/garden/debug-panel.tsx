@@ -7,6 +7,14 @@ import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
+/**
+ * Check if debug mode is enabled via environment variable.
+ * In production, set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
+ * Defaults to true in development for convenience.
+ */
+const isDebugEnabled =
+  process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false" && process.env.NODE_ENV !== "production";
+
 interface DebugPanelProps {
   isOpen?: boolean;
   onToggle?: (isOpen: boolean) => void;
@@ -23,12 +31,16 @@ interface DebugPanelProps {
  * - Live log message display with filtering
  * - System state indicators
  * - Selected plant details
+ *
+ * Note: Debug panel is disabled in production by default.
+ * Set NEXT_PUBLIC_DEBUG_ENABLED=true to enable in production.
  */
 export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const [internalVisible, setInternalVisible] = useState(false);
 
   // Use external control if provided, otherwise internal state
-  const isVisible = isOpen !== undefined ? isOpen : internalVisible;
+  // Debug disabled check happens at render time, not before hooks
+  const isVisible = isDebugEnabled && (isOpen !== undefined ? isOpen : internalVisible);
   const setIsVisible = (value: boolean | ((prev: boolean) => boolean)) => {
     const newValue = typeof value === "function" ? value(isVisible) : value;
     if (onToggle) {
@@ -79,10 +91,10 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     }
   );
 
-  // Toggle visibility with backtick key (only when not externally controlled)
+  // Toggle visibility with backtick key (only when not externally controlled and debug is enabled)
   useEffect(() => {
-    // Skip internal keyboard handler if externally controlled
-    if (isOpen !== undefined) return;
+    // Skip if debug is disabled or externally controlled
+    if (!isDebugEnabled || isOpen !== undefined) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "`" && !e.ctrlKey && !e.metaKey) {

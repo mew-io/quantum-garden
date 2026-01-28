@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Notification Duration Updates)_
+_Last updated: 2026-01-28 (Production Debug Gating)_
 
 ## Project Status
 
@@ -85,8 +85,8 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 57  | Add keyboard shortcut hints to info overlay       | P1       | `info-overlay.tsx`              |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
-| 60  | Gate debug panel behind env variable              | P1       | `debug-panel.tsx`               |
-| 61  | Hide debug button in toolbar for production       | P1       | `toolbar.tsx`                   |
+| 60  | ~~Gate debug panel behind env variable~~          | ✅ Done  | `debug-panel.tsx`               |
+| 61  | ~~Hide debug button in toolbar for production~~   | ✅ Done  | `toolbar.tsx`                   |
 | 62  | Add keyboard shortcut discovery hint              | P2       | `page.tsx`                      |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
 | 64  | Show entanglement lines more prominently          | P2       | `entanglement-overlay.ts`       |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Production Debug Gating
+
+- Gated debug panel behind environment variable (#60)
+- Hidden debug button in toolbar for production builds (#61)
+- Added `isDebugEnabled` constant checking `NEXT_PUBLIC_DEBUG_ENABLED` and `NODE_ENV`
+- Debug panel and keyboard shortcut (backtick) disabled in production by default
+- Can be re-enabled with `NEXT_PUBLIC_DEBUG_ENABLED=true` for debugging production
+- Prevents exposing internal garden state to end users
+- All 136 tests passing
 
 ### 2026-01-28 - Notification Duration Improvements
 

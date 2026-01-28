@@ -48,8 +48,18 @@ export function TimeTravelScrubber({
   const timelineRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
-  // Memoize current time to avoid re-rendering on every frame
-  const now = useMemo(() => new Date(), []);
+  // Track "now" with periodic updates to keep timeline fresh
+  // Updates every 10 seconds when timeline is expanded to avoid stale endpoints
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [isExpanded]);
 
   // Query evolution timeline
   const { data: events = [] } = trpc.garden.getEvolutionTimeline.useQuery(
@@ -63,11 +73,12 @@ export function TimeTravelScrubber({
     }
   );
 
-  // Calculate time range
+  // Calculate time range with minimum duration to prevent division by zero
   const timeRange = useMemo(() => {
     const start = gardenCreatedAt.getTime();
     const end = now.getTime();
-    const duration = end - start;
+    // Ensure minimum 1 second duration to prevent division by zero
+    const duration = Math.max(1000, end - start);
 
     return { start, end, duration };
   }, [gardenCreatedAt, now]);
@@ -106,12 +117,15 @@ export function TimeTravelScrubber({
       const relativeX = clientX - rect.left;
       const progress = Math.max(0, Math.min(1, relativeX / rect.width));
 
-      const timestamp = new Date(timeRange.start + progress * timeRange.duration);
+      // Calculate timestamp but ensure it doesn't exceed current time
+      const targetTime = timeRange.start + progress * timeRange.duration;
+      const clampedTime = Math.min(targetTime, now.getTime());
+      const timestamp = new Date(clampedTime);
 
       setCurrentTime(timestamp);
       onScrubToTime(timestamp);
     },
-    [timeRange, onScrubToTime]
+    [timeRange, now, onScrubToTime]
   );
 
   // Mouse/touch handlers for dragging
@@ -163,18 +177,18 @@ export function TimeTravelScrubber({
     return () => clearInterval(interval);
   }, [isPlaying, isActive, playbackSpeed, now, onScrubToTime]);
 
-  // Calculate playhead position
+  // Calculate playhead position (clamped to 0-1 range)
   const playheadProgress = useMemo(() => {
-    if (timeRange.duration === 0) return 0;
-    return (currentTime.getTime() - timeRange.start) / timeRange.duration;
+    const progress = (currentTime.getTime() - timeRange.start) / timeRange.duration;
+    return Math.max(0, Math.min(1, progress));
   }, [currentTime, timeRange]);
 
   // Render event markers
   const renderEventMarkers = useCallback(() => {
-    if (timeRange.duration === 0) return null;
-
     return events.map((event: EvolutionEvent, index: number) => {
-      const progress = (event.timestamp.getTime() - timeRange.start) / timeRange.duration;
+      // Clamp progress to 0-1 range to prevent markers outside timeline
+      const rawProgress = (event.timestamp.getTime() - timeRange.start) / timeRange.duration;
+      const progress = Math.max(0, Math.min(1, rawProgress));
       const left = `${progress * 100}%`;
       const leftPercent = progress * 100;
 

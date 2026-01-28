@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (useEvolutionSystem Hook Tests)_
+_Last updated: 2026-01-28 (Time-Travel Edge Cases Fix)_
 
 ## Project Status
 
@@ -33,7 +33,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 67  | ~~Debounce store subscriptions in garden-scene~~                | ✅ Done  | `garden-scene.tsx`         |
 | 68  | ~~Fix empty plants array edge case~~                            | ✅ Done  | `page.tsx`                 |
 | 69  | ~~Add user-facing error notification for observation failures~~ | ✅ Done  | `use-observation.ts`       |
-| 70  | Fix time-travel edge cases (zero duration, stale now)           | P2       | `time-travel-scrubber.tsx` |
+| 70  | ~~Fix time-travel edge cases (zero duration, stale now)~~       | ✅ Done  | `time-travel-scrubber.tsx` |
 | 71  | Implement circular buffer for debug logs                        | P2       | `debug-logger.ts`          |
 | 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
 | 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
@@ -182,6 +182,14 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Time-Travel Edge Cases Fix
+
+- Fixed two edge cases in `time-travel-scrubber.tsx` (#70)
+- **Stale `now` value**: Changed from useMemo with empty deps to useState with useEffect that updates every 10s when expanded
+- **Zero duration**: Added `Math.max(1000, end - start)` to ensure minimum 1 second duration
+- Additional safety improvements: clamped scrub position, playhead progress, and event marker positions to valid ranges
+- All 172 tests passing
 
 ### 2026-01-28 - useEvolutionSystem Hook Tests
 

@@ -9,6 +9,7 @@ import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { Toolbar } from "@/components/garden/toolbar";
+import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { useGardenStore } from "@/stores/garden-store";
 import { trpc } from "@/lib/trpc/client";
 
@@ -185,6 +186,7 @@ export default function Home() {
         />
         <EvolutionNotifications />
         <ObservationContextPanel />
+        <CooldownIndicator />
         {gardenCreatedAt && (
           <TimeTravelScrubber
             isActive={isTimeTravelMode}

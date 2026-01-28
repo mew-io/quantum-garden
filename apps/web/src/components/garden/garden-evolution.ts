@@ -10,6 +10,7 @@
  */
 
 import { useGardenStore } from "@/stores/garden-store";
+import { debugLogger } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
 /** Evolution timing constants (in milliseconds) */
@@ -118,6 +119,31 @@ export class GardenEvolutionSystem {
   }
 
   /**
+   * Check if the evolution system is currently running.
+   */
+  get running(): boolean {
+    return this.isRunning;
+  }
+
+  /**
+   * Pause the evolution system (alias for stop, preserves tracking).
+   */
+  pause(): void {
+    if (!this.isRunning) return;
+    debugLogger.evolution.info("Evolution system paused");
+    this.stop();
+  }
+
+  /**
+   * Resume the evolution system (alias for start).
+   */
+  resume(): void {
+    if (this.isRunning) return;
+    debugLogger.evolution.info("Evolution system resumed");
+    this.start();
+  }
+
+  /**
    * Initialize tracking of dormant plants.
    */
   private initializePlantTracking(): void {
@@ -214,6 +240,11 @@ export class GardenEvolutionSystem {
     const { plants } = useGardenStore.getState();
     const now = Date.now();
 
+    debugLogger.evolution.debug("Running evolution check", {
+      totalPlants: plants.length,
+      trackedDormant: this.plantAges.size,
+    });
+
     // Update tracking for any new dormant plants
     for (const plant of plants) {
       if (!plant.germinatedAt && !this.plantAges.has(plant.id)) {
@@ -258,17 +289,25 @@ export class GardenEvolutionSystem {
           this.plantAges.delete(plant.id); // No longer tracking
           germinationsThisCheck++;
 
-          // Log for debugging (will be visible in browser console)
+          // Log for debugging
           const waveIndicator = isWave ? " (wave)" : "";
-          console.log(`[Evolution] Plant ${plant.id.slice(-6)} germinated${waveIndicator}`);
+          debugLogger.evolution.info(`Plant germinated${waveIndicator}`, {
+            plantId: plant.id.slice(0, 8),
+            probability: probability.toFixed(2),
+          });
         } catch (error) {
-          console.error(`[Evolution] Failed to germinate plant ${plant.id}:`, error);
+          debugLogger.evolution.error("Failed to germinate plant", {
+            plantId: plant.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
     }
 
     if (isWave && germinationsThisCheck > 0) {
-      console.log(`[Evolution] Germination wave: ${germinationsThisCheck} plants sprouted`);
+      debugLogger.evolution.info(`Germination wave complete`, {
+        plantsGerminated: germinationsThisCheck,
+      });
     }
   }
 

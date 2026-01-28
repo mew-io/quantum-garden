@@ -22,6 +22,7 @@ import { OverlayManager } from "./overlays";
 import { ObservationSystem } from "@/components/garden/observation-system";
 import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
+import { useEvolutionSystem } from "@/hooks/use-evolution-system";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
@@ -86,15 +87,16 @@ export function GardenScene() {
   // Evolution hook for plant germination
   const { triggerGermination } = useEvolution();
 
+  // Evolution system - manages automatic germination of dormant plants
+  // This is the critical hook that makes the garden continuously evolve
+  useEvolutionSystem({ triggerGermination });
+
   // Load plants from server into store
   usePlants();
 
-  // Store callback refs to keep them stable across renders
+  // Store callback ref to keep it stable across renders
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
   observationCallbackRef.current = triggerObservation;
-
-  const germinationCallbackRef = useRef<(plantId: string) => Promise<void>>(async () => {});
-  germinationCallbackRef.current = triggerGermination;
 
   useEffect(() => {
     if (!containerRef.current) return;

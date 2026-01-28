@@ -20,6 +20,14 @@ export interface ObservationContext {
 }
 
 /**
+ * Evolution system statistics.
+ */
+export interface EvolutionStats {
+  dormantCount: number;
+  trackedCount: number;
+}
+
+/**
  * Client-side garden state.
  *
  * Manages the visual and interactive state of the garden,
@@ -66,6 +74,14 @@ interface GardenState {
   observationContext: ObservationContext | null;
   setObservationContext: (context: ObservationContext) => void;
   clearObservationContext: () => void;
+
+  // Evolution system state
+  evolutionPaused: boolean;
+  setEvolutionPaused: (paused: boolean) => void;
+  evolutionStats: EvolutionStats | null;
+  setEvolutionStats: (stats: EvolutionStats | null) => void;
+  lastGerminationTime: number | null;
+  setLastGerminationTime: (time: number | null) => void;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -132,4 +148,12 @@ export const useGardenStore = create<GardenState>((set) => ({
   observationContext: null,
   setObservationContext: (context) => set({ observationContext: context }),
   clearObservationContext: () => set({ observationContext: null }),
+
+  // Evolution system state
+  evolutionPaused: true, // Starts paused until system initializes
+  setEvolutionPaused: (paused) => set({ evolutionPaused: paused }),
+  evolutionStats: null,
+  setEvolutionStats: (stats) => set({ evolutionStats: stats }),
+  lastGerminationTime: null,
+  setLastGerminationTime: (time) => set({ lastGerminationTime: time }),
 }));

@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Event Marker Touch Targets)_
+_Last updated: 2026-01-28 (Keyboard Shortcut Hints)_
 
 ## Project Status
 
@@ -82,7 +82,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 54  | ~~Increase event marker touch targets to 20px~~   | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 55  | Add event marker tooltips                         | P2       | `time-travel-scrubber.tsx`      |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
-| 57  | Add keyboard shortcut hints to info overlay       | P1       | `info-overlay.tsx`              |
+| 57  | ~~Add keyboard shortcut hints to info overlay~~   | ✅ Done  | `info-overlay.tsx`              |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
 | 60  | ~~Gate debug panel behind env variable~~          | ✅ Done  | `debug-panel.tsx`               |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Keyboard Shortcut Hints
+
+- Added keyboard shortcuts section to info overlay (#57)
+- Shows three shortcuts: T (Timeline), ? (Help), Esc (Close)
+- Uses styled kbd elements matching garden aesthetic
+- Only visible on desktop devices (hidden on touch devices)
+- Placed between device instructions and dismiss button
+- Improves discoverability of time-travel and help features
+- All 136 tests passing
 
 ### 2026-01-28 - Event Marker Touch Targets
 

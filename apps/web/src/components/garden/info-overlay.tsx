@@ -111,6 +111,33 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
           )}
         </div>
 
+        {/* Keyboard shortcuts - desktop only */}
+        {!isTouch && (
+          <div className="mb-6">
+            <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Keyboard Shortcuts</p>
+            <div className="flex justify-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <kbd className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-xs font-mono">
+                  T
+                </kbd>
+                <span className="text-gray-400">Timeline</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <kbd className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-xs font-mono">
+                  ?
+                </kbd>
+                <span className="text-gray-400">Help</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <kbd className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-xs font-mono">
+                  Esc
+                </kbd>
+                <span className="text-gray-400">Close</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Dismiss button */}
         <button
           onClick={handleDismiss}

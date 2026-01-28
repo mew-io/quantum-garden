@@ -1,7 +1,7 @@
 # Session Archive: Evolution Paused Indicator
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (to be filled after commit)
+**Synthesis Commit**: 47fa144
 
 ---
 

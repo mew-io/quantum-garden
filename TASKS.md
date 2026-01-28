@@ -31,11 +31,12 @@ Build a slow-evolving generative environment where plants exist in quantum super
 
 3. **Sprint 4: Enhanced Garden Evolution** (IN PROGRESS - MEDIUM PRIORITY)
    - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27 - autowork loop 1)
-   - Task 4.2: Smart Germination Logic (NEXT)
-   - Task 4.3: Evolution Event Notifications
+   - ✅ Task 4.2: Smart Germination Logic (COMPLETED 2026-01-27 - autowork loop 2)
+   - Task 4.3: Evolution Event Notifications (NEXT)
    - Makes garden feel alive and dynamic
    - Improves long-term engagement
    - Task 4.1 implemented GPU-accelerated shader animations for young/mature/old plants
+   - Task 4.2 implemented proximity bonus, clustering prevention, age weighting, and wave patterns
 
 ### Medium-Term Goals (Next 2 Weeks)
 
@@ -441,15 +442,31 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 4.2: Smart Germination Logic
 
-**Status**: 🔴 Not Started
+**Status**: ✅ COMPLETED (2026-01-27)
 **File**: `apps/web/src/components/garden/garden-evolution.ts`
 
 **Enhancements**:
 
-- **Proximity bonus**: Plants near observed plants 2x more likely to germinate
-- **Clustering prevention**: If 3+ germinated plants within 150px radius, skip area
-- **Age weighting**: Older dormant plants gradually increase germination chance
-- **Wave pattern**: Occasional "germination waves" where multiple plants sprout together
+- **Proximity bonus**: Plants near observed plants 2x more likely to germinate (200px radius)
+- **Clustering prevention**: If 3+ germinated plants within 150px radius, skip area (0% chance)
+- **Age weighting**: Older dormant plants gradually increase germination chance (up to 2.5x after 15 min)
+- **Wave pattern**: Occasional "germination waves" where multiple plants sprout together (5% chance per check, 3-5 plants)
+
+**Implementation**:
+
+- Added smart germination constants to EVOLUTION config (proximity radius, clustering threshold, age weighting period, wave chance)
+- Implemented `getDistance()` helper to calculate distance between plants
+- Implemented `hasObservedNeighbors()` to check for observed plants within proximity radius
+- Implemented `isInCluster()` to detect crowded areas with 3+ germinated neighbors
+- Implemented `getAgeMultiplier()` to calculate age-based bonus (linear increase from 1.0 to 2.5x over 15 min)
+- Implemented `getGerminationProbability()` to combine all factors (proximity, age, clustering)
+- Updated `checkEvolution()` to support wave germination events (3-5 plants at once)
+- All germination decisions logged to console with wave indicator
+
+**Quality Checks**:
+
+- TypeScript: ✅ PASS
+- ESLint: ✅ PASS
 
 #### Task 4.3: Evolution Event Notifications
 

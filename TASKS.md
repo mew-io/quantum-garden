@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Cooldown Indicator Component)_
+_Last updated: 2026-01-28 (GardenEvolutionSystem Unit Tests)_
 
 ## Project Status
 
@@ -123,20 +123,20 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Phase 7: Testing & Documentation
 
-| #   | Task                                      | Priority | File                      |
-| --- | ----------------------------------------- | -------- | ------------------------- |
-| 105 | Add GardenEvolutionSystem unit tests      | P1       | NEW                       |
-| 106 | Add useEvolutionSystem hook tests         | P1       | NEW                       |
-| 107 | Add integration test for germination flow | P2       | NEW                       |
-| 108 | Add tests for wave germination logic      | P2       | `evolution-logic.test.ts` |
-| 109 | ~~Add tests for guaranteed germination~~  | ✅ Done  | `evolution-logic.test.ts` |
-| 110 | Add store tests for evolution state       | P2       | NEW                       |
-| 111 | Add visual regression test checklist      | P3       | `docs/testing.md`         |
-| 112 | Update README with evolution system info  | P2       | `README.md`               |
-| 113 | Add JSDoc to useEvolutionSystem hook      | P2       | `use-evolution-system.ts` |
-| 114 | Update architecture docs                  | P2       | `docs/architecture.md`    |
-| 117 | Test with 100+ plants for performance     | P2       | -                         |
-| 118 | Test extended session for memory leaks    | P2       | -                         |
+| #   | Task                                      | Priority | File                       |
+| --- | ----------------------------------------- | -------- | -------------------------- |
+| 105 | ~~Add GardenEvolutionSystem unit tests~~  | ✅ Done  | `garden-evolution.test.ts` |
+| 106 | Add useEvolutionSystem hook tests         | P1       | NEW                        |
+| 107 | Add integration test for germination flow | P2       | NEW                        |
+| 108 | Add tests for wave germination logic      | P2       | `evolution-logic.test.ts`  |
+| 109 | ~~Add tests for guaranteed germination~~  | ✅ Done  | `evolution-logic.test.ts`  |
+| 110 | Add store tests for evolution state       | P2       | NEW                        |
+| 111 | Add visual regression test checklist      | P3       | `docs/testing.md`          |
+| 112 | Update README with evolution system info  | P2       | `README.md`                |
+| 113 | Add JSDoc to useEvolutionSystem hook      | P2       | `use-evolution-system.ts`  |
+| 114 | Update architecture docs                  | P2       | `docs/architecture.md`     |
+| 117 | Test with 100+ plants for performance     | P2       | -                          |
+| 118 | Test extended session for memory leaks    | P2       | -                          |
 
 ---
 
@@ -183,6 +183,13 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ## Completed Work
 
+### 2026-01-28 - GardenEvolutionSystem Unit Tests
+
+- Created `garden-evolution.test.ts` with 19 unit tests (#105)
+- Tests cover lifecycle, germination callbacks, plant tracking, eligibility, clustering prevention, stats, factory function, and error handling
+- Key testing patterns: mock `useGardenStore.getState()`, mock `debugLogger`, use `vi.useFakeTimers()` to control time
+- All 155 tests passing (60 shared + 95 web)
+
 ### 2026-01-28 - Cooldown Indicator Component
 
 - Created `cooldown-indicator.tsx` component (#48, #49)
@@ -193,7 +200,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 - Shows seconds remaining text on desktop (hidden on mobile)
 - Properly syncs with `isInCooldown` state from store
 - ARIA label for accessibility with remaining time
-- All 136 tests passing (76 tests run)
+- All tests passing
 
 ### 2026-01-28 - Dwell-Time Observation Mode
 
@@ -401,4 +408,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (136+)
+- All tests passing (155+)

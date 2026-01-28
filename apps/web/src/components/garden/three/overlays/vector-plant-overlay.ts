@@ -55,6 +55,7 @@ interface PlantRenderState {
 
 /**
  * Renders vector-mode plant variants using Three.js Line primitives.
+ * Uses material pooling to reduce allocations.
  */
 export class VectorPlantOverlay {
   private group: THREE.Group;
@@ -63,9 +64,35 @@ export class VectorPlantOverlay {
   private plants: Plant[] = [];
   private variantCache: Map<string, PlantVariant> = new Map();
 
+  /** Pool of materials keyed by "color-opacity" string for reuse */
+  private materialPool: Map<string, THREE.LineBasicMaterial> = new Map();
+
+  /** Pool of circle geometries keyed by segment count for reuse */
+  private circleGeometryPool: Map<string, THREE.BufferGeometry> = new Map();
+
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "vector-plants";
+  }
+
+  /**
+   * Get or create a pooled material with the given color and opacity.
+   */
+  private getPooledMaterial(color: string, opacity: number): THREE.LineBasicMaterial {
+    // Round opacity to 2 decimal places to increase cache hits
+    const roundedOpacity = Math.round(opacity * 100) / 100;
+    const key = `${color}-${roundedOpacity}`;
+
+    let material = this.materialPool.get(key);
+    if (!material) {
+      material = new THREE.LineBasicMaterial({
+        color: new THREE.Color(color),
+        transparent: true,
+        opacity: roundedOpacity,
+      });
+      this.materialPool.set(key, material);
+    }
+    return material;
   }
 
   /**
@@ -176,22 +203,21 @@ export class VectorPlantOverlay {
 
   /**
    * Update a plant's mesh group with the current keyframe visuals.
+   * Uses pooled materials to reduce allocations.
    */
   private updatePlantGroup(
     plantGroup: THREE.Group,
     plant: Plant,
     keyframe: VectorKeyframe | InterpolatedVectorKeyframe
   ): void {
-    // Clear existing children
+    // Clear existing children - dispose geometry but NOT materials (they're pooled)
     while (plantGroup.children.length > 0) {
       const child = plantGroup.children[0];
       if (child) {
         plantGroup.remove(child);
         if (child instanceof THREE.Line || child instanceof THREE.LineLoop) {
           child.geometry.dispose();
-          if (child.material instanceof THREE.Material) {
-            child.material.dispose();
-          }
+          // Note: materials are pooled, so we don't dispose them here
         }
       }
     }
@@ -200,9 +226,6 @@ export class VectorPlantOverlay {
     const drawFractions = isInterpolatedVectorKeyframe(keyframe)
       ? keyframe.drawFractions
       : undefined;
-
-    // Create base material for this keyframe
-    const color = new THREE.Color(keyframe.strokeColor);
 
     // Generate geometry for each primitive
     for (let i = 0; i < keyframe.primitives.length; i++) {
@@ -214,12 +237,9 @@ export class VectorPlantOverlay {
       // Skip primitives that are fully hidden
       if (drawFraction <= 0) continue;
 
-      // Create material - adjust opacity for partially drawn primitives
-      const material = new THREE.LineBasicMaterial({
-        color,
-        transparent: true,
-        opacity: keyframe.strokeOpacity * Math.min(1, drawFraction * 2), // Fade in during first half of draw
-      });
+      // Get pooled material - adjust opacity for partially drawn primitives
+      const opacity = keyframe.strokeOpacity * Math.min(1, drawFraction * 2); // Fade in during first half of draw
+      const material = this.getPooledMaterial(keyframe.strokeColor, opacity);
 
       const lineObject = this.createPrimitiveGeometry(primitive, material, drawFraction);
       if (lineObject) {
@@ -451,14 +471,13 @@ export class VectorPlantOverlay {
 
   /**
    * Dispose of a mesh group and its resources.
+   * Note: Materials are pooled and not disposed here.
    */
   private disposeMeshGroup(group: THREE.Group): void {
     for (const child of group.children) {
       if (child instanceof THREE.Line || child instanceof THREE.LineLoop) {
         child.geometry.dispose();
-        if (child.material instanceof THREE.Material) {
-          child.material.dispose();
-        }
+        // Materials are pooled, so we don't dispose them here
       }
     }
   }
@@ -597,5 +616,17 @@ export class VectorPlantOverlay {
     }
     this.plantMeshes.clear();
     this.plantRenderStates.clear();
+
+    // Dispose pooled materials
+    for (const material of this.materialPool.values()) {
+      material.dispose();
+    }
+    this.materialPool.clear();
+
+    // Dispose pooled geometries
+    for (const geometry of this.circleGeometryPool.values()) {
+      geometry.dispose();
+    }
+    this.circleGeometryPool.clear();
   }
 }

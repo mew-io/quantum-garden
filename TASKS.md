@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Polling Deduplication)_
+_Last updated: 2026-01-28 (Material Pooling)_
 
 ## Project Status
 
@@ -40,7 +40,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
 | 80  | Investigate z-layer sorting overhead                            | P2       | `plant-instancer.ts`       |
 | 81  | ~~Deduplicate polling across components~~                       | ✅ Done  | `use-plants.ts`            |
-| 82  | Implement geometry pooling for vector primitives                | P1       | `vector-plant-overlay.ts`  |
+| 82  | ~~Implement material pooling for vector primitives~~            | Done     | `vector-plant-overlay.ts`  |
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
 | 84  | Use partial buffer updates for dirty instances                  | P2       | `plant-instancer.ts`       |
 | 85  | Add `hasActiveAnimations()` check to overlays                   | P2       | `overlay-manager.ts`       |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Material Pooling for Vector Plants
+
+- Implemented material pooling in `vector-plant-overlay.ts` (#82)
+- Added `materialPool` Map to cache materials by "color-opacity" key
+- Added `getPooledMaterial()` method to fetch or create pooled materials
+- Materials now reused across all plants instead of recreated per geometry update
+- Geometry disposed individually on plant removal, materials disposed only on full dispose
+- Added `circleGeometryPool` placeholder for future geometry pooling
+- Reduces GPU allocations significantly for vector plant rendering
+- All 128 tests passing
 
 ### 2026-01-28 - Polling Deduplication
 

@@ -30,13 +30,13 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - Showcases garden's autonomous nature over time
 
 3. **Sprint 4: Enhanced Garden Evolution** (IN PROGRESS - MEDIUM PRIORITY)
-   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27 - autowork loop 1)
-   - ✅ Task 4.2: Smart Germination Logic (COMPLETED 2026-01-27 - autowork loop 2)
-   - Task 4.3: Evolution Event Notifications (NEXT)
+   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27)
+   - ✅ Task 4.2: Smart Germination Logic (COMPLETED 2026-01-27)
+   - Task 4.3: Evolution Event Notifications (NEXT - HIGH PRIORITY)
    - Makes garden feel alive and dynamic
    - Improves long-term engagement
-   - Task 4.1 implemented GPU-accelerated shader animations for young/mature/old plants
-   - Task 4.2 implemented proximity bonus, clustering prevention, age weighting, and wave patterns
+   - Task 4.1: GPU-accelerated shader animations (young pulse, mature sway, old slow movement)
+   - Task 4.2: Proximity bonus, clustering prevention, age weighting, wave patterns
 
 ### Medium-Term Goals (Next 2 Weeks)
 
@@ -543,6 +543,31 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-27 - Sprint 4: Enhanced Garden Evolution (Tasks 4.1 & 4.2)
+
+**Lifecycle-Based Visual Behaviors (Task 4.1)**:
+
+- [x] GPU-accelerated shader animations for lifecycle stages
+- [x] Young plants (lifecycle < 0.3): Gentle scale pulse (0.98-1.02, 3s cycle)
+- [x] Mature plants (lifecycle 0.3-0.7): Subtle rotation sway (±2°, 5s cycle)
+- [x] Old plants (lifecycle > 0.7): Slower movement (10s cycle) with opacity variance
+- [x] Automatic lifecycle progress calculation via instance buffer
+- [x] Animations respect plant states (only for germinated, unresolved plants)
+
+**Smart Germination Logic (Task 4.2)**:
+
+- [x] Proximity bonus: 2x germination chance near observed plants (200px radius)
+- [x] Clustering prevention: 0% chance in areas with 3+ germinated neighbors (150px radius)
+- [x] Age weighting: Gradual increase in probability (1.0x to 2.5x over 5 min)
+- [x] Wave patterns: 5% chance per check for coordinated germination (3-5 plants)
+- [x] Helper methods: getDistance(), hasObservedNeighbors(), isInCluster(), getAgeMultiplier()
+- [x] Enhanced logging with germination decision rationale
+
+**Quality Checks**:
+
+- [x] TypeScript type-checking: PASS (2 packages, 954ms)
+- [x] ESLint linting: PASS (2 packages, 956ms)
 
 ### 2026-01-27 - Sprint 3: Time-Travel Experience (Complete)
 

@@ -589,17 +589,85 @@ export class PlantInstancer {
   }
 
   /**
-   * Mark all instance attributes as needing GPU update.
+   * Mark instance attributes for GPU update.
+   * Uses partial buffer updates when only a subset of instances changed.
    */
   private markAttributesNeedUpdate(): void {
     const geometry = this.mesh.geometry;
-    (geometry.getAttribute("instancePosition") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instanceUVBounds") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instancePalette0") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instancePalette1") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instancePalette2") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instanceState") as THREE.BufferAttribute).needsUpdate = true;
-    (geometry.getAttribute("instanceAnimation") as THREE.BufferAttribute).needsUpdate = true;
+
+    // If no specific dirty instances or forcing full sync, upload everything
+    if (this.dirtyInstances.size === 0 || this.forceFullSync) {
+      this.setFullBufferUpdate(geometry);
+      return;
+    }
+
+    // Calculate the range of dirty instances
+    let minIndex = Infinity;
+    let maxIndex = -Infinity;
+    for (const index of this.dirtyInstances) {
+      if (index < minIndex) minIndex = index;
+      if (index > maxIndex) maxIndex = index;
+    }
+
+    // If the range spans most of the buffer, just do a full update
+    const rangeSize = maxIndex - minIndex + 1;
+    const totalInstances = this.plantIndexMap.size;
+    if (rangeSize > totalInstances * 0.5 || totalInstances < 10) {
+      this.setFullBufferUpdate(geometry);
+      return;
+    }
+
+    // Use partial buffer update for the dirty range
+    this.setPartialBufferUpdate(geometry, minIndex, rangeSize);
+  }
+
+  /**
+   * Set all buffer attributes to upload fully.
+   */
+  private setFullBufferUpdate(geometry: THREE.BufferGeometry): void {
+    const attrs = [
+      "instancePosition",
+      "instanceUVBounds",
+      "instancePalette0",
+      "instancePalette1",
+      "instancePalette2",
+      "instanceState",
+      "instanceAnimation",
+    ];
+    for (const name of attrs) {
+      const attr = geometry.getAttribute(name) as THREE.BufferAttribute;
+      // Clear any partial update ranges - empty array means full update
+      attr.updateRanges.length = 0;
+      attr.needsUpdate = true;
+    }
+  }
+
+  /**
+   * Set buffer attributes to upload only a partial range.
+   * Each attribute has a different item size, so we calculate the byte range accordingly.
+   */
+  private setPartialBufferUpdate(
+    geometry: THREE.BufferGeometry,
+    startIndex: number,
+    count: number
+  ): void {
+    const attrConfigs: Array<{ name: string; itemSize: number }> = [
+      { name: "instancePosition", itemSize: 3 },
+      { name: "instanceUVBounds", itemSize: 4 },
+      { name: "instancePalette0", itemSize: 3 },
+      { name: "instancePalette1", itemSize: 3 },
+      { name: "instancePalette2", itemSize: 3 },
+      { name: "instanceState", itemSize: 4 },
+      { name: "instanceAnimation", itemSize: 2 },
+    ];
+
+    for (const { name, itemSize } of attrConfigs) {
+      const attr = geometry.getAttribute(name) as THREE.BufferAttribute;
+      // Set the update range for partial upload
+      attr.updateRanges.length = 0;
+      attr.addUpdateRange(startIndex * itemSize, count * itemSize);
+      attr.needsUpdate = true;
+    }
   }
 
   /**

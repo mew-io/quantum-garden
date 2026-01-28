@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Safe area padding for iOS notched devices)_
+_Last updated: 2026-01-28 (Partial buffer updates for plant instancer)_
 
 ## Project Status
 
@@ -42,7 +42,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 81  | ~~Deduplicate polling across components~~                       | ✅ Done  | `use-plants.ts`            |
 | 82  | ~~Implement material pooling for vector primitives~~            | Done     | `vector-plant-overlay.ts`  |
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
-| 84  | Use partial buffer updates for dirty instances                  | P2       | `plant-instancer.ts`       |
+| 84  | ~~Use partial buffer updates for dirty instances~~              | ✅ Done  | `plant-instancer.ts`       |
 | 85  | Add `hasActiveAnimations()` check to overlays                   | P2       | `overlay-manager.ts`       |
 | 86  | Shallow compare entanglement groups before rebuild              | P2       | `entanglement-overlay.ts`  |
 | 87  | ~~Skip frame-level syncPlants when store just synced~~          | ✅ Done  | `garden-scene.tsx`         |
@@ -182,6 +182,21 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Partial Buffer Updates for Plant Instancer
+
+- Implemented partial buffer updates in PlantInstancer to reduce GPU data transfer (#84)
+- **Problem**: Previously `markAttributesNeedUpdate()` set `needsUpdate = true` on all buffer attributes, causing Three.js to re-upload the entire buffer to GPU even when only a few instances changed
+- **Solution**: Track min/max dirty instance indices and use Three.js `addUpdateRange()` API to specify partial upload ranges
+- Added `setFullBufferUpdate()` method - clears update ranges for full buffer upload
+- Added `setPartialBufferUpdate()` method - sets ranges using `attr.addUpdateRange(offset, count)`
+- Updated `markAttributesNeedUpdate()` to:
+  - Calculate dirty range (min to max index)
+  - Use partial update if range < 50% of total instances and total > 10
+  - Fall back to full update for small counts or large ranges (threshold optimization)
+- Buffer attributes updated: instancePosition (3), instanceUVBounds (4), instancePalette0/1/2 (3 each), instanceState (4), instanceAnimation (2)
+- Uses Three.js r150+ API with `updateRanges` array and `addUpdateRange()` method
+- All 178 tests pass (60 shared + 118 web)
 
 ### 2026-01-28 - Safe Area Padding for iOS Notched Devices
 

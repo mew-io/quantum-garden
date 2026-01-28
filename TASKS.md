@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Store Subscription Optimization)_
+_Last updated: 2026-01-28 (Empty Plants Array Edge Case Fix)_
 
 ## Project Status
 
@@ -31,7 +31,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | --- | ----------------------------------------------------------- | -------- | -------------------------- |
 | 66  | ~~Fix vector plant geometry rebuilding every frame~~        | ✅ Done  | `vector-plant-overlay.ts`  |
 | 67  | ~~Debounce store subscriptions in garden-scene~~            | ✅ Done  | `garden-scene.tsx`         |
-| 68  | Fix empty plants array edge case                            | P1       | `page.tsx`                 |
+| 68  | ~~Fix empty plants array edge case~~                        | ✅ Done  | `page.tsx`                 |
 | 69  | Add user-facing error notification for observation failures | P1       | `use-observation.ts`       |
 | 70  | Fix time-travel edge cases (zero duration, stale now)       | P2       | `time-travel-scrubber.tsx` |
 | 71  | Implement circular buffer for debug logs                    | P2       | `debug-logger.ts`          |
@@ -115,7 +115,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 99  | Add time-travel explanation to help                 | P2       | `info-overlay.tsx`              |
-| 100 | Add loading state during initial plant fetch        | P2       | `page.tsx`                      |
+| 100 | ~~Add loading state during initial plant fetch~~    | ✅ Done  | `page.tsx`                      |
 | 101 | Complete keyboard shortcuts list                    | P2       | `toolbar.tsx`                   |
 | 102 | Plan sound effects system                           | P3       | -                               |
 | 103 | Add playback speed control to time-travel           | P3       | `time-travel-scrubber.tsx`      |
@@ -182,6 +182,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Empty Plants Array Edge Case Fix
+
+- ✅ Fixed empty plants array handling in page.tsx (#68)
+- ✅ Added explicit check for `plants.length === 0` that clears `gardenCreatedAt`
+- ✅ Added initial value to `reduce()` call to prevent crash on empty array
+- ✅ Added loading state indicator during initial plant fetch (#100)
+- ✅ Improved state management: separate handling for loading vs empty states
+- ✅ All 128 tests passing
 
 ### 2026-01-28 - Store Subscription Optimization
 

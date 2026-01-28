@@ -22,16 +22,25 @@ export default function Home() {
   const [showHelp, setShowHelp] = useState(false);
 
   // Fetch earliest plant creation time to determine garden age
-  const { data: plants } = trpc.plants.list.useQuery();
+  const { data: plants, isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
 
   // Calculate garden creation time from earliest plant
   useEffect(() => {
-    if (plants && plants.length > 0) {
-      const earliest = plants.reduce((min, p) =>
-        new Date(p.createdAt) < new Date(min.createdAt) ? p : min
-      );
-      setGardenCreatedAt(new Date(earliest.createdAt));
+    if (!plants) {
+      // Still loading - don't change state
+      return;
     }
+    if (plants.length === 0) {
+      // No plants - clear garden created time
+      setGardenCreatedAt(null);
+      return;
+    }
+    // Find earliest plant creation time
+    const earliest = plants.reduce(
+      (min, p) => (new Date(p.createdAt) < new Date(min.createdAt) ? p : min),
+      plants[0]! // Safe because we checked length > 0
+    );
+    setGardenCreatedAt(new Date(earliest.createdAt));
   }, [plants]);
 
   // Query for historical state
@@ -120,6 +129,28 @@ export default function Home() {
     <ErrorBoundary>
       <main>
         <GardenScene />
+
+        {/* Loading indicator during initial plant fetch */}
+        {isPlantsLoading && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 20,
+              left: "50%",
+              transform: "translateX(-50%)",
+              padding: "8px 16px",
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              color: "#fff",
+              borderRadius: 4,
+              fontSize: 14,
+              fontFamily: "monospace",
+              pointerEvents: "none",
+              zIndex: 100,
+            }}
+          >
+            Loading garden...
+          </div>
+        )}
 
         {/* Toolbar with visible controls */}
         <Toolbar

@@ -56,6 +56,9 @@ const EVOLUTION = {
 
   /** Minimum dormant plants required for wave events */
   WAVE_MIN_DORMANT_COUNT: 5, // Need at least 5 dormant plants for a wave
+
+  /** Minimum distance between wave-selected plants (pixels) */
+  WAVE_MIN_SPACING: 200, // Prefer plants at least 200px apart in waves
 };
 
 type GerminationCallback = (plantId: string) => Promise<void>;
@@ -196,6 +199,60 @@ export class GardenEvolutionSystem {
   }
 
   /**
+   * Select plants for wave germination with spatial distribution.
+   * Uses a greedy algorithm to maximize spread across the garden.
+   *
+   * @param candidates - Eligible plants to choose from
+   * @param count - Number of plants to select
+   * @returns Array of spatially-distributed plants
+   */
+  private selectSpatiallyDistributedPlants(candidates: Plant[], count: number): Plant[] {
+    if (candidates.length <= count) {
+      return candidates;
+    }
+
+    const selected: Plant[] = [];
+
+    // Start with a random plant to add variety
+    const startIndex = Math.floor(Math.random() * candidates.length);
+    selected.push(candidates[startIndex]!);
+
+    // Greedily select plants that maximize minimum distance to already-selected plants
+    while (selected.length < count) {
+      let bestCandidate: Plant | null = null;
+      let bestMinDistance = -1;
+
+      for (const candidate of candidates) {
+        // Skip already selected
+        if (selected.includes(candidate)) continue;
+
+        // Calculate minimum distance to any selected plant
+        let minDistanceToSelected = Infinity;
+        for (const selectedPlant of selected) {
+          const dist = this.getDistance(candidate.position, selectedPlant.position);
+          if (dist < minDistanceToSelected) {
+            minDistanceToSelected = dist;
+          }
+        }
+
+        // Track candidate with maximum minimum distance (furthest from all selected)
+        if (minDistanceToSelected > bestMinDistance) {
+          bestMinDistance = minDistanceToSelected;
+          bestCandidate = candidate;
+        }
+      }
+
+      if (bestCandidate) {
+        selected.push(bestCandidate);
+      } else {
+        break; // No more candidates
+      }
+    }
+
+    return selected;
+  }
+
+  /**
    * Calculate age-based germination bonus.
    * Returns a multiplier (1.0 to MAX_AGE_MULTIPLIER).
    */
@@ -295,10 +352,16 @@ export class GardenEvolutionSystem {
       ? EVOLUTION.WAVE_GERMINATION_COUNT + Math.floor(Math.random() * 3) // 3-5 plants
       : EVOLUTION.MAX_GERMINATIONS_PER_CHECK;
 
-    // Randomly select plants to germinate with smart logic
+    // For wave events, select spatially-distributed plants
+    // For normal events, use the regular eligibility order
+    const plantsToProcess = isWave
+      ? this.selectSpatiallyDistributedPlants(eligiblePlants, maxGerminations)
+      : eligiblePlants;
+
+    // Process selected plants
     let germinationsThisCheck = 0;
 
-    for (const plant of eligiblePlants) {
+    for (const plant of plantsToProcess) {
       if (germinationsThisCheck >= maxGerminations) break;
 
       const dormantSince = this.plantAges.get(plant.id);

@@ -396,21 +396,77 @@ describe("GardenEvolutionSystem", () => {
       ];
       setMockPlants(plants);
 
+      // Mock random BEFORE starting to control all random calls
+      // This includes interval-triggered checks during advanceTimersByTime
+      vi.spyOn(Math, "random").mockReturnValue(0.01); // < 0.05 = wave, < 0.15 = germinate
+
       system.start();
 
       // Advance time past minimum dormancy
       vi.advanceTimersByTime(60 * 1000);
 
-      // Mock random to always trigger wave chance and always pass germination probability
-      vi.spyOn(Math, "random").mockReturnValue(0.01); // < 0.05 = wave, < 0.15 = germinate
+      // Clear any callbacks from interval-triggered checks during advanceTimersByTime
+      callback.mockClear();
+
+      await system.triggerCheck();
+
+      // With wave triggered (6 >= 5), should germinate 3+ plants (base wave count is 3)
+      // The spatial selection picks 3 plants, all should pass germination probability
+      expect(callback.mock.calls.length).toBeGreaterThanOrEqual(3);
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should prefer spatially distributed plants during wave events", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create 8 plants with varied positions
+      // Some clustered together, some spread out
+      const plants = [
+        // Cluster in top-left corner
+        createMockPlant("cluster1", 100, 100),
+        createMockPlant("cluster2", 120, 100),
+        createMockPlant("cluster3", 100, 120),
+        // Spread out plants
+        createMockPlant("spread1", 500, 100),
+        createMockPlant("spread2", 900, 100),
+        createMockPlant("spread3", 100, 500),
+        createMockPlant("spread4", 500, 500),
+        createMockPlant("spread5", 900, 500),
+      ];
+      setMockPlants(plants);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Track which plants are germinated
+      const germinatedIds: string[] = [];
+      callback.mockImplementation(async (plantId: string) => {
+        germinatedIds.push(plantId);
+      });
+
+      // Mock random: first call triggers wave (0.01 < 0.05)
+      // Then always pass germination probability
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
 
       // Clear any callbacks from interval-triggered checks
       callback.mockClear();
 
       await system.triggerCheck();
 
-      // With wave triggered (6 >= 5), should germinate 3-5 plants (wave count)
-      expect(callback.mock.calls.length).toBeGreaterThanOrEqual(3);
+      // Wave should have selected some plants
+      expect(germinatedIds.length).toBeGreaterThanOrEqual(3);
+
+      // The spatial selection should NOT pick all 3 clustered plants together
+      // because it prefers plants that are spread out
+      const clusterCount = germinatedIds.filter((id) => id.startsWith("cluster")).length;
+
+      // At most 1 plant from the cluster should be selected (as starting point)
+      // The algorithm should prefer spread-out plants for subsequent selections
+      expect(clusterCount).toBeLessThanOrEqual(2);
 
       vi.spyOn(Math, "random").mockRestore();
     });

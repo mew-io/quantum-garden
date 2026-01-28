@@ -40,6 +40,11 @@ export function TimeTravelScrubber({
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Auto-expand when entering time-travel mode, collapse when exiting
+  useEffect(() => {
+    setIsExpanded(isActive);
+  }, [isActive]);
   const [playbackSpeed] = useState(10); // 10x speed
   const [hoveredEvent, setHoveredEvent] = useState<{
     event: EvolutionEvent;

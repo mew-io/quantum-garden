@@ -4,14 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
 import type { Plant } from "@quantum-garden/shared";
 
-interface JobStats {
-  pending: number;
-  completed: number;
-  failed: number;
-  total: number;
-  execution_mode: string;
-}
-
 /**
  * Debug panel for viewing quantum garden internals.
  * Toggle with backtick (`) key.
@@ -19,7 +11,6 @@ interface JobStats {
 export function DebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
-  const [jobStats, setJobStats] = useState<JobStats | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
 
   // Fetch all plants for overview
@@ -28,16 +19,23 @@ export function DebugPanel() {
     refetchInterval: isVisible ? 2000 : false,
   });
 
-  const fetchJobStats = useCallback(async () => {
-    try {
-      const res = await fetch("http://localhost:18742/jobs/");
-      if (res.ok) {
-        setJobStats(await res.json());
-      }
-    } catch {
-      // Quantum service not available
+  // Fetch quantum service configuration
+  const { data: quantumConfig, refetch: refetchConfig } = trpc.quantum.getConfig.useQuery(
+    undefined,
+    {
+      enabled: isVisible,
+      refetchInterval: isVisible ? 5000 : false, // Poll every 5 seconds
     }
-  }, []);
+  );
+
+  // Fetch job queue statistics
+  const { data: jobStats, refetch: refetchJobStats } = trpc.quantum.getJobStats.useQuery(
+    undefined,
+    {
+      enabled: isVisible,
+      refetchInterval: isVisible ? 2000 : false, // Poll every 2 seconds
+    }
+  );
 
   // Toggle visibility with backtick key
   useEffect(() => {
@@ -60,15 +58,6 @@ export function DebugPanel() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // Fetch job stats when visible
-  useEffect(() => {
-    if (isVisible) {
-      fetchJobStats();
-      const interval = setInterval(fetchJobStats, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [isVisible, fetchJobStats]);
 
   // Listen for plant selection events from the canvas
   useEffect(() => {
@@ -136,6 +125,45 @@ export function DebugPanel() {
             <Stat label="Observed" value={`${observedCount}/${totalCount}`} />
           </div>
         </section>
+
+        {/* Quantum Service Status */}
+        {quantumConfig && (
+          <section>
+            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Quantum Service</h4>
+            <div className="space-y-2">
+              <div className="bg-gray-800/50 rounded p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-xs">Execution Mode</span>
+                  <span
+                    className={`text-xs font-mono px-2 py-1 rounded ${
+                      quantumConfig.execution_mode === "simulator"
+                        ? "bg-blue-900/50 text-blue-300"
+                        : quantumConfig.execution_mode === "hardware"
+                          ? "bg-purple-900/50 text-purple-300"
+                          : "bg-gray-700/50 text-gray-400"
+                    }`}
+                  >
+                    {quantumConfig.execution_mode.toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-500">IonQ API Key</span>
+                  <span
+                    className={
+                      quantumConfig.ionq_api_key_configured ? "text-green-400" : "text-gray-500"
+                    }
+                  >
+                    {quantumConfig.ionq_api_key_configured ? "Configured" : "Not Set"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-500">Default Shots</span>
+                  <span className="text-cyan-400">{quantumConfig.default_shots}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Observation Mode Toggle */}
         <section>
@@ -252,7 +280,8 @@ export function DebugPanel() {
         <button
           onClick={() => {
             refetchPlants();
-            fetchJobStats();
+            refetchConfig();
+            refetchJobStats();
           }}
           className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs"
         >

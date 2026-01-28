@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Exit Timeline Button Rename)_
+_Last updated: 2026-01-28 (Dwell-Time Observation Mode)_
 
 ## Project Status
 
@@ -71,8 +71,8 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                              | Priority | File                            |
 | --- | ------------------------------------------------- | -------- | ------------------------------- |
-| 46  | Add dwell-time observation mode                   | P1       | `observation-system.ts`         |
-| 47  | Connect dwell progress to store                   | P1       | `observation-system.ts`         |
+| 46  | ~~Add dwell-time observation mode~~               | ✅ Done  | `observation-system.ts`         |
+| 47  | ~~Connect dwell progress to store~~               | ✅ Done  | `observation-system.ts`         |
 | 48  | Create cooldown indicator component               | P1       | NEW                             |
 | 49  | Position cooldown indicator near corner           | P2       | `page.tsx`                      |
 | 50  | ~~Increase notification duration to 5-6s~~        | ✅ Done  | `evolution-notifications.tsx`   |
@@ -182,6 +182,18 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Dwell-Time Observation Mode
+
+- Implemented dwell-time observation mode in `observation-system.ts` (#46, #47)
+- Added `enableDwellMode` config option (default: false for backward compatibility)
+- Added `dwellDuration` config option (default: 1.5 seconds)
+- Dwell mode requires cursor to stay on eligible plant for duration before triggering observation
+- Progress syncs to store (`dwellTarget`, `dwellProgress`) for UI display
+- Observation resets if cursor moves off plant or leaves observation region
+- Public API: `setDwellMode()`, `getDwellMode()`, `setDwellDuration()`, `getDwellDuration()`, `getDwellState()`
+- Backward compatible: immediate observation mode remains the default
+- All 136 tests passing
 
 ### 2026-01-28 - Exit Timeline Button Rename
 

@@ -40,6 +40,10 @@ interface ObservationSystemConfig {
   cooldownDuration?: number;
   /** Plant size for overlap detection (pixels) */
   plantSize?: number;
+  /** Enable dwell-time observation mode (requires holding cursor on plant) */
+  enableDwellMode?: boolean;
+  /** Time required to observe a plant in dwell mode (seconds) */
+  dwellDuration?: number;
 }
 
 const DEFAULT_CONFIG: Required<ObservationSystemConfig> = {
@@ -47,6 +51,8 @@ const DEFAULT_CONFIG: Required<ObservationSystemConfig> = {
   regionLifetime: 75, // 60-90 seconds
   cooldownDuration: 17.5, // 15-20 seconds
   plantSize: 64, // 64x64 pixel plants
+  enableDwellMode: false, // Immediate observation by default
+  dwellDuration: 1.5, // 1.5 seconds when dwell mode is enabled
 };
 
 /**
@@ -72,6 +78,10 @@ export class ObservationSystem {
 
   // Observation tracking (prevent double-observations within same frame)
   private lastObservedPlantId: string | null = null;
+
+  // Dwell-time observation state
+  private dwellTarget: string | null = null; // Plant ID being dwelled on
+  private dwellTimer: number = 0; // Accumulated dwell time
 
   // Spatial indexing for O(1) plant lookups
   // Cell size matches region radius for optimal query performance
@@ -123,31 +133,86 @@ export class ObservationSystem {
 
     // Skip observation checks during cooldown
     if (this.cooldownTimer > 0) {
+      // Reset dwell when entering cooldown
+      this.resetDwellState();
       return;
     }
 
     // Check for alignment and trigger observation
-    this.checkForObservation();
+    this.checkForObservation(deltaTime);
   }
 
   /**
    * Check if alignment conditions are met and trigger observation.
+   * In dwell mode, requires cursor to stay on plant for dwellDuration.
+   * In immediate mode, triggers as soon as alignment conditions are met.
    */
-  private checkForObservation(): void {
+  private checkForObservation(deltaTime: number = 0): void {
     if (!this.activeRegion) return;
 
     const reticlePos = this.getReticlePosition();
 
     // Check if reticle is within region
     if (!this.isPointInCircle(reticlePos, this.activeRegion.center, this.activeRegion.radius)) {
+      // Reset dwell if cursor leaves region
+      this.resetDwellState();
       return;
     }
 
     // Find eligible plant (unobserved, fully contained in region, overlapping reticle)
     const eligiblePlant = this.findEligiblePlant(reticlePos);
 
-    if (eligiblePlant) {
+    if (!eligiblePlant) {
+      // No eligible plant under cursor - reset dwell
+      this.resetDwellState();
+      return;
+    }
+
+    // In dwell mode, track time on plant before observing
+    if (this.config.enableDwellMode) {
+      this.handleDwellObservation(eligiblePlant, deltaTime);
+    } else {
+      // Immediate mode - trigger observation right away
       this.triggerObservation(eligiblePlant);
+    }
+  }
+
+  /**
+   * Handle dwell-time observation mode.
+   * Accumulates time on a plant and triggers observation when dwell completes.
+   */
+  private handleDwellObservation(plant: Plant, deltaTime: number): void {
+    // Check if we're dwelling on a new plant
+    if (this.dwellTarget !== plant.id) {
+      // Reset and start new dwell
+      this.dwellTarget = plant.id;
+      this.dwellTimer = 0;
+      useGardenStore.getState().setDwellTarget(plant.id);
+      useGardenStore.getState().setDwellProgress(0);
+    }
+
+    // Accumulate dwell time
+    this.dwellTimer += deltaTime;
+
+    // Calculate and sync progress (0-1)
+    const progress = Math.min(1, this.dwellTimer / this.config.dwellDuration);
+    useGardenStore.getState().setDwellProgress(progress);
+
+    // Trigger observation when dwell completes
+    if (this.dwellTimer >= this.config.dwellDuration) {
+      this.triggerObservation(plant);
+      this.resetDwellState();
+    }
+  }
+
+  /**
+   * Reset dwell state when cursor moves off plant or observation completes.
+   */
+  private resetDwellState(): void {
+    if (this.dwellTarget !== null || this.dwellTimer > 0) {
+      this.dwellTarget = null;
+      this.dwellTimer = 0;
+      useGardenStore.getState().resetDwell();
     }
   }
 
@@ -340,10 +405,54 @@ export class ObservationSystem {
   }
 
   /**
+   * Enable or disable dwell-time observation mode.
+   * When enabled, cursor must stay on plant for dwellDuration to observe.
+   * When disabled, observation triggers immediately on alignment.
+   */
+  setDwellMode(enabled: boolean): void {
+    this.config.enableDwellMode = enabled;
+    // Reset any active dwell when mode changes
+    this.resetDwellState();
+  }
+
+  /**
+   * Get current dwell mode state.
+   */
+  getDwellMode(): boolean {
+    return this.config.enableDwellMode;
+  }
+
+  /**
+   * Set the dwell duration (time required to observe in dwell mode).
+   * @param duration Time in seconds
+   */
+  setDwellDuration(duration: number): void {
+    this.config.dwellDuration = duration;
+  }
+
+  /**
+   * Get current dwell duration.
+   */
+  getDwellDuration(): number {
+    return this.config.dwellDuration;
+  }
+
+  /**
+   * Get current dwell state (for external progress display).
+   */
+  getDwellState(): { target: string | null; progress: number } {
+    return {
+      target: this.dwellTarget,
+      progress: this.config.dwellDuration > 0 ? this.dwellTimer / this.config.dwellDuration : 0,
+    };
+  }
+
+  /**
    * Clean up resources.
    */
   dispose(): void {
     this.activeRegion = null;
+    this.resetDwellState();
     useGardenStore.getState().setActiveRegion(null);
   }
 }

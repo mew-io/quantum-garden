@@ -471,4 +471,119 @@ describe("GardenEvolutionSystem", () => {
       vi.spyOn(Math, "random").mockRestore();
     });
   });
+
+  describe("cooldown system", () => {
+    it("should apply cooldown penalty to plants near recent germinations", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create two plants close together
+      const plants = [
+        createMockPlant("plant1", 100, 100),
+        createMockPlant("plant2", 150, 100), // 50px away, within 200px cooldown radius
+      ];
+      setMockPlants(plants);
+
+      // Mock random to always pass germination initially
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Clear callbacks
+      callback.mockClear();
+
+      // First check - plant1 should germinate (0.01 < 0.15)
+      await system.triggerCheck();
+      expect(callback).toHaveBeenCalledWith("plant1");
+
+      // Reset for next check
+      callback.mockClear();
+
+      // Now change random to return 0.10 - this would pass base chance (0.15)
+      // but should fail with cooldown: base 0.15 * cooldown 0.3 = 0.045
+      // 0.10 > 0.045, so plant2 should NOT germinate
+      vi.spyOn(Math, "random").mockReturnValue(0.1);
+
+      // Second check - plant2 is near recent germination
+      await system.triggerCheck();
+
+      // plant2 should not have germinated due to cooldown penalty
+      expect(callback).not.toHaveBeenCalled();
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should not apply cooldown to plants far from recent germinations", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create two plants far apart (outside 200px cooldown radius)
+      const plants = [
+        createMockPlant("plant1", 100, 100),
+        createMockPlant("plant2", 500, 500), // ~566px away, outside cooldown radius
+      ];
+      setMockPlants(plants);
+
+      // Mock random to always pass germination
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Clear callbacks
+      callback.mockClear();
+
+      // First check - plant1 germinates
+      await system.triggerCheck();
+      expect(callback).toHaveBeenCalledWith("plant1");
+      callback.mockClear();
+
+      // Second check - plant2 should germinate normally (no cooldown)
+      await system.triggerCheck();
+      expect(callback).toHaveBeenCalledWith("plant2");
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should allow cooldown to expire after COOLDOWN_DURATION", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create two plants close together
+      const plants = [
+        createMockPlant("plant1", 100, 100),
+        createMockPlant("plant2", 150, 100), // 50px away, within cooldown radius
+      ];
+      setMockPlants(plants);
+
+      // Mock random to always pass germination
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      callback.mockClear();
+
+      // First check - plant1 germinates
+      await system.triggerCheck();
+      expect(callback).toHaveBeenCalledWith("plant1");
+      callback.mockClear();
+
+      // Advance time past cooldown duration (2 minutes)
+      vi.advanceTimersByTime(120 * 1000);
+
+      // Now plant2 should be able to germinate (cooldown expired)
+      await system.triggerCheck();
+      expect(callback).toHaveBeenCalledWith("plant2");
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+  });
 });

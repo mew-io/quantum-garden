@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Wave spatial distribution)_
+_Last updated: 2026-01-28 (Per-plant germination cooldown)_
 
 ## Project Status
 
@@ -52,20 +52,20 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Phase 3: Evolution Improvements
 
-| #   | Task                                                        | Priority | File                             |
-| --- | ----------------------------------------------------------- | -------- | -------------------------------- |
-| 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`             |
-| 10  | ~~Add minimum dormant count for wave events~~               | ✅ Done  | `garden-evolution.ts`            |
-| 11  | ~~Improve wave distribution (prefer spatial spread)~~       | ✅ Done  | `garden-evolution.ts`            |
-| 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`            |
-| 13  | Create EvolutionStatusIndicator component                   | P2       | NEW                              |
-| 14  | Update debug panel evolution badge to read from store       | P2       | `debug-panel.tsx`                |
-| 15  | Batch wave notifications                                    | P2       | `use-evolution.ts`               |
-| 16  | Add wave notification style                                 | P3       | `evolution-notifications.tsx`    |
-| 17  | ~~Show "Evolution Paused" during time-travel~~              | ✅ Done  | `evolution-paused-indicator.tsx` |
-| 18  | Add dormant plant count to debug panel                      | P3       | `debug-panel.tsx`                |
-| 19  | Add last germination time to debug panel                    | P3       | `debug-panel.tsx`                |
-| 20  | ~~Reduce CHECK_INTERVAL from 30s to 15s~~                   | ✅ Done  | `garden-evolution.ts`            |
+| #   | Task                                                            | Priority | File                             |
+| --- | --------------------------------------------------------------- | -------- | -------------------------------- |
+| 9   | ~~Add guaranteed germination after 15 min dormancy~~            | ✅ Done  | `evolution-logic.ts`             |
+| 10  | ~~Add minimum dormant count for wave events~~                   | ✅ Done  | `garden-evolution.ts`            |
+| 11  | ~~Improve wave distribution (prefer spatial spread)~~           | ✅ Done  | `garden-evolution.ts`            |
+| 12  | ~~Add per-plant germination cooldown near recent germinations~~ | ✅ Done  | `garden-evolution.ts`            |
+| 13  | Create EvolutionStatusIndicator component                       | P2       | NEW                              |
+| 14  | Update debug panel evolution badge to read from store           | P2       | `debug-panel.tsx`                |
+| 15  | Batch wave notifications                                        | P2       | `use-evolution.ts`               |
+| 16  | Add wave notification style                                     | P3       | `evolution-notifications.tsx`    |
+| 17  | ~~Show "Evolution Paused" during time-travel~~                  | ✅ Done  | `evolution-paused-indicator.tsx` |
+| 18  | Add dormant plant count to debug panel                          | P3       | `debug-panel.tsx`                |
+| 19  | Add last germination time to debug panel                        | P3       | `debug-panel.tsx`                |
+| 20  | ~~Reduce CHECK_INTERVAL from 30s to 15s~~                       | ✅ Done  | `garden-evolution.ts`            |
 
 ### Phase 4: User Feedback & Discoverability
 
@@ -182,6 +182,26 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Per-Plant Germination Cooldown
+
+- Implemented per-plant germination cooldown system (#12)
+- Added cooldown constants to `EVOLUTION`:
+  - `COOLDOWN_RADIUS: 200` - distance threshold for cooldown effect
+  - `COOLDOWN_DURATION: 120_000` - 2 minute cooldown period
+  - `COOLDOWN_MULTIPLIER: 0.3` - 30% normal germination chance near recent germinations
+- Added `recentGerminations: Map<string, number>` to track germination timestamps
+- Implemented `getCooldownMultiplier()` method:
+  - Automatically cleans up expired cooldowns
+  - Returns 0.3 multiplier for plants within cooldown radius of recent germinations
+  - Returns 1.0 (no penalty) for plants outside cooldown radius
+- Updated `getGerminationProbability()` to apply cooldown multiplier
+- Guaranteed germination (15+ min dormancy) bypasses cooldown - uses early return
+- Added 3 new tests in `garden-evolution.test.ts`:
+  - "should apply cooldown penalty to plants near recent germinations"
+  - "should not apply cooldown to plants far from recent germinations"
+  - "should allow cooldown to expire after COOLDOWN_DURATION"
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Wave Spatial Distribution
 
@@ -483,4 +503,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (172+)
+- All tests passing (178+)

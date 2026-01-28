@@ -59,6 +59,15 @@ const EVOLUTION = {
 
   /** Minimum distance between wave-selected plants (pixels) */
   WAVE_MIN_SPACING: 200, // Prefer plants at least 200px apart in waves
+
+  /** Cooldown radius for recent germinations (pixels) */
+  COOLDOWN_RADIUS: 200, // Plants within 200px of recent germinations have reduced chance
+
+  /** Cooldown duration (milliseconds) */
+  COOLDOWN_DURATION: 120_000, // 2 minutes
+
+  /** Cooldown probability multiplier (0-1) */
+  COOLDOWN_MULTIPLIER: 0.3, // 30% normal chance near recent germinations
 };
 
 type GerminationCallback = (plantId: string) => Promise<void>;
@@ -74,12 +83,14 @@ export class GardenEvolutionSystem {
   private isRunning: boolean;
   private onGerminate: GerminationCallback | null;
   private plantAges: Map<string, number>; // plantId -> timestamp when first seen dormant
+  private recentGerminations: Map<string, number>; // plantId -> timestamp when germinated
 
   constructor() {
     this.intervalId = null;
     this.isRunning = false;
     this.onGerminate = null;
     this.plantAges = new Map();
+    this.recentGerminations = new Map();
   }
 
   /**
@@ -125,6 +136,7 @@ export class GardenEvolutionSystem {
   destroy(): void {
     this.stop();
     this.plantAges.clear();
+    this.recentGerminations.clear();
   }
 
   /**
@@ -196,6 +208,37 @@ export class GardenEvolutionSystem {
         p.germinatedAt && this.getDistance(plantPosition, p.position) <= EVOLUTION.CLUSTERING_RADIUS
     );
     return nearbyGerminated.length >= EVOLUTION.CLUSTERING_THRESHOLD;
+  }
+
+  /**
+   * Get cooldown multiplier for a plant based on recent nearby germinations.
+   * Returns 1.0 if no cooldown applies, or COOLDOWN_MULTIPLIER if near recent germination.
+   */
+  private getCooldownMultiplier(
+    plantPosition: { x: number; y: number },
+    allPlants: Plant[],
+    now: number
+  ): number {
+    // Clean up expired cooldowns
+    for (const [plantId, timestamp] of this.recentGerminations) {
+      if (now - timestamp > EVOLUTION.COOLDOWN_DURATION) {
+        this.recentGerminations.delete(plantId);
+      }
+    }
+
+    // Check if plant is near any recent germinations
+    for (const [plantId, _timestamp] of this.recentGerminations) {
+      const germinatedPlant = allPlants.find((p) => p.id === plantId);
+      if (!germinatedPlant) continue;
+
+      const distance = this.getDistance(plantPosition, germinatedPlant.position);
+      if (distance <= EVOLUTION.COOLDOWN_RADIUS) {
+        // Near a recent germination - apply cooldown
+        return EVOLUTION.COOLDOWN_MULTIPLIER;
+      }
+    }
+
+    return 1.0; // No cooldown
   }
 
   /**
@@ -291,7 +334,7 @@ export class GardenEvolutionSystem {
       return 0;
     }
 
-    // Guaranteed germination returns 100%
+    // Guaranteed germination returns 100% (bypasses cooldown)
     if (guaranteed) {
       return 1.0;
     }
@@ -306,6 +349,10 @@ export class GardenEvolutionSystem {
     // Age weighting: older plants gradually increase chance
     const ageMultiplier = this.getAgeMultiplier(dormantSince, now);
     probability *= ageMultiplier;
+
+    // Cooldown penalty: reduced chance near recent germinations
+    const cooldownMultiplier = this.getCooldownMultiplier(plant.position, allPlants, now);
+    probability *= cooldownMultiplier;
 
     return Math.min(probability, 1.0); // Cap at 100%
   }
@@ -372,7 +419,8 @@ export class GardenEvolutionSystem {
       if (Math.random() < probability) {
         try {
           await this.onGerminate(plant.id);
-          this.plantAges.delete(plant.id); // No longer tracking
+          this.plantAges.delete(plant.id); // No longer tracking dormancy
+          this.recentGerminations.set(plant.id, now); // Track for cooldown
           germinationsThisCheck++;
 
           // Log for debugging

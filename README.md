@@ -29,8 +29,7 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ### In Progress 🔄
 
-- **Observation System**: Implementing region-based observation where the autonomous reticle naturally encounters plants
-- **Quantum Integration**: Activating real IonQ simulator for quantum trait generation (currently using mock traits)
+- **Quantum Integration**: Connecting observation to pre-computed quantum results (jobs submit during plant creation, need observation reveal)
 - **Time-Travel**: Building UI to scrub through garden evolution history
 
 ### Coming Soon 🎯
@@ -43,16 +42,19 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ## ⚠️ Quantum Integration Status
 
-**Real quantum execution is staged but not active.** The architecture supports IonQ hardware, but the garden currently uses pseudorandom trait generation seeded from circuit definitions.
+**Real quantum execution is partially active.** Jobs are submitted to IonQ during plant creation and processed in the background, but observation does not yet reveal the quantum results.
 
-**Planned Approach**:
+**Current State**:
 
-- Quantum circuits will be executed as background jobs during plant creation
-- Observation will reveal pre-computed traits (not trigger real-time computation)
+- ✅ Quantum circuits submitted as background jobs during plant creation
+- ✅ IonQ simulator configured and ready (requires API key)
+- ✅ Job status visible in debug panel
+- 🟡 Observation reveals pre-computed traits (IN PROGRESS - Task 2.2)
 - The UX remains identical whether using quantum hardware or mock generation
-- Real integration will be enabled when IonQ simulator is configured
 
-**Coordination Required**: Changes to the quantum service (`apps/quantum/`) require explicit coordination. The Qiskit circuit code and IonQ client are scaffolded and ready for activation.
+**Next Step**: Connect observation system to check quantum job status and return traits when ready. This completes the quantum integration loop.
+
+**Coordination Required**: Changes to the quantum service (`apps/quantum/`) require explicit coordination. The Qiskit circuit code and IonQ client are fully operational.
 
 ---
 

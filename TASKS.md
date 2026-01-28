@@ -1,12 +1,60 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-27 (Sprint Planning Session)_
+_Last updated: 2026-01-27 (Loop 3 Synthesis)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Implement the user-facing quantum simulation experience with functional garden rendering, autonomous evolution, time-travel, and real IonQ quantum data integration.
+**Current Focus**: Complete the quantum integration loop by connecting observation to pre-computed quantum results, then implement time-travel to showcase the garden's evolution history.
+
+## Strategic Roadmap
+
+### Immediate Next Steps (This Week)
+
+1. **Complete Sprint 2: Real Quantum Data Integration**
+   - ✅ Task 2.1: Pre-compute Quantum Jobs at Plant Creation (DONE)
+   - ✅ Task 2.3: Enable IonQ Simulator Configuration (DONE)
+   - ✅ Task 2.4: Quantum Status in Debug Panel (DONE)
+   - 🟡 **Task 2.2: Observation Reveals Pre-Computed Traits** (NEXT - HIGH PRIORITY)
+     - This completes the quantum integration loop
+     - Unblocks real quantum hardware testing
+     - Critical path to functional demo
+
+2. **Begin Sprint 3: Time-Travel Experience**
+   - Task 3.1: Historical State API
+   - Task 3.2: Time-Travel UI Component
+   - Task 3.3: Integrate Timeline into Garden
+   - Creates compelling demonstration of garden evolution
+   - Showcases the "observer" philosophy
+
+### Medium-Term Goals (Next 2 Weeks)
+
+1. **Manual Testing & Validation**
+   - Test full quantum workflow with IonQ simulator
+   - Validate observation → trait reveal flow
+   - Test time-travel with historical data
+   - Document any edge cases or issues
+
+2. **Sprint 4: Enhanced Garden Evolution**
+   - Lifecycle-based visual behaviors
+   - Smart germination logic
+   - Evolution event notifications
+   - Makes garden feel "alive"
+
+### Long-Term Vision (Next Month)
+
+1. **Sprint 5: Educational & Polish**
+   - Post-observation context panel
+   - Observation feedback enhancements
+   - Performance optimization
+   - Educational quantum circuit explanations
+
+2. **Production Readiness**
+   - Comprehensive testing
+   - Performance profiling
+   - Documentation completion
+   - Gallery installation preparation
 
 ---
 
@@ -23,7 +71,9 @@ Build a slow-evolving generative environment where plants exist in quantum super
 - **✨ Debug region visualization** - Green circle overlay for tuning parameters
 - Entanglement visualization (correlated trait reveals)
 - Database with quantum circuits, observation history, timestamps
-- IonQ async job API scaffolded (but unused)
+- **✨ Quantum job pre-computation** - Jobs submitted during plant creation, stored in database
+- **✨ IonQ integration configured** - Simulator mode ready, execution mode visible in debug panel
+- **✨ Job queue monitoring** - Debug panel shows quantum service status and job statistics
 - 14 plant variants across 6 categories (ground-cover, grass, flower, shrub, tree, ethereal)
 - 64x64 pixel grid patterns with lifecycle animations
 - Vector plant variants with progressive drawing and keyframe support
@@ -31,7 +81,7 @@ Build a slow-evolving generative environment where plants exist in quantum super
 ### Critical Gaps ❌
 
 - **No time-travel** - Database has timestamps but no API or UI to query historical states
-- **Quantum integration dormant** - Using mock traits instead of real IonQ simulator
+- **Observation doesn't reveal quantum results** - Need to check job status and return traits when ready
 - **Limited evolution** - Only auto-germination, no other dynamic behaviors
 
 ---
@@ -136,17 +186,33 @@ class ObservationSystem {
 
 #### Task 2.1: Pre-compute Quantum Jobs at Plant Creation
 
-**Status**: 🔴 Not Started
-**Files**: `apps/web/scripts/seed-garden.ts`, `apps/quantum/src/jobs/worker.py`
+**Status**: ✅ COMPLETED (2026-01-27)
+**Files**: `apps/web/scripts/seed-garden.ts`
 
-**Changes**:
+**Implementation**:
 
-1. Generate circuit via quantum service (existing)
-2. **NEW**: Submit job to IonQ via `POST /jobs/submit`
-   - Pass: `circuitDefinition`, `circuitId`, `seed`, `shots: 100`
-   - Receive: `jobId`, `status: "pending"`
-3. Store `jobId` in `QuantumRecord.ionqJobId`
-4. Plant created with `visualState: "superposed"`, no traits yet
+- **Job Submission Flow**:
+  - Added `submitQuantumJob()` function to submit jobs via `/jobs/submit` endpoint
+  - Modified plant creation to submit quantum jobs after creating each plant
+  - Stores `ionqJobId` in QuantumRecord when job submission succeeds
+  - Changes QuantumRecord status from "pending" to "submitted" when job is queued
+  - Updated entangled plant creation to also submit jobs for shared circuits
+  - Enhanced logging to show job IDs (truncated to 8 chars) or "mock mode" indicator
+
+- **Workflow**:
+  1. Generate quantum circuit definition via `/circuits/generate`
+  2. Create plant and QuantumRecord in database (status: "pending")
+  3. Submit quantum job via `/jobs/submit` (returns job ID)
+  4. Update QuantumRecord with job ID and change status to "submitted"
+
+- **Entanglement Support**:
+  - Uses synthetic plant ID (`entangled-${i}`) for job submission
+  - Shared circuit gets its own job submission
+  - Both entangled plants reference the same QuantumRecord with the job
+
+- **Graceful Degradation**:
+  - If quantum service unavailable, proceeds without job ID (mock mode)
+  - Seed script works in both modes transparently
 
 **Background Worker** (already exists):
 
@@ -157,22 +223,34 @@ class ObservationSystem {
 
 #### Task 2.2: Observation Reveals Pre-Computed Traits
 
-**Status**: 🔴 Not Started
+**Status**: 🟡 HIGH PRIORITY - Next Task
 **File**: `apps/web/src/server/routers/observation.ts`
 
 **Logic**:
 
 1. Check if plant's quantum job has completed:
-   - `QuantumRecord.status === "completed"` → traits ready
-   - `QuantumRecord.status === "pending" | "running"` → not ready
-2. If ready: Return traits immediately, collapse visual state
+   - `QuantumRecord.status === "completed"` → traits ready, return immediately
+   - `QuantumRecord.status === "submitted" | "running"` → not ready, return waiting state
+   - `QuantumRecord.status === "failed"` → fall back to mock traits
+2. If ready: Return traits from QuantumRecord, collapse visual state
 3. If not ready: Return `{ waitingForQuantum: true }`, keep superposed
    - Frontend shows subtle "quantum computation in progress" indicator
+   - Frontend can poll for updates or wait for next observation attempt
 
 **Graceful Degradation**:
 
 - If job fails after retries, fall back to mock traits
 - Log execution mode to `ObservationEvent` metadata
+- Ensure UX is smooth regardless of backend state
+
+**Implementation Steps**:
+
+1. Modify observation router to check QuantumRecord.status
+2. Add logic to return traits if status is "completed"
+3. Add logic to return waiting state if status is "submitted" or "running"
+4. Add fallback to mock traits if status is "failed"
+5. Update frontend to handle waiting state (show indicator)
+6. Test full workflow: seed → wait for job → observe → traits revealed
 
 #### Task 2.3: Enable IonQ Simulator Configuration
 
@@ -397,6 +475,15 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-27 - Pre-compute Quantum Jobs at Plant Creation (Sprint 2, Task 2.1)
+
+- [x] **Job Submission Integration**: Modified seed script to submit quantum jobs via `/jobs/submit` endpoint
+- [x] **Database Updates**: Store job IDs in QuantumRecord and update status to "submitted"
+- [x] **Entanglement Support**: Submit jobs for shared circuits in entangled plant groups
+- [x] **Graceful Degradation**: Seed script works in both quantum-enabled and mock modes
+- [x] **Enhanced Logging**: Show job IDs (truncated) or "mock mode" indicator for visibility
+- [x] **Quality Checks**: TypeScript type-checking and ESLint passing
 
 ### 2026-01-27 - Quantum Status in Debug Panel (Sprint 2, Task 2.4)
 

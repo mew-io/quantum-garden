@@ -34,11 +34,32 @@ const VECTOR_PLANT_CONFIG = {
 };
 
 /**
+ * Cached render state for a plant to detect when geometry needs rebuilding.
+ * Only rebuild when these values change.
+ */
+interface PlantRenderState {
+  /** Current keyframe index */
+  keyframeIndex: number;
+  /** Whether we're in a transition (first 10% of keyframe) */
+  isTransitioning: boolean;
+  /** For transitions: interpolation t value (to 2 decimal places) */
+  transitionT: number;
+  /** Stroke color (for transition color changes) */
+  strokeColor: string;
+  /** Scale value */
+  scale: number;
+  /** Plant position for detecting moves */
+  positionX: number;
+  positionY: number;
+}
+
+/**
  * Renders vector-mode plant variants using Three.js Line primitives.
  */
 export class VectorPlantOverlay {
   private group: THREE.Group;
   private plantMeshes: Map<string, THREE.Group> = new Map();
+  private plantRenderStates: Map<string, PlantRenderState> = new Map();
   private plants: Plant[] = [];
   private variantCache: Map<string, PlantVariant> = new Map();
 
@@ -444,12 +465,120 @@ export class VectorPlantOverlay {
 
   /**
    * Update the overlay each frame.
+   * Only rebuilds geometry for plants whose visual state has changed.
    */
   update(_time: number): void {
-    // Rebuild geometry to update keyframes based on current time
-    // In a production system, you might optimize this to only update
-    // plants that are actively transitioning
-    this.rebuildGeometry();
+    // Incrementally update only plants that need it
+    this.updateChangedPlants();
+  }
+
+  /**
+   * Compute the current render state for a plant.
+   */
+  private computeRenderState(
+    plant: Plant,
+    variant: PlantVariant,
+    keyframe: VectorKeyframe | InterpolatedVectorKeyframe
+  ): PlantRenderState {
+    // Get keyframe index from lifecycle state
+    const plantWithLifecycle: PlantWithLifecycle = {
+      id: plant.id,
+      variantId: plant.variantId,
+      germinatedAt: plant.germinatedAt ?? null,
+      lifecycleModifier: plant.lifecycleModifier ?? 1.0,
+      colorVariationName: plant.colorVariationName ?? null,
+    };
+
+    const tempVariant: PlantVariant = {
+      ...variant,
+      keyframes: variant.vectorKeyframes!.map((vk) => ({
+        name: vk.name,
+        duration: vk.duration,
+        pattern: [],
+        palette: [vk.strokeColor],
+        opacity: vk.strokeOpacity,
+        scale: vk.scale,
+      })),
+    };
+
+    const lifecycleState = computeLifecycleState(plantWithLifecycle, tempVariant);
+    const isTransitioning = isInterpolatedVectorKeyframe(keyframe);
+
+    return {
+      keyframeIndex: lifecycleState.keyframeIndex,
+      isTransitioning,
+      // Round t to 2 decimal places to reduce spurious updates during transitions
+      transitionT: isTransitioning
+        ? Math.round((keyframe as InterpolatedVectorKeyframe).t * 100) / 100
+        : 0,
+      strokeColor: keyframe.strokeColor,
+      scale: keyframe.scale ?? 1.0,
+      positionX: plant.position.x,
+      positionY: plant.position.y,
+    };
+  }
+
+  /**
+   * Check if two render states are equal.
+   */
+  private renderStatesEqual(a: PlantRenderState, b: PlantRenderState): boolean {
+    return (
+      a.keyframeIndex === b.keyframeIndex &&
+      a.isTransitioning === b.isTransitioning &&
+      a.transitionT === b.transitionT &&
+      a.strokeColor === b.strokeColor &&
+      a.scale === b.scale &&
+      a.positionX === b.positionX &&
+      a.positionY === b.positionY
+    );
+  }
+
+  /**
+   * Update only plants whose render state has changed.
+   */
+  private updateChangedPlants(): void {
+    const seenPlantIds = new Set<string>();
+
+    for (const plant of this.plants) {
+      seenPlantIds.add(plant.id);
+
+      const variant = this.getVariant(plant.variantId);
+      if (!variant?.vectorKeyframes?.length) continue;
+
+      const keyframe = this.getCurrentKeyframe(plant, variant);
+      if (!keyframe) continue;
+
+      // Compute current render state
+      const currentState = this.computeRenderState(plant, variant, keyframe);
+      const prevState = this.plantRenderStates.get(plant.id);
+
+      // Get or create mesh group
+      let plantGroup = this.plantMeshes.get(plant.id);
+      const isNewPlant = !plantGroup;
+
+      if (isNewPlant) {
+        plantGroup = new THREE.Group();
+        plantGroup.name = `vector-plant-${plant.id}`;
+        this.group.add(plantGroup);
+        this.plantMeshes.set(plant.id, plantGroup);
+      }
+
+      // Only update if state changed or new plant
+      if (isNewPlant || !prevState || !this.renderStatesEqual(prevState, currentState)) {
+        this.updatePlantGroup(plantGroup!, plant, keyframe);
+        this.plantRenderStates.set(plant.id, currentState);
+      }
+    }
+
+    // Remove plants that are no longer present
+    for (const [plantId, meshGroup] of this.plantMeshes) {
+      if (!seenPlantIds.has(plantId)) {
+        this.group.remove(meshGroup);
+        this.disposeMeshGroup(meshGroup);
+        this.plantMeshes.delete(plantId);
+        this.plantRenderStates.delete(plantId);
+      }
+    }
   }
 
   /**
@@ -467,5 +596,6 @@ export class VectorPlantOverlay {
       this.disposeMeshGroup(meshGroup);
     }
     this.plantMeshes.clear();
+    this.plantRenderStates.clear();
   }
 }

@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Evolution System Fix + Comprehensive Task Cleanup)_
+_Last updated: 2026-01-28 (Vector Plant Performance Fix)_
 
 ## Project Status
 
@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (96 Total)
+## Active Tasks (95 Total)
 
 ### Phase 1: Evolution System Fix - COMPLETED
 
@@ -29,7 +29,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                                        | Priority | File                       |
 | --- | ----------------------------------------------------------- | -------- | -------------------------- |
-| 66  | Fix vector plant geometry rebuilding every frame            | P0       | `vector-plant-overlay.ts`  |
+| 66  | ~~Fix vector plant geometry rebuilding every frame~~        | ✅ Done  | `vector-plant-overlay.ts`  |
 | 67  | Debounce store subscriptions in garden-scene                | P1       | `garden-scene.tsx`         |
 | 68  | Fix empty plants array edge case                            | P1       | `page.tsx`                 |
 | 69  | Add user-facing error notification for observation failures | P1       | `use-observation.ts`       |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Vector Plant Performance Fix
+
+- ✅ Fixed P0 bug: vector plant geometry was rebuilding every frame
+- ✅ Added `PlantRenderState` interface to track visual identity
+- ✅ Implemented state caching in `plantRenderStates` Map
+- ✅ Created `computeRenderState()` and `renderStatesEqual()` methods
+- ✅ Created `updateChangedPlants()` for incremental geometry updates
+- ✅ Geometry now only rebuilds when plant state actually changes
+- ✅ Key insight: plants are static 90% of time (only transition during first 10% of keyframe)
+- ✅ All 128 tests passing
 
 ### 2026-01-28 - Evolution System Fix
 

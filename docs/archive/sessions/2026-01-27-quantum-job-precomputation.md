@@ -1,7 +1,7 @@
 # Session Archive: Quantum Job Pre-computation at Plant Creation
 
 **Date**: 2026-01-27
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 52c1a72
 
 ---
 

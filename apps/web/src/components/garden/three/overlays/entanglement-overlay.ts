@@ -90,6 +90,7 @@ export class EntanglementOverlay {
 
   /**
    * Update entanglement groups from plant data.
+   * Uses shallow comparison to avoid unnecessary geometry rebuilds.
    */
   private updateGroups(plants: Plant[]): void {
     // Group plants by entanglement group ID
@@ -104,12 +105,50 @@ export class EntanglementOverlay {
     }
 
     // Convert to array of groups (only groups with 2+ plants)
-    this.groups = Array.from(groupMap.entries())
+    const newGroups = Array.from(groupMap.entries())
       .filter(([, groupPlants]) => groupPlants.length >= 2)
       .map(([groupId, groupPlants]) => ({ groupId, plants: groupPlants }));
 
-    // Rebuild geometry
+    // Check if groups have actually changed before rebuilding
+    if (this.groupsEqual(this.groups, newGroups)) {
+      return; // No changes, skip rebuild
+    }
+
+    this.groups = newGroups;
+
+    // Rebuild geometry only when groups changed
     this.rebuildGeometry();
+  }
+
+  /**
+   * Shallow compare two entanglement group arrays.
+   * Returns true if they represent the same groups with the same plant positions.
+   */
+  private groupsEqual(a: EntanglementGroup[], b: EntanglementGroup[]): boolean {
+    if (a.length !== b.length) return false;
+
+    for (let i = 0; i < a.length; i++) {
+      const groupA = a[i]!;
+      const groupB = b[i]!;
+
+      // Check group ID
+      if (groupA.groupId !== groupB.groupId) return false;
+
+      // Check plant count
+      if (groupA.plants.length !== groupB.plants.length) return false;
+
+      // Check plant IDs and positions (positions affect line rendering)
+      for (let j = 0; j < groupA.plants.length; j++) {
+        const plantA = groupA.plants[j]!;
+        const plantB = groupB.plants[j]!;
+
+        if (plantA.id !== plantB.id) return false;
+        if (plantA.position.x !== plantB.position.x) return false;
+        if (plantA.position.y !== plantB.position.y) return false;
+      }
+    }
+
+    return true;
   }
 
   /**

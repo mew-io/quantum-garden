@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (hasActiveAnimations overlay optimization)_
+_Last updated: 2026-01-28 (entanglement groups shallow comparison)_
 
 ## Project Status
 
@@ -44,7 +44,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
 | 84  | ~~Use partial buffer updates for dirty instances~~              | ✅ Done  | `plant-instancer.ts`       |
 | 85  | ~~Add `hasActiveAnimations()` check to overlays~~               | ✅ Done  | `overlay-manager.ts`       |
-| 86  | Shallow compare entanglement groups before rebuild              | P2       | `entanglement-overlay.ts`  |
+| 86  | ~~Shallow compare entanglement groups before rebuild~~          | ✅ Done  | `entanglement-overlay.ts`  |
 | 87  | ~~Skip frame-level syncPlants when store just synced~~          | ✅ Done  | `garden-scene.tsx`         |
 | 88  | Profile render loop for 1000 plants                             | P2       | -                          |
 | 89  | Cache previous keyframe meshes in vector overlay                | P2       | `vector-plant-overlay.ts`  |
@@ -182,6 +182,22 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Entanglement Groups Shallow Comparison
+
+- Implemented shallow comparison in `EntanglementOverlay.updateGroups()` to prevent unnecessary geometry rebuilds (#86)
+- **Problem**: `updateGroups()` was called on every store subscription update and always called `rebuildGeometry()` even when groups hadn't changed
+- **Solution**: Added `groupsEqual()` method for shallow comparison before triggering rebuild
+- Comparison checks:
+  - Group count (early return if different)
+  - Group IDs match
+  - Plant count per group matches
+  - Plant IDs and positions match (positions affect line rendering)
+- **Performance Impact**:
+  - Most frames: O(n) comparison where n = total plants in entanglement groups
+  - Rebuild only when: new groups form, plants move, or groups dissolve
+  - Avoids: geometry creation, disposal, GPU buffer allocation
+- All 178 tests pass (60 shared + 118 web)
 
 ### 2026-01-28 - hasActiveAnimations Overlay Optimization
 

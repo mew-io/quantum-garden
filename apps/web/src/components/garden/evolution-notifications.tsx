@@ -11,8 +11,11 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useGardenStore } from "@/stores/garden-store";
+
+/** Auto-dismiss duration in milliseconds */
+const DISMISS_DURATION = 5000;
 
 interface NotificationProps {
   id: string;
@@ -22,16 +25,54 @@ interface NotificationProps {
 
 /**
  * Single toast notification component.
+ * Supports pause-on-hover: timer pauses when user hovers over the notification.
  */
 function Notification({ id, message, onDismiss }: NotificationProps) {
-  useEffect(() => {
-    // Auto-dismiss after 5 seconds (increased from 3s for better readability)
-    const timer = setTimeout(() => {
-      onDismiss(id);
-    }, 5000);
+  const [isPaused, setIsPaused] = useState(false);
+  const remainingTimeRef = useRef(DISMISS_DURATION);
+  const startTimeRef = useRef(Date.now());
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    return () => clearTimeout(timer);
+  // Start or resume the dismiss timer
+  const startTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    startTimeRef.current = Date.now();
+    timerRef.current = setTimeout(() => {
+      onDismiss(id);
+    }, remainingTimeRef.current);
   }, [id, onDismiss]);
+
+  // Pause the timer and save remaining time
+  const pauseTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+      // Calculate remaining time
+      const elapsed = Date.now() - startTimeRef.current;
+      remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
+    }
+  }, []);
+
+  // Start timer on mount
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [startTimer]);
+
+  // Handle pause/resume based on hover state
+  useEffect(() => {
+    if (isPaused) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  }, [isPaused, pauseTimer, startTimer]);
 
   return (
     <div
@@ -45,6 +86,8 @@ function Notification({ id, message, onDismiss }: NotificationProps) {
         cursor-pointer transition-colors
       "
       onClick={() => onDismiss(id)}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       role="status"
       aria-live="polite"
     >

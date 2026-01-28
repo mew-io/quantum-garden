@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Time-Travel Edge Cases Fix)_
+_Last updated: 2026-01-28 (Pause-on-Hover Notifications)_
 
 ## Project Status
 
@@ -77,7 +77,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 49  | ~~Position cooldown indicator near corner~~       | ✅ Done  | `page.tsx`                      |
 | 50  | ~~Increase notification duration to 5-6s~~        | ✅ Done  | `evolution-notifications.tsx`   |
 | 51  | ~~Increase context panel duration to 30s~~        | ✅ Done  | `observation-context-panel.tsx` |
-| 52  | Add pause-on-hover for notifications              | P2       | `evolution-notifications.tsx`   |
+| 52  | ~~Add pause-on-hover for notifications~~          | ✅ Done  | `evolution-notifications.tsx`   |
 | 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
 | 54  | ~~Increase event marker touch targets to 20px~~   | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 55  | ~~Add event marker tooltips~~                     | ✅ Done  | `time-travel-scrubber.tsx`      |
@@ -182,6 +182,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Pause-on-Hover Notifications
+
+- Implemented pause-on-hover functionality in `evolution-notifications.tsx` (#52)
+- Timer pauses when user hovers over notification, resumes with remaining time on leave
+- Used `useRef` for timer state to avoid re-renders (`remainingTimeRef`, `startTimeRef`, `timerRef`)
+- Extracted `DISMISS_DURATION` constant (5000ms)
+- Added `onMouseEnter`/`onMouseLeave` handlers to notification component
+- All 172 tests passing
 
 ### 2026-01-28 - Time-Travel Edge Cases Fix
 

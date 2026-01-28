@@ -93,6 +93,9 @@ export class PlantInstancer {
   private dirtyInstances: Set<number> = new Set();
   private forceFullSync: boolean = true; // First sync must be full
 
+  // Category cache - variant ID -> category string (avoids repeated string matching)
+  private categoryCache: Map<string, string> = new Map();
+
   // Transition timing
   private static COLLAPSE_DURATION = 1.5; // seconds
 
@@ -445,18 +448,36 @@ export class PlantInstancer {
 
   /**
    * Get plant category from variant for z-ordering.
+   * Results are cached per variant ID to avoid repeated string matching.
    */
   private getPlantCategory(variant: PlantVariant): string {
+    // Check cache first
+    const cached = this.categoryCache.get(variant.id);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     // Extract category from variant ID or name
     // Format: "category-name" or infer from keywords
     const id = variant.id.toLowerCase();
-    if (id.includes("moss") || id.includes("lichen") || id.includes("ground"))
-      return "ground-cover";
-    if (id.includes("grass") || id.includes("fern")) return "grass";
-    if (id.includes("tree") || id.includes("oak") || id.includes("pine")) return "tree";
-    if (id.includes("shrub") || id.includes("bush")) return "shrub";
-    if (id.includes("ethereal") || id.includes("spirit") || id.includes("wisp")) return "ethereal";
-    return "flower"; // default
+    let category: string;
+    if (id.includes("moss") || id.includes("lichen") || id.includes("ground")) {
+      category = "ground-cover";
+    } else if (id.includes("grass") || id.includes("fern")) {
+      category = "grass";
+    } else if (id.includes("tree") || id.includes("oak") || id.includes("pine")) {
+      category = "tree";
+    } else if (id.includes("shrub") || id.includes("bush")) {
+      category = "shrub";
+    } else if (id.includes("ethereal") || id.includes("spirit") || id.includes("wisp")) {
+      category = "ethereal";
+    } else {
+      category = "flower"; // default
+    }
+
+    // Cache the result
+    this.categoryCache.set(variant.id, category);
+    return category;
   }
 
   /**
@@ -589,5 +610,6 @@ export class PlantInstancer {
     this.material.dispose();
     this.plantIndexMap.clear();
     this.animationStates.clear();
+    this.categoryCache.clear();
   }
 }

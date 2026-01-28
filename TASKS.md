@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Circular buffer for debug logs)_
+_Last updated: 2026-01-28 (Z-layer category caching optimization)_
 
 ## Project Status
 
@@ -38,7 +38,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
 | 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
-| 80  | Investigate z-layer sorting overhead                            | P2       | `plant-instancer.ts`       |
+| 80  | ~~Investigate z-layer sorting overhead~~                        | ✅ Done  | `plant-instancer.ts`       |
 | 81  | ~~Deduplicate polling across components~~                       | ✅ Done  | `use-plants.ts`            |
 | 82  | ~~Implement material pooling for vector primitives~~            | Done     | `vector-plant-overlay.ts`  |
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Z-Layer Category Caching Optimization
+
+- Investigated z-layer sorting overhead (#80)
+- **Finding**: No runtime sorting overhead - Z positions computed per-plant, GPU handles depth ordering
+- **Optimization identified**: `getPlantCategory()` did string matching on every plant update
+- Added `categoryCache: Map<string, string>` to cache variant ID -> category mappings
+- First lookup per variant does string matching, all subsequent lookups are O(1) Map access
+- Cache cleared on `dispose()` to prevent memory leaks
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Circular Buffer for Debug Logs
 

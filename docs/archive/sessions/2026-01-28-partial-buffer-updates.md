@@ -1,7 +1,7 @@
 # Session Archive: Partial Buffer Updates for Plant Instancer
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 583cf29
 
 ---
 

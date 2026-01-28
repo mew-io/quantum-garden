@@ -98,6 +98,9 @@ export function GardenScene() {
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
   observationCallbackRef.current = triggerObservation;
 
+  // Track if store subscription already synced this frame to avoid redundant work
+  const storeSyncedThisFrameRef = useRef(false);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -207,6 +210,8 @@ export function GardenScene() {
         plantInstancer.syncPlants(convertToRenderable(state.plants));
         overlayManager.setPlants(state.plants);
         observationSystem.updatePlants(state.plants);
+        // Mark that we synced this frame to avoid redundant sync in updateCallback
+        storeSyncedThisFrameRef.current = true;
       }
       // Update debug overlay when active region changes
       if (state.activeRegion !== prevState.activeRegion) {
@@ -227,11 +232,16 @@ export function GardenScene() {
 
       // Re-sync to update transition animations
       // This is needed because transitions are time-based, not state-based
+      // Skip if store subscription already synced this frame to avoid redundant work
       const currentPlants = useGardenStore.getState().plants;
-      plantInstancer.syncPlants(convertToRenderable(currentPlants));
+      if (!storeSyncedThisFrameRef.current) {
+        plantInstancer.syncPlants(convertToRenderable(currentPlants));
+        overlayManager.setPlants(currentPlants);
+      }
+      // Reset the flag for next frame
+      storeSyncedThisFrameRef.current = false;
 
-      // Update overlays (vector plants need plants for lifecycle updates)
-      overlayManager.setPlants(currentPlants);
+      // Update overlays (time-based animations still need updating even after sync)
       overlayManager.update(time, deltaTime);
 
       // Update observation system (region-based observation)

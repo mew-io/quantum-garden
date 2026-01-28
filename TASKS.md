@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Vector Plant Performance Fix)_
+_Last updated: 2026-01-28 (Store Subscription Optimization)_
 
 ## Project Status
 
@@ -30,7 +30,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | #   | Task                                                        | Priority | File                       |
 | --- | ----------------------------------------------------------- | -------- | -------------------------- |
 | 66  | ~~Fix vector plant geometry rebuilding every frame~~        | ✅ Done  | `vector-plant-overlay.ts`  |
-| 67  | Debounce store subscriptions in garden-scene                | P1       | `garden-scene.tsx`         |
+| 67  | ~~Debounce store subscriptions in garden-scene~~            | ✅ Done  | `garden-scene.tsx`         |
 | 68  | Fix empty plants array edge case                            | P1       | `page.tsx`                 |
 | 69  | Add user-facing error notification for observation failures | P1       | `use-observation.ts`       |
 | 70  | Fix time-travel edge cases (zero duration, stale now)       | P2       | `time-travel-scrubber.tsx` |
@@ -45,7 +45,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 84  | Use partial buffer updates for dirty instances              | P2       | `plant-instancer.ts`       |
 | 85  | Add `hasActiveAnimations()` check to overlays               | P2       | `overlay-manager.ts`       |
 | 86  | Shallow compare entanglement groups before rebuild          | P2       | `entanglement-overlay.ts`  |
-| 87  | Skip frame-level syncPlants when store just synced          | P1       | `garden-scene.tsx`         |
+| 87  | ~~Skip frame-level syncPlants when store just synced~~      | ✅ Done  | `garden-scene.tsx`         |
 | 88  | Profile render loop for 1000 plants                         | P2       | -                          |
 | 89  | Cache previous keyframe meshes in vector overlay            | P2       | `vector-plant-overlay.ts`  |
 | 90  | Add performance monitoring to debug panel                   | P3       | `debug-panel.tsx`          |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Store Subscription Optimization
+
+- ✅ Fixed redundant plant sync operations in garden-scene.tsx (#67 + #87)
+- ✅ Added `storeSyncedThisFrameRef` to track if store subscription already synced
+- ✅ Store subscription sets flag to `true` after syncing
+- ✅ Frame callback skips `syncPlants` and `setPlants` if flag is `true`
+- ✅ Flag resets at end of frame callback for next frame
+- ✅ Frame callback still updates time-based animations (`overlayManager.update`)
+- ✅ All 128 tests passing
 
 ### 2026-01-28 - Vector Plant Performance Fix
 

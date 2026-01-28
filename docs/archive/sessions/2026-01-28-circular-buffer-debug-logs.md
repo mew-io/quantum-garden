@@ -1,7 +1,7 @@
 # Session Archive: Circular Buffer for Debug Logs
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: b3272f2
 
 ---
 

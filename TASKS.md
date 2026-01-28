@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Event Marker Tooltips)_
+_Last updated: 2026-01-28 (Exit Timeline Button Rename)_
 
 ## Project Status
 
@@ -107,7 +107,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | #   | Task                                                | Priority | File                            |
 | --- | --------------------------------------------------- | -------- | ------------------------------- |
 | 91  | Standardize auto-dismiss timers in constants        | P2       | `constants.ts`                  |
-| 92  | Rename "Return to Live" to "Exit Timeline"          | P2       | `time-travel-scrubber.tsx`      |
+| 92  | ~~Rename "Return to Live" to "Exit Timeline"~~      | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
 | 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
 | 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
@@ -182,6 +182,13 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Exit Timeline Button Rename
+
+- Renamed "Return to Live" button to "Exit Timeline" in time-travel scrubber (#92)
+- Updated comment to match new button text
+- Simple UX improvement: "Exit Timeline" more clearly describes leaving historical view
+- All 136 tests passing
 
 ### 2026-01-28 - Event Marker Tooltips
 

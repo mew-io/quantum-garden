@@ -248,7 +248,7 @@ export function TimeTravelScrubber({
                   {isPlaying ? "Pause" : "Play"} (10x)
                 </button>
 
-                {/* Return to Live */}
+                {/* Exit Timeline */}
                 <button
                   onClick={() => {
                     setIsPlaying(false);
@@ -256,7 +256,7 @@ export function TimeTravelScrubber({
                   }}
                   className="px-3 py-1.5 bg-emerald-600/80 text-white rounded text-sm hover:bg-emerald-600 transition-colors"
                 >
-                  Return to Live
+                  Exit Timeline
                 </button>
 
                 {/* Collapse */}

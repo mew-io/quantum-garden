@@ -1,7 +1,7 @@
 # Session Archive: Safe Area Padding for iOS Notched Devices
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (to be filled after commit)
+**Synthesis Commit**: ee84e5d
 
 ---
 

@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Keyboard Shortcut Hints)_
+_Last updated: 2026-01-28 (Event Marker Tooltips)_
 
 ## Project Status
 
@@ -80,7 +80,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 52  | Add pause-on-hover for notifications              | P2       | `evolution-notifications.tsx`   |
 | 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
 | 54  | ~~Increase event marker touch targets to 20px~~   | ✅ Done  | `time-travel-scrubber.tsx`      |
-| 55  | Add event marker tooltips                         | P2       | `time-travel-scrubber.tsx`      |
+| 55  | ~~Add event marker tooltips~~                     | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
 | 57  | ~~Add keyboard shortcut hints to info overlay~~   | ✅ Done  | `info-overlay.tsx`              |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Event Marker Tooltips
+
+- Added styled tooltips for time-travel event markers (#55)
+- Replaced browser `title` attribute with custom tooltip component
+- Tooltip shows colored dot indicator matching event type (green/blue)
+- Displays event type name (Germination/Observation) and formatted timestamp
+- Positioned above timeline track, centered on hovered marker
+- Uses `pointer-events-none` to avoid interfering with timeline scrubbing
+- Dark background with rounded corners matches garden aesthetic
+- All 136 tests passing
 
 ### 2026-01-28 - Keyboard Shortcut Hints
 

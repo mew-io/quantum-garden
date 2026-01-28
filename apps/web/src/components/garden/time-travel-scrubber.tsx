@@ -41,6 +41,10 @@ export function TimeTravelScrubber({
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed] = useState(10); // 10x speed
+  const [hoveredEvent, setHoveredEvent] = useState<{
+    event: EvolutionEvent;
+    x: number;
+  } | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
@@ -172,6 +176,7 @@ export function TimeTravelScrubber({
     return events.map((event: EvolutionEvent, index: number) => {
       const progress = (event.timestamp.getTime() - timeRange.start) / timeRange.duration;
       const left = `${progress * 100}%`;
+      const leftPercent = progress * 100;
 
       const isGermination = event.type === "germination";
       const color = isGermination ? "rgb(34, 197, 94)" : "rgb(59, 130, 246)"; // green-500 or blue-500
@@ -182,7 +187,8 @@ export function TimeTravelScrubber({
           key={`${event.type}-${event.plantId}-${index}`}
           className="absolute top-0 bottom-0 flex items-start justify-center cursor-pointer group"
           style={{ left, width: "20px", marginLeft: "-10px" }}
-          title={`${isGermination ? "Germination" : "Observation"} - ${event.timestamp.toLocaleString()}`}
+          onMouseEnter={() => setHoveredEvent({ event, x: leftPercent })}
+          onMouseLeave={() => setHoveredEvent(null)}
         >
           {/* Visual marker line - 2px wide */}
           <div
@@ -291,6 +297,35 @@ export function TimeTravelScrubber({
                   className="absolute top-0 left-0 bottom-0 bg-white/10"
                   style={{ width: `${playheadProgress * 100}%` }}
                 />
+
+                {/* Event Tooltip */}
+                {hoveredEvent && (
+                  <div
+                    className="absolute bottom-full mb-2 px-3 py-2 bg-gray-900/95 rounded-lg shadow-lg border border-white/10 text-xs whitespace-nowrap pointer-events-none z-20"
+                    style={{
+                      left: `${hoveredEvent.x}%`,
+                      transform: "translateX(-50%)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            hoveredEvent.event.type === "germination"
+                              ? "rgb(34, 197, 94)"
+                              : "rgb(59, 130, 246)",
+                        }}
+                      />
+                      <span className="text-white/90 font-medium">
+                        {hoveredEvent.event.type === "germination" ? "Germination" : "Observation"}
+                      </span>
+                    </div>
+                    <div className="text-white/60 mt-1">
+                      {hoveredEvent.event.timestamp.toLocaleString()}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Timeline Labels */}

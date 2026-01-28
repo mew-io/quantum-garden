@@ -321,3 +321,6 @@ export interface JobStatsResponse {
   total: number;
   executionMode: "mock" | "simulator" | "hardware";
 }
+
+// Re-export quantum pool types
+export * from "./types/quantum-pool";

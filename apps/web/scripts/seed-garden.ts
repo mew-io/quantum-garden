@@ -162,47 +162,6 @@ async function generateQuantumCircuit(
 }
 
 /**
- * Submit a quantum job for a plant.
- * Jobs are processed asynchronously by the background worker.
- * Returns the job ID for tracking.
- */
-async function submitQuantumJob(
-  plantId: string,
-  circuitId: string,
-  seed: number
-): Promise<string | null> {
-  const isAvailable = await checkQuantumService();
-
-  if (!isAvailable) {
-    return null;
-  }
-
-  try {
-    const response = await fetch(`${QUANTUM_SERVICE_URL}/jobs/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        plant_id: plantId,
-        circuit_id: circuitId,
-        seed,
-        shots: 100,
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.job_id;
-  } catch (error) {
-    console.warn(`  Warning: Job submission failed for plant ${plantId}`);
-    return null;
-  }
-}
-
-/**
  * Get circuit ID based on variant rarity (fallback mapping).
  */
 function getCircuitIdForRarity(rarity: number): string {
@@ -264,8 +223,8 @@ async function main() {
     // Random lifecycle modifier (0.8 - 1.2 speed variation)
     const lifecycleModifier = 0.8 + Math.random() * 0.4;
 
-    // Create plant first (so we have a plantId for job submission)
-    const plant = await db.plant.create({
+    // Create plant with quantum circuit
+    await db.plant.create({
       data: {
         positionX: position.x,
         positionY: position.y,
@@ -285,31 +244,11 @@ async function main() {
           },
         },
       },
-      include: {
-        quantumCircuit: true,
-      },
     });
 
-    // Submit quantum job for background processing
-    const jobId = await submitQuantumJob(plant.id, circuitId, seed);
-
-    // Update quantum record with job ID if submission was successful
-    if (jobId && plant.quantumCircuit) {
-      await db.quantumRecord.update({
-        where: { id: plant.quantumCircuit.id },
-        data: {
-          ionqJobId: jobId,
-          status: "submitted",
-        },
-      });
-      console.log(
-        `  Created plant ${i + 1}/${NUM_PLANTS}: ${variant.name} (${circuitId}) at (${position.x.toFixed(0)}, ${position.y.toFixed(0)})${germinatedAt ? " [germinated]" : " [dormant]"} [job: ${jobId.substring(0, 8)}...]`
-      );
-    } else {
-      console.log(
-        `  Created plant ${i + 1}/${NUM_PLANTS}: ${variant.name} (${circuitId}) at (${position.x.toFixed(0)}, ${position.y.toFixed(0)})${germinatedAt ? " [germinated]" : " [dormant]"} [mock mode]`
-      );
-    }
+    console.log(
+      `  Created plant ${i + 1}/${NUM_PLANTS}: ${variant.name} (${circuitId}) at (${position.x.toFixed(0)}, ${position.y.toFixed(0)})${germinatedAt ? " [germinated]" : " [dormant]"}`
+    );
   }
 
   // Create entanglement groups by linking random pairs of plants
@@ -343,26 +282,6 @@ async function main() {
       },
     });
 
-    // Submit job for the entangled pair's shared circuit
-    // Use a synthetic plant ID for entanglement groups
-    const entanglementGroupPlantId = `entangled-${i}`;
-    const entangledJobId = await submitQuantumJob(
-      entanglementGroupPlantId,
-      "bell_pair",
-      entangledSeed
-    );
-
-    // Update shared circuit with job ID
-    if (entangledJobId) {
-      await db.quantumRecord.update({
-        where: { id: sharedCircuit.id },
-        data: {
-          ionqJobId: entangledJobId,
-          status: "submitted",
-        },
-      });
-    }
-
     // Create entanglement group linking both plants
     const group = await db.entanglementGroup.create({
       data: {
@@ -381,9 +300,7 @@ async function main() {
       data: { entanglementGroupId: group.id },
     });
 
-    console.log(
-      `  Created entanglement group ${i + 1}: ${plant1.variantId} ↔ ${plant2.variantId}${entangledJobId ? ` [job: ${entangledJobId.substring(0, 8)}...]` : " [mock mode]"}`
-    );
+    console.log(`  Created entanglement group ${i + 1}: ${plant1.variantId} ↔ ${plant2.variantId}`);
   }
 
   console.log("\nGarden seeded successfully!");

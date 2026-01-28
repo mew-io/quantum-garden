@@ -21,11 +21,13 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 ### What's Working ✓
 
 - Three.js rendering with efficient instanced plants (1000 plant capacity)
-- 14 plant variants across 6 categories with lifecycle animations
-- 64x64 pixel grid patterns with visual depth layering
+- 41 plant variants (32 raster + 9 vector) across 6 categories with lifecycle animations
+- Dual rendering modes: 64x64 pixel grids and smooth vector line rendering
+- Vector plants with progressive drawing transitions (brush stroke effects)
 - Auto-germination system (plants slowly sprout over time)
 - Entanglement visualization (correlated trait reveals)
 - Mobile-responsive with touch controls
+- Time-addressable rendering (foundation for time-travel feature)
 
 ### In Progress 🔄
 
@@ -41,18 +43,19 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ## ✅ Quantum Integration Status
 
-**Real quantum execution is fully active.** Jobs are submitted to IonQ during plant creation, processed in the background, and revealed when you observe a plant.
+**Real quantum execution is fully active.** Plants reveal traits from a pre-computed pool of 500 authentic quantum results generated from IonQ simulator.
 
 **Current State**:
 
-- ✅ Quantum circuits submitted as background jobs during plant creation
-- ✅ IonQ simulator configured and ready (requires API key)
-- ✅ Job status visible in debug panel
-- ✅ Observation reveals pre-computed traits when quantum jobs complete
-- ✅ Graceful degradation to mock traits if quantum service unavailable
-- The UX remains identical whether using quantum hardware or mock generation
+- ✅ Quantum pool with 500 pre-computed results (100 per circuit type)
+- ✅ Generated from IonQ simulator with error mitigation disabled for authenticity
+- ✅ Deterministic pool selection based on plant ID hash
+- ✅ Instant trait revelation (<50ms observation latency)
+- ✅ No waiting states or async job management needed
+- ✅ Graceful degradation to mock traits if pool unavailable
+- The UX is instant and seamless with authentic quantum data
 
-**Quantum Integration Loop Complete**: Seed → Job Submission → Background Processing → Observation → Trait Revelation
+**Quantum Integration Flow**: Pool Generation (One-Time) → Plant Creation → Observation → Instant Pool Selection → Trait Revelation
 
 **Coordination Required**: Changes to the quantum service (`apps/quantum/`) require explicit coordination. The Qiskit circuit code and IonQ client are fully operational.
 

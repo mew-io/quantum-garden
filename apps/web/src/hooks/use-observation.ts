@@ -23,28 +23,16 @@ export function useObservation() {
 
   const recordObservationMutation = trpc.observation.recordObservation.useMutation({
     onSuccess: (result) => {
-      // Check if we're waiting for quantum computation
-      const waitingForQuantum = "waitingForQuantum" in result && result.waitingForQuantum;
-
       // Update plant in local store to reflect observed state
       // Cast through unknown because Prisma JSON type is very broad
       updatePlant(result.id, {
         observed: true,
         observedAt: result.observedAt ?? undefined,
-        // If waiting for quantum, keep in superposed state until traits arrive
-        visualState: waitingForQuantum ? "superposed" : "collapsed",
+        visualState: "collapsed",
         traits: result.traits as unknown as ReturnType<
           typeof useGardenStore.getState
         >["plants"][number]["traits"],
       });
-
-      // If waiting for quantum computation, show a notification
-      if (waitingForQuantum) {
-        console.log(
-          `[Quantum] Observation recorded for plant ${result.id}, waiting for quantum computation...`
-        );
-        // TODO: Show toast notification "Quantum computation in progress..."
-      }
 
       // If entangled partners were updated, refetch plants to get their new state
       if (result.entangledPartnersUpdated) {

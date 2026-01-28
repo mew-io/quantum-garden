@@ -16,6 +16,7 @@ import type {
   ListCircuitsResponse,
   MeasureCircuitRequest,
   MeasureCircuitResponse,
+  QuantumPool,
   SubmitJobRequest,
   SubmitJobResponse,
 } from "@quantum-garden/shared";
@@ -369,6 +370,35 @@ export async function getJobStats(): Promise<JobStatsResponse> {
 
   if (!response.ok) {
     throw new Error(`Failed to get job stats: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+// =============================================================================
+// Quantum Result Pool API
+// =============================================================================
+
+/**
+ * Get the pre-computed quantum result pool.
+ *
+ * The pool contains pre-computed quantum measurement results for all circuit types.
+ * Results are selected deterministically based on plant ID for instant trait revelation.
+ *
+ * @returns The complete quantum pool with all results
+ */
+export async function getQuantumPool(): Promise<QuantumPool> {
+  const url = `${getQuantumServiceUrl()}/circuits/pool`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get quantum pool: ${response.statusText}`);
   }
 
   return response.json();

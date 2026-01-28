@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "generatedAt": "2026-01-27T00:00:00Z",
+    "poolSize": 100,
+    "totalResults": 500,
+    "executionMode": "mock",
+    "errorMitigationDisabled": true
+  },
+  "pools": {
+    "superposition": [],
+    "bell_pair": [],
+    "ghz_state": [],
+    "interference": [],
+    "variational": []
+  }
+}

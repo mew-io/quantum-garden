@@ -55,6 +55,7 @@ async def submit_circuit(
     circuit_definition: str | QuantumCircuit,
     shots: int = 100,
     use_simulator: bool = True,
+    error_mitigation: dict[str, bool] | None = None,
 ) -> str:
     """
     Submit a quantum circuit to IonQ.
@@ -63,6 +64,8 @@ async def submit_circuit(
         circuit_definition: Circuit as base64 string or QuantumCircuit object
         shots: Number of measurement shots
         use_simulator: If True, use IonQ simulator; otherwise use hardware
+        error_mitigation: Error mitigation settings
+            (default: {"debias": False} - disabled)
 
     Returns:
         Job ID for tracking the execution
@@ -78,12 +81,16 @@ async def submit_circuit(
     backend_name = "ionq_simulator" if use_simulator else "ionq_qpu"
     backend = provider.get_backend(backend_name)
 
+    # Disable error mitigation by default for authentic quantum results
+    if error_mitigation is None:
+        error_mitigation = {"debias": False}
+
     # Submit job
     # Run in executor to avoid blocking the event loop
     loop = asyncio.get_event_loop()
     job = await loop.run_in_executor(
         None,
-        lambda: backend.run(circuit, shots=shots),
+        lambda: backend.run(circuit, shots=shots, error_mitigation=error_mitigation),
     )
 
     return str(job.job_id())

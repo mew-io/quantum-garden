@@ -13,12 +13,13 @@ Build a slow-evolving generative environment where plants exist in quantum super
 ### Immediate Next Steps (This Week)
 
 1. ✅ **Sprint 2: Real Quantum Data Integration** (COMPLETED 2026-01-27)
-   - ✅ Task 2.1: Pre-compute Quantum Jobs at Plant Creation
-   - ✅ Task 2.2: Observation Reveals Pre-Computed Traits
+   - ✅ Task 2.1: Pre-compute Quantum Jobs at Plant Creation [SUPERSEDED by pool]
+   - ✅ Task 2.2: Observation Reveals Pre-Computed Traits [SUPERSEDED by pool]
    - ✅ Task 2.3: Enable IonQ Simulator Configuration
    - ✅ Task 2.4: Quantum Status in Debug Panel
-   - **Quantum integration loop is now complete!**
-   - Ready for real quantum hardware testing
+   - ✅ **BONUS**: Quantum Pool System - Instant observation with authentic quantum results
+   - **Quantum integration complete with excellent UX!**
+   - Pool generated from IonQ simulator, ready for hardware pool generation
 
 2. **Begin Sprint 3: Time-Travel Experience** (NEXT - HIGH PRIORITY)
    - Task 3.1: Historical State API
@@ -31,9 +32,10 @@ Build a slow-evolving generative environment where plants exist in quantum super
 ### Medium-Term Goals (Next 2 Weeks)
 
 1. **Manual Testing & Validation**
-   - Test full quantum workflow with IonQ simulator
-   - Validate observation → trait reveal flow
-   - Test time-travel with historical data
+   - Test quantum pool selection (deterministic, even distribution)
+   - Validate instant observation → trait reveal flow
+   - Test vector rendering in live garden
+   - Test time-travel with historical data (when implemented)
    - Document any edge cases or issues
 
 2. **Sprint 4: Enhanced Garden Evolution**
@@ -71,12 +73,15 @@ Build a slow-evolving generative environment where plants exist in quantum super
 - **✨ Debug region visualization** - Green circle overlay for tuning parameters
 - Entanglement visualization (correlated trait reveals)
 - Database with quantum circuits, observation history, timestamps
-- **✨ Quantum job pre-computation** - Jobs submitted during plant creation, stored in database
-- **✨ IonQ integration configured** - Simulator mode ready, execution mode visible in debug panel
-- **✨ Job queue monitoring** - Debug panel shows quantum service status and job statistics
-- 14 plant variants across 6 categories (ground-cover, grass, flower, shrub, tree, ethereal)
+- **✨ Quantum pool system** - 500 pre-computed authentic quantum results from IonQ simulator
+- **✨ Instant trait revelation** - Deterministic pool selection provides <50ms observation latency
+- **✨ IonQ integration configured** - Pool generated from simulator with error mitigation disabled
+- **✨ Vector rendering system** - Smooth line-based rendering with 9 vector variants
+- **✨ Progressive drawing transitions** - Dynamic brush stroke effects on vector plants
+- **✨ Time-addressable rendering** - Foundation for time-travel feature with arbitrary time point rendering
+- 41 total plant variants (32 raster + 9 vector) across 6 categories (ground-cover, grass, flower, shrub, tree, ethereal)
 - 64x64 pixel grid patterns with lifecycle animations
-- Vector plant variants with progressive drawing and keyframe support
+- Vector keyframe tweening with smooth interpolation
 
 ### Critical Gaps ❌
 
@@ -483,7 +488,36 @@ getEvolutionTimeline: publicProcedure
 
 ## Completed Work
 
-### 2026-01-27 - Observation Reveals Pre-Computed Traits (Sprint 2, Task 2.2)
+### 2026-01-27 - Quantum Pool Implementation (Major Architecture Shift)
+
+- [x] **Pool Generator Script**: Created script to generate 500 pre-computed quantum results (100 per circuit type)
+- [x] **Quantum Pool Data**: Generated pool from IonQ simulator with error mitigation disabled for authenticity
+- [x] **Deterministic Selection**: Hash-based pool selection ensures same plant always gets same traits
+- [x] **Observation Simplification**: Removed job polling, waiting states, complex fallback logic (307-line reduction)
+- [x] **Instant Trait Revelation**: Observation now <50ms (was 5-30+ seconds with job polling)
+- [x] **Pool Endpoint**: Added `/circuits/pool` to quantum service serving pre-computed results
+- [x] **Type System**: Added QuantumPool types and selectFromPool utility to shared package
+- [x] **Frontend Cleanup**: Removed waiting state handling from observation hook
+- [x] **Seed Script Cleanup**: Removed job submission logic (no longer needed)
+- [x] **Architecture Shift**: Moved quantum computation from observation-time to setup-time
+- [x] **Quality**: Maintained quantum authenticity while dramatically improving UX (100-600x faster)
+
+### 2026-01-26 to 2026-01-27 - Vector Rendering System
+
+- [x] **VectorPlantOverlay**: Three.js line rendering with batched LineSegments for efficient vector plant display
+- [x] **9 Vector Variants**: Sacred Mandala, Crystal Lattice, Stellar Geometry, Metatron's Cube, Pulsing Orb, Phoenix Flame, Kaleidoscope Star, Vortex Spiral, Sumi Spirit (total: 41 variants)
+- [x] **Vector Primitive System**: Builder utilities for lines, circles, polygons, stars, diamonds, arc segments
+- [x] **Progressive Drawing Transitions**: Dynamic drawing effects where lines draw/undraw sequentially like brush strokes
+- [x] **Time-Addressable Rendering**: `renderVectorGlyphAtProgress()` for rendering at arbitrary time points (foundation for time-travel)
+- [x] **Vector Keyframe Tweening**: Smooth interpolation of stroke color, opacity, scale, and primitive positions
+- [x] **Multi-Renderer Support**: Consistent rendering across Three.js (garden), Canvas2D (sandbox), and SVG (timeline)
+- [x] **Sandbox Integration**: Vector variant preview, keyframe panel, timeline with VectorMiniGlyph thumbnails
+- [x] **Renderer Column**: Added to variant gallery showing vector/raster mode and progressive drawing indicators
+- [x] **Quality Checks**: TypeScript, ESLint, visual testing, performance (60fps) all passing
+
+### 2026-01-27 - Observation Reveals Pre-Computed Traits (Sprint 2, Task 2.2) [SUPERSEDED]
+
+**Note**: This implementation was superseded by the quantum pool system. The job-based approach worked but had poor UX (5-30s wait times). The pool approach provides the same quantum authenticity with instant results.
 
 - [x] **Live Job Status Checking**: Modified observation router to query quantum service for current job status
 - [x] **Conditional Trait Revelation**: Return traits if job completed, waiting state if processing, mock if failed

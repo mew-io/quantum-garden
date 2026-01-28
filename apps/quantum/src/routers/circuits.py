@@ -278,3 +278,31 @@ async def execute_circuit_endpoint(request: ExecuteRequest) -> ExecuteResponse:
             success=False,
             error=str(e),
         )
+
+
+@router.get("/pool")
+async def get_quantum_pool() -> dict[str, Any]:
+    """
+    Get the pre-computed quantum result pool.
+
+    Returns all pre-computed quantum measurement results for all circuit types.
+    The pool is used for instant trait revelation during plant observation.
+    """
+    import json
+    from pathlib import Path
+
+    pool_path = Path(__file__).parent.parent / "data" / "quantum-pool.json"
+
+    if not pool_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Quantum pool not found. "
+                "Run 'uv run python scripts/generate-quantum-pool.py' to generate it."
+            ),
+        )
+
+    with open(pool_path) as f:
+        pool: dict[str, Any] = json.load(f)
+
+    return pool

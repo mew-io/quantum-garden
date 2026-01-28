@@ -1,7 +1,7 @@
 # Session Archive: Per-Plant Germination Cooldown
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 0dedce3
 
 ---
 

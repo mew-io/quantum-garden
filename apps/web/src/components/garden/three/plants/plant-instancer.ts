@@ -88,6 +88,11 @@ export class PlantInstancer {
   private animationStates: Map<string, PlantAnimationState> = new Map();
   private activeCount: number = 0;
 
+  // Dirty tracking for selective updates
+  private plantHashes: Map<string, string> = new Map();
+  private dirtyInstances: Set<number> = new Set();
+  private forceFullSync: boolean = true; // First sync must be full
+
   // Transition timing
   private static COLLAPSE_DURATION = 1.5; // seconds
 
@@ -111,7 +116,10 @@ export class PlantInstancer {
 
     // Create InstancedMesh
     this.mesh = new THREE.InstancedMesh(geometry, this.material, MAX_INSTANCES);
-    this.mesh.frustumCulled = false; // We'll handle culling manually if needed
+    // Enable frustum culling - Three.js will skip rendering instances outside view
+    // Note: For 2D orthographic camera covering full canvas, this has minimal impact
+    // but is good practice for potential 3D/zoom features
+    this.mesh.frustumCulled = true;
 
     // Add instanced buffer attributes to geometry
     geometry.setAttribute(
@@ -155,8 +163,26 @@ export class PlantInstancer {
   }
 
   /**
+   * Compute a hash for plant state to detect changes.
+   * Only includes fields that affect rendering.
+   */
+  private computePlantHash(plant: RenderablePlant): string {
+    // Include fields that affect visual output
+    const hashParts = [
+      plant.observed ? "1" : "0",
+      plant.visualState,
+      plant.variantId,
+      plant.germinatedAt?.getTime() ?? "null",
+      plant.lifecycleModifier.toFixed(2),
+      plant.colorVariationName ?? "",
+      plant.traits?.opacity?.toFixed(2) ?? "",
+    ];
+    return hashParts.join("|");
+  }
+
+  /**
    * Sync plants from the store.
-   * Updates instance attributes for all active plants.
+   * Uses dirty-tracking to only update changed plants.
    */
   syncPlants(plants: RenderablePlant[]): void {
     const now = new Date();
@@ -171,13 +197,16 @@ export class PlantInstancer {
 
     // Track which plants are still active
     const activePlantIds = new Set<string>();
+    let hasStructuralChanges = false;
 
     pixelPlants.forEach((plant) => {
       activePlantIds.add(plant.id);
 
       // Get or create instance index for this plant
       let index = this.plantIndexMap.get(plant.id);
-      if (index === undefined) {
+      const isNewPlant = index === undefined;
+
+      if (isNewPlant) {
         const newIndex = this.getNextAvailableIndex();
         if (newIndex === null) {
           console.warn("PlantInstancer: Max instances reached");
@@ -185,6 +214,7 @@ export class PlantInstancer {
         }
         index = newIndex;
         this.plantIndexMap.set(plant.id, index);
+        hasStructuralChanges = true;
         // Initialize animation state
         this.animationStates.set(plant.id, {
           isTransitioning: false,
@@ -194,6 +224,9 @@ export class PlantInstancer {
           shimmerPhase: this.generateShimmerPhase(plant.id),
         });
       }
+
+      // After the block above, index is guaranteed to be defined
+      const instanceIndex = index as number;
 
       // Get animation state
       const animState = this.animationStates.get(plant.id)!;
@@ -213,20 +246,34 @@ export class PlantInstancer {
           animState.transitionProgress = 0;
           animState.transitionStartTime = time;
         }
+        this.dirtyInstances.add(instanceIndex);
       }
       animState.previousVisualState = plant.visualState;
 
-      // Update transition progress
+      // Update transition progress for transitioning plants
       if (animState.isTransitioning) {
         const elapsed = time - animState.transitionStartTime;
         animState.transitionProgress = Math.min(1, elapsed / PlantInstancer.COLLAPSE_DURATION);
         if (animState.transitionProgress >= 1) {
           animState.isTransitioning = false;
         }
+        this.dirtyInstances.add(instanceIndex);
       }
 
-      // Update instance data
-      this.updateInstanceData(index, plant, animState, now);
+      // Check if plant state changed (dirty tracking)
+      const newHash = this.computePlantHash(plant);
+      const oldHash = this.plantHashes.get(plant.id);
+      const isDirty = isNewPlant || newHash !== oldHash || this.forceFullSync;
+
+      if (isDirty) {
+        this.plantHashes.set(plant.id, newHash);
+        this.dirtyInstances.add(instanceIndex);
+      }
+
+      // Only update instance data if dirty or transitioning
+      if (isDirty || animState.isTransitioning) {
+        this.updateInstanceData(instanceIndex, plant, animState, now);
+      }
     });
 
     // Remove plants that are no longer in the list
@@ -235,14 +282,21 @@ export class PlantInstancer {
         this.clearInstance(index);
         this.plantIndexMap.delete(plantId);
         this.animationStates.delete(plantId);
+        this.plantHashes.delete(plantId);
+        hasStructuralChanges = true;
       }
     }
 
     // Update instance count
     this.mesh.count = this.plantIndexMap.size;
 
-    // Mark attributes as needing update
-    this.markAttributesNeedUpdate();
+    // Only mark attributes for update if there were changes
+    if (this.dirtyInstances.size > 0 || hasStructuralChanges || this.forceFullSync) {
+      this.markAttributesNeedUpdate();
+      this.dirtyInstances.clear();
+    }
+
+    this.forceFullSync = false;
   }
 
   /**

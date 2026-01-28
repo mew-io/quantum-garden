@@ -28,6 +28,90 @@ interface Vector2 {
 }
 
 /**
+ * Spatial grid for efficient plant lookups.
+ *
+ * Divides the canvas into cells for O(1) average-case lookups
+ * instead of O(n) brute-force iteration through all plants.
+ */
+class SpatialGrid {
+  private cellSize: number;
+  private cells: Map<string, Set<Plant>> = new Map();
+  private plantCells: Map<string, string[]> = new Map(); // Track which cells each plant is in
+
+  constructor(cellSize: number) {
+    this.cellSize = cellSize;
+  }
+
+  /**
+   * Get the cell key for a position.
+   */
+  private getCellKey(x: number, y: number): string {
+    const cellX = Math.floor(x / this.cellSize);
+    const cellY = Math.floor(y / this.cellSize);
+    return `${cellX},${cellY}`;
+  }
+
+  /**
+   * Rebuild the grid with new plant data.
+   */
+  rebuild(plants: Plant[]): void {
+    this.cells.clear();
+    this.plantCells.clear();
+
+    for (const plant of plants) {
+      this.addPlant(plant);
+    }
+  }
+
+  /**
+   * Add a plant to the grid.
+   */
+  private addPlant(plant: Plant): void {
+    const key = this.getCellKey(plant.position.x, plant.position.y);
+    let cell = this.cells.get(key);
+    if (!cell) {
+      cell = new Set();
+      this.cells.set(key, cell);
+    }
+    cell.add(plant);
+    this.plantCells.set(plant.id, [key]);
+  }
+
+  /**
+   * Get all plants within a circular region.
+   * Checks cells that overlap with the region bounds.
+   */
+  getPlantsInRegion(center: Position, radius: number): Plant[] {
+    const plants: Plant[] = [];
+    const checked = new Set<string>(); // Avoid duplicate plants
+
+    // Calculate cell range that could overlap with region
+    const minCellX = Math.floor((center.x - radius) / this.cellSize);
+    const maxCellX = Math.floor((center.x + radius) / this.cellSize);
+    const minCellY = Math.floor((center.y - radius) / this.cellSize);
+    const maxCellY = Math.floor((center.y + radius) / this.cellSize);
+
+    // Check all cells in range
+    for (let cellX = minCellX; cellX <= maxCellX; cellX++) {
+      for (let cellY = minCellY; cellY <= maxCellY; cellY++) {
+        const key = `${cellX},${cellY}`;
+        const cell = this.cells.get(key);
+        if (cell) {
+          for (const plant of cell) {
+            if (!checked.has(plant.id)) {
+              checked.add(plant.id);
+              plants.push(plant);
+            }
+          }
+        }
+      }
+    }
+
+    return plants;
+  }
+}
+
+/**
  * Configuration for the observation system.
  */
 interface ObservationSystemConfig {
@@ -72,6 +156,10 @@ export class ObservationSystem {
   // Observation tracking (prevent double-observations within same frame)
   private lastObservedPlantId: string | null = null;
 
+  // Spatial indexing for O(1) plant lookups
+  // Cell size matches region radius for optimal query performance
+  private spatialGrid: SpatialGrid;
+
   constructor(
     plants: Plant[],
     getReticlePosition: () => Vector2,
@@ -82,6 +170,10 @@ export class ObservationSystem {
     this.getReticlePosition = getReticlePosition;
     this.onObservation = onObservation;
     this.config = { ...DEFAULT_CONFIG, ...config };
+
+    // Initialize spatial grid with cell size matching region radius
+    this.spatialGrid = new SpatialGrid(this.config.regionRadius);
+    this.spatialGrid.rebuild(plants);
 
     // Initialize with first region
     this.createNewRegion();
@@ -145,6 +237,8 @@ export class ObservationSystem {
   /**
    * Find an eligible plant for observation.
    *
+   * Uses spatial grid for O(1) average-case lookups instead of O(n) iteration.
+   *
    * Eligibility criteria:
    * - Plant is unobserved
    * - Plant's full bounding box is within active region
@@ -155,7 +249,13 @@ export class ObservationSystem {
 
     const halfPlantSize = this.config.plantSize / 2;
 
-    for (const plant of this.plants) {
+    // Use spatial grid to get only nearby plants (O(1) instead of O(n))
+    const nearbyPlants = this.spatialGrid.getPlantsInRegion(
+      this.activeRegion.center,
+      this.activeRegion.radius
+    );
+
+    for (const plant of nearbyPlants) {
       // Skip observed plants
       if (plant.observed) continue;
 
@@ -286,9 +386,11 @@ export class ObservationSystem {
 
   /**
    * Update the list of plants.
+   * Rebuilds spatial index for efficient lookups.
    */
   updatePlants(plants: Plant[]): void {
     this.plants = plants;
+    this.spatialGrid.rebuild(plants);
   }
 
   /**

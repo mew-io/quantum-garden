@@ -1,7 +1,7 @@
 # Session Archive: Quantum Observation Integration
 
 **Date**: 2026-01-27
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 210d4ca
 
 ---
 

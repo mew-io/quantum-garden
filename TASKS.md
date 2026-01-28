@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Reduced CHECK_INTERVAL)_
+_Last updated: 2026-01-28 (Wave spatial distribution)_
 
 ## Project Status
 
@@ -56,7 +56,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | --- | ----------------------------------------------------------- | -------- | -------------------------------- |
 | 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`             |
 | 10  | ~~Add minimum dormant count for wave events~~               | ✅ Done  | `garden-evolution.ts`            |
-| 11  | Improve wave distribution (prefer spatial spread)           | P2       | `garden-evolution.ts`            |
+| 11  | ~~Improve wave distribution (prefer spatial spread)~~       | ✅ Done  | `garden-evolution.ts`            |
 | 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`            |
 | 13  | Create EvolutionStatusIndicator component                   | P2       | NEW                              |
 | 14  | Update debug panel evolution badge to read from store       | P2       | `debug-panel.tsx`                |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Wave Spatial Distribution
+
+- Implemented spatial distribution for wave germination events (#11)
+- Added `WAVE_MIN_SPACING: 200` constant (minimum distance between wave-selected plants)
+- Added `selectSpatiallyDistributedPlants()` method using greedy algorithm
+- Algorithm: picks random starting plant, then iteratively picks plants maximizing minimum distance to already-selected plants
+- Wave events now use spatial selection instead of random iteration
+- Creates more visually pleasing wave effects spread across the garden
+- Added 1 new test: "should prefer spatially distributed plants during wave events"
+- All 175 tests passing (60 shared + 115 web)
 
 ### 2026-01-28 - Reduced Evolution Check Interval
 

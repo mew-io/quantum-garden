@@ -177,14 +177,21 @@ export function TimeTravelScrubber({
       const color = isGermination ? "rgb(34, 197, 94)" : "rgb(59, 130, 246)"; // green-500 or blue-500
 
       return (
+        // Outer container provides 20px touch target while marker remains visually small
         <div
           key={`${event.type}-${event.plantId}-${index}`}
-          className="absolute top-0 bottom-0 w-0.5 opacity-60 hover:opacity-100 transition-opacity"
-          style={{ left, backgroundColor: color }}
+          className="absolute top-0 bottom-0 flex items-start justify-center cursor-pointer group"
+          style={{ left, width: "20px", marginLeft: "-10px" }}
           title={`${isGermination ? "Germination" : "Observation"} - ${event.timestamp.toLocaleString()}`}
         >
+          {/* Visual marker line - 2px wide */}
           <div
-            className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full"
+            className="absolute top-0 bottom-0 w-0.5 opacity-60 group-hover:opacity-100 transition-opacity"
+            style={{ backgroundColor: color }}
+          />
+          {/* Visual marker dot - 10px wide */}
+          <div
+            className="absolute -top-1 w-2.5 h-2.5 rounded-full opacity-60 group-hover:opacity-100 transition-opacity"
             style={{ backgroundColor: color }}
           />
         </div>

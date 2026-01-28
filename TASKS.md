@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Production Debug Gating)_
+_Last updated: 2026-01-28 (Event Marker Touch Targets)_
 
 ## Project Status
 
@@ -79,7 +79,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 51  | ~~Increase context panel duration to 30s~~        | ✅ Done  | `observation-context-panel.tsx` |
 | 52  | Add pause-on-hover for notifications              | P2       | `evolution-notifications.tsx`   |
 | 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
-| 54  | Increase event marker touch targets to 20px       | P1       | `time-travel-scrubber.tsx`      |
+| 54  | ~~Increase event marker touch targets to 20px~~   | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 55  | Add event marker tooltips                         | P2       | `time-travel-scrubber.tsx`      |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
 | 57  | Add keyboard shortcut hints to info overlay       | P1       | `info-overlay.tsx`              |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Event Marker Touch Targets
+
+- Improved time-travel scrubber event markers with 20px touch targets (#54)
+- Wrapped 2px visual marker line + 10px dot in 20px wide touch container
+- Used `marginLeft: "-10px"` to center the touch area on the visual marker
+- Added `group` class for coordinated hover states on both line and dot
+- Visual appearance unchanged - only hit area enlarged
+- Improves usability on touch devices and for users with motor impairments
+- All 136 tests passing
 
 ### 2026-01-28 - Production Debug Gating
 

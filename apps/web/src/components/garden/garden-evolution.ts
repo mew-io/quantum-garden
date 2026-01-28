@@ -21,6 +21,9 @@ const EVOLUTION = {
   /** Minimum time before a dormant plant can germinate */
   MIN_DORMANCY: 60_000, // 1 minute
 
+  /** Guaranteed germination time - plants dormant this long always germinate */
+  GUARANTEED_GERMINATION_TIME: 900_000, // 15 minutes
+
   /** Base probability of germination per check (0-1) */
   GERMINATION_CHANCE: 0.15, // 15% base chance per dormant plant per check
 
@@ -204,6 +207,14 @@ export class GardenEvolutionSystem {
   }
 
   /**
+   * Check if a plant has been dormant long enough for guaranteed germination.
+   */
+  private isGuaranteedGermination(dormantSince: number, now: number): boolean {
+    const dormantDuration = now - dormantSince;
+    return dormantDuration >= EVOLUTION.GUARANTEED_GERMINATION_TIME;
+  }
+
+  /**
    * Calculate germination probability for a plant.
    */
   private getGerminationProbability(
@@ -212,6 +223,19 @@ export class GardenEvolutionSystem {
     dormantSince: number,
     now: number
   ): number {
+    // Check for guaranteed germination first (15 min dormancy)
+    const guaranteed = this.isGuaranteedGermination(dormantSince, now);
+
+    // Clustering prevention: 0% chance in crowded areas (even for guaranteed)
+    if (this.isInCluster(plant.position, allPlants)) {
+      return 0;
+    }
+
+    // Guaranteed germination returns 100%
+    if (guaranteed) {
+      return 1.0;
+    }
+
     let probability = EVOLUTION.GERMINATION_CHANCE;
 
     // Proximity bonus: 2x chance near observed plants
@@ -222,11 +246,6 @@ export class GardenEvolutionSystem {
     // Age weighting: older plants gradually increase chance
     const ageMultiplier = this.getAgeMultiplier(dormantSince, now);
     probability *= ageMultiplier;
-
-    // Clustering prevention: 0% chance in crowded areas
-    if (this.isInCluster(plant.position, allPlants)) {
-      probability = 0;
-    }
 
     return Math.min(probability, 1.0); // Cap at 100%
   }
@@ -291,7 +310,8 @@ export class GardenEvolutionSystem {
 
           // Log for debugging
           const waveIndicator = isWave ? " (wave)" : "";
-          debugLogger.evolution.info(`Plant germinated${waveIndicator}`, {
+          const guaranteedIndicator = probability >= 1.0 ? " (guaranteed)" : "";
+          debugLogger.evolution.info(`Plant germinated${waveIndicator}${guaranteedIndicator}`, {
             plantId: plant.id.slice(0, 8),
             probability: probability.toFixed(2),
           });

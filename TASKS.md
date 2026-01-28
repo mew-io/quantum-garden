@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Material Pooling)_
+_Last updated: 2026-01-28 (Guaranteed Germination)_
 
 ## Project Status
 
@@ -54,7 +54,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                                        | Priority | File                          |
 | --- | ----------------------------------------------------------- | -------- | ----------------------------- |
-| 9   | Add guaranteed germination after 15 min dormancy            | P1       | `evolution-logic.ts`          |
+| 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`          |
 | 10  | Add minimum dormant count for wave events                   | P2       | `evolution-logic.ts`          |
 | 11  | Improve wave distribution (prefer spatial spread)           | P2       | `garden-evolution.ts`         |
 | 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`         |
@@ -129,7 +129,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 106 | Add useEvolutionSystem hook tests         | P1       | NEW                       |
 | 107 | Add integration test for germination flow | P2       | NEW                       |
 | 108 | Add tests for wave germination logic      | P2       | `evolution-logic.test.ts` |
-| 109 | Add tests for guaranteed germination      | P2       | `evolution-logic.test.ts` |
+| 109 | ~~Add tests for guaranteed germination~~  | ✅ Done  | `evolution-logic.test.ts` |
 | 110 | Add store tests for evolution state       | P2       | NEW                       |
 | 111 | Add visual regression test checklist      | P3       | `docs/testing.md`         |
 | 112 | Update README with evolution system info  | P2       | `README.md`               |
@@ -182,6 +182,18 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Guaranteed Germination After 15 Minutes
+
+- Implemented guaranteed germination in `evolution-logic.ts` and `garden-evolution.ts` (#9)
+- Added `GUARANTEED_GERMINATION_TIME: 900_000` constant (15 minutes)
+- Added `isGuaranteedGermination()` function to check if plant qualifies for 100% germination
+- Updated `getGerminationProbability()` to return 1.0 for guaranteed germination
+- Guaranteed germination still respects clustering prevention (can't germinate in crowded areas)
+- Added 8 new tests covering guaranteed germination scenarios (#109)
+- Updated 2 existing tests to avoid triggering guaranteed germination threshold
+- Ensures no plant stays dormant forever while maintaining visual distribution
+- All 136 tests passing
 
 ### 2026-01-28 - Material Pooling for Vector Plants
 
@@ -308,4 +320,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (128+)
+- All tests passing (136+)

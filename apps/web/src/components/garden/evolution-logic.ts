@@ -32,6 +32,9 @@ export const EVOLUTION_CONFIG = {
 
   /** Minimum dormancy before germination (milliseconds) */
   MIN_DORMANCY: 60_000, // 1 minute
+
+  /** Guaranteed germination time (milliseconds) - plants dormant this long always germinate */
+  GUARANTEED_GERMINATION_TIME: 900_000, // 15 minutes
 };
 
 /**
@@ -98,8 +101,22 @@ export function getAgeMultiplier(
 }
 
 /**
+ * Check if a plant has been dormant long enough for guaranteed germination.
+ * After GUARANTEED_GERMINATION_TIME, plants will always germinate (100% probability).
+ */
+export function isGuaranteedGermination(
+  dormantSince: number,
+  now: number,
+  guaranteedTime: number = EVOLUTION_CONFIG.GUARANTEED_GERMINATION_TIME
+): boolean {
+  const dormantDuration = now - dormantSince;
+  return dormantDuration >= guaranteedTime;
+}
+
+/**
  * Calculate germination probability for a plant.
- * Combines base chance, proximity bonus, age weighting, and clustering prevention.
+ * Combines base chance, proximity bonus, age weighting, clustering prevention,
+ * and guaranteed germination after 15 minutes.
  */
 export function getGerminationProbability(
   plant: Plant,
@@ -109,6 +126,31 @@ export function getGerminationProbability(
   config: Partial<typeof EVOLUTION_CONFIG> = {}
 ): number {
   const mergedConfig = { ...EVOLUTION_CONFIG, ...config };
+
+  // Check for guaranteed germination first (15 min dormancy)
+  // Even guaranteed germination respects clustering prevention
+  const guaranteed = isGuaranteedGermination(
+    dormantSince,
+    now,
+    mergedConfig.GUARANTEED_GERMINATION_TIME
+  );
+
+  // Clustering prevention: 0% chance in crowded areas (even for guaranteed)
+  if (
+    isInCluster(
+      plant.position,
+      allPlants,
+      mergedConfig.CLUSTERING_RADIUS,
+      mergedConfig.CLUSTERING_THRESHOLD
+    )
+  ) {
+    return 0;
+  }
+
+  // Guaranteed germination returns 100%
+  if (guaranteed) {
+    return 1.0;
+  }
 
   let probability = mergedConfig.GERMINATION_CHANCE;
 
@@ -125,18 +167,6 @@ export function getGerminationProbability(
     mergedConfig.MAX_AGE_MULTIPLIER
   );
   probability *= ageMultiplier;
-
-  // Clustering prevention: 0% chance in crowded areas
-  if (
-    isInCluster(
-      plant.position,
-      allPlants,
-      mergedConfig.CLUSTERING_RADIUS,
-      mergedConfig.CLUSTERING_THRESHOLD
-    )
-  ) {
-    probability = 0;
-  }
 
   return Math.min(probability, 1.0); // Cap at 100%
 }

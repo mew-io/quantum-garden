@@ -10,6 +10,7 @@ import {
   hasObservedNeighbors,
   isInCluster,
   getAgeMultiplier,
+  isGuaranteedGermination,
   getGerminationProbability,
   isEligibleForGermination,
   EVOLUTION_CONFIG,
@@ -204,6 +205,37 @@ describe("getAgeMultiplier", () => {
   });
 });
 
+describe("isGuaranteedGermination", () => {
+  const now = Date.now();
+  const guaranteedTime = EVOLUTION_CONFIG.GUARANTEED_GERMINATION_TIME;
+
+  it("should return false for plants dormant less than guaranteed time", () => {
+    const dormantSince = now - guaranteedTime / 2; // Half the guaranteed time
+    expect(isGuaranteedGermination(dormantSince, now)).toBe(false);
+  });
+
+  it("should return true for plants dormant exactly at guaranteed time", () => {
+    const dormantSince = now - guaranteedTime;
+    expect(isGuaranteedGermination(dormantSince, now)).toBe(true);
+  });
+
+  it("should return true for plants dormant longer than guaranteed time", () => {
+    const dormantSince = now - guaranteedTime * 2; // Double the guaranteed time
+    expect(isGuaranteedGermination(dormantSince, now)).toBe(true);
+  });
+
+  it("should accept custom guaranteed time", () => {
+    const customGuaranteedTime = 60_000; // 1 minute
+    const dormantSince = now - customGuaranteedTime;
+    expect(isGuaranteedGermination(dormantSince, now, customGuaranteedTime)).toBe(true);
+  });
+
+  it("should handle edge case of dormantSince in the future", () => {
+    const dormantSince = now + 1000; // Future
+    expect(isGuaranteedGermination(dormantSince, now)).toBe(false);
+  });
+});
+
 describe("getGerminationProbability", () => {
   const now = Date.now();
   const dormantSince = now - 60_000; // 1 minute ago
@@ -240,23 +272,30 @@ describe("getGerminationProbability", () => {
   it("should apply age multiplier for old plants", () => {
     const plant = createMockPlant("test", 500, 500);
     const plants: Plant[] = [];
-    const oldDormantSince = now - EVOLUTION_CONFIG.AGE_WEIGHTING_PERIOD * 3;
+    // Use a time just before guaranteed germination threshold to test age multiplier
+    // AGE_WEIGHTING_PERIOD * 2.9 = 870,000 ms (just under 15 min guaranteed time)
+    const oldDormantSince = now - EVOLUTION_CONFIG.AGE_WEIGHTING_PERIOD * 2.9;
 
     const probability = getGerminationProbability(plant, plants, oldDormantSince, now);
-    const expected = EVOLUTION_CONFIG.GERMINATION_CHANCE * EVOLUTION_CONFIG.MAX_AGE_MULTIPLIER;
+    // At 2.9x AGE_WEIGHTING_PERIOD, ageRatio = min(2.9 / 3, 1) ≈ 0.967
+    // multiplier = 1.0 + 0.967 * 1.5 ≈ 2.45
+    const expectedAgeMultiplier = 1.0 + (2.9 / 3) * (EVOLUTION_CONFIG.MAX_AGE_MULTIPLIER - 1.0);
+    const expected = EVOLUTION_CONFIG.GERMINATION_CHANCE * expectedAgeMultiplier;
     expect(probability).toBeCloseTo(expected, 5);
   });
 
   it("should combine proximity and age bonuses", () => {
     const plant = createMockPlant("test", 100, 100);
     const plants = [createMockPlant("observed", 150, 150, { observed: true })];
-    const oldDormantSince = now - EVOLUTION_CONFIG.AGE_WEIGHTING_PERIOD * 3;
+    // Use a time just before guaranteed germination threshold to test age multiplier
+    const oldDormantSince = now - EVOLUTION_CONFIG.AGE_WEIGHTING_PERIOD * 2.9;
 
     const probability = getGerminationProbability(plant, plants, oldDormantSince, now);
+    const expectedAgeMultiplier = 1.0 + (2.9 / 3) * (EVOLUTION_CONFIG.MAX_AGE_MULTIPLIER - 1.0);
     const expected =
       EVOLUTION_CONFIG.GERMINATION_CHANCE *
       EVOLUTION_CONFIG.PROXIMITY_MULTIPLIER *
-      EVOLUTION_CONFIG.MAX_AGE_MULTIPLIER;
+      expectedAgeMultiplier;
     expect(probability).toBeCloseTo(expected, 5);
   });
 
@@ -282,6 +321,41 @@ describe("getGerminationProbability", () => {
     });
 
     expect(probability).toBe(0.5);
+  });
+
+  it("should return 1.0 for plants dormant longer than guaranteed time", () => {
+    const plant = createMockPlant("test", 500, 500);
+    const plants: Plant[] = [];
+    const guaranteedDormantSince = now - EVOLUTION_CONFIG.GUARANTEED_GERMINATION_TIME;
+
+    const probability = getGerminationProbability(plant, plants, guaranteedDormantSince, now);
+    expect(probability).toBe(1.0);
+  });
+
+  it("should return 0 for guaranteed plants in clustered area", () => {
+    const plant = createMockPlant("test", 100, 100);
+    const plants = [
+      createMockPlant("g1", 110, 110, { germinatedAt: new Date() }),
+      createMockPlant("g2", 120, 100, { germinatedAt: new Date() }),
+      createMockPlant("g3", 100, 120, { germinatedAt: new Date() }),
+    ];
+    const guaranteedDormantSince = now - EVOLUTION_CONFIG.GUARANTEED_GERMINATION_TIME;
+
+    // Even guaranteed germination should be blocked by clustering
+    const probability = getGerminationProbability(plant, plants, guaranteedDormantSince, now);
+    expect(probability).toBe(0);
+  });
+
+  it("should accept custom guaranteed germination time", () => {
+    const plant = createMockPlant("test", 500, 500);
+    const plants: Plant[] = [];
+    const customGuaranteedTime = 60_000; // 1 minute
+    const customDormantSince = now - customGuaranteedTime;
+
+    const probability = getGerminationProbability(plant, plants, customDormantSince, now, {
+      GUARANTEED_GERMINATION_TIME: customGuaranteedTime,
+    });
+    expect(probability).toBe(1.0);
   });
 });
 

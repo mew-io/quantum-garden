@@ -27,6 +27,11 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Manage application lifecycle - start/stop background worker."""
+    # Log execution mode on startup
+    execution_mode = "IonQ Simulator" if settings.ionq_use_simulator else "Mock Mode"
+    api_key_status = "configured" if settings.ionq_api_key else "not configured"
+    logger.info(f"Quantum execution mode: {execution_mode} (API key: {api_key_status})")
+
     # Startup: Start the job worker
     worker = get_job_worker()
     await worker.start()

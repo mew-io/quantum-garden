@@ -176,16 +176,17 @@ class ObservationSystem {
 
 #### Task 2.3: Enable IonQ Simulator Configuration
 
-**Status**: 🔴 Not Started
-**Files**: `apps/quantum/.env`, `apps/quantum/src/config.py`
+**Status**: ✅ COMPLETED (2026-01-27)
+**Files**: `apps/quantum/.env.example`, `apps/quantum/src/config.py`, `apps/quantum/README.md`
 
-**Updates**:
+**Implementation**:
 
-- Set `IONQ_USE_SIMULATOR=true`
-- Add `IONQ_API_KEY` environment variable
-- Document in README how to get IonQ API key (free tier)
-- Log execution mode to console
-- Expose via `/config` endpoint for debugging
+- ✅ Created `.env.example` with IonQ configuration template
+- ✅ Documented IonQ API key setup in README (free tier includes 10 min/month)
+- ✅ Added execution mode logging on service startup
+- ✅ Created `/config` endpoint exposing execution mode and circuit defaults
+- ✅ Documented simulator vs. hardware vs. mock modes
+- ✅ All Python tests, type-checking, and linting passing
 
 #### Task 2.4: Quantum Status in Debug Panel
 
@@ -393,6 +394,14 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-27 - IonQ Simulator Configuration (Sprint 2, Task 2.3)
+
+- [x] **Environment Configuration**: Created `.env.example` with IonQ API key template and execution mode settings
+- [x] **Configuration Endpoint**: Added `/config` endpoint to quantum service exposing execution mode and circuit defaults
+- [x] **Startup Logging**: Added execution mode logging on service startup for visibility
+- [x] **Documentation**: Comprehensive IonQ API key setup guide in quantum service README
+- [x] **Quality Checks**: All Python tests (11/11), mypy type-checking, and ruff linting passing
 
 ### 2026-01-27 - Core Observation System Implementation (Sprint 1)
 

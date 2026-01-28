@@ -3,6 +3,9 @@
  *
  * Three.js implementation of dashed lines connecting entangled plants.
  * Uses LineSegments with a LineDashedMaterial for the dashed effect.
+ *
+ * When observation triggers entanglement, a "quantum correlation wave"
+ * travels along the connection lines as a visual pulse.
  */
 
 import * as THREE from "three";
@@ -18,6 +21,11 @@ const ENTANGLEMENT = {
   PULSE_DURATION: 2.0,
   DASH_SIZE: 8,
   GAP_SIZE: 4,
+  // Wave particle settings
+  WAVE_COLOR: 0xffffff,
+  WAVE_SIZE: 6,
+  WAVE_DURATION: 0.6, // How long the wave takes to travel
+  WAVE_ALPHA: 0.9,
 };
 
 interface EntanglementGroup {
@@ -25,8 +33,16 @@ interface EntanglementGroup {
   plants: Plant[];
 }
 
+interface WaveParticle {
+  groupId: string;
+  startTime: number;
+  fromPosition: THREE.Vector3;
+  toPosition: THREE.Vector3;
+  mesh: THREE.Mesh;
+}
+
 /**
- * Renders dashed lines between entangled plants.
+ * Renders dashed lines between entangled plants with wave effects.
  */
 export class EntanglementOverlay {
   private group: THREE.Group;
@@ -35,6 +51,11 @@ export class EntanglementOverlay {
   private groups: EntanglementGroup[] = [];
   private pulsingGroups: Map<string, number> = new Map();
   private storeUnsubscribe: (() => void) | null = null;
+
+  // Wave particles
+  private waveParticles: WaveParticle[] = [];
+  private waveMaterial: THREE.MeshBasicMaterial;
+  private waveGeometry: THREE.CircleGeometry;
 
   constructor() {
     this.group = new THREE.Group();
@@ -48,6 +69,14 @@ export class EntanglementOverlay {
       dashSize: ENTANGLEMENT.DASH_SIZE,
       gapSize: ENTANGLEMENT.GAP_SIZE,
     });
+
+    // Create wave particle material and geometry (reusable)
+    this.waveMaterial = new THREE.MeshBasicMaterial({
+      color: ENTANGLEMENT.WAVE_COLOR,
+      transparent: true,
+      opacity: ENTANGLEMENT.WAVE_ALPHA,
+    });
+    this.waveGeometry = new THREE.CircleGeometry(ENTANGLEMENT.WAVE_SIZE, 16);
 
     // Subscribe to store changes
     this.storeUnsubscribe = useGardenStore.subscribe((state) => {
@@ -68,15 +97,15 @@ export class EntanglementOverlay {
 
     for (const plant of plants) {
       if (plant.entanglementGroupId) {
-        const group = groupMap.get(plant.entanglementGroupId) ?? [];
-        group.push(plant);
-        groupMap.set(plant.entanglementGroupId, group);
+        const existingGroup = groupMap.get(plant.entanglementGroupId) ?? [];
+        existingGroup.push(plant);
+        groupMap.set(plant.entanglementGroupId, existingGroup);
       }
     }
 
     // Convert to array of groups (only groups with 2+ plants)
     this.groups = Array.from(groupMap.entries())
-      .filter(([_, groupPlants]) => groupPlants.length >= 2)
+      .filter(([, groupPlants]) => groupPlants.length >= 2)
       .map(([groupId, groupPlants]) => ({ groupId, plants: groupPlants }));
 
     // Rebuild geometry
@@ -138,9 +167,39 @@ export class EntanglementOverlay {
 
   /**
    * Trigger a pulse animation for an entanglement group.
+   * Creates wave particles that travel along the connection lines.
    */
   triggerPulse(groupId: string): void {
-    this.pulsingGroups.set(groupId, performance.now());
+    const now = performance.now();
+    this.pulsingGroups.set(groupId, now);
+
+    // Find the group and create wave particles
+    const group = this.groups.find((g) => g.groupId === groupId);
+    if (!group || group.plants.length < 2) return;
+
+    // Find the observed plant (the one that triggered the pulse)
+    // We'll assume it's the one that was most recently observed
+    const observedPlant = group.plants.find((p) => p.observed);
+    if (!observedPlant) return;
+
+    // Create wave particles traveling to each non-observed partner
+    for (const partner of group.plants) {
+      if (partner.id === observedPlant.id) continue;
+
+      // Create a wave particle
+      const mesh = new THREE.Mesh(this.waveGeometry, this.waveMaterial.clone());
+      mesh.position.set(observedPlant.position.x, observedPlant.position.y, 1);
+
+      this.group.add(mesh);
+
+      this.waveParticles.push({
+        groupId,
+        startTime: now,
+        fromPosition: new THREE.Vector3(observedPlant.position.x, observedPlant.position.y, 1),
+        toPosition: new THREE.Vector3(partner.position.x, partner.position.y, 1),
+        mesh,
+      });
+    }
   }
 
   /**
@@ -169,6 +228,45 @@ export class EntanglementOverlay {
 
     // Update material opacity
     this.material.opacity = maxAlpha;
+
+    // Update wave particles
+    const completedParticles: number[] = [];
+
+    for (let i = 0; i < this.waveParticles.length; i++) {
+      const particle = this.waveParticles[i]!;
+      const elapsed = (now - particle.startTime) / 1000;
+      const progress = elapsed / ENTANGLEMENT.WAVE_DURATION;
+
+      if (progress >= 1) {
+        completedParticles.push(i);
+        continue;
+      }
+
+      // Ease out cubic for smooth arrival
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      // Interpolate position
+      particle.mesh.position.lerpVectors(particle.fromPosition, particle.toPosition, easedProgress);
+
+      // Fade out as it approaches destination
+      const material = particle.mesh.material as THREE.MeshBasicMaterial;
+      material.opacity = ENTANGLEMENT.WAVE_ALPHA * (1 - progress * 0.5);
+
+      // Grow slightly as it travels
+      const scale = 1 + easedProgress * 0.5;
+      particle.mesh.scale.set(scale, scale, 1);
+    }
+
+    // Remove completed particles (in reverse order)
+    for (let i = completedParticles.length - 1; i >= 0; i--) {
+      const index = completedParticles[i]!;
+      const particle = this.waveParticles[index]!;
+
+      this.group.remove(particle.mesh);
+      (particle.mesh.material as THREE.MeshBasicMaterial).dispose();
+
+      this.waveParticles.splice(index, 1);
+    }
   }
 
   /**
@@ -190,5 +288,12 @@ export class EntanglementOverlay {
       this.lines.geometry.dispose();
     }
     this.material.dispose();
+    this.waveMaterial.dispose();
+    this.waveGeometry.dispose();
+
+    // Clean up any remaining wave particles
+    for (const particle of this.waveParticles) {
+      (particle.mesh.material as THREE.MeshBasicMaterial).dispose();
+    }
   }
 }

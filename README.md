@@ -27,7 +27,8 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 - Lifecycle-based visual behaviors: GPU-accelerated shader animations for young/mature/old plants
 - Smart germination system: proximity bonuses, clustering prevention, age weighting, wave patterns
 - Evolution event notifications: subtle toasts for germination and entanglement events
-- Entanglement visualization (correlated trait reveals)
+- Enhanced observation feedback: plant-colored celebration rings and entanglement wave particles
+- Entanglement visualization (correlated trait reveals with quantum correlation waves)
 - Mobile-responsive with touch controls
 - Time-travel system: scrub through garden evolution history (press T key)
   - View historical plant states at any point in time
@@ -43,8 +44,8 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ### Coming Soon 🎯
 
-- Observation feedback enhancements (color variation, entanglement pulse visuals)
 - Performance optimizations for large gardens
+- Sound effects (optional audio feedback)
 
 ---
 

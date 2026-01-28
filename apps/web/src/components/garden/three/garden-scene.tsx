@@ -8,7 +8,12 @@
  */
 
 import { useEffect, useRef } from "react";
-import { CANVAS } from "@quantum-garden/shared";
+import {
+  CANVAS,
+  getVariantById,
+  getEffectivePalette,
+  computeLifecycleState,
+} from "@quantum-garden/shared";
 import type { ObservationPayload, Plant } from "@quantum-garden/shared";
 import { SceneManager } from "./core/scene-manager";
 import { PlantInstancer, type RenderablePlant } from "./plants/plant-instancer";
@@ -20,6 +25,46 @@ import { useEvolution } from "@/hooks/use-evolution";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
+
+/**
+ * Get the primary color from a plant's palette for celebration feedback.
+ *
+ * Uses resolved traits if observed, otherwise computes from variant definition.
+ */
+function getPlantPrimaryColor(plant: Plant): string | undefined {
+  // If plant has resolved traits from quantum measurement, use those
+  if (plant.traits?.colorPalette?.[0]) {
+    return plant.traits.colorPalette[0];
+  }
+
+  // Fall back to variant's first keyframe palette
+  const variant = getVariantById(plant.variantId);
+  if (!variant) return undefined;
+
+  // For non-germinated plants, use first keyframe
+  const keyframe = variant.keyframes[0];
+  if (!keyframe) return undefined;
+
+  // Get effective palette considering color variation
+  if (plant.germinatedAt) {
+    const plantWithLifecycle = {
+      ...plant,
+      germinatedAt: plant.germinatedAt,
+      colorVariationName: plant.colorVariationName ?? null,
+    };
+    const state = computeLifecycleState(plantWithLifecycle, variant, new Date());
+    const palette = getEffectivePalette(
+      state.currentKeyframe,
+      variant,
+      plant.colorVariationName ?? null
+    );
+    return palette[0];
+  }
+
+  // For dormant plants, just use the first palette color
+  const palette = getEffectivePalette(keyframe, variant, plant.colorVariationName ?? null);
+  return palette[0];
+}
 
 /**
  * Main garden scene component using Three.js.
@@ -105,8 +150,15 @@ export function GardenScene() {
         // Find the observed plant
         const plant = useGardenStore.getState().plants.find((p) => p.id === payload.plantId);
         if (plant) {
-          // Trigger celebration feedback
-          overlayManager.feedback.triggerCelebration(plant.position.x, plant.position.y);
+          // Get plant's primary color for celebration feedback
+          const primaryColor = getPlantPrimaryColor(plant);
+
+          // Trigger celebration feedback with plant's color
+          overlayManager.feedback.triggerCelebration(
+            plant.position.x,
+            plant.position.y,
+            primaryColor
+          );
 
           // Trigger entanglement pulse if plant is entangled
           if (plant.entanglementGroupId) {
@@ -194,6 +246,9 @@ export function GardenScene() {
       });
 
       if (clickedPlant) {
+        // Get plant's primary color for celebration feedback
+        const primaryColor = getPlantPrimaryColor(clickedPlant);
+
         // Trigger observation
         observationCallbackRef.current({
           plantId: clickedPlant.id,
@@ -202,10 +257,11 @@ export function GardenScene() {
           timestamp: new Date(),
         });
 
-        // Trigger celebration feedback
+        // Trigger celebration feedback with plant's color
         overlayManager.feedback.triggerCelebration(
           clickedPlant.position.x,
-          clickedPlant.position.y
+          clickedPlant.position.y,
+          primaryColor
         );
 
         // Trigger entanglement pulse if plant is entangled

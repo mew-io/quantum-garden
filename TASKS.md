@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-28 (Sprint 5.1 Complete - Post-Observation Context Panel + Debug System)_
+_Last updated: 2026-01-28 (Sprint 5.2 Complete - Observation Feedback Enhancements)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Sprint 5.1 complete (educational context panel and enhanced debug tools). Next priority is manual testing and validation of new features, followed by observation feedback enhancements.
+**Current Focus**: Sprint 5.2 complete (observation feedback enhancements with plant-colored celebrations and entanglement wave particles). Next priority is manual testing and validation of new features, followed by performance optimization.
 
 ## Strategic Roadmap
 
@@ -548,15 +548,21 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 5.2: Observation Feedback Enhancements
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/lib/three/overlays/feedback-overlay.ts`
+**Status**: ✅ COMPLETED (2026-01-28)
+**Files**: `apps/web/src/components/garden/three/overlays/feedback-overlay.ts`, `apps/web/src/components/garden/three/overlays/entanglement-overlay.ts`, `apps/web/src/components/garden/three/garden-scene.tsx`
 
-**Improvements**:
+**Implemented**:
 
-- Add color variation based on plant's primary palette color
-- Entanglement pulse: Show "quantum correlation" wave traveling between plants
-- Subtle "ding" sound effect (optional, respects system audio settings)
-- Haptic feedback pattern based on rarity (longer pulse for rare plants)
+- ✅ Inner celebration ring uses plant's primary palette color instead of default cyan
+- ✅ Helper function `getPlantPrimaryColor()` extracts color from resolved traits or variant definition
+- ✅ "Quantum correlation wave" particles travel from observed plant to entangled partners
+- ✅ Wave particles use ease-out cubic interpolation for smooth arrival
+- ✅ Particles grow (1.5x scale) and fade as they travel (0.6s duration)
+
+**Deferred to future sprint**:
+
+- Sound effects (requires audio file assets and user preference system)
+- Haptic feedback patterns based on rarity (low priority)
 
 #### Task 5.3: Performance Optimization
 
@@ -572,6 +578,8 @@ getEvolutionTimeline: publicProcedure
 
 **Acceptance Criteria**:
 
+- [x] Plant-colored celebration rings (inner ring uses plant palette)
+- [x] Quantum wave particles travel to entangled partners
 - [ ] 60fps rendering with 100+ plants
 - [ ] No memory leaks after extended sessions
 - [ ] Time-travel queries respond quickly (<500ms)
@@ -580,6 +588,38 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Sprint 5.2: Observation Feedback Enhancements (Complete)
+
+**Plant-Colored Celebration Feedback**:
+
+- [x] Enhanced `FeedbackOverlay.triggerCelebration()` to accept optional `primaryColor` parameter
+- [x] Inner celebration ring now uses plant's primary palette color instead of default cyan
+- [x] Added `hexStringToNumber()` helper for hex color string to Three.js color conversion
+- [x] Outer ring remains white for visual contrast
+- [x] Created `getPlantPrimaryColor()` helper in garden-scene.tsx
+- [x] Extracts color from resolved traits (for observed plants) or variant definition
+- [x] Both region-based and click-based observation use plant colors
+
+**Entanglement Wave Particles**:
+
+- [x] Added "quantum correlation wave" effect to `EntanglementOverlay`
+- [x] White circular particles travel from observed plant to entangled partners
+- [x] Particles use ease-out cubic interpolation (`1 - (1 - progress)^3`) for smooth arrival
+- [x] Particles grow (1.0 to 1.5x scale) as they travel
+- [x] Particles fade (0.9 to 0.45 opacity) as they approach destination
+- [x] Duration: 0.6 seconds per wave
+- [x] Proper cleanup: particles removed and materials disposed after animation completes
+
+**Deferred Items**:
+
+- Sound effects (requires audio file assets and user preference system)
+- Haptic feedback patterns based on rarity (low priority)
+
+**Quality Checks**:
+
+- [x] TypeScript type-checking: PASS
+- [x] ESLint linting: PASS
 
 ### 2026-01-28 - Sprint 5.1: Post-Observation Context Panel + Debug System (Complete)
 

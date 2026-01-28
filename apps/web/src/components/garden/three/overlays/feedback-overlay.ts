@@ -30,6 +30,14 @@ interface FeedbackAnimation {
 }
 
 /**
+ * Convert a hex color string (#RRGGBB) to THREE.js color number.
+ */
+function hexStringToNumber(hex: string): number {
+  const clean = hex.replace("#", "");
+  return parseInt(clean, 16);
+}
+
+/**
  * Renders expanding ring animations when observations complete.
  */
 export class FeedbackOverlay {
@@ -91,13 +99,22 @@ export class FeedbackOverlay {
 
   /**
    * Trigger a celebration animation at the given position.
+   *
+   * @param x - X position in world coordinates
+   * @param y - Y position in world coordinates
+   * @param primaryColor - Optional primary color from plant's palette (hex string like "#4ecdc4")
    */
-  triggerCelebration(x: number, y: number): void {
-    // Create inner ring (cyan)
-    const innerRing = this.createRing(OBSERVATION_FEEDBACK.PRIMARY_COLOR);
+  triggerCelebration(x: number, y: number, primaryColor?: string): void {
+    // Use plant's primary color for inner ring if provided, otherwise default cyan
+    const innerColor = primaryColor
+      ? hexStringToNumber(primaryColor)
+      : OBSERVATION_FEEDBACK.PRIMARY_COLOR;
+
+    // Create inner ring with plant's color or default
+    const innerRing = this.createRing(innerColor);
     innerRing.position.set(x, y, 2);
 
-    // Create outer ring (white)
+    // Create outer ring (white for contrast)
     const outerRing = this.createRing(OBSERVATION_FEEDBACK.SECONDARY_COLOR);
     outerRing.position.set(x, y, 2);
     outerRing.visible = false; // Starts hidden, appears after delay

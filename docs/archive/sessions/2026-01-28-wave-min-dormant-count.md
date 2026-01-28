@@ -1,7 +1,7 @@
 # Session Archive: Wave Minimum Dormant Count
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: 08b2a1f
 
 ---
 

@@ -418,7 +418,11 @@ describe("GardenEvolutionSystem", () => {
     });
 
     it("should prefer spatially distributed plants during wave events", async () => {
-      const callback = vi.fn().mockResolvedValue(undefined);
+      // Track which plants are germinated
+      const germinatedIds: string[] = [];
+      const callback = vi.fn().mockImplementation(async (plantId: string) => {
+        germinatedIds.push(plantId);
+      });
       system.setGerminationCallback(callback);
 
       // Create 8 plants with varied positions
@@ -437,23 +441,20 @@ describe("GardenEvolutionSystem", () => {
       ];
       setMockPlants(plants);
 
-      system.start();
-
-      // Advance time past minimum dormancy
-      vi.advanceTimersByTime(60 * 1000);
-
-      // Track which plants are germinated
-      const germinatedIds: string[] = [];
-      callback.mockImplementation(async (plantId: string) => {
-        germinatedIds.push(plantId);
-      });
-
-      // Mock random: first call triggers wave (0.01 < 0.05)
-      // Then always pass germination probability
+      // Mock random BEFORE starting:
+      // - Wave chance check: 0.01 < 0.05 (triggers wave)
+      // - Germination probability checks: 0.01 passes all
       vi.spyOn(Math, "random").mockReturnValue(0.01);
 
-      // Clear any callbacks from interval-triggered checks
+      system.start();
+
+      // Advance time past minimum dormancy (but don't let interval checks happen yet)
+      // We'll use triggerCheck directly after setting up time
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Clear any callbacks from interval-triggered checks during time advance
       callback.mockClear();
+      germinatedIds.length = 0;
 
       await system.triggerCheck();
 

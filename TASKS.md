@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Per-plant germination cooldown)_
+_Last updated: 2026-01-28 (Circular buffer for debug logs)_
 
 ## Project Status
 
@@ -34,7 +34,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 68  | ~~Fix empty plants array edge case~~                            | ✅ Done  | `page.tsx`                 |
 | 69  | ~~Add user-facing error notification for observation failures~~ | ✅ Done  | `use-observation.ts`       |
 | 70  | ~~Fix time-travel edge cases (zero duration, stale now)~~       | ✅ Done  | `time-travel-scrubber.tsx` |
-| 71  | Implement circular buffer for debug logs                        | P2       | `debug-logger.ts`          |
+| 71  | ~~Implement circular buffer for debug logs~~                    | ✅ Done  | `debug-logger.ts`          |
 | 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
 | 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
@@ -182,6 +182,19 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Circular Buffer for Debug Logs
+
+- Implemented circular buffer for debug logs (#71)
+- Created `CircularBuffer<T>` generic class with O(1) add operations
+- Buffer uses fixed-size array with head pointer and count tracking
+- When full, new entries automatically overwrite oldest entries
+- No more array `slice()` operations on every log entry
+- Methods: `push()`, `toArray()`, `clear()`, `length` getter
+- Updated `DebugLogger` to use `CircularBuffer<LogEntry>` instead of array
+- Updated `subscribe()`, `getLogs()`, `clear()`, and `log()` methods
+- Fixed flaky test "should prefer spatially distributed plants during wave events"
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Per-Plant Germination Cooldown
 

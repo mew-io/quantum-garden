@@ -26,8 +26,69 @@ export interface LogEntry {
 
 const MAX_LOGS = 100;
 
+/**
+ * CircularBuffer - Fixed-size buffer with O(1) add and automatic overwrite of oldest entries.
+ *
+ * Uses a head pointer to track the next write position. When full, new entries
+ * overwrite the oldest ones. Avoids array slice/copy operations on every add.
+ */
+class CircularBuffer<T> {
+  private buffer: (T | undefined)[];
+  private head = 0; // Next write position
+  private count = 0; // Current number of entries (up to capacity)
+  private readonly capacity: number;
+
+  constructor(capacity: number) {
+    this.capacity = capacity;
+    this.buffer = new Array(capacity);
+  }
+
+  /**
+   * Add an entry to the buffer. If full, overwrites the oldest entry.
+   */
+  push(entry: T): void {
+    this.buffer[this.head] = entry;
+    this.head = (this.head + 1) % this.capacity;
+    if (this.count < this.capacity) {
+      this.count++;
+    }
+  }
+
+  /**
+   * Get all entries in order (oldest first).
+   */
+  toArray(): T[] {
+    if (this.count === 0) return [];
+
+    const result: T[] = [];
+    // Start from the oldest entry
+    const start = this.count < this.capacity ? 0 : this.head;
+    for (let i = 0; i < this.count; i++) {
+      const index = (start + i) % this.capacity;
+      result.push(this.buffer[index] as T);
+    }
+    return result;
+  }
+
+  /**
+   * Clear all entries.
+   */
+  clear(): void {
+    this.buffer = new Array(this.capacity);
+    this.head = 0;
+    this.count = 0;
+  }
+
+  /**
+   * Get the number of entries currently in the buffer.
+   */
+  get length(): number {
+    return this.count;
+  }
+}
+
 class DebugLogger {
-  private logs: LogEntry[] = [];
+  private logs: CircularBuffer<LogEntry> = new CircularBuffer(MAX_LOGS);
   private listeners: Set<(logs: LogEntry[]) => void> = new Set();
   private enabled = true;
 
@@ -44,7 +105,7 @@ class DebugLogger {
   subscribe(listener: (logs: LogEntry[]) => void): () => void {
     this.listeners.add(listener);
     // Immediately send current logs to new subscriber
-    listener(this.logs);
+    listener(this.logs.toArray());
     return () => this.listeners.delete(listener);
   }
 
@@ -52,14 +113,14 @@ class DebugLogger {
    * Get all current logs.
    */
   getLogs(): LogEntry[] {
-    return [...this.logs];
+    return this.logs.toArray();
   }
 
   /**
    * Clear all logs.
    */
   clear(): void {
-    this.logs = [];
+    this.logs.clear();
     this.notifyListeners();
   }
 
@@ -79,11 +140,6 @@ class DebugLogger {
     };
 
     this.logs.push(entry);
-
-    // Trim to max size
-    if (this.logs.length > MAX_LOGS) {
-      this.logs = this.logs.slice(-MAX_LOGS);
-    }
 
     // Also log to console with appropriate method
     const consoleMethod =

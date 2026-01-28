@@ -25,7 +25,8 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 - Dual rendering modes: 64x64 pixel grids and smooth vector line rendering
 - Vector plants with progressive drawing transitions (brush stroke effects)
 - Lifecycle-based visual behaviors: GPU-accelerated shader animations for young/mature/old plants
-- Auto-germination system (plants slowly sprout over time)
+- Smart germination system: proximity bonuses, clustering prevention, age weighting, wave patterns
+- Evolution event notifications: subtle toasts for germination and entanglement events
 - Entanglement visualization (correlated trait reveals)
 - Mobile-responsive with touch controls
 - Time-travel system: scrub through garden evolution history (press T key)
@@ -35,8 +36,8 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ### Coming Soon 🎯
 
-- Enhanced evolution behaviors (proximity-based germination, wave patterns)
 - Educational quantum circuit explanations
+- Post-observation context panel
 - Performance optimizations for large gardens
 
 ---

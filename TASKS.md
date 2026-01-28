@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-27 (Sprint 4.1 Complete - Lifecycle Visual Behaviors)_
+_Last updated: 2026-01-27 (Sprint 4 Complete - Enhanced Garden Evolution)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: With quantum integration and time-travel complete, focus shifts to making the garden feel more alive through enhanced evolution behaviors and lifecycle-based visual animations.
+**Current Focus**: Core systems complete (quantum integration, time-travel, evolution behaviors). Next priority is manual testing and validation, followed by educational content and polish.
 
 ## Strategic Roadmap
 
@@ -45,16 +45,14 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - Test quantum pool selection (deterministic, even distribution)
    - Validate instant observation → trait reveal flow
    - Test vector rendering in live garden (verify all 9 variants work)
+   - Test lifecycle animations across all plant types and variants
+   - Verify smart germination behaviors (proximity, clustering, wave patterns)
+   - Monitor germination patterns over extended time (10+ minutes)
    - Test time-travel with substantial historical data (seed 100+ plants, observe over time)
    - Verify performance with larger gardens (100+ plants)
    - Test time-travel scrubbing smoothness and event marker accuracy
+   - Test evolution notifications (appearance, timing, dismissal)
    - Document any edge cases or issues discovered
-
-2. **Sprint 4: Enhanced Garden Evolution**
-   - Lifecycle-based visual behaviors
-   - Smart germination logic
-   - Evolution event notifications
-   - Makes garden feel "alive"
 
 ### Long-Term Vision (Next Month)
 
@@ -562,7 +560,7 @@ getEvolutionTimeline: publicProcedure
 
 ## Completed Work
 
-### 2026-01-27 - Sprint 4: Enhanced Garden Evolution (Tasks 4.1 & 4.2)
+### 2026-01-27 - Sprint 4: Enhanced Garden Evolution (Complete)
 
 **Lifecycle-Based Visual Behaviors (Task 4.1)**:
 
@@ -582,10 +580,22 @@ getEvolutionTimeline: publicProcedure
 - [x] Helper methods: getDistance(), hasObservedNeighbors(), isInCluster(), getAgeMultiplier()
 - [x] Enhanced logging with germination decision rationale
 
+**Evolution Event Notifications (Task 4.3)**:
+
+- [x] Created toast notification system (bottom-right, 3s auto-dismiss)
+- [x] Germination notifications ("A plant has germinated")
+- [x] Entanglement observation notifications ("Entangled plants observed")
+- [x] Fade in/out animations with click-to-dismiss
+- [x] Accessible design (role="status", aria-live="polite")
+- [x] Added notification state to garden store (addNotification, removeNotification)
+- [x] Integrated with germination callback in use-evolution.ts
+- [x] Integrated with observation system for entangled observations
+- [x] Calm aesthetic matching garden (black/80 background, green border)
+
 **Quality Checks**:
 
-- [x] TypeScript type-checking: PASS (2 packages, 954ms)
-- [x] ESLint linting: PASS (2 packages, 956ms)
+- [x] TypeScript type-checking: PASS (2 packages, 1.243s)
+- [x] ESLint linting: PASS (2 packages, 955ms)
 
 ### 2026-01-27 - Sprint 3: Time-Travel Experience (Complete)
 

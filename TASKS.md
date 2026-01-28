@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-27 (Loop 3 Synthesis)_
+_Last updated: 2026-01-27 (Sprint 3 Complete - Synthesis)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Complete the quantum integration loop by connecting observation to pre-computed quantum results, then implement time-travel to showcase the garden's evolution history.
+**Current Focus**: With quantum integration and time-travel complete, focus shifts to making the garden feel more alive through enhanced evolution behaviors and lifecycle-based visual animations.
 
 ## Strategic Roadmap
 
@@ -38,12 +38,14 @@ Build a slow-evolving generative environment where plants exist in quantum super
 
 ### Medium-Term Goals (Next 2 Weeks)
 
-1. **Manual Testing & Validation**
+1. **Manual Testing & Validation** (HIGH PRIORITY - NEXT)
    - Test quantum pool selection (deterministic, even distribution)
    - Validate instant observation → trait reveal flow
-   - Test vector rendering in live garden
-   - Test time-travel with historical data (when implemented)
-   - Document any edge cases or issues
+   - Test vector rendering in live garden (verify all 9 variants work)
+   - Test time-travel with substantial historical data (seed 100+ plants, observe over time)
+   - Verify performance with larger gardens (100+ plants)
+   - Test time-travel scrubbing smoothness and event marker accuracy
+   - Document any edge cases or issues discovered
 
 2. **Sprint 4: Enhanced Garden Evolution**
    - Lifecycle-based visual behaviors
@@ -86,14 +88,19 @@ Build a slow-evolving generative environment where plants exist in quantum super
 - **✨ Vector rendering system** - Smooth line-based rendering with 9 vector variants
 - **✨ Progressive drawing transitions** - Dynamic brush stroke effects on vector plants
 - **✨ Time-addressable rendering** - Foundation for time-travel feature with arbitrary time point rendering
+- **✨ Time-travel system** - Full historical state viewing with scrubber UI (T key toggle)
+- **✨ Evolution timeline** - Visual event markers for germinations and observations
+- **✨ Auto-play mode** - Watch garden evolution at 10x speed
 - 41 total plant variants (32 raster + 9 vector) across 6 categories (ground-cover, grass, flower, shrub, tree, ethereal)
 - 64x64 pixel grid patterns with lifecycle animations
 - Vector keyframe tweening with smooth interpolation
+- Mobile-responsive with touch controls
 
 ### Critical Gaps ❌
 
-- **No time-travel** - Database has timestamps but no API or UI to query historical states
 - **Limited evolution** - Only auto-germination, no other dynamic behaviors
+- **No educational content** - Quantum concepts not explained to users
+- **Basic visual behaviors** - Plants lack lifecycle-based animations
 
 ---
 

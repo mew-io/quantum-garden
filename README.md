@@ -27,11 +27,10 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 - Auto-germination system (plants slowly sprout over time)
 - Entanglement visualization (correlated trait reveals)
 - Mobile-responsive with touch controls
-- Time-addressable rendering (foundation for time-travel feature)
-
-### In Progress 🔄
-
-- **Time-Travel**: Building UI to scrub through garden evolution history
+- Time-travel system: scrub through garden evolution history (press T key)
+  - View historical plant states at any point in time
+  - Event markers show germinations and observations
+  - Auto-play mode to watch garden evolve at 10x speed
 
 ### Coming Soon 🎯
 

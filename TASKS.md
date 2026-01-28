@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Pause-on-Hover Notifications)_
+_Last updated: 2026-01-28 (Notification Stacking Limit)_
 
 ## Project Status
 
@@ -111,7 +111,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
 | 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
 | 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
-| 96  | Limit notification stacking to 3 max                | P2       | `evolution-notifications.tsx`   |
+| 96  | ~~Limit notification stacking to 3 max~~            | ✅ Done  | `garden-store.ts`               |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 99  | Add time-travel explanation to help                 | P2       | `info-overlay.tsx`              |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Notification Stacking Limit
+
+- Limited notification stacking to 3 max in `garden-store.ts` (#96)
+- Modified `addNotification` to keep only the last 2 existing notifications
+- Combined with the new notification = max 3 visible at once
+- Oldest notifications automatically removed when limit is reached
+- Uses `slice(-2)` to keep the most recent notifications
+- Prevents notification overload during rapid germination events or wave germinations
+- All 172 tests passing
 
 ### 2026-01-28 - Pause-on-Hover Notifications
 

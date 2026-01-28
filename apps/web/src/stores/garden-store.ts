@@ -126,19 +126,21 @@ export const useGardenStore = create<GardenState>((set) => ({
     }),
   setTimeTravelTimestamp: (timestamp) => set({ timeTravelTimestamp: timestamp }),
 
-  // Evolution notifications
+  // Evolution notifications (max 3 visible at once)
   notifications: [],
   addNotification: (message) =>
-    set((state) => ({
-      notifications: [
-        ...state.notifications,
-        {
-          id: `notification-${Date.now()}-${Math.random()}`,
-          message,
-          timestamp: Date.now(),
-        },
-      ],
-    })),
+    set((state) => {
+      const newNotification = {
+        id: `notification-${Date.now()}-${Math.random()}`,
+        message,
+        timestamp: Date.now(),
+      };
+      // Keep only the most recent notifications (max 3)
+      const existingNotifications = state.notifications.slice(-2); // Keep last 2
+      return {
+        notifications: [...existingNotifications, newNotification],
+      };
+    }),
   removeNotification: (id) =>
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),

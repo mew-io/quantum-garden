@@ -10,6 +10,7 @@ import { EvolutionNotifications } from "@/components/garden/evolution-notificati
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
+import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
 import { useGardenStore } from "@/stores/garden-store";
 import { trpc } from "@/lib/trpc/client";
 
@@ -187,6 +188,7 @@ export default function Home() {
         <EvolutionNotifications />
         <ObservationContextPanel />
         <CooldownIndicator />
+        <EvolutionPausedIndicator />
         {gardenCreatedAt && (
           <TimeTravelScrubber
             isActive={isTimeTravelMode}

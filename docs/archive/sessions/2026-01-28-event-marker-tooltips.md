@@ -1,7 +1,7 @@
 # Session Archive: Event Marker Tooltips
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: 645915a
 
 ---
 

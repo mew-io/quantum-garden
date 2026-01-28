@@ -29,7 +29,6 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ### In Progress 🔄
 
-- **Quantum Integration**: Connecting observation to pre-computed quantum results (jobs submit during plant creation, need observation reveal)
 - **Time-Travel**: Building UI to scrub through garden evolution history
 
 ### Coming Soon 🎯
@@ -40,19 +39,20 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ---
 
-## ⚠️ Quantum Integration Status
+## ✅ Quantum Integration Status
 
-**Real quantum execution is partially active.** Jobs are submitted to IonQ during plant creation and processed in the background, but observation does not yet reveal the quantum results.
+**Real quantum execution is fully active.** Jobs are submitted to IonQ during plant creation, processed in the background, and revealed when you observe a plant.
 
 **Current State**:
 
 - ✅ Quantum circuits submitted as background jobs during plant creation
 - ✅ IonQ simulator configured and ready (requires API key)
 - ✅ Job status visible in debug panel
-- 🟡 Observation reveals pre-computed traits (IN PROGRESS - Task 2.2)
+- ✅ Observation reveals pre-computed traits when quantum jobs complete
+- ✅ Graceful degradation to mock traits if quantum service unavailable
 - The UX remains identical whether using quantum hardware or mock generation
 
-**Next Step**: Connect observation system to check quantum job status and return traits when ready. This completes the quantum integration loop.
+**Quantum Integration Loop Complete**: Seed → Job Submission → Background Processing → Observation → Trait Revelation
 
 **Coordination Required**: Changes to the quantum service (`apps/quantum/`) require explicit coordination. The Qiskit circuit code and IonQ client are fully operational.
 

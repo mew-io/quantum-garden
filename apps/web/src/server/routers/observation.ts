@@ -7,7 +7,7 @@ import {
   getVariantById,
   getEffectivePalette,
 } from "@quantum-garden/shared";
-import { measureCircuit } from "../../lib/quantum-client";
+import { measureCircuit, getJobStatus } from "../../lib/quantum-client";
 
 /**
  * Simple seeded pseudo-random number generator.
@@ -173,29 +173,90 @@ export const observationRouter = router({
       // Get the circuit ID for trait mapping (defaults to "variational")
       // The circuit ID determines which trait mapper is used based on complexity level
       const circuitId = plant.quantumCircuit?.circuitId ?? "variational";
+      const ionqJobId = plant.quantumCircuit?.ionqJobId;
 
-      // Try to resolve traits via quantum service, fall back to mock if unavailable
-      let resolvedTraits: ResolvedTraits;
-      try {
-        resolvedTraits = await resolveTraitsFromQuantum(
-          plant.id,
-          circuitDefinition as string,
-          circuitId as string
-        );
-        console.log(
-          `[Quantum] Plant ${plant.id} observed via quantum service (circuit: ${circuitId})`
-        );
-      } catch (error) {
-        // Quantum service unavailable - fall back to mock traits
-        console.warn(
-          `[Quantum] Service unavailable for plant ${plant.id}, using mock traits:`,
-          error instanceof Error ? error.message : error
-        );
-        resolvedTraits = generateMockTraits(
-          circuitDefinition as string,
-          plant.variantId,
-          plant.colorVariationName
-        );
+      // Check if quantum job has been pre-computed
+      let resolvedTraits: ResolvedTraits | null = null;
+      let waitingForQuantum = false;
+      let executionMode = "mock";
+
+      // If we have a pre-submitted job, check its live status from quantum service
+      if (ionqJobId) {
+        try {
+          // Query quantum service for current job status
+          const jobResult = await getJobStatus(ionqJobId);
+
+          if (jobResult.status === "completed" && jobResult.traits) {
+            // Job completed - use pre-computed traits
+            resolvedTraits = jobResult.traits;
+            executionMode = jobResult.executionMode ?? "simulator";
+            console.log(
+              `[Quantum] Plant ${plant.id} using pre-computed traits (job: ${ionqJobId.substring(0, 8)}..., mode: ${executionMode})`
+            );
+          } else if (["pending", "submitted", "running"].includes(jobResult.status)) {
+            // Job still processing - observation completes but plant stays in superposed state
+            // Frontend will show "quantum computation in progress" indicator
+            waitingForQuantum = true;
+            console.log(
+              `[Quantum] Plant ${plant.id} observed but quantum job ${ionqJobId.substring(0, 8)}... still processing (${jobResult.status})`
+            );
+          } else if (["failed", "timeout"].includes(jobResult.status)) {
+            // Job failed - fall back to mock
+            console.warn(
+              `[Quantum] Job ${ionqJobId} failed for plant ${plant.id} (status: ${jobResult.status}), using mock traits`
+            );
+            resolvedTraits = generateMockTraits(
+              circuitDefinition as string,
+              plant.variantId,
+              plant.colorVariationName
+            );
+          } else {
+            // Unknown status - fall back to mock
+            console.warn(
+              `[Quantum] Unknown job status ${jobResult.status} for plant ${plant.id}, using mock traits`
+            );
+            resolvedTraits = generateMockTraits(
+              circuitDefinition as string,
+              plant.variantId,
+              plant.colorVariationName
+            );
+          }
+        } catch (error) {
+          // Job query failed - fall back to mock
+          console.warn(
+            `[Quantum] Failed to query job ${ionqJobId} for plant ${plant.id}, using mock:`,
+            error instanceof Error ? error.message : error
+          );
+          resolvedTraits = generateMockTraits(
+            circuitDefinition as string,
+            plant.variantId,
+            plant.colorVariationName
+          );
+        }
+      } else {
+        // No job ID - try real-time quantum service (legacy path)
+        try {
+          resolvedTraits = await resolveTraitsFromQuantum(
+            plant.id,
+            circuitDefinition as string,
+            circuitId as string
+          );
+          executionMode = "simulator";
+          console.log(
+            `[Quantum] Plant ${plant.id} observed via real-time quantum service (circuit: ${circuitId})`
+          );
+        } catch (error) {
+          // Quantum service unavailable - fall back to mock traits
+          console.warn(
+            `[Quantum] Service unavailable for plant ${plant.id}, using mock traits:`,
+            error instanceof Error ? error.message : error
+          );
+          resolvedTraits = generateMockTraits(
+            circuitDefinition as string,
+            plant.variantId,
+            plant.colorVariationName
+          );
+        }
       }
 
       const updatedPlant = await ctx.db.plant.update({
@@ -203,9 +264,11 @@ export const observationRouter = router({
         data: {
           observed: true,
           observedAt: new Date(),
-          visualState: "collapsed",
-          // Store resolved traits (pre-computed or mock-generated)
-          traits: resolvedTraits as unknown as object,
+          // If waiting for quantum computation, keep in superposed state
+          // Otherwise, collapse to show resolved traits
+          visualState: waitingForQuantum ? "superposed" : "collapsed",
+          // Store resolved traits only if available (not waiting)
+          traits: resolvedTraits ? (resolvedTraits as unknown as object) : undefined,
         },
       });
 
@@ -236,48 +299,102 @@ export const observationRouter = router({
 
           if (partnerCircuit) {
             const partnerCircuitId = partner.quantumCircuit?.circuitId ?? "variational";
+            const partnerJobId = partner.quantumCircuit?.ionqJobId;
 
-            // Try quantum service for entangled partner, fall back to mock
-            let correlatedTraits: ResolvedTraits;
-            try {
-              correlatedTraits = await resolveTraitsFromQuantum(
-                partner.id,
-                partnerCircuit as string,
-                partnerCircuitId as string
-              );
-              console.log(`[Quantum] Entangled partner ${partner.id} resolved via quantum service`);
-            } catch (error) {
-              // Fall back to mock with seed offset for correlation
-              console.warn(
-                `[Quantum] Service unavailable for partner ${partner.id}, using mock:`,
-                error instanceof Error ? error.message : error
-              );
-              correlatedTraits = generateMockTraits(
-                partnerCircuit as string,
-                partner.variantId,
-                partner.colorVariationName,
-                i + 1 // Offset based on position in entanglement group
-              );
+            // Check if partner's quantum job has been pre-computed
+            let correlatedTraits: ResolvedTraits | null = null;
+
+            // If partner has a pre-submitted job, check its live status from quantum service
+            if (partnerJobId) {
+              try {
+                // Query quantum service for current job status
+                const partnerJobResult = await getJobStatus(partnerJobId);
+
+                if (partnerJobResult.status === "completed" && partnerJobResult.traits) {
+                  // Job completed - use pre-computed traits
+                  correlatedTraits = partnerJobResult.traits;
+                  console.log(
+                    `[Quantum] Entangled partner ${partner.id} using pre-computed traits (job: ${partnerJobId.substring(0, 8)}...)`
+                  );
+                } else if (["pending", "submitted", "running"].includes(partnerJobResult.status)) {
+                  // Partner job still processing - skip for now
+                  // The partner will be revealed when its own observation completes
+                  console.log(
+                    `[Quantum] Entangled partner ${partner.id} job still processing (${partnerJobResult.status}), will reveal later`
+                  );
+                  continue;
+                } else {
+                  // Job failed or unknown status - fall back to mock
+                  console.warn(
+                    `[Quantum] Partner job ${partnerJobId} failed/timeout (status: ${partnerJobResult.status}), using mock traits`
+                  );
+                  correlatedTraits = generateMockTraits(
+                    partnerCircuit as string,
+                    partner.variantId,
+                    partner.colorVariationName,
+                    i + 1
+                  );
+                }
+              } catch (error) {
+                // Job query failed - fall back to mock
+                console.warn(
+                  `[Quantum] Failed to query job ${partnerJobId} for partner ${partner.id}, using mock:`,
+                  error instanceof Error ? error.message : error
+                );
+                correlatedTraits = generateMockTraits(
+                  partnerCircuit as string,
+                  partner.variantId,
+                  partner.colorVariationName,
+                  i + 1
+                );
+              }
+            } else {
+              // No job ID - try real-time quantum service (legacy path)
+              try {
+                correlatedTraits = await resolveTraitsFromQuantum(
+                  partner.id,
+                  partnerCircuit as string,
+                  partnerCircuitId as string
+                );
+                console.log(
+                  `[Quantum] Entangled partner ${partner.id} resolved via real-time quantum service`
+                );
+              } catch (error) {
+                // Fall back to mock with seed offset for correlation
+                console.warn(
+                  `[Quantum] Service unavailable for partner ${partner.id}, using mock:`,
+                  error instanceof Error ? error.message : error
+                );
+                correlatedTraits = generateMockTraits(
+                  partnerCircuit as string,
+                  partner.variantId,
+                  partner.colorVariationName,
+                  i + 1 // Offset based on position in entanglement group
+                );
+              }
             }
 
-            await ctx.db.plant.update({
-              where: { id: partner.id },
-              data: {
-                observed: true,
-                observedAt: new Date(),
-                visualState: "collapsed",
-                traits: correlatedTraits as unknown as object,
-              },
-            });
+            // Only update partner if we have traits (skip if still computing)
+            if (correlatedTraits) {
+              await ctx.db.plant.update({
+                where: { id: partner.id },
+                data: {
+                  observed: true,
+                  observedAt: new Date(),
+                  visualState: "collapsed",
+                  traits: correlatedTraits as unknown as object,
+                },
+              });
 
-            // Record observation event for partner
-            await ctx.db.observationEvent.create({
-              data: {
-                plantId: partner.id,
-                regionId: input.regionId,
-                quantumRecordId: partner.quantumCircuitId,
-              },
-            });
+              // Record observation event for partner
+              await ctx.db.observationEvent.create({
+                data: {
+                  plantId: partner.id,
+                  regionId: input.regionId,
+                  quantumRecordId: partner.quantumCircuitId,
+                },
+              });
+            }
           }
         }
       }
@@ -294,11 +411,13 @@ export const observationRouter = router({
         // Region not found in database - this is expected for in-memory regions
       }
 
-      // Return updated plant with information about entangled partners
+      // Return updated plant with information about entangled partners and quantum status
       // The frontend will refetch plants to get the updated partner states
       return {
         ...updatedPlant,
         entangledPartnersUpdated: plant.entanglementGroupId ? true : false,
+        waitingForQuantum,
+        quantumJobId: waitingForQuantum ? ionqJobId : undefined,
       };
     }),
 

@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Notification Stacking Limit)_
+_Last updated: 2026-01-28 (Evolution Paused Indicator)_
 
 ## Project Status
 
@@ -52,20 +52,20 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Phase 3: Evolution Improvements
 
-| #   | Task                                                        | Priority | File                          |
-| --- | ----------------------------------------------------------- | -------- | ----------------------------- |
-| 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`          |
-| 10  | Add minimum dormant count for wave events                   | P2       | `evolution-logic.ts`          |
-| 11  | Improve wave distribution (prefer spatial spread)           | P2       | `garden-evolution.ts`         |
-| 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`         |
-| 13  | Create EvolutionStatusIndicator component                   | P2       | NEW                           |
-| 14  | Update debug panel evolution badge to read from store       | P2       | `debug-panel.tsx`             |
-| 15  | Batch wave notifications                                    | P2       | `use-evolution.ts`            |
-| 16  | Add wave notification style                                 | P3       | `evolution-notifications.tsx` |
-| 17  | Show "Evolution Paused" during time-travel                  | P2       | `page.tsx`                    |
-| 18  | Add dormant plant count to debug panel                      | P3       | `debug-panel.tsx`             |
-| 19  | Add last germination time to debug panel                    | P3       | `debug-panel.tsx`             |
-| 20  | Reduce CHECK_INTERVAL from 30s to 15s                       | P2       | `garden-evolution.ts`         |
+| #   | Task                                                        | Priority | File                             |
+| --- | ----------------------------------------------------------- | -------- | -------------------------------- |
+| 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`             |
+| 10  | Add minimum dormant count for wave events                   | P2       | `evolution-logic.ts`             |
+| 11  | Improve wave distribution (prefer spatial spread)           | P2       | `garden-evolution.ts`            |
+| 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`            |
+| 13  | Create EvolutionStatusIndicator component                   | P2       | NEW                              |
+| 14  | Update debug panel evolution badge to read from store       | P2       | `debug-panel.tsx`                |
+| 15  | Batch wave notifications                                    | P2       | `use-evolution.ts`               |
+| 16  | Add wave notification style                                 | P3       | `evolution-notifications.tsx`    |
+| 17  | ~~Show "Evolution Paused" during time-travel~~              | ✅ Done  | `evolution-paused-indicator.tsx` |
+| 18  | Add dormant plant count to debug panel                      | P3       | `debug-panel.tsx`                |
+| 19  | Add last germination time to debug panel                    | P3       | `debug-panel.tsx`                |
+| 20  | Reduce CHECK_INTERVAL from 30s to 15s                       | P2       | `garden-evolution.ts`            |
 
 ### Phase 4: User Feedback & Discoverability
 
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Evolution Paused Indicator
+
+- Created `evolution-paused-indicator.tsx` component (#17)
+- Shows subtle amber-colored "Evolution Paused" indicator during time-travel mode
+- Positioned top-center with pause icon and text
+- Uses backdrop blur and animation for smooth appearance
+- Only visible when both `isTimeTravelMode` and `evolutionPaused` are true
+- ARIA live region for accessibility
+- Integrated into `page.tsx` component tree
+- All 172 tests passing
 
 ### 2026-01-28 - Notification Stacking Limit
 

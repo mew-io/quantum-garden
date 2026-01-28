@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Wave Min Dormant Count)_
+_Last updated: 2026-01-28 (Reduced CHECK_INTERVAL)_
 
 ## Project Status
 
@@ -65,7 +65,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 17  | ~~Show "Evolution Paused" during time-travel~~              | ✅ Done  | `evolution-paused-indicator.tsx` |
 | 18  | Add dormant plant count to debug panel                      | P3       | `debug-panel.tsx`                |
 | 19  | Add last germination time to debug panel                    | P3       | `debug-panel.tsx`                |
-| 20  | Reduce CHECK_INTERVAL from 30s to 15s                       | P2       | `garden-evolution.ts`            |
+| 20  | ~~Reduce CHECK_INTERVAL from 30s to 15s~~                   | ✅ Done  | `garden-evolution.ts`            |
 
 ### Phase 4: User Feedback & Discoverability
 
@@ -182,6 +182,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Reduced Evolution Check Interval
+
+- Reduced `CHECK_INTERVAL` from 30 seconds to 15 seconds in `garden-evolution.ts` (#20)
+- Garden evolution checks now occur twice as frequently
+- Makes the garden feel more responsive and alive
+- Germination opportunities evaluated more often
+- No probability changes - intentionally allowing faster evolution
+- All 174 tests passing (60 shared + 114 web)
 
 ### 2026-01-28 - Wave Minimum Dormant Count
 

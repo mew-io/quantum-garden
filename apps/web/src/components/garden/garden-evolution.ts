@@ -16,7 +16,7 @@ import type { Plant } from "@quantum-garden/shared";
 /** Evolution timing constants (in milliseconds) */
 const EVOLUTION = {
   /** How often to check for evolution opportunities */
-  CHECK_INTERVAL: 30_000, // 30 seconds
+  CHECK_INTERVAL: 15_000, // 15 seconds
 
   /** Minimum time before a dormant plant can germinate */
   MIN_DORMANCY: 60_000, // 1 minute

@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Toolbar Responsive Fix)_
+_Last updated: 2026-01-28 (Polling Deduplication)_
 
 ## Project Status
 
@@ -39,7 +39,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
 | 80  | Investigate z-layer sorting overhead                            | P2       | `plant-instancer.ts`       |
-| 81  | Deduplicate polling across components                           | P1       | `use-plants.ts`            |
+| 81  | ~~Deduplicate polling across components~~                       | ✅ Done  | `use-plants.ts`            |
 | 82  | Implement geometry pooling for vector primitives                | P1       | `vector-plant-overlay.ts`  |
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
 | 84  | Use partial buffer updates for dirty instances                  | P2       | `plant-instancer.ts`       |
@@ -182,6 +182,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Polling Deduplication
+
+- Removed redundant `trpc.plants.list.useQuery` polling from toolbar (#81)
+- Added `refetchInterval: 5000` to `usePlants` hook to keep store fresh
+- Toolbar now uses `useGardenStore` for plant data (single source of truth)
+- Added `useMemo` for efficient computation of plantCount, germinatedCount, observedCount
+- Updated loading indicator to use `plantCount === 0` instead of query `isLoading`
+- Reduces network requests from multiple components polling independently
+- All 128 tests passing
 
 ### 2026-01-28 - Toolbar Responsive Design Fix
 

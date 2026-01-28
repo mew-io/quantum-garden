@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useGardenStore } from "@/stores/garden-store";
-import { trpc } from "@/lib/trpc/client";
 
 /**
  * Toolbar - Persistent control bar for the Quantum Garden.
@@ -30,14 +29,16 @@ export function Toolbar({
   const { isTimeTravelMode, setTimeTravelMode, plants } = useGardenStore();
   const [showShortcuts, setShowShortcuts] = useState(false);
 
-  // Fetch plant data for status
-  const { data: plantsData, isLoading } = trpc.plants.list.useQuery(undefined, {
-    refetchInterval: 5000,
-  });
-
-  const plantCount = plantsData?.length ?? plants.length ?? 0;
-  const germinatedCount = plantsData?.filter((p) => p.germinatedAt !== null).length ?? 0;
-  const observedCount = plantsData?.filter((p) => p.observed).length ?? 0;
+  // Use store data (kept fresh by usePlants hook's polling in GardenScene)
+  // Memoize computed values to avoid recalculating on every render
+  const { plantCount, germinatedCount, observedCount } = useMemo(
+    () => ({
+      plantCount: plants.length,
+      germinatedCount: plants.filter((p) => p.germinatedAt !== null).length,
+      observedCount: plants.filter((p) => p.observed).length,
+    }),
+    [plants]
+  );
 
   // Toggle time travel
   const handleTimeTravelToggle = () => {
@@ -53,10 +54,10 @@ export function Toolbar({
         {/* Status Indicator */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded">
           <span
-            className={`w-2 h-2 rounded-full ${isLoading ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-pulse"}`}
+            className={`w-2 h-2 rounded-full ${plantCount === 0 ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-pulse"}`}
           />
           <span className="text-xs text-gray-400">
-            {isLoading ? "Loading..." : `${plantCount} plants`}
+            {plantCount === 0 ? "Loading..." : `${plantCount} plants`}
           </span>
         </div>
 

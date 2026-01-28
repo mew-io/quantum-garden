@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (entanglement groups shallow comparison)_
+_Last updated: 2026-01-28_
 
 ## Project Status
 
@@ -10,89 +10,43 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (95 Total)
+## Active Tasks (34 Remaining)
 
-### Phase 1: Evolution System Fix - COMPLETED
+### Bugs & Performance
 
-| #   | Task                                             | Status  |
-| --- | ------------------------------------------------ | ------- |
-| 1   | Create `useEvolutionSystem` hook                 | ✅ Done |
-| 2   | Call `useEvolutionSystem` in GardenScene         | ✅ Done |
-| 3   | Add time-travel mode subscription (pause/resume) | ✅ Done |
-| 4   | Add evolution state to store                     | ✅ Done |
-| 5   | Add `pause()`/`resume()` methods                 | ✅ Done |
-| 6   | Remove unused `germinationCallbackRef`           | ✅ Done |
-| 7   | Add `running` getter to GardenEvolutionSystem    | ✅ Done |
-| 8   | Log evolution events via debugLogger             | ✅ Done |
+| #   | Task                                             | Priority | File                      |
+| --- | ------------------------------------------------ | -------- | ------------------------- |
+| 74  | Make spatial grid adaptive to plant distribution | P3       | `spatial-grid.ts`         |
+| 83  | Audit texture atlas packing efficiency           | P3       | `texture-atlas.ts`        |
+| 88  | Profile render loop for 1000 plants              | P2       | -                         |
+| 89  | Cache previous keyframe meshes in vector overlay | P2       | `vector-plant-overlay.ts` |
+| 90  | Add performance monitoring to debug panel        | P3       | `debug-panel.tsx`         |
 
-### Phase 2: Bugs & Performance
+### Evolution Improvements
 
-| #   | Task                                                            | Priority | File                       |
-| --- | --------------------------------------------------------------- | -------- | -------------------------- |
-| 66  | ~~Fix vector plant geometry rebuilding every frame~~            | ✅ Done  | `vector-plant-overlay.ts`  |
-| 67  | ~~Debounce store subscriptions in garden-scene~~                | ✅ Done  | `garden-scene.tsx`         |
-| 68  | ~~Fix empty plants array edge case~~                            | ✅ Done  | `page.tsx`                 |
-| 69  | ~~Add user-facing error notification for observation failures~~ | ✅ Done  | `use-observation.ts`       |
-| 70  | ~~Fix time-travel edge cases (zero duration, stale now)~~       | ✅ Done  | `time-travel-scrubber.tsx` |
-| 71  | ~~Implement circular buffer for debug logs~~                    | ✅ Done  | `debug-logger.ts`          |
-| 72  | ~~Apply consistent safe area padding~~                          | ✅ Done  | Multiple files             |
-| 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
-| 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
-| 80  | ~~Investigate z-layer sorting overhead~~                        | ✅ Done  | `plant-instancer.ts`       |
-| 81  | ~~Deduplicate polling across components~~                       | ✅ Done  | `use-plants.ts`            |
-| 82  | ~~Implement material pooling for vector primitives~~            | Done     | `vector-plant-overlay.ts`  |
-| 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
-| 84  | ~~Use partial buffer updates for dirty instances~~              | ✅ Done  | `plant-instancer.ts`       |
-| 85  | ~~Add `hasActiveAnimations()` check to overlays~~               | ✅ Done  | `overlay-manager.ts`       |
-| 86  | ~~Shallow compare entanglement groups before rebuild~~          | ✅ Done  | `entanglement-overlay.ts`  |
-| 87  | ~~Skip frame-level syncPlants when store just synced~~          | ✅ Done  | `garden-scene.tsx`         |
-| 88  | Profile render loop for 1000 plants                             | P2       | -                          |
-| 89  | Cache previous keyframe meshes in vector overlay                | P2       | `vector-plant-overlay.ts`  |
-| 90  | Add performance monitoring to debug panel                       | P3       | `debug-panel.tsx`          |
+| #   | Task                                          | Priority | File                          |
+| --- | --------------------------------------------- | -------- | ----------------------------- |
+| 13  | Create EvolutionStatusIndicator component     | P2       | NEW                           |
+| 14  | Update debug panel evolution badge from store | P2       | `debug-panel.tsx`             |
+| 15  | Batch wave notifications                      | P2       | `use-evolution.ts`            |
+| 16  | Add wave notification style                   | P3       | `evolution-notifications.tsx` |
+| 18  | Add dormant plant count to debug panel        | P3       | `debug-panel.tsx`             |
+| 19  | Add last germination time to debug panel      | P3       | `debug-panel.tsx`             |
 
-### Phase 3: Evolution Improvements
-
-| #   | Task                                                            | Priority | File                             |
-| --- | --------------------------------------------------------------- | -------- | -------------------------------- |
-| 9   | ~~Add guaranteed germination after 15 min dormancy~~            | ✅ Done  | `evolution-logic.ts`             |
-| 10  | ~~Add minimum dormant count for wave events~~                   | ✅ Done  | `garden-evolution.ts`            |
-| 11  | ~~Improve wave distribution (prefer spatial spread)~~           | ✅ Done  | `garden-evolution.ts`            |
-| 12  | ~~Add per-plant germination cooldown near recent germinations~~ | ✅ Done  | `garden-evolution.ts`            |
-| 13  | Create EvolutionStatusIndicator component                       | P2       | NEW                              |
-| 14  | Update debug panel evolution badge to read from store           | P2       | `debug-panel.tsx`                |
-| 15  | Batch wave notifications                                        | P2       | `use-evolution.ts`               |
-| 16  | Add wave notification style                                     | P3       | `evolution-notifications.tsx`    |
-| 17  | ~~Show "Evolution Paused" during time-travel~~                  | ✅ Done  | `evolution-paused-indicator.tsx` |
-| 18  | Add dormant plant count to debug panel                          | P3       | `debug-panel.tsx`                |
-| 19  | Add last germination time to debug panel                        | P3       | `debug-panel.tsx`                |
-| 20  | ~~Reduce CHECK_INTERVAL from 30s to 15s~~                       | ✅ Done  | `garden-evolution.ts`            |
-
-### Phase 4: User Feedback & Discoverability
+### User Feedback & Discoverability
 
 | #   | Task                                              | Priority | File                            |
 | --- | ------------------------------------------------- | -------- | ------------------------------- |
-| 46  | ~~Add dwell-time observation mode~~               | ✅ Done  | `observation-system.ts`         |
-| 47  | ~~Connect dwell progress to store~~               | ✅ Done  | `observation-system.ts`         |
-| 48  | ~~Create cooldown indicator component~~           | ✅ Done  | `cooldown-indicator.tsx`        |
-| 49  | ~~Position cooldown indicator near corner~~       | ✅ Done  | `page.tsx`                      |
-| 50  | ~~Increase notification duration to 5-6s~~        | ✅ Done  | `evolution-notifications.tsx`   |
-| 51  | ~~Increase context panel duration to 30s~~        | ✅ Done  | `observation-context-panel.tsx` |
-| 52  | ~~Add pause-on-hover for notifications~~          | ✅ Done  | `evolution-notifications.tsx`   |
 | 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
-| 54  | ~~Increase event marker touch targets to 20px~~   | ✅ Done  | `time-travel-scrubber.tsx`      |
-| 55  | ~~Add event marker tooltips~~                     | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
-| 57  | ~~Add keyboard shortcut hints to info overlay~~   | ✅ Done  | `info-overlay.tsx`              |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
-| 60  | ~~Gate debug panel behind env variable~~          | ✅ Done  | `debug-panel.tsx`               |
-| 61  | ~~Hide debug button in toolbar for production~~   | ✅ Done  | `toolbar.tsx`                   |
 | 62  | Add keyboard shortcut discovery hint              | P2       | `page.tsx`                      |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
 | 64  | Show entanglement lines more prominently          | P2       | `entanglement-overlay.ts`       |
 | 65  | Add entanglement legend to info overlay           | P2       | `info-overlay.tsx`              |
 
-### Phase 5: Quantum Accuracy
+### Quantum Accuracy
 
 | #   | Task                                                  | Priority | File                 |
 | --- | ----------------------------------------------------- | -------- | -------------------- |
@@ -102,41 +56,35 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 78  | Review opacity-from-consistency logic                 | P3       | `observation.ts`     |
 | 79  | Consider probability-weighted superposition rendering | P3       | `plant-instancer.ts` |
 
-### Phase 6: Polish
+### Polish
 
 | #   | Task                                                | Priority | File                            |
 | --- | --------------------------------------------------- | -------- | ------------------------------- |
 | 91  | Standardize auto-dismiss timers in constants        | P2       | `constants.ts`                  |
-| 92  | ~~Rename "Return to Live" to "Exit Timeline"~~      | ✅ Done  | `time-travel-scrubber.tsx`      |
 | 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
 | 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
 | 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
-| 96  | ~~Limit notification stacking to 3 max~~            | ✅ Done  | `garden-store.ts`               |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 99  | Add time-travel explanation to help                 | P2       | `info-overlay.tsx`              |
-| 100 | ~~Add loading state during initial plant fetch~~    | ✅ Done  | `page.tsx`                      |
 | 101 | Complete keyboard shortcuts list                    | P2       | `toolbar.tsx`                   |
 | 102 | Plan sound effects system                           | P3       | -                               |
 | 103 | Add playback speed control to time-travel           | P3       | `time-travel-scrubber.tsx`      |
 | 104 | Add "scrub to now" quick button                     | P3       | `time-travel-scrubber.tsx`      |
 
-### Phase 7: Testing & Documentation
+### Testing & Documentation
 
-| #   | Task                                      | Priority | File                           |
-| --- | ----------------------------------------- | -------- | ------------------------------ |
-| 105 | ~~Add GardenEvolutionSystem unit tests~~  | ✅ Done  | `garden-evolution.test.ts`     |
-| 106 | ~~Add useEvolutionSystem hook tests~~     | ✅ Done  | `use-evolution-system.test.ts` |
-| 107 | Add integration test for germination flow | P2       | NEW                            |
-| 108 | Add tests for wave germination logic      | P2       | `evolution-logic.test.ts`      |
-| 109 | ~~Add tests for guaranteed germination~~  | ✅ Done  | `evolution-logic.test.ts`      |
-| 110 | Add store tests for evolution state       | P2       | NEW                            |
-| 111 | Add visual regression test checklist      | P3       | `docs/testing.md`              |
-| 112 | Update README with evolution system info  | P2       | `README.md`                    |
-| 113 | Add JSDoc to useEvolutionSystem hook      | P2       | `use-evolution-system.ts`      |
-| 114 | Update architecture docs                  | P2       | `docs/architecture.md`         |
-| 117 | Test with 100+ plants for performance     | P2       | -                              |
-| 118 | Test extended session for memory leaks    | P2       | -                              |
+| #   | Task                                      | Priority | File                      |
+| --- | ----------------------------------------- | -------- | ------------------------- |
+| 107 | Add integration test for germination flow | P2       | NEW                       |
+| 108 | Add tests for wave germination logic      | P2       | `evolution-logic.test.ts` |
+| 110 | Add store tests for evolution state       | P2       | NEW                       |
+| 111 | Add visual regression test checklist      | P3       | `docs/testing.md`         |
+| 112 | Update README with evolution system info  | P2       | `README.md`               |
+| 113 | Add JSDoc to useEvolutionSystem hook      | P2       | `use-evolution-system.ts` |
+| 114 | Update architecture docs                  | P2       | `docs/architecture.md`    |
+| 117 | Test with 100+ plants for performance     | P2       | -                         |
+| 118 | Test extended session for memory leaks    | P2       | -                         |
 
 ---
 

@@ -47,9 +47,9 @@ export function Toolbar({
   };
 
   return (
-    <div className="fixed top-4 left-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-4 left-4 right-4 sm:right-auto z-50 flex flex-col gap-2">
       {/* Main Toolbar */}
-      <div className="flex items-center gap-2 bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-700/50 p-2 shadow-xl">
+      <div className="flex flex-wrap items-center gap-2 bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-700/50 p-2 shadow-xl max-w-full overflow-hidden">
         {/* Status Indicator */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded">
           <span
@@ -104,7 +104,7 @@ export function Toolbar({
       </div>
 
       {/* Garden Status Bar */}
-      <div className="flex items-center gap-3 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-700/50 px-3 py-2 shadow-lg text-xs">
+      <div className="hidden sm:flex items-center gap-3 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-700/50 px-3 py-2 shadow-lg text-xs">
         <StatusItem
           icon={<SeedIcon />}
           label="Dormant"
@@ -182,7 +182,7 @@ function ToolbarButton({
       title={shortcut ? `${label} (${shortcut})` : label}
     >
       {icon}
-      <span className="text-xs font-medium">{label}</span>
+      <span className="hidden min-[400px]:inline text-xs font-medium">{label}</span>
       {shortcut && (
         <kbd className="hidden sm:inline-block ml-1 px-1 py-0.5 text-[10px] bg-gray-900/50 rounded text-gray-500">
           {shortcut}

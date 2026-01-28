@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Observation Error Notification)_
+_Last updated: 2026-01-28 (Toolbar Responsive Fix)_
 
 ## Project Status
 
@@ -36,7 +36,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 70  | Fix time-travel edge cases (zero duration, stale now)           | P2       | `time-travel-scrubber.tsx` |
 | 71  | Implement circular buffer for debug logs                        | P2       | `debug-logger.ts`          |
 | 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
-| 73  | Fix toolbar overflow on small screens                           | P1       | `toolbar.tsx`              |
+| 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
 | 80  | Investigate z-layer sorting overhead                            | P2       | `plant-instancer.ts`       |
 | 81  | Deduplicate polling across components                           | P1       | `use-plants.ts`            |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Toolbar Responsive Design Fix
+
+- ✅ Fixed toolbar overflow on small screens (#73)
+- ✅ Main toolbar container: Added `right-4 sm:right-auto` for width constraint on mobile
+- ✅ Added `flex-wrap` and `max-w-full overflow-hidden` to prevent content overflow
+- ✅ Garden status bar: Hidden on mobile (`hidden sm:flex`) - not essential info
+- ✅ Button labels: Hidden on very small screens (`hidden min-[400px]:inline`)
+- ✅ Icons remain visible on all screen sizes, maintaining functionality
+- ✅ Toolbar now works well on screens as small as 320px
+- ✅ All 128 tests passing
 
 ### 2026-01-28 - Observation Error Notification
 

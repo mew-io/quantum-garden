@@ -53,6 +53,9 @@ const EVOLUTION = {
 
   /** Wave germination count */
   WAVE_GERMINATION_COUNT: 3, // 3-5 plants germinate in a wave
+
+  /** Minimum dormant plants required for wave events */
+  WAVE_MIN_DORMANT_COUNT: 5, // Need at least 5 dormant plants for a wave
 };
 
 type GerminationCallback = (plantId: string) => Promise<void>;
@@ -285,8 +288,9 @@ export class GardenEvolutionSystem {
 
     if (eligiblePlants.length === 0) return;
 
-    // Determine if this is a wave event
-    const isWave = Math.random() < EVOLUTION.WAVE_CHANCE;
+    // Determine if this is a wave event (requires minimum dormant count)
+    const canWave = eligiblePlants.length >= EVOLUTION.WAVE_MIN_DORMANT_COUNT;
+    const isWave = canWave && Math.random() < EVOLUTION.WAVE_CHANCE;
     const maxGerminations = isWave
       ? EVOLUTION.WAVE_GERMINATION_COUNT + Math.floor(Math.random() * 3) // 3-5 plants
       : EVOLUTION.MAX_GERMINATIONS_PER_CHECK;

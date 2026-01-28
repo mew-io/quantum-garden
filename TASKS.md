@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Evolution Paused Indicator)_
+_Last updated: 2026-01-28 (Wave Min Dormant Count)_
 
 ## Project Status
 
@@ -55,7 +55,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | #   | Task                                                        | Priority | File                             |
 | --- | ----------------------------------------------------------- | -------- | -------------------------------- |
 | 9   | ~~Add guaranteed germination after 15 min dormancy~~        | ✅ Done  | `evolution-logic.ts`             |
-| 10  | Add minimum dormant count for wave events                   | P2       | `evolution-logic.ts`             |
+| 10  | ~~Add minimum dormant count for wave events~~               | ✅ Done  | `garden-evolution.ts`            |
 | 11  | Improve wave distribution (prefer spatial spread)           | P2       | `garden-evolution.ts`            |
 | 12  | Add per-plant germination cooldown near recent germinations | P2       | `garden-evolution.ts`            |
 | 13  | Create EvolutionStatusIndicator component                   | P2       | NEW                              |
@@ -182,6 +182,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Wave Minimum Dormant Count
+
+- Added `WAVE_MIN_DORMANT_COUNT` constant (5) to `garden-evolution.ts` (#10)
+- Wave germination events now require at least 5 dormant plants to trigger
+- Prevents waves from occurring when the garden is sparse
+- Added `canWave` check before wave probability roll
+- Added 2 new tests in `garden-evolution.test.ts`:
+  - "should limit germinations to MAX_GERMINATIONS_PER_CHECK when below WAVE_MIN_DORMANT_COUNT"
+  - "should allow wave germinations (3+) when at or above WAVE_MIN_DORMANT_COUNT"
+- All 174 tests passing (60 shared + 114 web)
 
 ### 2026-01-28 - Evolution Paused Indicator
 

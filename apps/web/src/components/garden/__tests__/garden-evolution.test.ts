@@ -341,4 +341,78 @@ describe("GardenEvolutionSystem", () => {
       expect(callback).toHaveBeenCalled();
     });
   });
+
+  describe("wave events", () => {
+    it("should limit germinations to MAX_GERMINATIONS_PER_CHECK when below WAVE_MIN_DORMANT_COUNT", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create only 4 dormant plants (below the 5 minimum for waves)
+      // Space them far apart to avoid clustering
+      const plants = [
+        createMockPlant("p1", 100, 100),
+        createMockPlant("p2", 500, 100),
+        createMockPlant("p3", 100, 500),
+        createMockPlant("p4", 500, 500),
+      ];
+      setMockPlants(plants);
+
+      system.start();
+
+      // Advance time past minimum dormancy but not past a second interval
+      // MIN_DORMANCY is 60s, CHECK_INTERVAL is 30s
+      // We need plants to be tracked for 60s+ so we can manually call triggerCheck
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Mock random to always pass germination probability (0.01 < 0.15)
+      // canWave is false (4 < 5), so Math.random() is only called for germination probability
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      // Clear any callbacks from interval-triggered checks during advanceTimersByTime
+      callback.mockClear();
+
+      await system.triggerCheck();
+
+      // Without wave (< 5 plants), only MAX_GERMINATIONS_PER_CHECK (1) should germinate
+      // in a SINGLE triggerCheck call, even though all plants would pass probability
+      expect(callback.mock.calls.length).toBe(1);
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should allow wave germinations (3+) when at or above WAVE_MIN_DORMANT_COUNT", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create 6 dormant plants (above the 5 minimum for waves)
+      // Space them far apart to avoid clustering prevention
+      const plants = [
+        createMockPlant("p1", 100, 100),
+        createMockPlant("p2", 500, 100),
+        createMockPlant("p3", 900, 100),
+        createMockPlant("p4", 100, 500),
+        createMockPlant("p5", 500, 500),
+        createMockPlant("p6", 900, 500),
+      ];
+      setMockPlants(plants);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Mock random to always trigger wave chance and always pass germination probability
+      vi.spyOn(Math, "random").mockReturnValue(0.01); // < 0.05 = wave, < 0.15 = germinate
+
+      // Clear any callbacks from interval-triggered checks
+      callback.mockClear();
+
+      await system.triggerCheck();
+
+      // With wave triggered (6 >= 5), should germinate 3-5 plants (wave count)
+      expect(callback.mock.calls.length).toBeGreaterThanOrEqual(3);
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+  });
 });

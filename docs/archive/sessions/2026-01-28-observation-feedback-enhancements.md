@@ -121,4 +121,4 @@ This creates a smooth "arrival" effect where particles slow down as they approac
 
 ## Commit
 
-_(To be updated after commit)_
+`a647510b8b7473c8224a11ed37b08bfc8af392d2`

@@ -1,7 +1,7 @@
 # Session Archive: Material Pooling for Vector Plants
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: 60d1ae7
 
 ---
 

@@ -1,677 +1,473 @@
-# Quantum Garden - Task Tracking
+# Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-18 (Session 36 - Tablet Breakpoints)_
+_Last updated: 2026-01-27 (Sprint Planning Session)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
----
-
-## Current Sprint
-
-### In Progress
-
-_No tasks currently in progress_
-
-### Up Next
-
-#### Mobile Experience Improvements
-
-Critical UX feedback missing for touch users:
-
-- [x] **Dwell progress indicator**: Visual ring/arc around plant showing observation progress (0-100%) - Done
-- [x] **Touch mode indicator**: Subtle UI hint when reticle switches to touch mode - Done
-- [x] **Observation feedback**: Visual pulse/glow when observation completes - Done
-- [x] **Haptic feedback**: Vibration on observation complete and touch mode activation - Done
-
-#### Sandbox Mobile Polish
-
-Secondary improvements for sandbox on mobile:
-
-- [x] **Timeline overflow**: Prevent horizontal overflow on small phones - Done
-- [x] **Control panel touch targets**: Increase button sizes for mobile - Done
-- [x] **Tablet breakpoints**: Add `md:` breakpoints for better tablet layouts - Done
-
-#### Manual Testing Required
-
-The Garden Ecosystem Expansion is code-complete. Before considering the feature done, manual visual testing is required:
-
-- [ ] Run `pnpm db:seed` to populate garden with all 14 variants
-- [ ] Start dev server (`pnpm dev`) and view at http://localhost:14923
-- [ ] Check sandbox at http://localhost:14923/sandbox to preview all variants
-- [ ] Verify visual balance and z-ordering in the garden
-- [ ] Consider adjusting scale/rarity values based on visual feedback
+**Current Focus**: Implement the user-facing quantum simulation experience with functional garden rendering, autonomous evolution, time-travel, and real IonQ quantum data integration.
 
 ---
 
-## Completed
-
-### 2026-01-18 - Tablet Breakpoints
-
-- [x] Add `md:` breakpoints for better tablet layouts in sandbox
-  - Gallery header: Superposed preview shown at tablet size (`md:` instead of `lg:`)
-  - Gallery layout: Table view on tablets (`hidden md:block`), cards only on mobile
-  - Detail view: Two-column layout starts at tablet (`md:flex-row`)
-  - Config panel: Responsive width `md:w-72 lg:w-80` (narrower on tablet)
-  - Footer: Stacks vertically on mobile, horizontal on tablet (`flex-col md:flex-row`)
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Control Panel Touch Targets
-
-- [x] Increase sandbox control panel button sizes for mobile touch targets (44px+ minimum)
-  - Icon buttons: `p-2` to `p-3`, icons `w-4 h-4` to `w-5 h-5`
-  - Speed/scale/background selector buttons: `px-2 py-1 text-xs` to `px-3 py-2 text-sm`
-  - Grid toggle and back button: `px-3 py-1` to `px-4 py-2`
-  - Increased gaps between button groups for better touch separation
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Timeline Overflow Fix
-
-- [x] Fix horizontal overflow in sandbox timeline on small phones
-  - Add `overflow-x-auto` to timeline track container for horizontal scrolling
-  - Add styled scrollbar classes (`scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent`)
-  - Add `min-w-fit` to keyframe container for proper content sizing
-  - Reduce keyframe `minWidth` from 60px to 48px for better mobile fit
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Haptic Feedback
-
-- [x] Create haptic feedback utility module (`apps/web/src/utils/haptics.ts`)
-  - `supportsHaptics()` - checks for Web Vibration API support
-  - `hapticLight()` - 15ms pulse for subtle feedback (touch mode activation)
-  - `hapticMedium()` - 30ms pulse for confirmations
-  - `hapticSuccess()` - two quick pulses [40, 50, 40] for celebrations
-  - `hapticCustom()` - arbitrary vibration patterns
-  - Gracefully degrades (no-op) on unsupported devices (iOS Safari, desktop)
-- [x] Integrate haptics into GardenCanvas
-  - `hapticLight()` triggers on touch mode activation for tactile confirmation
-  - `hapticSuccess()` triggers on observation complete before visual celebration
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Observation Feedback
-
-- [x] Create ObservationFeedback class for visual celebration on observation complete
-  - Two staggered expanding rings at plant location (inner cyan, outer white)
-  - Inner ring: 25px → 50px radius with immediate start
-  - Outer ring: 30px → 70px radius with 0.1s delay
-  - 0.8s animation duration with cubic ease-out
-  - Supports multiple simultaneous celebrations
-- [x] Integrate ObservationFeedback into GardenCanvas
-  - Initialized after dwell indicator (above plants, below reticle)
-  - triggerCelebration called in observation callback before entanglement pulse
-  - Proper cleanup in unmount handler
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Touch Mode Indicator
-
-- [x] Create TouchModeIndicator class for visual feedback on mode switch
-  - Expanding ring animation at touch location when touch mode activates
-  - Ring expands from 20px to 60px radius over 0.6 seconds
-  - Uses eased-out cubic animation with fading alpha
-  - Soft cyan color (#4ecdc4) to match garden theme
-- [x] Add ModeChangeCallback to ReticleController
-  - New `setModeChangeCallback()` method for external notifications
-  - Callback triggered when control mode actually changes (not just set)
-- [x] Integrate TouchModeIndicator into GardenCanvas
-  - Initialized after reticle controller (above reticle for visibility)
-  - Mode change callback triggers pulse animation on touch mode activation
-  - Proper cleanup in unmount handler
-- [x] All quality checks passing: TypeScript, lint, 87 tests (49 shared + 38 web)
-
-### 2026-01-18 - Dwell Progress Indicator
-
-- [x] Create DwellIndicator class following EntanglementRenderer pattern
-  - Subscribes to garden store for `dwellTarget`, `dwellProgress`, and `plants`
-  - Draws circular progress arc around observed plant
-  - Subtle gray background track with soft cyan progress arc
-  - 35px radius, starts from top of circle (12 o'clock position)
-- [x] Integrate DwellIndicator into GardenCanvas
-  - Initialized after plant renderer (above plants, below reticle)
-  - Proper cleanup on unmount
-- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
-
-### 2026-01-18 - Info Overlay Implementation
-
-- [x] Create InfoOverlay component with device-aware messaging
-  - Desktop: Explains autonomous reticle drift and automatic observation
-  - Mobile: Explains touch-and-hold interaction
-  - Touch detection via `useIsTouchDevice` hook
-- [x] Add localStorage persistence for dismissal state
-  - Key: `quantum-garden-info-dismissed`
-  - Dismissal persists across sessions (shows only on first visit)
-- [x] Implement smooth fade-in/fade-out animations
-  - Scale transition (95% to 100%)
-  - Opacity transition (0 to 100%)
-- [x] Match garden's calm visual aesthetic
-  - Dark semi-transparent backdrop (rgba(0, 0, 0, 0.6))
-  - Rounded corners, subtle border
-  - Soft gray color palette
-- [x] Integrate InfoOverlay into main garden page
-- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
-
-### 2026-01-18 - Sandbox UX Consolidation
-
-- [x] Consolidate Superposed View into Gallery View
-  - Removed separate "superposed" view mode from sandbox
-  - Created `SuperposedPreview` component as compact, self-contained widget
-  - Integrated SuperposedPreview into VariantGallery header (desktop only)
-  - Superposed preview is now always visible while browsing variants
-- [x] Simplify sandbox URL structure
-  - Removed `?view=superposed` URL parameter (no longer needed)
-  - Now only two views: gallery (default) and detail (`?variant=...`)
-  - Updated `useSandboxUrlSync` hook to remove superposed handling
-- [x] Simplify sandbox state management
-  - Removed `goToSuperposed` action from store
-  - Reduced `ViewMode` type from 3 to 2 options (`gallery` | `detail`)
-  - Removed superposed button from gallery header
-- [x] Delete redundant `superposed-view.tsx` component
-- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
-
-### 2026-01-17 - Sandbox URL Sync and Tweening Fixes
-
-- [x] Create `useSandboxUrlSync` hook for shareable sandbox URLs
-  - Supports `/sandbox?variant=simple-bloom&color=red` format
-  - Syncs view mode, variant selection, and color variation to URL
-  - Includes `buildSandboxUrl()` helper for generating links
-- [x] Add Suspense boundary to sandbox page for URL param loading
-- [x] Fix edge-only tweening in lifecycle system
-  - Tweening now only occurs in first 10% of keyframe (tween-in from previous)
-  - No tween-out at keyframe end - eliminates discontinuity at boundaries
-  - Added `prevKeyframe` tracking to `ComputedLifecycleState`
-  - Track `hasLooped` flag to avoid wrapping prevKeyframe on first loop iteration
-- [x] Update VariantPreview to use `getActiveVisual()` helper function
-- [x] Improve sandbox responsive layout
-  - Fixed overflow handling with `h-screen overflow-hidden`
-  - Made header/footer non-shrinkable
-  - Better detail view layout on mobile
-- [x] Enhance VariantGallery mobile experience
-  - Full stats display (duration, features) on mobile cards
-  - Keyframe strip preview on mobile
-  - Sticky table header for desktop
-  - Prevent column squishing with `whitespace-nowrap`
-- [x] Update default sandbox scale from 16 to 2 (appropriate for 64x64 grids)
-- [x] Add 4 new lifecycle tests for prevKeyframe and loop behavior
-- [x] All quality checks passing: TypeScript, 87 tests (49 shared + 38 web), lint
-
-### 2026-01-17 - Sandbox Visual Polish
-
-- [x] Refactor MiniGlyph to use canvas-based rendering for 64x64 performance
-- [x] Add distance-from-center gradient coloring to MiniGlyph (matches plant-sprite.ts)
-- [x] Update VariantGallery with responsive layout (mobile cards, desktop table)
-- [x] Update VariantPreview GRID_SIZE from 8 to 64
-- [x] Add gradient coloring to VariantPreview (matches plant-sprite.ts)
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - Autowork: Garden Ecosystem Expansion (7 loops)
-
-Full ecosystem expansion completed via automated autowork session:
-
-- **14 total plant variants** across 6 categories implemented
-- **64x64 grid pattern upgrade** with pattern-builder utilities
-- **Pattern builder module** for programmatic glyph generation
-- **Z-ordering system** for visual depth (ground cover to ethereal)
-- **Seed script updated** to 24 plants with 3 entangled pairs
-- **83 tests passing**, TypeScript and lint clean
-
-See archive: `docs/archive/sessions/2026-01-17-autowork-ecosystem-complete.md`
-
-### 2026-01-17 - Scale and Z-Ordering Integration
-
-- [x] Verify scale is correctly applied in PlantSprite rendering:
-  - `renderCollapsed()` uses `keyframe.scale ?? 1`
-  - `renderSuperposed()` applies scale to each layer
-  - `drawKeyframe()` calculates `pixelSize = cellSize * keyframeScale`
-- [x] Verify scale interpolation works between keyframes:
-  - `interpolateKeyframes` in lifecycle.ts lerps between `from.scale` and `to.scale`
-  - Returns interpolated scale in result object
-- [x] Add z-ordering by plant category to PlantRenderer:
-  - `CATEGORY_Z_ORDER` map assigns z-index per variant ID
-  - Ground cover: 0-9 (back), Grasses: 10-19, Flowers: 20-29
-  - Shrubs: 30-39, Trees: 40-49, Ethereal: 50+ (front)
-  - Enabled `sortableChildren = true` on plants container
-  - Set `sprite.zIndex` when creating sprites
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - Seed Distribution Update
-
-- [x] Increase plant count from 12 to 24 for better variant distribution
-- [x] Increase entangled pairs from 2 to 3
-- [x] Verify seed script dynamically uses PLANT_VARIANTS array with rarity-based selection
-- [x] Confirm all 14 variants automatically available via shared package export
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - Ecosystem Expansion (Phase 4: Trees)
-
-- [x] Create sapling-hope variant (rarity 0.3, rare)
-  - 5 keyframes: seedling, sprout, growing, young, mature
-  - Delicate branching with progressive leaf unfurling
-  - Rich spring-to-forest green color progression
-  - Scale 0.6-1.8x, grows from small seedling to larger tree
-- [x] Create weeping-willow variant (rarity 0.25, rare)
-  - 6 keyframes: sapling, growing, full, sway-left, sway-right, rest
-  - Continuous gentle sway animation with `loop: true`
-  - Cascading fronds using drawGrassBlade utility
-  - Silvery-green willow color palette
-  - Scale 1.0-2.5x, tall landmark tree
-- [x] Add pattern generators using pattern-builder utilities
-- [x] Add TREES section between SHRUBS and ETHEREAL in definitions.ts
-- [x] Updated PLANT_VARIANTS array - now 14 total variants
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - Ecosystem Expansion (Phase 3: Shrubs)
-
-- [x] Create cloud-bush variant (rarity 0.4, uncommon)
-  - 5 keyframes: base, full, breathe-in, breathe-out, berried
-  - Rounded puffy shape with overlapping circles
-  - "Breathing" animation via scale oscillation (1.15-1.25x) with loop
-  - Berry details appear in final stage with color accent
-  - Scale 1.0-1.3x for medium structure
-- [x] Create berry-thicket variant (rarity 0.4, uncommon)
-  - 4 keyframes: sparse, growing, fruiting, ripe
-  - Dense branching pattern with progressive fruiting
-  - Berries materialize and grow larger through lifecycle
-  - Rich green-to-berry color palette transition
-  - Scale 1.0-1.4x for larger structure
-- [x] Add pattern generators for both shrub variants using pattern-builder
-- [x] Add SHRUBS section between GRASSES and ETHEREAL in definitions.ts
-- [x] Updated PLANT_VARIANTS array - now 12 total variants
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - 64x64 Grid Pattern Upgrade
-
-- [x] Upgrade glyph patterns from 8x8 to 64x64 for dramatically better visual quality
-- [x] Update GRID_SIZE constant from 8 to 64 in plant-sprite.ts
-- [x] Update DEFAULT_SCALE from 4 to 1 (64x64 grid = 64x64 pixel plant)
-- [x] Update GLYPH constants: MAX_SIZE 32->64, MIN_SIZE 8->16
-- [x] Create pattern-builder.ts utility module with programmatic drawing primitives:
-  - `createEmptyPattern()` / `createFilledPattern()`
-  - `drawCircle()`, `drawEllipse()`, `drawRect()`, `drawRing()`
-  - `drawLine()`, `drawCurve()`, `drawPetal()`, `drawGrassBlade()`
-  - `scatterDots()`, `mirrorHorizontal()`, `shiftPattern()`
-- [x] Redesign all 7 variants for 64x64 resolution:
-  - Simple Bloom: 4 keyframes with detailed flower petals, stem, leaves
-  - Quantum Tulip: 4 keyframes with classic tulip cup shape
-  - Soft Moss: 2 keyframes with organic scattered dots
-  - Pebble Patch: 1 keyframe with elliptical stones
-  - Meadow Tuft: 2 keyframes with grass blades and base clump
-  - Whisper Reed: 2 keyframes with tall curved reeds and seed heads
-  - Pulsing Orb: 2 keyframes with ring (dim) and filled circle (bright)
-- [x] Verify all 83 tests passing (45 shared + 38 web)
-- [x] TypeScript and lint checks pass
-
-### 2026-01-17 - Ecosystem Expansion (Phase 2: Flowers)
-
-- [x] Create dewdrop-daisy variant (rarity 0.7, moderate)
-  - 6 keyframes: bud, unfurl, bloom, sparkle, bloom-2, fade
-  - Daisy pattern with 12 thin radiating petals
-  - Sparkle effect with brighter colors and slight scale increase
-  - Soft yellow-white color palette
-- [x] Create midnight-poppy variant (rarity 0.4, uncommon)
-  - 4 keyframes in continuous loop: closed, opening, open, closing
-  - Dramatic curved bowl-shaped petals
-  - Deep burgundy/magenta colors (departure from pastel for drama)
-  - Scale 1.1x for larger presence
-- [x] Create bell-cluster variant (rarity 0.4, uncommon)
-  - 5 keyframes: buds, first, second, full, fade
-  - Staggered blooming - bells open one at a time
-  - Multiple hanging bell shapes on branching stems
-  - Soft lilac color palette, scale 1.2x for taller structure
-- [x] Updated PLANT_VARIANTS array - now 10 total variants
-- [x] All quality checks passing: TypeScript, 83 tests, lint
-
-### 2026-01-17 - Ecosystem Expansion (Phase 1)
-
-- [x] Implement ground cover variants: soft-moss (rarity 1.2), pebble-patch (rarity 1.3)
-- [x] Implement grass variants: meadow-tuft (rarity 1.1), whisper-reed (rarity 0.9)
-- [x] Add section headers organizing variants by category
-- [x] Document scale properties for each variant
-- [x] Verify all 83 tests passing (45 shared + 38 web)
-- [x] Update README with quantum integration status clarification
-- [x] Define "Rarity = Visual Reward" design principle
-
-### 2026-01-17 - Reduced Motion Accessibility
-
-- [x] Add prefers-reduced-motion detection utility
-- [x] Add disable-animations class support via globals.css
-- [x] Update PlantSprite to skip tweening and effects when reduced motion preferred
-- [x] Calm aesthetic preserved when motion reduced
-
-### 2026-01-17 - Error Boundaries
-
-- [x] Create ErrorBoundary component for main garden canvas
-- [x] Create SandboxErrorBoundary for variant sandbox page
-- [x] Integrate error boundaries into page components
-- [x] Calm, minimal error display matching garden aesthetic
-- [x] Developer-friendly error display for sandbox
-
-### 2026-01-17 - Performance Optimization
-
-- [x] Add viewport culling to PlantRenderer (skip rendering off-screen plants)
-- [x] Add shallow comparison for plant sync (avoid processing on reticle/dwell updates)
-- [x] Define SPRITE_SIZE and CULL_MARGIN constants for clarity
-- [x] All tests passing: 83 tests (45 shared + 38 web)
-
-### 2026-01-17 - Mobile Support
-
-- [x] Add viewport meta tag with `user-scalable=false` and `viewport-fit=cover`
-- [x] Add `touch-action: none` CSS to prevent default touch behaviors
-- [x] Add iOS safe area padding for notched devices
-- [x] Modify ReticleController to support control modes (autonomous/touch)
-- [x] Add `setPosition()` and `setControlMode()` methods to ReticleController
-- [x] Add pointer event handlers to GardenCanvas for touch input
-- [x] Auto-switch to touch mode on first non-mouse pointer interaction
-- [x] Verify all 83 tests pass, linting and type checking pass
-
-### 2026-01-17 - Persistence Verification
-
-- [x] **Persistence already implemented**: Database is source of truth for all plant state
-  - Plant positions, observations, traits persist in PostgreSQL
-  - Lifecycle computed from germinatedAt timestamps (no sync issues)
-  - Zustand store intentionally ephemeral - re-hydrates from database on load
-  - Design philosophy: "garden continues to evolve whether anyone is watching"
-- [x] Verified database contains persisted plant state
-
-### 2026-01-17 - Garden Evolution System
-
-- [x] Create GardenEvolutionSystem class with periodic check interval (30s)
-- [x] Track dormant plants and trigger germination after minimum dormancy (60s)
-- [x] Implement 15% germination chance per eligible plant per check
-- [x] Add `germinate` mutation to plants router
-- [x] Create `useEvolution` hook for triggering germination via tRPC
-- [x] Integrate evolution system into GardenCanvas component
-- [x] Add cleanup on unmount
-- [x] All tests passing: 83 unit tests (45 shared + 38 web)
-
-### 2026-01-17 - Entanglement Visualization
-
-- [x] Update seed script to create entanglement groups (2 pairs of plants)
-- [x] Add entanglementGroupId to RenderablePlant interface
-- [x] Create EntanglementRenderer class:
-  - Draws dashed purple lines connecting entangled plants
-  - Pulse animation when observation reveals correlated traits
-  - Renders behind plants (z-order)
-- [x] Integrate EntanglementRenderer into GardenCanvas
-- [x] Implement correlated reveal on observation:
-  - When entangled plant is observed, all partners automatically collapse
-  - Partners receive correlated traits (same base seed, different offset)
-  - Returns entangledPartnersUpdated flag
-- [x] Update useObservation hook to refetch plants when entangled partners updated
-- [x] All tests passing: 88 unit tests (38 web + 45 shared + 5 E2E)
-
-### 2026-01-17 - Observation Testing and E2E Setup
-
-- [x] Fix observation router bug: handle in-memory regions gracefully
-- [x] Verify database has seeded plants (12 plants with variants)
-- [x] Set up Playwright E2E testing framework
-- [x] Create playwright.config.ts with proper port configuration
-- [x] Write E2E test suite (5 tests):
-  - Garden canvas renders
-  - No console errors on load
-  - tRPC plants request is made
-  - Observation mutation endpoint accessible
-  - Plants show after loading
-- [x] Add test:e2e and test:e2e:ui npm scripts
-- [x] All tests passing: 83 unit tests + 5 E2E tests
-
-### 2026-01-17 - PlantSprite and PlantRenderer Tests
-
-- [x] Create PlantSprite test suite (13 tests)
-  - Initialization for superposed and collapsed plants
-  - State transition detection (superposed to collapsed)
-  - Collapse transition animation timing (1.5s duration)
-  - Rendering with resolved traits vs lifecycle state
-  - Fallback rendering for missing variants
-  - Position updates on plant movement
-- [x] Create PlantRenderer test suite (15 tests)
-  - Initialization and container setup
-  - Store subscription on start/stop
-  - Sprite creation for initial plants
-  - Dynamic sprite addition/removal on store updates
-  - Sprite reuse on plant data changes
-  - Resource cleanup on destroy
-  - Sprite lookup by ID
-- [x] Implement proper PixiJS mocking with class implementations
-- [x] Create mock garden store with subscribe/getState
-- [x] Total test coverage: 83 tests (45 lifecycle + 38 web app)
-
-### 2026-01-17 - End-to-End Visual Verification
-
-- [x] Create usePlants hook to fetch plant data and sync to Zustand store
-- [x] Integrate usePlants hook into GardenCanvas component
-- [x] Verify plants render correctly in browser (12 plants: 8 simple-bloom, 2 pulsing-orb, 2 quantum-tulip)
-- [x] Verify reticle moves autonomously across the garden
-- [x] Visual confirmation: plants display with correct colors, patterns, and lifecycle states
-
-### 2026-01-17 - Observation Router Integration Tests
-
-- [x] Add vitest as test framework for web app
-- [x] Create vitest.config.ts with path alias support
-- [x] Add test and test:watch npm scripts to apps/web
-- [x] Write integration tests for observation router (10 tests)
-- [x] Test recordObservation: plant state collapse with trait generation
-- [x] Test recordObservation: error handling (not found, already observed)
-- [x] Test deterministic traits from circuit seed
-- [x] Test getActiveRegion: active, expired, inactive region scenarios
-- [x] Test getHistory: retrieve observation events by plant
-
-### 2026-01-17 - Lifecycle Test Coverage
-
-- [x] Add vitest as test framework for shared package
-- [x] Configure turbo `test` task for monorepo-wide testing
-- [x] Write comprehensive lifecycle computation tests (45 tests)
-- [x] Test `computeLifecycleState` for ungerminated, germinated, and complete lifecycles
-- [x] Test `interpolateKeyframes` with pattern, palette, and property blending
-- [x] Test color variation selection and effective palette resolution
-- [x] Test lifecycle modifier (speed up/slow down) behavior
-
-### 2026-01-17 - Mock Trait Generation
-
-- [x] Implement seeded pseudorandom number generator for reproducible traits
-- [x] Create `generateMockTraits()` function using circuit definition as seed
-- [x] Replace quantum service call with local mock trait resolution
-- [x] Use variant's palette for color selection, with random fallback
-- [x] Generate growth rate (0.5-1.5) and opacity (0.7-1.0) from seed
-- [x] Update TASKS.md to reflect architectural clarification
-- [x] Update observation system documentation with pre-computed approach
-
-### 2026-01-17 - State Collapse Animation
-
-- [x] Implement collapse transition in PlantSprite class
-- [x] Track visual state changes to detect superposed to collapsed transition
-- [x] Add 1.5-second crossfade animation with ease-out cubic timing
-- [x] Render superposed layers fading out while collapsed form fades in
-- [x] Add `isCollapseTransitioning` and `collapseProgress` getters
-
-### 2026-01-17 - Garden Seeding with Variant Assignments
-
-- [x] Create `scripts/seed-garden.ts` seed script
-- [x] Implement variant selection based on rarity weights
-- [x] Generate grid-based plant positions with jitter
-- [x] Create quantum records with placeholder circuit definitions
-- [x] Assign color variations for multi-color variants
-- [x] Randomly germinate 50% of plants for immediate visual interest
-- [x] Add `db:seed` npm script to package.json
-- [x] Sync Prisma schema to database with `db:push`
-
-### 2026-01-17 - Observation System with Dwell Tracking
-
-- [x] Create ObservationSystem class with region management and dwell tracking
-- [x] Implement alignment detection (reticle overlaps plant within region)
-- [x] Track dwell time per eligible plant with progress sync to store
-- [x] Trigger observation events when dwell threshold reached
-- [x] Manage post-observation cooldown period
-- [x] Integrate ObservationSystem into GardenCanvas component
-- [x] Create useObservation hook for triggering observations via tRPC
-- [x] Update observation.ts router to call quantum service `/circuits/measure` endpoint
-- [x] Wire GardenCanvas to use observation hook with callback ref pattern
-
-### 2026-01-17 - Reticle Controller Implementation
-
-- [x] Create ReticleController class with autonomous drift behavior
-- [x] Implement state machine with drifting/paused states
-- [x] Add edge bouncing with slight randomization
-- [x] Render reticle as small cross pattern (3px default)
-- [x] Sync reticle position to Zustand garden store
-- [x] Integrate ReticleController into GardenCanvas component
-- [x] Add cleanup for ReticleController on unmount
-
-### 2026-01-17 - Plant Rendering on Main Canvas
-
-- [x] Create PlantSprite class for rendering individual plants with lifecycle state
-- [x] Create PlantRenderer class to manage all plant sprites and sync with Zustand store
-- [x] Integrate PlantRenderer into GardenCanvas component
-- [x] Add lifecycle fields to shared Plant type (variantId, germinatedAt, lifecycleModifier, colorVariationName)
-- [x] Create transformPlant function in plants router to properly map DB plants to shared type
-- [x] Add window resize handling to GardenCanvas
-- [x] Add full-screen styling to GardenCanvas
-- [x] Add proper cleanup on unmount for PlantRenderer
-
-### 2026-01-17 - Plant Lifecycle & Variant Sandbox
-
-- [x] Design and implement keyframe-based lifecycle system
-- [x] Create PlantVariant, GlyphKeyframe, and lifecycle types in shared package
-- [x] Implement lifecycle computation logic (`computeLifecycleState`)
-- [x] Define initial plant variants (simple-bloom, quantum-tulip, pulsing-orb)
-- [x] Create comprehensive lifecycle documentation (`docs/variants-and-lifecycle.md`)
-- [x] Build variant sandbox with timeline editor
-- [x] Add gallery view for browsing all variants
-- [x] Implement playback controls (play/pause, speed adjustment)
-- [x] Add configuration panel for variant editing
-- [x] Create superposed view with pastel color palettes
-- [x] Fix PixiJS black box rendering issue
-- [x] Update Prisma schema with lifecycle fields (variantId, germinatedAt, lifecycleModifier, colorVariationName)
-- [x] Create Python variant loader for quantum service integration
-- [x] Add export script for TypeScript variants to JSON
-
-### 2026-01-16 - Initial Project Setup
-
-- [x] Set up monorepo structure with pnpm workspaces
-- [x] Configure Next.js 16 with React 19 and TypeScript
-- [x] Set up PixiJS 8 integration with basic canvas
-- [x] Configure tRPC with Prisma ORM
-- [x] Design and implement Prisma schema (Plants, QuantumRecords, Observations, Entanglement)
-- [x] Create FastAPI quantum service with Qiskit
-- [x] Implement plant circuit generation endpoint
-- [x] Implement IonQ client for circuit submission
-- [x] Create trait mapping from quantum measurements
-- [x] Set up Docker Compose for PostgreSQL
-- [x] Configure CI/CD pipeline
-- [x] Set up pre-commit hooks (linting, formatting, secrets scanning)
-- [x] Write architecture documentation
-- [x] Write observation system documentation
-- [x] Write quantum circuits documentation
-- [x] Create `/synthesize` command for session review
-- [x] Create `TASKS.md` for task tracking
-- [x] Set up session logging and archive system
+## Current State Assessment
+
+### What's Working ✓
+
+- Three.js rendering with efficient instanced plants (1000 plant capacity)
+- Plant visual states with collapse transitions (superposed → collapsed, 1.5s)
+- Auto-germination (30s checks, 15% chance for dormant plants)
+- Autonomous reticle with drift behavior
+- **✨ Region-based observation system** - Immediate trigger on alignment with 15-20s cooldown
+- **✨ Debug observation mode toggle** - Switch between region and click observation
+- **✨ Debug region visualization** - Green circle overlay for tuning parameters
+- Entanglement visualization (correlated trait reveals)
+- Database with quantum circuits, observation history, timestamps
+- IonQ async job API scaffolded (but unused)
+- 14 plant variants across 6 categories (ground-cover, grass, flower, shrub, tree, ethereal)
+- 64x64 pixel grid patterns with lifecycle animations
+- Vector plant variants with progressive drawing and keyframe support
+
+### Critical Gaps ❌
+
+- **No time-travel** - Database has timestamps but no API or UI to query historical states
+- **Quantum integration dormant** - Using mock traits instead of real IonQ simulator
+- **Limited evolution** - Only auto-germination, no other dynamic behaviors
 
 ---
 
-## Backlog
+## Implementation Roadmap
 
-### High Priority
+### Sprint 1: Core Observation System (P0 - CRITICAL)
 
-_Core functionality needed for a working demo_
+**Goal**: Implement the designed observation system where observation happens naturally when the reticle aligns with a plant within an invisible observation region.
 
-- [x] **Plant Renderer**: Render plants on main PixiJS canvas using variant lifecycle system
-- [x] **Reticle System**: Implement autonomous reticle with drift behavior
-- [x] **Observation Mechanics**: Detect reticle-plant alignment and track dwell time
-- [x] **Quantum Integration**: Wire frontend observation to backend (mock traits, real quantum deferred)
-- [x] **Plant Seeding**: Create initial batch of plants with pre-computed traits
-- [x] **State Collapse Animation**: Animate transition from superposed to collapsed state
+#### Task 1.1: Create ObservationSystem Class
 
-> **Note**: Real-time updates are not needed. Observation is a UX layer over pre-computed data—traits are determined at plant creation, not observation time.
+**Status**: ✅ COMPLETED (2026-01-27)
+**File**: `apps/web/src/components/garden/observation-system.ts` (NEW)
 
-### Medium Priority
+**Implementation**:
 
-_Important features for complete experience_
+- **Region Management**:
+  - One active region at a time
+  - Radius: 120-150 pixels (configured at 135px)
+  - Lifetime: 60-90 seconds (configured at 75s)
+  - Region repositions after observation or expiration
+  - Never visualized (invisible to user)
 
-- [x] **Entanglement Visualization**: Show correlated trait reveals across entangled plants
-- [x] **Observation Regions**: Implement invisible regions where observation can occur (part of ObservationSystem)
-- [x] **Plant Lifecycle Display**: Show lifecycle keyframes on main canvas (PlantSprite uses lifecycle system)
-- [x] **Garden Evolution**: Implement time-based garden progression (dormant plants germinate over time)
-- [x] **Persistence**: Save and restore garden state across sessions (already implemented via database)
-- [x] **Mobile Support**: Ensure touch-friendly observation on mobile devices
+- **Alignment Detection** (per-frame checks):
+  - Check if reticle position overlaps active region
+  - Check if plant's full bounding box is within region
+  - Check if reticle overlaps any part of plant
+  - All three must be true simultaneously
 
-### Low Priority / Polish
+- **Observation Trigger**:
+  - When alignment conditions met → observation triggers **immediately** (no dwell time)
+  - Enforce 15-20s cooldown after observation (configured at 17.5s)
+  - Deactivate/relocate region after observation
 
-_Nice-to-have enhancements_
+- **Debug Mode**:
+  - Toggle between region-based and click-based observation
+  - Controlled via debug panel (backtick key)
+  - Default: region-based observation
+  - Debug click mode: Allow clicking plants directly (bypass regions)
 
-- [ ] **Ambient Audio**: Add generative soundscape
-- [~] **Visual Polish**: Refine plant aesthetics and animations (shimmer + scale pulse added)
-- [x] **Performance Optimization**: Optimize for large numbers of plants (viewport culling)
-- [ ] **Analytics**: Track observation patterns and garden statistics
-- [~] **Accessibility**: Screen reader support and reduced motion options (reduced motion done)
-- [x] **Tweening**: Enable smooth interpolation between keyframes (all variants now use tweenBetweenKeyframes)
+**API**:
+
+```typescript
+class ObservationSystem {
+  constructor(
+    plants: Plant[],
+    getReticlePosition: () => Vector2,
+    onObservation: (payload: ObservationPayload) => void
+  );
+  update(deltaTime: number): void;
+  updatePlants(plants: Plant[]): void;
+  getActiveRegion(): ObservationRegion | null;
+  isInCooldown(): boolean;
+  setDebugMode(enabled: boolean): void;
+  dispose(): void;
+}
+```
+
+#### Task 1.2: Integrate ObservationSystem
+
+**Status**: ✅ COMPLETED (2026-01-27)
+**File**: `apps/web/src/components/garden/three/garden-scene.tsx`
+
+**Changes**:
+
+1. ✅ Instantiate `ObservationSystem` after overlayManager
+2. ✅ Call `observationSystem.update(deltaTime)` in updateCallback
+3. ✅ Subscribe to store to update `observationSystem.updatePlants()` when plants change
+4. ✅ **Keep click handler but wrap in debug mode check**: Only active when debug mode enabled
+5. ✅ Move celebration/entanglement trigger logic into observation callback (shared by both modes)
+6. ✅ Add debug panel toggle for switching observation modes
+7. ✅ Add cleanup for observationSystem in unmount
+
+#### Task 1.3: Add Debug Region Visualization
+
+**Status**: ✅ COMPLETED (2026-01-27)
+**File**: `apps/web/src/components/garden/three/overlays/debug-overlay.ts` (NEW)
+
+**Features**:
+
+- ✅ Renders active region as green circle outline when debug mode enabled
+- ✅ Shows region center dot
+- ✅ Add toggle button: "Observation Mode: [Region / Click]"
+- ✅ Completely removable for production
+- ✅ Integrated into OverlayManager
+
+**Acceptance Criteria**:
+
+- ✅ Reticle drifts autonomously without user control
+- ✅ Observation triggers immediately when alignment conditions met
+- ✅ Region system works (verify via debug visualization)
+- ✅ Cooldown prevents rapid observations (15-20s)
+- ✅ Debug mode allows switching to click-based observation
+- ✅ Click observation only works when debug mode enabled
 
 ---
 
-## Technical Debt
+### Sprint 2: Real Quantum Data Integration (P1)
 
-- [x] Add error boundaries in React components
-- [x] Add tests for observation router logic
-- [x] Add tests for PlantSprite and PlantRenderer
-- [x] Add E2E tests for observation flow
+**Goal**: Switch from mock traits to real IonQ simulator results, treating quantum execution as async background process.
 
-### Deferred (Quantum Service)
+#### Task 2.1: Pre-compute Quantum Jobs at Plant Creation
 
-> **⚠️ Do not work on these during autowork.** The quantum service (`apps/quantum/`) is scaffolded but not actively used. Real quantum integration requires explicit coordination.
+**Status**: 🔴 Not Started
+**Files**: `apps/web/scripts/seed-garden.ts`, `apps/quantum/src/jobs/worker.py`
+
+**Changes**:
+
+1. Generate circuit via quantum service (existing)
+2. **NEW**: Submit job to IonQ via `POST /jobs/submit`
+   - Pass: `circuitDefinition`, `circuitId`, `seed`, `shots: 100`
+   - Receive: `jobId`, `status: "pending"`
+3. Store `jobId` in `QuantumRecord.ionqJobId`
+4. Plant created with `visualState: "superposed"`, no traits yet
+
+**Background Worker** (already exists):
+
+- Polls IonQ for job status
+- When complete, maps measurements to traits
+- Updates `QuantumRecord` with traits and status
+- Sets `Plant.traits` when ready
+
+#### Task 2.2: Observation Reveals Pre-Computed Traits
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/server/routers/observation.ts`
+
+**Logic**:
+
+1. Check if plant's quantum job has completed:
+   - `QuantumRecord.status === "completed"` → traits ready
+   - `QuantumRecord.status === "pending" | "running"` → not ready
+2. If ready: Return traits immediately, collapse visual state
+3. If not ready: Return `{ waitingForQuantum: true }`, keep superposed
+   - Frontend shows subtle "quantum computation in progress" indicator
+
+**Graceful Degradation**:
+
+- If job fails after retries, fall back to mock traits
+- Log execution mode to `ObservationEvent` metadata
+
+#### Task 2.3: Enable IonQ Simulator Configuration
+
+**Status**: 🔴 Not Started
+**Files**: `apps/quantum/.env`, `apps/quantum/src/config.py`
+
+**Updates**:
+
+- Set `IONQ_USE_SIMULATOR=true`
+- Add `IONQ_API_KEY` environment variable
+- Document in README how to get IonQ API key (free tier)
+- Log execution mode to console
+- Expose via `/config` endpoint for debugging
+
+#### Task 2.4: Quantum Status in Debug Panel
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/ui/debug-panel.tsx`
+
+**Display**:
+
+- Current quantum execution mode (Simulator / Mock)
+- Job queue status (pending, running, completed, failed counts)
+- Average job completion time
+- Last 5 jobs with status
+
+**Acceptance Criteria**:
+
+- [ ] Seeds new garden with IonQ simulator enabled
+- [ ] Background worker processes jobs successfully
+- [ ] Observations reveal real quantum traits (not mock)
+- [ ] Graceful degradation on job failures
+
+---
+
+### Sprint 3: Time-Travel Experience (P1)
+
+**Goal**: Users can scrub through garden's history, seeing when plants germinated and were observed.
+
+#### Task 3.1: Historical State API
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/server/routers/garden.ts` (NEW router)
+
+**Endpoints**:
+
+```typescript
+// Get garden state at specific timestamp
+getStateAtTime: publicProcedure
+  .input(z.object({ timestamp: z.date() }))
+  .query(async ({ input }) => {
+    // Query plants with state computed for that moment:
+    // - dormant if germinatedAt > timestamp
+    // - superposed if observedAt > timestamp or null
+    // - collapsed if observedAt <= timestamp
+    // Return: Plant[] with historical states
+  });
+
+// Get timeline of events (germinations, observations)
+getEvolutionTimeline: publicProcedure
+  .input(
+    z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    })
+  )
+  .query(async ({ input }) => {
+    // Query ObservationEvent and plant germination times
+    // Return: Event[] sorted by timestamp
+  });
+```
+
+#### Task 3.2: Time-Travel UI Component
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/garden/time-travel-scrubber.tsx` (NEW)
+
+**Features**:
+
+- Horizontal timeline showing garden age (hours/days since creation)
+- Event markers for germinations (green dots) and observations (blue dots)
+- Draggable playhead to scrub through time
+- "Live" / "Historical" mode toggle
+- Auto-play capability (watch evolution at 10x speed)
+
+**Behavior**:
+
+- When scrubbing, disable observation system (read-only mode)
+- Call `getStateAtTime` on scrub (debounced)
+- Render plants in historical states
+- Show subtle "Historical View" indicator overlay
+- "Return to Live" button exits time-travel mode
+
+**Position**: Overlay at bottom of screen, collapsible, hidden by default
+
+#### Task 3.3: Integrate Timeline into Garden
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/garden/three/garden-scene.tsx`
+
+**Integration**:
+
+- Toggle via keyboard shortcut (T key)
+- When active, suspend observation system and evolution system
+- Show time-travel scrubber UI
+- Fetch and render historical plant states
+
+**Acceptance Criteria**:
+
+- [ ] Can scrub through garden history smoothly
+- [ ] Plants show correct states at historical timestamps
+- [ ] Timeline markers appear for events
+- [ ] Can return to live view seamlessly
+
+---
+
+### Sprint 4: Enhanced Garden Evolution (P2)
+
+**Goal**: Garden feels alive even when not being observed with subtle behaviors and dynamic evolution.
+
+#### Task 4.1: Lifecycle-Based Visual Behaviors
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/lib/three/plants/plant-instancer.ts`
+
+**Animations**:
+
+- **Young plants** (lifecycle < 0.3): Gentle scale pulse (0.98-1.02, 3s cycle)
+- **Mature plants** (lifecycle 0.3-0.7): Subtle rotation sway (±2 degrees, 5s cycle)
+- **Old plants** (lifecycle > 0.7): Slower movements, increased opacity variance
+
+**Implementation**: Via shader uniforms, respects `prefers-reduced-motion`
+
+#### Task 4.2: Smart Germination Logic
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/garden/garden-evolution.ts`
+
+**Enhancements**:
+
+- **Proximity bonus**: Plants near observed plants 2x more likely to germinate
+- **Clustering prevention**: If 3+ germinated plants within 150px radius, skip area
+- **Age weighting**: Older dormant plants gradually increase germination chance
+- **Wave pattern**: Occasional "germination waves" where multiple plants sprout together
+
+#### Task 4.3: Evolution Event Notifications
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/garden/evolution-notifications.tsx` (NEW)
+
+**Features**:
+
+- When plant germinates: Subtle toast "A plant has germinated" (3s duration)
+- When entangled observation occurs: "Entangled plants observed"
+- Notifications fade in/out at bottom-right corner
+- Never intrusive, easily ignorable
+- Optional: Click notification to pan camera to plant location
+
+**Acceptance Criteria**:
+
+- [ ] Plants germinate with smart logic (proximity, clustering)
+- [ ] Visual behaviors animate based on lifecycle
+- [ ] Notifications appear for evolution events
+- [ ] Garden feels "alive" even when idle
+
+---
+
+### Sprint 5: Educational & Polish (P2-P3)
+
+**Goal**: Enhance meaning and polish the experience.
+
+#### Task 5.1: Post-Observation Context Panel
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/components/garden/observation-context-panel.tsx` (NEW)
+
+**Content**:
+
+- Quantum circuit type used (e.g., "Bell Pair - Entanglement")
+- Simplified circuit diagram (visual representation)
+- Brief explanation of quantum concept (1-2 sentences)
+- "Learn More" link to detailed docs
+- Dismissible, remembers preference in localStorage
+
+**Design**: Appears from side, calm aesthetic, easy to ignore
+
+#### Task 5.2: Observation Feedback Enhancements
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/lib/three/overlays/feedback-overlay.ts`
+
+**Improvements**:
+
+- Add color variation based on plant's primary palette color
+- Entanglement pulse: Show "quantum correlation" wave traveling between plants
+- Subtle "ding" sound effect (optional, respects system audio settings)
+- Haptic feedback pattern based on rarity (longer pulse for rare plants)
+
+#### Task 5.3: Performance Optimization
+
+**Status**: 🔴 Not Started
+**File**: `apps/web/src/lib/three/plants/plant-instancer.ts`
+
+**Optimizations**:
+
+- Verify frustum culling working correctly
+- LOD for distant plants (if camera zooms out)
+- Observation region spatial indexing (quadtree for O(log n) checks)
+- Lazy historical data loading (paginate time-travel queries)
+
+**Acceptance Criteria**:
+
+- [ ] 60fps rendering with 100+ plants
+- [ ] No memory leaks after extended sessions
+- [ ] Time-travel queries respond quickly (<500ms)
+- [ ] Observation system runs efficiently per-frame
+
+---
+
+## Completed Work
+
+### 2026-01-27 - Core Observation System Implementation (Sprint 1)
+
+- [x] **ObservationSystem Class**: Complete implementation with region management, alignment detection, and cooldown logic
+- [x] **Garden Scene Integration**: Integrated observation system into render loop with event handling
+- [x] **Debug Visualization**: Added DebugOverlay for visualizing observation regions during development
+- [x] **Debug Panel Controls**: Added observation mode toggle (Region / Click) with visual indicators
+- [x] **Documentation Updates**: Updated architecture.md and observation-system.md to reflect immediate trigger implementation
+- [x] **Implementation Plan**: Created comprehensive implementation-plan.md documenting all sprints
+
+### 2026-01-27 - Sprint Planning & Documentation
+
+- [x] Comprehensive codebase evaluation (quantum integration, rendering, evolution)
+- [x] Created prioritized implementation roadmap
+- [x] Updated all documentation to reflect new plan
+
+### 2026-01-18 - Mobile Experience & Tablet Polish
+
+- [x] Dwell progress indicator with visual ring/arc
+- [x] Touch mode indicator with expanding ring animation
+- [x] Observation feedback with expanding celebration rings
+- [x] Haptic feedback integration
+- [x] Tablet breakpoints for responsive layouts
+- [x] Timeline overflow fixes for small phones
+- [x] Control panel touch target improvements
+
+### 2026-01-17 - Garden Ecosystem Expansion
+
+- [x] 14 total plant variants across 6 categories
+- [x] 64x64 grid pattern upgrade with pattern-builder utilities
+- [x] Z-ordering system for visual depth
+- [x] Seed script updated to 24 plants with 3 entangled pairs
+- [x] 83 tests passing, TypeScript and lint clean
+
+See `docs/archive/sessions/` for detailed session notes.
+
+---
+
+## Technical Debt & Deferred Work
+
+### Quantum Service (Deferred)
+
+> **⚠️ Do not work on these during autowork.** Real quantum integration requires explicit coordination.
 
 - [ ] Add comprehensive test coverage for quantum service
 - [ ] Document quantum circuit design decisions in code
 - [ ] Implement proper error handling for IonQ API failures
 
----
+### Out of Scope (For Later)
 
-## Implementation Status
-
-| Component                    | Status   | Notes                                                                 |
-| ---------------------------- | -------- | --------------------------------------------------------------------- |
-| **Frontend (apps/web)**      |          |                                                                       |
-| PixiJS canvas initialization | Done     | Full-screen, resize handling                                          |
-| Plant rendering (main)       | Done     | PlantSprite + PlantRenderer with lifecycle                            |
-| Entanglement rendering       | Done     | Dashed lines, pulse animation on observation                          |
-| Variant sandbox              | Done     | Full timeline editor, gallery, playback                               |
-| Superposed view              | Done     | Pastel palettes, visual development tool                              |
-| Reticle controller           | Done     | Autonomous drift, state machine, edge bounce                          |
-| Observation system           | Done     | Region management, dwell tracking, cooldown                           |
-| Evolution system             | Done     | Automatic germination, dormancy tracking                              |
-| Zustand store                | Done     | Plant data, dwell state, cooldown state                               |
-| tRPC client                  | Done     | Connected and working                                                 |
-| **Shared (packages/shared)** |          |                                                                       |
-| Variant types                | Done     | PlantVariant, GlyphKeyframe, lifecycle types                          |
-| Variant definitions          | Done     | 14 variants: 2 ground, 2 grass, 5 flower, 2 shrub, 2 tree, 1 ethereal |
-| Lifecycle computation        | Done     | computeLifecycleState, interpolation                                  |
-| Lifecycle tests              | Done     | 49 tests covering all lifecycle functions                             |
-| **API Layer**                |          |                                                                       |
-| tRPC endpoints               | Done     | Plants, observation (tested), health routers                          |
-| Prisma schema                | Done     | Full schema with lifecycle + entanglement                             |
-| Prisma client                | Done     | Generated and working                                                 |
-| Garden seeding               | Done     | 24 plants, 6 entangled (3 pairs), all 14 variants                     |
-| Correlated observation       | Done     | Entangled partners collapse together                                  |
-| **Quantum Service**          |          |                                                                       |
-| FastAPI app                  | Done     | Running on port 18742                                                 |
-| Circuit generation           | Done     | Using Qiskit                                                          |
-| IonQ integration             | Deferred | Client implemented, real execution deferred                           |
-| Trait mapping                | Done     | Basic mapping in place                                                |
-| Variant loader               | Done     | Python module to load variant definitions                             |
-| Mock trait generation        | Done     | Pseudorandom traits seeded from circuit                               |
-| **Infrastructure**           |          |                                                                       |
-| PostgreSQL                   | Done     | Docker Compose configured                                             |
-| CI/CD                        | Done     | GitHub Actions workflow                                               |
-| Pre-commit hooks             | Done     | Linting, formatting, secrets                                          |
-
----
-
-## Ideas & Future Exploration
-
-- Gallery/installation mode with large display
+- Ambient audio / generative soundscape
+- Gallery installation mode adaptations
+- Analytics and observation pattern tracking
+- Custom variant designer
 - Multiple garden instances with cross-garden entanglement
-- Historical garden archives (time-lapse of past states)
-- Visitor presence indicators (anonymous, privacy-respecting)
-- Seasonal variations in quantum circuit parameters
-- Rare plant mutations from unusual quantum outcomes
-- Custom variant designer (export from sandbox to garden)
+- Seasonal variations in circuits
+- Screen reader support and full accessibility
+
+---
+
+## Success Metrics
+
+### Creative Director Perspective (Exceptional UX)
+
+- Observation feels meditative and inevitable, not gamey
+- Garden evolution is visible and engaging over time
+- Time-travel creates "wow" moment of seeing history
+- Quantum connection is educational and meaningful
+
+### System Architect Perspective (Clean Implementation)
+
+- Observation system is modular and testable
+- Quantum integration is async and fault-tolerant
+- Time-travel queries are efficient and accurate
+- All systems respect the calm, contemplative design philosophy
 
 ---
 
@@ -682,5 +478,3 @@ _Nice-to-have enhancements_
 - Target: Web-based experience, potentially adaptable to gallery installation
 - Philosophy: Calm, contemplative, slow - visitors are observers, not controllers
 - TypeScript is single source of truth for variants (exported to JSON for Python)
-- **Quantum integration is deferred**: Currently using pseudorandom trait generation. The architecture supports real quantum execution when enabled, but observation UX is identical either way.
-- **Observation is a UX layer**: Traits are pre-computed at plant creation. Observation reveals existing data, it does not trigger computation or require real-time updates.

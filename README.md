@@ -14,17 +14,45 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ---
 
+## Project Status
+
+**Current Phase**: Implementing user-facing quantum simulation experience
+
+### What's Working ✓
+
+- Three.js rendering with efficient instanced plants (1000 plant capacity)
+- 14 plant variants across 6 categories with lifecycle animations
+- 64x64 pixel grid patterns with visual depth layering
+- Auto-germination system (plants slowly sprout over time)
+- Entanglement visualization (correlated trait reveals)
+- Mobile-responsive with touch controls
+
+### In Progress 🔄
+
+- **Observation System**: Implementing region-based observation where the autonomous reticle naturally encounters plants
+- **Quantum Integration**: Activating real IonQ simulator for quantum trait generation (currently using mock traits)
+- **Time-Travel**: Building UI to scrub through garden evolution history
+
+### Coming Soon 🎯
+
+- Enhanced evolution behaviors (proximity-based germination, visual lifecycle animations)
+- Educational quantum circuit explanations
+- Performance optimizations for large gardens
+
+---
+
 ## ⚠️ Quantum Integration Status
 
-**Real quantum execution is deferred.** The architecture supports IonQ hardware, but the garden currently uses pseudorandom trait generation seeded from circuit definitions.
+**Real quantum execution is staged but not active.** The architecture supports IonQ hardware, but the garden currently uses pseudorandom trait generation seeded from circuit definitions.
 
-This is intentional:
+**Planned Approach**:
 
-- The observation UX is identical whether traits come from quantum hardware or mock generation
-- Traits are pre-computed at plant creation, not at observation time
-- Real quantum integration will be enabled when we're ready for IonQ submission
+- Quantum circuits will be executed as background jobs during plant creation
+- Observation will reveal pre-computed traits (not trigger real-time computation)
+- The UX remains identical whether using quantum hardware or mock generation
+- Real integration will be enabled when IonQ simulator is configured
 
-**Do not work on the quantum service (`apps/quantum/`) during regular development.** The Qiskit circuit code and IonQ client are scaffolded but not actively used. Changes to quantum behavior require explicit coordination.
+**Coordination Required**: Changes to the quantum service (`apps/quantum/`) require explicit coordination. The Qiskit circuit code and IonQ client are scaffolded and ready for activation.
 
 ---
 
@@ -93,7 +121,7 @@ See [docs/architecture.md](docs/architecture.md) for detailed system design.
 
 ## Technology
 
-- **Frontend**: Next.js 16, React 19, PixiJS 8, TypeScript
+- **Frontend**: Next.js 16, React 19, Three.js, TypeScript
 - **API**: tRPC, Prisma ORM
 - **Quantum**: Qiskit, qiskit-ionq, FastAPI
 - **Database**: PostgreSQL

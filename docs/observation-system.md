@@ -138,25 +138,27 @@ If any portion of the plant exits the region, exposure is lost and dwell resets.
 
 ---
 
-## Dwell tracking
+## Observation trigger
 
-Observation requires sustained alignment _and_ sustained exposure.
+> **Implementation Note**: The current implementation triggers observation **immediately** upon alignment, with no dwell time requirement. This section documents the original design concept, which may be revisited in future iterations.
 
-A dwell timer runs per eligible plant only when all conditions are true:
+**Current Behavior** (Immediate Trigger):
+When all alignment conditions are true simultaneously, observation triggers immediately:
 
 - Plant is unobserved
 - Entire plant bounding box is contained within the active region
 - Reticle overlaps any portion of the plant
 - Reticle overlaps the active region
 
-If any condition breaks, dwell resets to zero.
+**Original Design** (Dwell-Based - Not Implemented):
+Observation would require sustained alignment over a dwell duration:
 
-Recommended dwell duration:
+- Dwell timer runs per eligible plant
+- If any condition breaks, dwell resets to zero
+- Duration: 10 to 20 seconds
+- No partial progress retention
 
-- Minimum: 5 seconds
-- Preferred: 10 to 20 seconds
-
-There is no partial progress retention.
+The immediate trigger approach maintains the contemplative feel while reducing complexity.
 
 ---
 

@@ -11,10 +11,10 @@ Quantum Garden follows a modular architecture with clear separation between fron
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     NEXT.JS 16 APP (TypeScript)                 │
-│  React 19 + PixiJS 8 + tRPC                                     │
+│  React 19 + Three.js + tRPC                                     │
 │  ┌─────────────────────────┬─────────────────────────┐          │
 │  │       FRONTEND          │       API ROUTES        │          │
-│  │  - PixiJS garden canvas │  - tRPC endpoints       │          │
+│  │  - Three.js canvas      │  - tRPC endpoints       │          │
 │  │  - Observation system   │  - Prisma queries       │          │
 │  │  - Zustand state        │  - Quantum service calls│          │
 │  └─────────────────────────┴─────────────────────────┘          │
@@ -49,7 +49,7 @@ Quantum Garden follows a modular architecture with clear separation between fron
 | -------------- | ---------------------------------- |
 | Next.js 16     | React 19 framework with App Router |
 | TypeScript 5.7 | Type safety                        |
-| PixiJS 8       | WebGL 2D rendering                 |
+| Three.js       | WebGL rendering with InstancedMesh |
 | Zustand        | Lightweight state management       |
 | tRPC           | Type-safe API client               |
 
@@ -82,24 +82,48 @@ Quantum Garden follows a modular architecture with clear separation between fron
 
 ## Data Flow
 
-### Plant Creation
+### Plant Creation (Pre-computation Strategy)
+
+**Current Implementation** (Mock Traits):
 
 1. System generates a quantum circuit encoding trait possibilities
-2. Circuit is submitted to IonQ (simulator or hardware)
-3. Job ID and circuit definition are stored in database
-4. Plant record is created with reference to quantum record
+2. Circuit definition stored in database with placeholder
+3. Plant record created with `visualState: "superposed"`
+4. Mock traits generated from circuit seed at observation time
 
-### Observation
+**Planned Implementation** (Real Quantum):
 
-1. Reticle and region alignment detected on frontend
-2. Dwell timer completes after sustained alignment
-3. Frontend sends observation request to API
-4. API verifies plant is unobserved
-5. API calls quantum service to perform measurement
-6. Quantum service retrieves/executes quantum job
-7. Measurement results are mapped to visual traits
-8. Plant record is updated with resolved traits
-9. All connected clients receive the update
+1. System generates quantum circuit encoding trait possibilities
+2. Circuit submitted to IonQ simulator as background job
+3. Job ID and circuit definition stored in database
+4. Background worker polls job status
+5. When complete, traits computed from quantum measurements
+6. Traits stored in database, ready for observation reveal
+
+### Observation (Immediate Trigger)
+
+**Current Implementation** (Debug Mode):
+
+1. User clicks plant (debug mode only)
+2. Frontend sends observation request to API
+3. API generates mock traits if not pre-computed
+4. Plant state updated to `visualState: "collapsed"`
+5. Frontend renders collapse transition animation
+
+**Planned Implementation** (Region-Based):
+
+1. Reticle drifts autonomously across canvas
+2. Invisible observation region positioned in garden
+3. Alignment detection: reticle + region + plant overlap
+4. When all conditions met → observation triggers **immediately** (no dwell)
+5. Frontend sends observation request to API
+6. API verifies plant is unobserved
+7. If traits ready: Return traits, collapse visual state
+8. If traits pending: Return `waitingForQuantum`, keep superposed
+9. Frontend renders collapse transition (1.5s animation)
+10. Entangled partners automatically collapse with correlated traits
+
+**Note**: No dwell time required - observation is instantaneous upon alignment.
 
 ---
 

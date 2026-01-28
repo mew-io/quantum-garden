@@ -20,6 +20,7 @@ export function DebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [jobStats, setJobStats] = useState<JobStats | null>(null);
+  const [observationMode, setObservationMode] = useState<"region" | "click">("region");
 
   // Fetch all plants for overview
   const { data: plants, refetch: refetchPlants } = trpc.plants.list.useQuery(undefined, {
@@ -43,7 +44,16 @@ export function DebugPanel() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        setIsVisible((v) => !v);
+        setIsVisible((v) => {
+          const newVisibility = !v;
+          // Dispatch visibility change event
+          window.dispatchEvent(
+            new CustomEvent("debug-visibility-change", {
+              detail: { visible: newVisibility },
+            })
+          );
+          return newVisibility;
+        });
       }
     };
 
@@ -76,6 +86,19 @@ export function DebugPanel() {
         handlePlantSelect as EventListener
       );
   }, []);
+
+  // Handle observation mode changes
+  const toggleObservationMode = useCallback(() => {
+    const newMode = observationMode === "region" ? "click" : "region";
+    setObservationMode(newMode);
+
+    // Dispatch custom event to notify GardenScene
+    window.dispatchEvent(
+      new CustomEvent("observation-mode-change", {
+        detail: { mode: newMode, debugMode: newMode === "click" },
+      })
+    );
+  }, [observationMode]);
 
   if (!isVisible) {
     return null;
@@ -111,6 +134,33 @@ export function DebugPanel() {
           <div className="grid grid-cols-2 gap-2">
             <Stat label="Total Plants" value={totalCount} />
             <Stat label="Observed" value={`${observedCount}/${totalCount}`} />
+          </div>
+        </section>
+
+        {/* Observation Mode Toggle */}
+        <section>
+          <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Observation System</h4>
+          <div className="space-y-2">
+            <button
+              onClick={toggleObservationMode}
+              className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
+            >
+              <span className="text-xs">Observation Mode</span>
+              <span
+                className={`text-xs font-mono px-2 py-1 rounded ${
+                  observationMode === "region"
+                    ? "bg-green-900/50 text-green-300"
+                    : "bg-amber-900/50 text-amber-300"
+                }`}
+              >
+                {observationMode === "region" ? "REGION" : "CLICK"}
+              </span>
+            </button>
+            <div className="text-xs text-gray-500 px-1">
+              {observationMode === "region"
+                ? "Observation triggers when reticle aligns with plant in region"
+                : "Click plants directly to observe (debug mode)"}
+            </div>
           </div>
         </section>
 

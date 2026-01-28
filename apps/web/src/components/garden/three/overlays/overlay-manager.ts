@@ -18,6 +18,7 @@ import { EntanglementOverlay } from "./entanglement-overlay";
 import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
 import { VectorPlantOverlay } from "./vector-plant-overlay";
+import { DebugOverlay } from "./debug-overlay";
 
 /**
  * Manages all overlay elements in a unified way.
@@ -32,6 +33,7 @@ export class OverlayManager {
   public dwell: DwellOverlay;
   public feedback: FeedbackOverlay;
   public vectorPlants: VectorPlantOverlay;
+  public debug: DebugOverlay;
 
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
@@ -45,6 +47,7 @@ export class OverlayManager {
     this.dwell = new DwellOverlay();
     this.feedback = new FeedbackOverlay();
     this.vectorPlants = new VectorPlantOverlay();
+    this.debug = new DebugOverlay();
 
     // Add all overlay meshes to the overlay scene
     this.overlayScene.add(this.reticle.getObject());
@@ -52,6 +55,7 @@ export class OverlayManager {
     this.overlayScene.add(this.dwell.getObject());
     this.overlayScene.add(this.feedback.getObject());
     this.overlayScene.add(this.vectorPlants.getObject());
+    this.overlayScene.add(this.debug.getObject());
   }
 
   /**
@@ -63,6 +67,7 @@ export class OverlayManager {
     this.dwell.update(time);
     this.feedback.update(time);
     this.vectorPlants.update(time);
+    this.debug.update(time, deltaTime);
   }
 
   /**
@@ -95,5 +100,6 @@ export class OverlayManager {
     this.dwell.dispose();
     this.feedback.dispose();
     this.vectorPlants.dispose();
+    this.debug.dispose();
   }
 }

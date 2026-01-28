@@ -14,6 +14,7 @@ import { SceneManager } from "./core/scene-manager";
 import { PlantInstancer, type RenderablePlant } from "./plants/plant-instancer";
 import { disposeTextureAtlas } from "./core/texture-atlas";
 import { OverlayManager } from "./overlays";
+import { ObservationSystem } from "@/components/garden/observation-system";
 import { useObservation } from "@/hooks/use-observation";
 import { useEvolution } from "@/hooks/use-evolution";
 import { usePlants } from "@/hooks/use-plants";
@@ -31,6 +32,7 @@ export function GardenScene() {
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const plantInstancerRef = useRef<PlantInstancer | null>(null);
   const overlayManagerRef = useRef<OverlayManager | null>(null);
+  const observationSystemRef = useRef<ObservationSystem | null>(null);
 
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
@@ -93,6 +95,31 @@ export function GardenScene() {
     plantInstancer.syncPlants(convertToRenderable(initialPlants));
     overlayManager.setPlants(initialPlants);
 
+    // Initialize observation system (after convertToRenderable and overlayManager)
+    const observationSystem = new ObservationSystem(
+      initialPlants,
+      () => overlayManager.reticle.getPosition(),
+      (payload) => {
+        observationCallbackRef.current(payload);
+
+        // Find the observed plant
+        const plant = useGardenStore.getState().plants.find((p) => p.id === payload.plantId);
+        if (plant) {
+          // Trigger celebration feedback
+          overlayManager.feedback.triggerCelebration(plant.position.x, plant.position.y);
+
+          // Trigger entanglement pulse if plant is entangled
+          if (plant.entanglementGroupId) {
+            overlayManager.entanglement.triggerPulse(plant.entanglementGroupId);
+          }
+
+          // Haptic feedback
+          hapticSuccess();
+        }
+      }
+    );
+    observationSystemRef.current = observationSystem;
+
     // Subscribe to store changes
     const unsubscribe = useGardenStore.subscribe((state, prevState) => {
       if (!mounted) return;
@@ -100,6 +127,11 @@ export function GardenScene() {
       if (state.plants !== prevState.plants) {
         plantInstancer.syncPlants(convertToRenderable(state.plants));
         overlayManager.setPlants(state.plants);
+        observationSystem.updatePlants(state.plants);
+      }
+      // Update debug overlay when active region changes
+      if (state.activeRegion !== prevState.activeRegion) {
+        overlayManager.debug.setActiveRegion(state.activeRegion);
       }
     });
 
@@ -122,6 +154,9 @@ export function GardenScene() {
       // Update overlays (vector plants need plants for lifecycle updates)
       overlayManager.setPlants(currentPlants);
       overlayManager.update(time, deltaTime);
+
+      // Update observation system (region-based observation)
+      observationSystem.update(deltaTime);
     };
     sceneManager.addUpdateCallback(updateCallback);
 
@@ -131,8 +166,13 @@ export function GardenScene() {
     };
     sceneManager.addPostRenderCallback(postRenderCallback);
 
-    // Click handler for direct plant observation
+    // Click handler for direct plant observation (DEBUG MODE ONLY)
     const handleClick = (event: MouseEvent) => {
+      // Only handle clicks in debug mode
+      if (!observationSystem.getDebugMode()) {
+        return;
+      }
+
       const canvas = sceneManager.canvas;
       const rect = canvas.getBoundingClientRect();
       const x = (event.clientX - rect.left) * (canvas.width / rect.width / window.devicePixelRatio);
@@ -153,8 +193,8 @@ export function GardenScene() {
         // Trigger observation
         observationCallbackRef.current({
           plantId: clickedPlant.id,
-          regionId: "click-region",
-          reticleId: "click-reticle",
+          regionId: "click-region-debug",
+          reticleId: "click-reticle-debug",
           timestamp: new Date(),
         });
 
@@ -174,6 +214,24 @@ export function GardenScene() {
     };
     sceneManager.canvas.addEventListener("click", handleClick);
 
+    // Handle observation mode changes from debug panel
+    const handleObservationModeChange = (e: CustomEvent<{ mode: string; debugMode: boolean }>) => {
+      observationSystem.setDebugMode(e.detail.debugMode);
+    };
+    window.addEventListener(
+      "observation-mode-change" as keyof WindowEventMap,
+      handleObservationModeChange as EventListener
+    );
+
+    // Handle debug panel visibility changes
+    const handleDebugVisibilityChange = (e: CustomEvent<{ visible: boolean }>) => {
+      overlayManager.debug.setVisible(e.detail.visible);
+    };
+    window.addEventListener(
+      "debug-visibility-change" as keyof WindowEventMap,
+      handleDebugVisibilityChange as EventListener
+    );
+
     // Start render loop
     sceneManager.start();
 
@@ -182,8 +240,21 @@ export function GardenScene() {
       mounted = false;
       unsubscribe();
       sceneManager.canvas.removeEventListener("click", handleClick);
+      window.removeEventListener(
+        "observation-mode-change" as keyof WindowEventMap,
+        handleObservationModeChange as EventListener
+      );
+      window.removeEventListener(
+        "debug-visibility-change" as keyof WindowEventMap,
+        handleDebugVisibilityChange as EventListener
+      );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);
+
+      if (observationSystemRef.current) {
+        observationSystemRef.current.dispose();
+        observationSystemRef.current = null;
+      }
 
       if (overlayManagerRef.current) {
         overlayManagerRef.current.dispose();

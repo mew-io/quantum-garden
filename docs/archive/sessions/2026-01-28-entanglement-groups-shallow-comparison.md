@@ -1,7 +1,7 @@
 # Session Archive: Entanglement Groups Shallow Comparison
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (will be filled after commit)
+**Synthesis Commit**: 9abbb45
 
 ---
 

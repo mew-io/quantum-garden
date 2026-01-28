@@ -15,53 +15,12 @@ import {
   GLYPH,
   type PlantVariant,
 } from "@quantum-garden/shared";
-import { TextureAtlas, getTextureAtlas } from "../core/texture-atlas";
+import { type TextureAtlas, getTextureAtlas } from "../core/texture-atlas";
 import { createPlantMaterial, updatePlantMaterialTime } from "./plant-material";
 import { prefersReducedMotion } from "@/lib/accessibility";
 
 // Maximum number of plant instances
 const MAX_INSTANCES = 1000;
-
-/**
- * Scale a pattern to PATTERN_SIZE x PATTERN_SIZE using nearest-neighbor interpolation.
- *
- * The quantum service returns 8x8 patterns, but the renderer expects 64x64.
- * This function scales up smaller patterns to fill the expected size.
- *
- * @param pattern - The source pattern (may be 8x8 or any size)
- * @returns Pattern scaled to PATTERN_SIZE x PATTERN_SIZE
- */
-function scalePatternToSize(pattern: number[][]): number[][] {
-  const sourceHeight = pattern.length;
-  if (sourceHeight === 0) return [];
-
-  const sourceWidth = pattern[0]?.length ?? 0;
-  if (sourceWidth === 0) return [];
-
-  // Already the correct size, return as-is
-  if (sourceHeight === PATTERN_SIZE && sourceWidth === PATTERN_SIZE) {
-    return pattern;
-  }
-
-  const scaleX = PATTERN_SIZE / sourceWidth;
-  const scaleY = PATTERN_SIZE / sourceHeight;
-
-  const scaled: number[][] = [];
-
-  for (let y = 0; y < PATTERN_SIZE; y++) {
-    const row: number[] = [];
-    const sourceY = Math.floor(y / scaleY);
-    const sourceRow = pattern[sourceY] ?? [];
-
-    for (let x = 0; x < PATTERN_SIZE; x++) {
-      const sourceX = Math.floor(x / scaleX);
-      row.push(sourceRow[sourceX] ?? 0);
-    }
-    scaled.push(row);
-  }
-
-  return scaled;
-}
 
 // Z-layer offsets for plant categories
 const Z_LAYERS: Record<string, number> = {
@@ -410,7 +369,7 @@ export class PlantInstancer {
 
     // Calculate lifecycle progress for animations (0-1)
     let lifecycleProgress = 0;
-    if (plant.germinatedAt && !plant.traits?.glyphPattern) {
+    if (plant.germinatedAt) {
       const plantWithLifecycle = {
         ...plant,
         germinatedAt: plant.germinatedAt,
@@ -435,18 +394,7 @@ export class PlantInstancer {
     animState: PlantAnimationState,
     now: Date
   ): { pattern: number[][]; palette: string[]; opacity: number; scale: number } {
-    // If plant has resolved traits from quantum measurement, use those
-    if (plant.traits?.glyphPattern) {
-      // Scale pattern to PATTERN_SIZE if needed (quantum service returns 8x8, we need 64x64)
-      const scaledPattern = scalePatternToSize(plant.traits.glyphPattern);
-      return {
-        pattern: scaledPattern,
-        palette: plant.traits.colorPalette ?? ["#888888", "#AAAAAA", "#CCCCCC"],
-        opacity: plant.traits.opacity ?? GLYPH.COLLAPSED_OPACITY,
-        scale: 1,
-      };
-    }
-
+    // Always use variant keyframe patterns - quantum traits influence properties, not pattern replacement
     // Compute lifecycle state
     const plantWithLifecycle = {
       ...plant,
@@ -483,14 +431,9 @@ export class PlantInstancer {
 
   /**
    * Get a unique ID for a pattern (for atlas caching).
+   * Always uses variant + keyframe - quantum traits don't affect pattern identity.
    */
   private getPatternId(plant: RenderablePlant, variant: PlantVariant): string {
-    // For resolved traits, use pattern hash
-    if (plant.traits?.glyphPattern) {
-      return TextureAtlas.hashPattern(plant.traits.glyphPattern);
-    }
-
-    // For lifecycle-based patterns, use variant + keyframe info
     const plantWithLifecycle = {
       ...plant,
       germinatedAt: plant.germinatedAt ?? null,

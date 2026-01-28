@@ -17,6 +17,7 @@ import { useGardenStore } from "@/stores/garden-store";
  */
 export function useEvolution() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
+  const addNotification = useGardenStore((state) => state.addNotification);
 
   const germinateMutation = trpc.plants.germinate.useMutation({
     onSuccess: (result) => {
@@ -24,6 +25,9 @@ export function useEvolution() {
       updatePlant(result.id, {
         germinatedAt: result.germinatedAt,
       });
+
+      // Show notification
+      addNotification("A plant has germinated");
     },
     onError: (error) => {
       console.error("Germination failed:", error);

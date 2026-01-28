@@ -19,6 +19,7 @@ import type { ObservationPayload } from "@quantum-garden/shared";
  */
 export function useObservation() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
+  const addNotification = useGardenStore((state) => state.addNotification);
   const utils = trpc.useUtils();
 
   const recordObservationMutation = trpc.observation.recordObservation.useMutation({
@@ -37,6 +38,8 @@ export function useObservation() {
       // If entangled partners were updated, refetch plants to get their new state
       if (result.entangledPartnersUpdated) {
         utils.plants.list.invalidate();
+        // Show entanglement notification
+        addNotification("Entangled plants observed");
       }
     },
     onError: (error) => {

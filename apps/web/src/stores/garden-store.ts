@@ -2,6 +2,15 @@ import { create } from "zustand";
 import type { Plant, ObservationRegion, Reticle, Position } from "@quantum-garden/shared";
 
 /**
+ * Evolution event notification.
+ */
+export interface EvolutionNotification {
+  id: string;
+  message: string;
+  timestamp: number;
+}
+
+/**
  * Client-side garden state.
  *
  * Manages the visual and interactive state of the garden,
@@ -38,6 +47,11 @@ interface GardenState {
   timeTravelTimestamp: Date | null;
   setTimeTravelMode: (enabled: boolean) => void;
   setTimeTravelTimestamp: (timestamp: Date | null) => void;
+
+  // Evolution notifications
+  notifications: EvolutionNotification[];
+  addNotification: (message: string) => void;
+  removeNotification: (id: string) => void;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -81,4 +95,22 @@ export const useGardenStore = create<GardenState>((set) => ({
       timeTravelTimestamp: enabled ? null : null, // Reset timestamp when disabled
     }),
   setTimeTravelTimestamp: (timestamp) => set({ timeTravelTimestamp: timestamp }),
+
+  // Evolution notifications
+  notifications: [],
+  addNotification: (message) =>
+    set((state) => ({
+      notifications: [
+        ...state.notifications,
+        {
+          id: `notification-${Date.now()}-${Math.random()}`,
+          message,
+          timestamp: Date.now(),
+        },
+      ],
+    })),
+  removeNotification: (id) =>
+    set((state) => ({
+      notifications: state.notifications.filter((n) => n.id !== id),
+    })),
 }));

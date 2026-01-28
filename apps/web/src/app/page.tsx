@@ -6,6 +6,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { InfoOverlay } from "@/components/garden/info-overlay";
 import { DebugPanel } from "@/components/garden/debug-panel";
 import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
+import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { useGardenStore } from "@/stores/garden-store";
 import { trpc } from "@/lib/trpc/client";
 
@@ -89,6 +90,7 @@ export default function Home() {
         <GardenScene />
         <InfoOverlay />
         <DebugPanel />
+        <EvolutionNotifications />
         {gardenCreatedAt && (
           <TimeTravelScrubber
             isActive={isTimeTravelMode}

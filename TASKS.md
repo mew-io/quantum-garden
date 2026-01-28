@@ -29,14 +29,15 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - Demonstrates the "observer" philosophy through time
    - Showcases garden's autonomous nature over time
 
-3. **Sprint 4: Enhanced Garden Evolution** (IN PROGRESS - MEDIUM PRIORITY)
-   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27)
-   - ✅ Task 4.2: Smart Germination Logic (COMPLETED 2026-01-27)
-   - Task 4.3: Evolution Event Notifications (NEXT - HIGH PRIORITY)
+3. ✅ **Sprint 4: Enhanced Garden Evolution** (COMPLETED 2026-01-27)
+   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27 - autowork loop 1)
+   - ✅ Task 4.2: Smart Germination Logic (COMPLETED 2026-01-27 - autowork loop 2)
+   - ✅ Task 4.3: Evolution Event Notifications (COMPLETED 2026-01-27 - autowork loop 3)
    - Makes garden feel alive and dynamic
    - Improves long-term engagement
    - Task 4.1: GPU-accelerated shader animations (young pulse, mature sway, old slow movement)
    - Task 4.2: Proximity bonus, clustering prevention, age weighting, wave patterns
+   - Task 4.3: Toast notifications for germination and entanglement events
 
 ### Medium-Term Goals (Next 2 Weeks)
 
@@ -470,8 +471,8 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 4.3: Evolution Event Notifications
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/components/garden/evolution-notifications.tsx` (NEW)
+**Status**: ✅ COMPLETED (2026-01-27)
+**Files**: `apps/web/src/components/garden/evolution-notifications.tsx`, `apps/web/src/stores/garden-store.ts`, `apps/web/src/hooks/use-evolution.ts`, `apps/web/src/hooks/use-observation.ts`, `apps/web/src/app/page.tsx`
 
 **Features**:
 
@@ -479,14 +480,31 @@ getEvolutionTimeline: publicProcedure
 - When entangled observation occurs: "Entangled plants observed"
 - Notifications fade in/out at bottom-right corner
 - Never intrusive, easily ignorable
-- Optional: Click notification to pan camera to plant location
+- Click-to-dismiss functionality (click notification to dismiss immediately)
+
+**Implementation**:
+
+- Created EvolutionNotifications component with toast notification system
+- Bottom-right positioning with fade in/out animations (Tailwind animate-in)
+- Auto-dismiss after 3 seconds
+- Added EvolutionNotification interface to garden store (id, message, timestamp)
+- Implemented addNotification() and removeNotification() methods in store
+- Integrated with germination callback in use-evolution.ts hook
+- Integrated with observation system for entangled observations (use-observation.ts)
+- Accessible design (role="status", aria-live="polite")
+- Calm aesthetic: black/80 background, green border, hover effects
+
+**Quality Checks**:
+
+- TypeScript: ✅ PASS
+- ESLint: ✅ PASS
 
 **Acceptance Criteria**:
 
-- [ ] Plants germinate with smart logic (proximity, clustering)
-- [ ] Visual behaviors animate based on lifecycle
-- [ ] Notifications appear for evolution events
-- [ ] Garden feels "alive" even when idle
+- [x] Plants germinate with smart logic (proximity, clustering)
+- [x] Visual behaviors animate based on lifecycle
+- [x] Notifications appear for evolution events
+- [x] Garden feels "alive" even when idle
 
 ---
 

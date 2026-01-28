@@ -21,13 +21,20 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - **Quantum integration complete with excellent UX!**
    - Pool generated from IonQ simulator, ready for hardware pool generation
 
-2. **Begin Sprint 3: Time-Travel Experience** (NEXT - HIGH PRIORITY)
-   - Task 3.1: Historical State API
-   - Task 3.2: Time-Travel UI Component
-   - Task 3.3: Integrate Timeline into Garden
-   - Creates compelling demonstration of garden evolution
-   - Showcases the "observer" philosophy
-   - Critical for demonstrating garden's autonomous nature
+2. ✅ **Sprint 3: Time-Travel Experience** (COMPLETED 2026-01-27)
+   - ✅ Task 3.1: Historical State API
+   - ✅ Task 3.2: Time-Travel UI Component
+   - ✅ Task 3.3: Integrate Timeline into Garden
+   - Enables exploration of garden's evolution history
+   - Demonstrates the "observer" philosophy through time
+   - Showcases garden's autonomous nature over time
+
+3. **Begin Sprint 4: Enhanced Garden Evolution** (NEXT - MEDIUM PRIORITY)
+   - Task 4.1: Lifecycle-Based Visual Behaviors
+   - Task 4.2: Smart Germination Logic
+   - Task 4.3: Evolution Event Notifications
+   - Makes garden feel alive and dynamic
+   - Improves long-term engagement
 
 ### Medium-Term Goals (Next 2 Weeks)
 
@@ -304,12 +311,14 @@ class ObservationSystem {
 
 ### Sprint 3: Time-Travel Experience (P1)
 
+**Status**: ✅ COMPLETED (2026-01-27)
+
 **Goal**: Users can scrub through garden's history, seeing when plants germinated and were observed.
 
 #### Task 3.1: Historical State API
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/server/routers/garden.ts` (NEW router)
+**Status**: ✅ COMPLETED (2026-01-27)
+**File**: [apps/web/src/server/routers/garden.ts](apps/web/src/server/routers/garden.ts) (NEW router)
 
 **Endpoints**:
 
@@ -341,8 +350,8 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 3.2: Time-Travel UI Component
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/components/garden/time-travel-scrubber.tsx` (NEW)
+**Status**: ✅ COMPLETED (2026-01-27)
+**File**: [apps/web/src/components/garden/time-travel-scrubber.tsx](apps/web/src/components/garden/time-travel-scrubber.tsx) (NEW)
 
 **Features**:
 
@@ -364,22 +373,29 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 3.3: Integrate Timeline into Garden
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/components/garden/three/garden-scene.tsx`
+**Status**: ✅ COMPLETED (2026-01-27)
+**Files**:
 
-**Integration**:
+- [apps/web/src/app/page.tsx](apps/web/src/app/page.tsx)
+- [apps/web/src/stores/garden-store.ts](apps/web/src/stores/garden-store.ts)
+- [apps/web/src/components/garden/three/garden-scene.tsx](apps/web/src/components/garden/three/garden-scene.tsx)
+- [apps/web/src/hooks/use-evolution.ts](apps/web/src/hooks/use-evolution.ts)
 
-- Toggle via keyboard shortcut (T key)
-- When active, suspend observation system and evolution system
-- Show time-travel scrubber UI
-- Fetch and render historical plant states
+**Implementation**:
+
+- ✅ Toggle via keyboard shortcut (T key)
+- ✅ Suspend observation system during time-travel
+- ✅ Suspend evolution system during time-travel
+- ✅ Time-travel scrubber UI at bottom of screen
+- ✅ Fetch and render historical plant states via getStateAtTime
+- ✅ Time-travel state in garden store (isTimeTravelMode, timeTravelTimestamp)
 
 **Acceptance Criteria**:
 
-- [ ] Can scrub through garden history smoothly
-- [ ] Plants show correct states at historical timestamps
-- [ ] Timeline markers appear for events
-- [ ] Can return to live view seamlessly
+- [x] Can scrub through garden history smoothly
+- [x] Plants show correct states at historical timestamps
+- [x] Timeline markers appear for events
+- [x] Can return to live view seamlessly
 
 ---
 
@@ -487,6 +503,21 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-27 - Sprint 3: Time-Travel Experience (Complete)
+
+- [x] **Historical State API**: Created tRPC router with `getStateAtTime` and `getEvolutionTimeline` endpoints
+- [x] **Garden Router**: New router computing plant states at arbitrary timestamps (superposed/collapsed based on observation history)
+- [x] **Evolution Timeline**: Query system for germination and observation events within time ranges
+- [x] **Time-Travel Scrubber**: Horizontal timeline UI with draggable playhead, event markers, and auto-play (10x speed)
+- [x] **Event Visualization**: Green markers for germinations, blue for observations, with tooltips
+- [x] **Main Page Integration**: Added scrubber to page with keyboard shortcut (T key) and historical state queries
+- [x] **Garden Store Enhancement**: Added `isTimeTravelMode` and `timeTravelTimestamp` state management
+- [x] **Historical Rendering**: Plants render in correct historical states when scrubbing through time
+- [x] **Read-Only Mode**: Observation and evolution systems suspended during time-travel
+- [x] **Live View Return**: Seamless transition back to live garden with plant state refresh
+- [x] **Quality Checks**: TypeScript, ESLint, Prettier all passing
+- [x] **User Experience**: Smooth scrubbing, collapsible UI, calm dark aesthetic, real-time event updates
 
 ### 2026-01-27 - Quantum Pool Implementation (Major Architecture Shift)
 

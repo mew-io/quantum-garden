@@ -1,6 +1,6 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-27 (Sprint 3 Complete - Synthesis)_
+_Last updated: 2026-01-27 (Sprint 4.1 Complete - Lifecycle Visual Behaviors)_
 
 ## Project Goal
 
@@ -30,11 +30,12 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - Showcases garden's autonomous nature over time
 
 3. **Sprint 4: Enhanced Garden Evolution** (IN PROGRESS - MEDIUM PRIORITY)
-   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27)
+   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27 - autowork loop 1)
    - Task 4.2: Smart Germination Logic (NEXT)
    - Task 4.3: Evolution Event Notifications
    - Makes garden feel alive and dynamic
    - Improves long-term engagement
+   - Task 4.1 implemented GPU-accelerated shader animations for young/mature/old plants
 
 ### Medium-Term Goals (Next 2 Weeks)
 

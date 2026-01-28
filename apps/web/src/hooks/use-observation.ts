@@ -62,6 +62,8 @@ export function useObservation() {
     },
     onError: (error) => {
       debugLogger.observation.error("Observation failed", { error: error.message });
+      // Show user-facing error notification
+      addNotification("Observation failed. Please try again.");
     },
   });
 

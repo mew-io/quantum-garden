@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Empty Plants Array Edge Case Fix)_
+_Last updated: 2026-01-28 (Observation Error Notification)_
 
 ## Project Status
 
@@ -27,28 +27,28 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Phase 2: Bugs & Performance
 
-| #   | Task                                                        | Priority | File                       |
-| --- | ----------------------------------------------------------- | -------- | -------------------------- |
-| 66  | ~~Fix vector plant geometry rebuilding every frame~~        | ✅ Done  | `vector-plant-overlay.ts`  |
-| 67  | ~~Debounce store subscriptions in garden-scene~~            | ✅ Done  | `garden-scene.tsx`         |
-| 68  | ~~Fix empty plants array edge case~~                        | ✅ Done  | `page.tsx`                 |
-| 69  | Add user-facing error notification for observation failures | P1       | `use-observation.ts`       |
-| 70  | Fix time-travel edge cases (zero duration, stale now)       | P2       | `time-travel-scrubber.tsx` |
-| 71  | Implement circular buffer for debug logs                    | P2       | `debug-logger.ts`          |
-| 72  | Apply consistent safe area padding                          | P2       | Multiple files             |
-| 73  | Fix toolbar overflow on small screens                       | P1       | `toolbar.tsx`              |
-| 74  | Make spatial grid adaptive to plant distribution            | P3       | `spatial-grid.ts`          |
-| 80  | Investigate z-layer sorting overhead                        | P2       | `plant-instancer.ts`       |
-| 81  | Deduplicate polling across components                       | P1       | `use-plants.ts`            |
-| 82  | Implement geometry pooling for vector primitives            | P1       | `vector-plant-overlay.ts`  |
-| 83  | Audit texture atlas packing efficiency                      | P3       | `texture-atlas.ts`         |
-| 84  | Use partial buffer updates for dirty instances              | P2       | `plant-instancer.ts`       |
-| 85  | Add `hasActiveAnimations()` check to overlays               | P2       | `overlay-manager.ts`       |
-| 86  | Shallow compare entanglement groups before rebuild          | P2       | `entanglement-overlay.ts`  |
-| 87  | ~~Skip frame-level syncPlants when store just synced~~      | ✅ Done  | `garden-scene.tsx`         |
-| 88  | Profile render loop for 1000 plants                         | P2       | -                          |
-| 89  | Cache previous keyframe meshes in vector overlay            | P2       | `vector-plant-overlay.ts`  |
-| 90  | Add performance monitoring to debug panel                   | P3       | `debug-panel.tsx`          |
+| #   | Task                                                            | Priority | File                       |
+| --- | --------------------------------------------------------------- | -------- | -------------------------- |
+| 66  | ~~Fix vector plant geometry rebuilding every frame~~            | ✅ Done  | `vector-plant-overlay.ts`  |
+| 67  | ~~Debounce store subscriptions in garden-scene~~                | ✅ Done  | `garden-scene.tsx`         |
+| 68  | ~~Fix empty plants array edge case~~                            | ✅ Done  | `page.tsx`                 |
+| 69  | ~~Add user-facing error notification for observation failures~~ | ✅ Done  | `use-observation.ts`       |
+| 70  | Fix time-travel edge cases (zero duration, stale now)           | P2       | `time-travel-scrubber.tsx` |
+| 71  | Implement circular buffer for debug logs                        | P2       | `debug-logger.ts`          |
+| 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
+| 73  | Fix toolbar overflow on small screens                           | P1       | `toolbar.tsx`              |
+| 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
+| 80  | Investigate z-layer sorting overhead                            | P2       | `plant-instancer.ts`       |
+| 81  | Deduplicate polling across components                           | P1       | `use-plants.ts`            |
+| 82  | Implement geometry pooling for vector primitives                | P1       | `vector-plant-overlay.ts`  |
+| 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
+| 84  | Use partial buffer updates for dirty instances                  | P2       | `plant-instancer.ts`       |
+| 85  | Add `hasActiveAnimations()` check to overlays                   | P2       | `overlay-manager.ts`       |
+| 86  | Shallow compare entanglement groups before rebuild              | P2       | `entanglement-overlay.ts`  |
+| 87  | ~~Skip frame-level syncPlants when store just synced~~          | ✅ Done  | `garden-scene.tsx`         |
+| 88  | Profile render loop for 1000 plants                             | P2       | -                          |
+| 89  | Cache previous keyframe meshes in vector overlay                | P2       | `vector-plant-overlay.ts`  |
+| 90  | Add performance monitoring to debug panel                       | P3       | `debug-panel.tsx`          |
 
 ### Phase 3: Evolution Improvements
 
@@ -182,6 +182,13 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Observation Error Notification
+
+- ✅ Added user-facing error notification for observation failures (#69)
+- ✅ Users now see "Observation failed. Please try again." toast when observation errors occur
+- ✅ The `addNotification` function was already available from entanglement notifications
+- ✅ All 128 tests passing
 
 ### 2026-01-28 - Empty Plants Array Edge Case Fix
 

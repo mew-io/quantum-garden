@@ -244,12 +244,12 @@ export function ObservationContextPanel() {
     clearObservationContext();
   }, [clearObservationContext]);
 
-  // Auto-dismiss after 15 seconds
+  // Auto-dismiss after 30 seconds (increased from 15s for better readability)
   useEffect(() => {
     if (observationContext) {
       const timer = setTimeout(() => {
         clearObservationContext();
-      }, 15000);
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, [observationContext, clearObservationContext]);

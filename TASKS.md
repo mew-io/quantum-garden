@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Guaranteed Germination)_
+_Last updated: 2026-01-28 (Notification Duration Updates)_
 
 ## Project Status
 
@@ -75,8 +75,8 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 47  | Connect dwell progress to store                   | P1       | `observation-system.ts`         |
 | 48  | Create cooldown indicator component               | P1       | NEW                             |
 | 49  | Position cooldown indicator near corner           | P2       | `page.tsx`                      |
-| 50  | Increase notification duration to 5-6s            | P1       | `evolution-notifications.tsx`   |
-| 51  | Increase context panel duration to 30s            | P1       | `observation-context-panel.tsx` |
+| 50  | ~~Increase notification duration to 5-6s~~        | ✅ Done  | `evolution-notifications.tsx`   |
+| 51  | ~~Increase context panel duration to 30s~~        | ✅ Done  | `observation-context-panel.tsx` |
 | 52  | Add pause-on-hover for notifications              | P2       | `evolution-notifications.tsx`   |
 | 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
 | 54  | Increase event marker touch targets to 20px       | P1       | `time-travel-scrubber.tsx`      |
@@ -182,6 +182,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Notification Duration Improvements
+
+- Increased notification auto-dismiss from 3s to 5s (#50)
+- Increased context panel auto-dismiss from 15s to 30s (#51)
+- Updated doc comments to reflect new durations
+- Gives users more time to read educational content about quantum circuits
+- Both components remain manually dismissible by clicking/tapping
+- All 136 tests passing
 
 ### 2026-01-28 - Guaranteed Germination After 15 Minutes
 

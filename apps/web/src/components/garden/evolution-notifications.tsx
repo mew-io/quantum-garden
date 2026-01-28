@@ -6,7 +6,7 @@
  * - Entangled observation events
  *
  * Design philosophy: Calm, easily ignorable, never intrusive.
- * Positioned bottom-right corner, 3s duration, fade in/out animations.
+ * Positioned bottom-right corner, 5s duration, fade in/out animations.
  */
 
 "use client";
@@ -25,10 +25,10 @@ interface NotificationProps {
  */
 function Notification({ id, message, onDismiss }: NotificationProps) {
   useEffect(() => {
-    // Auto-dismiss after 3 seconds
+    // Auto-dismiss after 5 seconds (increased from 3s for better readability)
     const timer = setTimeout(() => {
       onDismiss(id);
-    }, 3000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [id, onDismiss]);

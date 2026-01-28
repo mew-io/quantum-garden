@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-27 (Sprint 4 Complete - Enhanced Garden Evolution)_
+_Last updated: 2026-01-28 (Sprint 5.1 Complete - Post-Observation Context Panel + Debug System)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Core systems complete (quantum integration, time-travel, evolution behaviors). Next priority is manual testing and validation, followed by educational content and polish.
+**Current Focus**: Sprint 5.1 complete (educational context panel and enhanced debug tools). Next priority is manual testing and validation of new features, followed by observation feedback enhancements.
 
 ## Strategic Roadmap
 
@@ -56,11 +56,11 @@ Build a slow-evolving generative environment where plants exist in quantum super
 
 ### Long-Term Vision (Next Month)
 
-1. **Sprint 5: Educational & Polish**
-   - Post-observation context panel
-   - Observation feedback enhancements
-   - Performance optimization
-   - Educational quantum circuit explanations
+1. **Sprint 5: Educational & Polish** (IN PROGRESS)
+   - ✅ Task 5.1: Post-observation context panel (COMPLETED 2026-01-28)
+   - ✅ Enhanced debug system with live logging (COMPLETED 2026-01-28)
+   - Task 5.2: Observation feedback enhancements (NEXT)
+   - Task 5.3: Performance optimization
 
 2. **Production Readiness**
    - Comprehensive testing
@@ -512,18 +512,39 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 5.1: Post-Observation Context Panel
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/components/garden/observation-context-panel.tsx` (NEW)
+**Status**: ✅ COMPLETED (2026-01-28)
+**File**: `apps/web/src/components/garden/observation-context-panel.tsx`
 
-**Content**:
+**Implementation**:
 
-- Quantum circuit type used (e.g., "Bell Pair - Entanglement")
-- Simplified circuit diagram (visual representation)
-- Brief explanation of quantum concept (1-2 sentences)
-- "Learn More" link to detailed docs
-- Dismissible, remembers preference in localStorage
+- ✅ Educational content for 5 circuit types (superposition, bell_pair, ghz_state, interference, variational)
+- ✅ ASCII circuit diagram visualization
+- ✅ Brief quantum concept explanations
+- ✅ "Learn More" links to documentation
+- ✅ Dismissible UI with "Don't show again" option (localStorage)
+- ✅ Auto-dismiss after 15 seconds
+- ✅ Calm slide-in animation from left side
 
-**Design**: Appears from side, calm aesthetic, easy to ignore
+**Related Enhancements**:
+
+- ✅ Added `ObservationContext` state to garden store
+- ✅ Added `circuitId` to observation router response
+- ✅ Integrated with observation hook to trigger on successful observation
+
+#### Task 5.1b: Enhanced Debug System
+
+**Status**: ✅ COMPLETED (2026-01-28)
+**Files**: `apps/web/src/lib/debug-logger.ts`, `apps/web/src/components/garden/debug-panel.tsx`, `docs/debugging.md`
+
+**Implementation**:
+
+- ✅ Centralized DebugLogger service with categories (quantum, observation, evolution, rendering, system)
+- ✅ Log levels (debug, info, warn, error) with filtering
+- ✅ React hook `useDebugLogs()` for UI integration
+- ✅ Enhanced debug panel with 3 tabs (Overview, Logs, Plants)
+- ✅ System state indicators (Evolution, Time Travel, Observation mode, Context Panel)
+- ✅ Live log message display with expandable JSON data view
+- ✅ Comprehensive debugging documentation
 
 #### Task 5.2: Observation Feedback Enhancements
 
@@ -559,6 +580,47 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Sprint 5.1: Post-Observation Context Panel + Debug System (Complete)
+
+**Post-Observation Context Panel (Task 5.1)**:
+
+- [x] Created ObservationContextPanel component with educational content
+- [x] Educational content for 5 circuit types (superposition, bell_pair, ghz_state, interference, variational)
+- [x] ASCII circuit diagram visualization in monospace font
+- [x] Brief quantum concept explanations (1-2 sentences per circuit)
+- [x] "Learn More" links to documentation pages
+- [x] Dismissible UI with close button and "Don't show again" option
+- [x] Auto-dismiss after 15 seconds
+- [x] Slide-in animation from left side (calm, non-intrusive)
+- [x] Preference stored in localStorage
+- [x] Added ObservationContext state to garden store (plantId, circuitId, isEntangled)
+- [x] Added circuitId and executionMode to observation router response
+- [x] Integrated context panel trigger in observation hook
+
+**Enhanced Debug System (Task 5.1b)**:
+
+- [x] Created DebugLogger service (`apps/web/src/lib/debug-logger.ts`)
+- [x] Centralized logging with 5 categories (quantum, observation, evolution, rendering, system)
+- [x] 4 log levels (debug, info, warn, error)
+- [x] In-memory storage with 100 log limit
+- [x] Console output with category prefixes (e.g., `[QUANTUM]`, `[OBSERVATION]`)
+- [x] React hook `useDebugLogs()` for subscribing to log updates
+- [x] `filterLogs()` utility for category/level filtering
+- [x] Enhanced debug panel with 3-tab interface (Overview, Logs, Plants)
+- [x] System state indicators (Evolution active/paused, Time Travel on/off, Observation mode, Context Panel visible)
+- [x] Expanded garden stats (total, germinated, dormant, observed, superposed, notifications)
+- [x] Live log message display with filtering UI
+- [x] Expandable log entries for viewing JSON data payloads
+- [x] Click-to-expand log data with syntax highlighting
+- [x] Added logging to use-evolution.ts (germination events)
+- [x] Added logging to use-observation.ts (observation events with circuit info)
+- [x] Created comprehensive debugging documentation (`docs/debugging.md`)
+
+**Quality Checks**:
+
+- [x] TypeScript type-checking: PASS
+- [x] ESLint linting: PASS
 
 ### 2026-01-27 - Sprint 4: Enhanced Garden Evolution (Complete)
 

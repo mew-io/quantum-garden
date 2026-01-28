@@ -280,11 +280,13 @@ export const observationRouter = router({
         // Region not found in database - this is expected for in-memory regions
       }
 
-      // Return updated plant with information about entangled partners
+      // Return updated plant with information about entangled partners and circuit type
       // The frontend will refetch plants to get the updated partner states
       return {
         ...updatedPlant,
         entangledPartnersUpdated: plant.entanglementGroupId ? true : false,
+        circuitId: circuitId,
+        executionMode: executionMode,
       };
     }),
 

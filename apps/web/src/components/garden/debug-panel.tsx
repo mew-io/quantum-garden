@@ -2,16 +2,42 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
+import { useGardenStore } from "@/stores/garden-store";
+import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
+import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
 /**
  * Debug panel for viewing quantum garden internals.
  * Toggle with backtick (`) key.
+ *
+ * Features:
+ * - Garden overview statistics
+ * - Quantum service status and configuration
+ * - Observation system mode toggle
+ * - Live log message display with filtering
+ * - System state indicators
+ * - Selected plant details
  */
 export function DebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
+  const [activeTab, setActiveTab] = useState<"overview" | "logs" | "plants">("overview");
+  const [logFilters, setLogFilters] = useState<{
+    categories: LogCategory[];
+    levels: LogLevel[];
+  }>({
+    categories: ["quantum", "observation", "evolution", "rendering", "system"],
+    levels: ["debug", "info", "warn", "error"],
+  });
+
+  // Get garden store state
+  const { isTimeTravelMode, notifications, observationContext } = useGardenStore();
+
+  // Get debug logs
+  const allLogs = useDebugLogs();
+  const filteredLogs = filterLogs(allLogs, logFilters);
 
   // Fetch all plants for overview
   const { data: plants, refetch: refetchPlants } = trpc.plants.list.useQuery(undefined, {
@@ -24,7 +50,7 @@ export function DebugPanel() {
     undefined,
     {
       enabled: isVisible,
-      refetchInterval: isVisible ? 5000 : false, // Poll every 5 seconds
+      refetchInterval: isVisible ? 5000 : false,
     }
   );
 
@@ -33,7 +59,7 @@ export function DebugPanel() {
     undefined,
     {
       enabled: isVisible,
-      refetchInterval: isVisible ? 2000 : false, // Poll every 2 seconds
+      refetchInterval: isVisible ? 2000 : false,
     }
   );
 
@@ -44,12 +70,15 @@ export function DebugPanel() {
         e.preventDefault();
         setIsVisible((v) => {
           const newVisibility = !v;
-          // Dispatch visibility change event
           window.dispatchEvent(
             new CustomEvent("debug-visibility-change", {
               detail: { visible: newVisibility },
             })
           );
+          // Log visibility change
+          if (newVisibility) {
+            debugLogger.system.info("Debug panel opened");
+          }
           return newVisibility;
         });
       }
@@ -80,8 +109,8 @@ export function DebugPanel() {
   const toggleObservationMode = useCallback(() => {
     const newMode = observationMode === "region" ? "click" : "region";
     setObservationMode(newMode);
+    debugLogger.observation.info(`Observation mode changed to ${newMode}`);
 
-    // Dispatch custom event to notify GardenScene
     window.dispatchEvent(
       new CustomEvent("observation-mode-change", {
         detail: { mode: newMode, debugMode: newMode === "click" },
@@ -89,25 +118,44 @@ export function DebugPanel() {
     );
   }, [observationMode]);
 
+  // Toggle category filter
+  const toggleCategory = (category: LogCategory) => {
+    setLogFilters((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
+    }));
+  };
+
+  // Toggle level filter
+  const toggleLevel = (level: LogLevel) => {
+    setLogFilters((prev) => ({
+      ...prev,
+      levels: prev.levels.includes(level)
+        ? prev.levels.filter((l) => l !== level)
+        : [...prev.levels, level],
+    }));
+  };
+
   if (!isVisible) {
     return null;
   }
 
   const observedCount = plants?.filter((p: Plant) => p.observed).length ?? 0;
+  const germinatedCount = plants?.filter((p: Plant) => p.germinatedAt !== null).length ?? 0;
+  const dormantCount = plants?.filter((p: Plant) => p.germinatedAt === null).length ?? 0;
   const totalCount = plants?.length ?? 0;
   const selectedPlant = plants?.find((p: Plant) => p.id === selectedPlantId);
 
-  // Group plants by variant
-  const variantCounts: Record<string, number> = {};
-  plants?.forEach((p: Plant) => {
-    variantCounts[p.variantId] = (variantCounts[p.variantId] ?? 0) + 1;
-  });
-
   return (
-    <div className="fixed top-4 right-4 z-50 w-80 max-h-[80vh] overflow-auto bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-2xl text-sm">
+    <div className="fixed top-4 right-4 z-50 w-96 max-h-[85vh] overflow-hidden bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-2xl text-sm flex flex-col">
       {/* Header */}
       <div className="sticky top-0 bg-gray-900 px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
-        <h3 className="text-gray-100 font-medium">Quantum Debug</h3>
+        <h3 className="text-gray-100 font-medium flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          Quantum Debug
+        </h3>
         <button
           onClick={() => setIsVisible(false)}
           className="text-gray-500 hover:text-gray-300 text-xs"
@@ -116,181 +164,348 @@ export function DebugPanel() {
         </button>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Overview Stats */}
-        <section>
-          <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Garden Overview</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <Stat label="Total Plants" value={totalCount} />
-            <Stat label="Observed" value={`${observedCount}/${totalCount}`} />
-          </div>
-        </section>
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-700/50 bg-gray-800/50">
+        {(["overview", "logs", "plants"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+              activeTab === tab
+                ? "text-green-400 border-b-2 border-green-400"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "logs" && filteredLogs.length > 0 && (
+              <span className="ml-1 text-gray-500">({filteredLogs.length})</span>
+            )}
+          </button>
+        ))}
+      </div>
 
-        {/* Quantum Service Status */}
-        {quantumConfig && (
-          <section>
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Quantum Service</h4>
-            <div className="space-y-2">
-              <div className="bg-gray-800/50 rounded p-3 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 text-xs">Execution Mode</span>
+      {/* Tab Content */}
+      <div className="flex-1 overflow-auto p-4 space-y-4">
+        {activeTab === "overview" && (
+          <>
+            {/* System State Indicators */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">System State</h4>
+              <div className="flex flex-wrap gap-2">
+                <StatusBadge
+                  label="Evolution"
+                  active={!isTimeTravelMode}
+                  activeColor="green"
+                  inactiveText="Paused"
+                />
+                <StatusBadge
+                  label="Time Travel"
+                  active={isTimeTravelMode}
+                  activeColor="purple"
+                  inactiveText="Off"
+                />
+                <StatusBadge
+                  label="Observation"
+                  active={observationMode === "region"}
+                  activeColor="blue"
+                  activeText="Region"
+                  inactiveText="Click"
+                  inactiveColor="amber"
+                />
+                {observationContext && (
+                  <StatusBadge
+                    label="Context Panel"
+                    active={true}
+                    activeColor="cyan"
+                    activeText="Visible"
+                  />
+                )}
+              </div>
+            </section>
+
+            {/* Garden Overview */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Garden Stats</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <Stat label="Total" value={totalCount} />
+                <Stat label="Germinated" value={germinatedCount} color="green" />
+                <Stat label="Dormant" value={dormantCount} color="yellow" />
+                <Stat label="Observed" value={observedCount} color="cyan" />
+                <Stat label="Superposed" value={totalCount - observedCount} color="purple" />
+                <Stat label="Notifications" value={notifications.length} />
+              </div>
+            </section>
+
+            {/* Quantum Service Status */}
+            {quantumConfig && (
+              <section>
+                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                  Quantum Service
+                </h4>
+                <div className="bg-gray-800/50 rounded p-3 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 text-xs">Execution Mode</span>
+                    <span
+                      className={`text-xs font-mono px-2 py-1 rounded ${
+                        quantumConfig.execution_mode === "simulator"
+                          ? "bg-blue-900/50 text-blue-300"
+                          : quantumConfig.execution_mode === "hardware"
+                            ? "bg-purple-900/50 text-purple-300"
+                            : "bg-gray-700/50 text-gray-400"
+                      }`}
+                    >
+                      {quantumConfig.execution_mode.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-500">IonQ API Key</span>
+                    <span
+                      className={
+                        quantumConfig.ionq_api_key_configured ? "text-green-400" : "text-gray-500"
+                      }
+                    >
+                      {quantumConfig.ionq_api_key_configured ? "Configured" : "Not Set"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-500">Default Shots</span>
+                    <span className="text-cyan-400">{quantumConfig.default_shots}</span>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Job Queue Stats */}
+            {jobStats && (
+              <section>
+                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Quantum Jobs</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Stat label="Pending" value={jobStats.pending} />
+                  <Stat label="Completed" value={jobStats.completed} color="green" />
+                  <Stat label="Failed" value={jobStats.failed} color="red" />
+                  <Stat label="Total" value={jobStats.total} />
+                </div>
+              </section>
+            )}
+
+            {/* Observation Mode Toggle */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Controls</h4>
+              <div className="space-y-2">
+                <button
+                  onClick={toggleObservationMode}
+                  className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
+                >
+                  <span className="text-xs">Toggle Observation Mode</span>
                   <span
                     className={`text-xs font-mono px-2 py-1 rounded ${
-                      quantumConfig.execution_mode === "simulator"
-                        ? "bg-blue-900/50 text-blue-300"
-                        : quantumConfig.execution_mode === "hardware"
-                          ? "bg-purple-900/50 text-purple-300"
-                          : "bg-gray-700/50 text-gray-400"
+                      observationMode === "region"
+                        ? "bg-green-900/50 text-green-300"
+                        : "bg-amber-900/50 text-amber-300"
                     }`}
                   >
-                    {quantumConfig.execution_mode.toUpperCase()}
+                    {observationMode === "region" ? "REGION" : "CLICK"}
                   </span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500">IonQ API Key</span>
-                  <span
-                    className={
-                      quantumConfig.ionq_api_key_configured ? "text-green-400" : "text-gray-500"
-                    }
-                  >
-                    {quantumConfig.ionq_api_key_configured ? "Configured" : "Not Set"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500">Default Shots</span>
-                  <span className="text-cyan-400">{quantumConfig.default_shots}</span>
-                </div>
+                </button>
               </div>
-            </div>
-          </section>
+            </section>
+
+            {/* Keyboard Shortcuts */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                Keyboard Shortcuts
+              </h4>
+              <div className="bg-gray-800/50 rounded p-3 space-y-1 text-xs">
+                <ShortcutRow shortcut="`" description="Toggle debug panel" />
+                <ShortcutRow shortcut="T" description="Toggle time-travel mode" />
+              </div>
+            </section>
+          </>
         )}
 
-        {/* Observation Mode Toggle */}
-        <section>
-          <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Observation System</h4>
-          <div className="space-y-2">
-            <button
-              onClick={toggleObservationMode}
-              className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
-            >
-              <span className="text-xs">Observation Mode</span>
-              <span
-                className={`text-xs font-mono px-2 py-1 rounded ${
-                  observationMode === "region"
-                    ? "bg-green-900/50 text-green-300"
-                    : "bg-amber-900/50 text-amber-300"
-                }`}
-              >
-                {observationMode === "region" ? "REGION" : "CLICK"}
-              </span>
-            </button>
-            <div className="text-xs text-gray-500 px-1">
-              {observationMode === "region"
-                ? "Observation triggers when reticle aligns with plant in region"
-                : "Click plants directly to observe (debug mode)"}
-            </div>
-          </div>
-        </section>
+        {activeTab === "logs" && (
+          <>
+            {/* Log Filters */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Filters</h4>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-1">
+                  {(
+                    ["quantum", "observation", "evolution", "rendering", "system"] as LogCategory[]
+                  ).map((cat) => (
+                    <FilterChip
+                      key={cat}
+                      label={cat}
+                      active={logFilters.categories.includes(cat)}
+                      onClick={() => toggleCategory(cat)}
+                      color={getCategoryColor(cat)}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {(["debug", "info", "warn", "error"] as LogLevel[]).map((level) => (
+                    <FilterChip
+                      key={level}
+                      label={level}
+                      active={logFilters.levels.includes(level)}
+                      onClick={() => toggleLevel(level)}
+                      color={getLevelColor(level)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </section>
 
-        {/* Job Queue Stats */}
-        {jobStats && (
-          <section>
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Quantum Jobs</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Stat label="Pending" value={jobStats.pending} />
-              <Stat label="Completed" value={jobStats.completed} />
-              <Stat label="Failed" value={jobStats.failed} color="red" />
-              <Stat label="Mode" value={jobStats.execution_mode} />
-            </div>
-          </section>
+            {/* Log Messages */}
+            <section>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-gray-400 text-xs uppercase tracking-wide">
+                  Messages ({filteredLogs.length})
+                </h4>
+                <button
+                  onClick={() => debugLogger.clear()}
+                  className="text-xs text-gray-500 hover:text-gray-300"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="bg-gray-800/50 rounded max-h-96 overflow-auto">
+                {filteredLogs.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 text-xs">No log messages</div>
+                ) : (
+                  <div className="divide-y divide-gray-700/30">
+                    {[...filteredLogs].reverse().map((log) => (
+                      <LogEntryRow key={log.id} log={log} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
         )}
 
-        {/* Selected Plant Details */}
-        {selectedPlant && (
-          <section>
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Selected Plant</h4>
-            <div className="bg-gray-800/50 rounded p-3 space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Variant</span>
-                <span className="text-green-400">{selectedPlant.variantId}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">State</span>
-                <span className={selectedPlant.observed ? "text-yellow-400" : "text-blue-400"}>
-                  {selectedPlant.visualState}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Circuit</span>
-                <span className="text-purple-400">{selectedPlant.quantumCircuitId ?? "—"}</span>
-              </div>
-              {selectedPlant.traits && (
-                <>
+        {activeTab === "plants" && (
+          <>
+            {/* Selected Plant Details */}
+            {selectedPlant && (
+              <section>
+                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                  Selected Plant
+                </h4>
+                <div className="bg-gray-800/50 rounded p-3 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Growth Rate</span>
-                    <span className="text-cyan-400">
-                      {selectedPlant.traits.growthRate?.toFixed(2) ?? "—"}
+                    <span className="text-gray-500">ID</span>
+                    <span className="text-gray-300 font-mono text-xs">
+                      {selectedPlant.id.slice(0, 8)}...
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Opacity</span>
-                    <span className="text-cyan-400">
-                      {selectedPlant.traits.opacity?.toFixed(2) ?? "—"}
+                    <span className="text-gray-500">Variant</span>
+                    <span className="text-green-400">{selectedPlant.variantId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">State</span>
+                    <span className={selectedPlant.observed ? "text-yellow-400" : "text-blue-400"}>
+                      {selectedPlant.visualState}
                     </span>
                   </div>
-                </>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Plant List */}
-        <section>
-          <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
-            Plants ({totalCount})
-          </h4>
-          <div className="max-h-48 overflow-auto space-y-1">
-            {plants?.slice(0, 20).map((plant: Plant) => (
-              <button
-                key={plant.id}
-                onClick={() => setSelectedPlantId(plant.id)}
-                className={`w-full text-left px-2 py-1 rounded text-xs flex justify-between items-center ${
-                  plant.id === selectedPlantId
-                    ? "bg-blue-900/50 text-blue-200"
-                    : "hover:bg-gray-800 text-gray-400"
-                }`}
-              >
-                <span>{plant.variantId}</span>
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    plant.observed ? "bg-yellow-400" : "bg-blue-400"
-                  }`}
-                />
-              </button>
-            ))}
-            {(plants?.length ?? 0) > 20 && (
-              <div className="text-gray-600 text-xs text-center py-1">
-                ... and {(plants?.length ?? 0) - 20} more
-              </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Germinated</span>
+                    <span
+                      className={selectedPlant.germinatedAt ? "text-green-400" : "text-gray-500"}
+                    >
+                      {selectedPlant.germinatedAt ? "Yes" : "No (dormant)"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Entangled</span>
+                    <span
+                      className={
+                        selectedPlant.entanglementGroupId ? "text-purple-400" : "text-gray-500"
+                      }
+                    >
+                      {selectedPlant.entanglementGroupId ? "Yes" : "No"}
+                    </span>
+                  </div>
+                  {selectedPlant.traits && (
+                    <>
+                      <div className="border-t border-gray-700/50 pt-2 mt-2">
+                        <span className="text-gray-400 text-xs">Traits (Resolved)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Growth Rate</span>
+                        <span className="text-cyan-400">
+                          {selectedPlant.traits.growthRate?.toFixed(2) ?? "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Opacity</span>
+                        <span className="text-cyan-400">
+                          {selectedPlant.traits.opacity?.toFixed(2) ?? "—"}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </section>
             )}
-          </div>
-        </section>
 
-        {/* Refresh Button */}
+            {/* Plant List */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                All Plants ({totalCount})
+              </h4>
+              <div className="max-h-64 overflow-auto space-y-1">
+                {plants?.map((plant: Plant) => (
+                  <button
+                    key={plant.id}
+                    onClick={() => setSelectedPlantId(plant.id)}
+                    className={`w-full text-left px-2 py-1.5 rounded text-xs flex justify-between items-center ${
+                      plant.id === selectedPlantId
+                        ? "bg-blue-900/50 text-blue-200"
+                        : "hover:bg-gray-800 text-gray-400"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          plant.observed
+                            ? "bg-yellow-400"
+                            : plant.germinatedAt
+                              ? "bg-green-400"
+                              : "bg-gray-600"
+                        }`}
+                      />
+                      <span>{plant.variantId}</span>
+                    </div>
+                    <span className="text-gray-600 font-mono">{plant.id.slice(0, 6)}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-gray-700/50 px-4 py-2 bg-gray-800/50">
         <button
           onClick={() => {
             refetchPlants();
             refetchConfig();
             refetchJobStats();
+            debugLogger.system.debug("Manual refresh triggered");
           }}
-          className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs"
+          className="w-full py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
         >
-          Refresh
+          Refresh All
         </button>
       </div>
     </div>
   );
 }
+
+// Helper Components
 
 function Stat({
   label,
@@ -299,19 +514,144 @@ function Stat({
 }: {
   label: string;
   value: string | number;
-  color?: "white" | "red" | "green" | "yellow";
+  color?: "white" | "red" | "green" | "yellow" | "cyan" | "purple";
 }) {
   const colorClass = {
     white: "text-gray-100",
     red: "text-red-400",
     green: "text-green-400",
     yellow: "text-yellow-400",
+    cyan: "text-cyan-400",
+    purple: "text-purple-400",
   }[color];
 
   return (
     <div className="bg-gray-800/50 rounded px-3 py-2">
       <div className="text-gray-500 text-xs">{label}</div>
       <div className={`font-mono ${colorClass}`}>{value}</div>
+    </div>
+  );
+}
+
+function StatusBadge({
+  label,
+  active,
+  activeColor,
+  activeText,
+  inactiveText,
+  inactiveColor = "gray",
+}: {
+  label: string;
+  active: boolean;
+  activeColor: "green" | "blue" | "purple" | "cyan" | "amber";
+  activeText?: string;
+  inactiveText?: string;
+  inactiveColor?: "gray" | "amber";
+}) {
+  const colorClasses = {
+    green: "bg-green-900/50 text-green-300 border-green-700/50",
+    blue: "bg-blue-900/50 text-blue-300 border-blue-700/50",
+    purple: "bg-purple-900/50 text-purple-300 border-purple-700/50",
+    cyan: "bg-cyan-900/50 text-cyan-300 border-cyan-700/50",
+    amber: "bg-amber-900/50 text-amber-300 border-amber-700/50",
+    gray: "bg-gray-800/50 text-gray-500 border-gray-700/50",
+  };
+
+  const className = active ? colorClasses[activeColor] : colorClasses[inactiveColor];
+  const text = active ? (activeText ?? "Active") : (inactiveText ?? "Inactive");
+
+  return (
+    <div className={`text-xs px-2 py-1 rounded border ${className}`}>
+      <span className="opacity-60">{label}:</span> {text}
+    </div>
+  );
+}
+
+function ShortcutRow({ shortcut, description }: { shortcut: string; description: string }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-gray-500">{description}</span>
+      <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 font-mono">{shortcut}</kbd>
+    </div>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+  color,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  color: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-xs px-2 py-1 rounded border transition-colors ${
+        active ? `${color} border-current` : "text-gray-500 border-gray-700 hover:border-gray-600"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function getCategoryColor(category: LogCategory): string {
+  const colors: Record<LogCategory, string> = {
+    quantum: "text-purple-400",
+    observation: "text-blue-400",
+    evolution: "text-green-400",
+    rendering: "text-yellow-400",
+    system: "text-gray-400",
+  };
+  return colors[category];
+}
+
+function getLevelColor(level: LogLevel): string {
+  const colors: Record<LogLevel, string> = {
+    debug: "text-gray-400",
+    info: "text-blue-400",
+    warn: "text-amber-400",
+    error: "text-red-400",
+  };
+  return colors[level];
+}
+
+function LogEntryRow({
+  log,
+}: {
+  log: {
+    id: string;
+    timestamp: Date;
+    level: LogLevel;
+    category: LogCategory;
+    message: string;
+    data?: unknown;
+  };
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const time = log.timestamp.toLocaleTimeString("en-US", { hour12: false });
+
+  return (
+    <div
+      className={`px-3 py-2 text-xs cursor-pointer hover:bg-gray-700/30 ${
+        log.level === "error" ? "bg-red-900/10" : log.level === "warn" ? "bg-amber-900/10" : ""
+      }`}
+      onClick={() => log.data && setExpanded(!expanded)}
+    >
+      <div className="flex items-start gap-2">
+        <span className="text-gray-600 font-mono shrink-0">{time}</span>
+        <span className={`shrink-0 ${getCategoryColor(log.category)}`}>[{log.category}]</span>
+        <span className={getLevelColor(log.level)}>{log.message}</span>
+      </div>
+      {expanded && log.data !== undefined && (
+        <pre className="mt-2 p-2 bg-gray-900/50 rounded text-gray-400 overflow-x-auto">
+          {String(JSON.stringify(log.data, null, 2))}
+        </pre>
+      )}
     </div>
   );
 }

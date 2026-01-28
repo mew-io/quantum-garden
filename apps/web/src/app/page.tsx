@@ -7,6 +7,7 @@ import { InfoOverlay } from "@/components/garden/info-overlay";
 import { DebugPanel } from "@/components/garden/debug-panel";
 import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
+import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { useGardenStore } from "@/stores/garden-store";
 import { trpc } from "@/lib/trpc/client";
 
@@ -91,6 +92,7 @@ export default function Home() {
         <InfoOverlay />
         <DebugPanel />
         <EvolutionNotifications />
+        <ObservationContextPanel />
         {gardenCreatedAt && (
           <TimeTravelScrubber
             isActive={isTimeTravelMode}

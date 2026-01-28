@@ -11,6 +11,15 @@ export interface EvolutionNotification {
 }
 
 /**
+ * Context for the observation panel showing quantum circuit info.
+ */
+export interface ObservationContext {
+  plantId: string;
+  circuitId: string;
+  isEntangled: boolean;
+}
+
+/**
  * Client-side garden state.
  *
  * Manages the visual and interactive state of the garden,
@@ -52,6 +61,11 @@ interface GardenState {
   notifications: EvolutionNotification[];
   addNotification: (message: string) => void;
   removeNotification: (id: string) => void;
+
+  // Observation context panel
+  observationContext: ObservationContext | null;
+  setObservationContext: (context: ObservationContext) => void;
+  clearObservationContext: () => void;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -113,4 +127,9 @@ export const useGardenStore = create<GardenState>((set) => ({
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
     })),
+
+  // Observation context panel
+  observationContext: null,
+  setObservationContext: (context) => set({ observationContext: context }),
+  clearObservationContext: () => set({ observationContext: null }),
 }));

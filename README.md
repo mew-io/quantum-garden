@@ -33,11 +33,17 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
   - View historical plant states at any point in time
   - Event markers show germinations and observations
   - Auto-play mode to watch garden evolve at 10x speed
+- Post-observation context panel: educational quantum circuit explanations
+  - ASCII circuit diagrams for superposition, Bell pair, GHZ state, interference, variational
+  - Calm, dismissible UI with "Don't show again" option
+- Enhanced debug system (press backtick key):
+  - Three-tab interface (Overview, Logs, Plants)
+  - Live log messages with category filtering
+  - System state indicators and garden statistics
 
 ### Coming Soon 🎯
 
-- Educational quantum circuit explanations
-- Post-observation context panel
+- Observation feedback enhancements (color variation, entanglement pulse visuals)
 - Performance optimizations for large gardens
 
 ---
@@ -139,6 +145,7 @@ See [docs/architecture.md](docs/architecture.md) for detailed system design.
 - [Architecture Overview](docs/architecture.md)
 - [Observation System](docs/observation-system.md)
 - [Quantum Circuits](docs/quantum-circuits.md)
+- [Debugging Guide](docs/debugging.md) — Debug panel, logging, and troubleshooting
 - [Sprite Sandbox](docs/sandbox.md) — Visual development tool for plant patterns
 - [Contributing Guide](docs/contributing.md)
 

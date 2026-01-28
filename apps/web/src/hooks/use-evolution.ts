@@ -8,6 +8,7 @@
 import { useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
+import { debugLogger } from "@/lib/debug-logger";
 
 /**
  * Hook that provides evolution functionality.
@@ -26,11 +27,17 @@ export function useEvolution() {
         germinatedAt: result.germinatedAt,
       });
 
+      // Log germination
+      debugLogger.evolution.info(`Plant germinated: ${result.variantId}`, {
+        plantId: result.id,
+        variantId: result.variantId,
+      });
+
       // Show notification
       addNotification("A plant has germinated");
     },
     onError: (error) => {
-      console.error("Germination failed:", error);
+      debugLogger.evolution.error("Germination failed", { error: error.message });
     },
   });
 

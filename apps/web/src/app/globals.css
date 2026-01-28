@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Safe area CSS custom properties for consistent spacing */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  /* Base spacing (16px = 4 in Tailwind) plus safe area */
+  --inset-top: max(1rem, var(--safe-top));
+  --inset-right: max(1rem, var(--safe-right));
+  --inset-bottom: max(1rem, var(--safe-bottom));
+  --inset-left: max(1rem, var(--safe-left));
+}
+
 *,
 *::before,
 *::after {
@@ -23,9 +36,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Prevent default touch behaviors (zoom, scroll) on mobile */
   touch-action: none;
-  /* iOS safe area padding for notched devices */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* iOS safe area padding for notched devices - body provides base, components use CSS vars */
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 #garden-canvas {

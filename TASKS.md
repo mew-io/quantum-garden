@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Z-layer category caching optimization)_
+_Last updated: 2026-01-28 (Safe area padding for iOS notched devices)_
 
 ## Project Status
 
@@ -35,7 +35,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 69  | ~~Add user-facing error notification for observation failures~~ | ✅ Done  | `use-observation.ts`       |
 | 70  | ~~Fix time-travel edge cases (zero duration, stale now)~~       | ✅ Done  | `time-travel-scrubber.tsx` |
 | 71  | ~~Implement circular buffer for debug logs~~                    | ✅ Done  | `debug-logger.ts`          |
-| 72  | Apply consistent safe area padding                              | P2       | Multiple files             |
+| 72  | ~~Apply consistent safe area padding~~                          | ✅ Done  | Multiple files             |
 | 73  | ~~Fix toolbar overflow on small screens~~                       | ✅ Done  | `toolbar.tsx`              |
 | 74  | Make spatial grid adaptive to plant distribution                | P3       | `spatial-grid.ts`          |
 | 80  | ~~Investigate z-layer sorting overhead~~                        | ✅ Done  | `plant-instancer.ts`       |
@@ -182,6 +182,24 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Safe Area Padding for iOS Notched Devices
+
+- Applied consistent safe area padding across all fixed-position UI components (#72)
+- Added CSS custom properties to `globals.css`:
+  - `--safe-top`, `--safe-right`, `--safe-bottom`, `--safe-left` - raw safe area insets
+  - `--inset-top`, `--inset-right`, `--inset-bottom`, `--inset-left` - max(1rem, safe-area) for minimum spacing
+- Updated 7 components to use the new CSS variables:
+  - `toolbar.tsx`: `top-4 left-4` -> `top-[var(--inset-top)] left-[var(--inset-left)]`
+  - `debug-panel.tsx`: `top-4 right-4` -> `top-[var(--inset-top)] right-[var(--inset-right)]`
+  - `evolution-notifications.tsx`: `bottom-4 right-4` -> `bottom-[var(--inset-bottom)] right-[var(--inset-right)]`
+  - `cooldown-indicator.tsx`: `bottom-4 left-4` -> `bottom-[var(--inset-bottom)] left-[var(--inset-left)]`
+  - `observation-context-panel.tsx`: `bottom-4 left-4` -> `bottom-[var(--inset-bottom)] left-[var(--inset-left)]`
+  - `time-travel-scrubber.tsx`: Added `paddingBottom: var(--safe-bottom)` to container
+  - `evolution-paused-indicator.tsx`: `top-20` -> `top: calc(var(--inset-top) + 4rem)` via style prop
+- Benefits: UI elements won't be obscured by device notches, home indicators, or rounded corners
+- Consistent 1rem minimum ensures reasonable padding on non-notched devices
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Z-Layer Category Caching Optimization
 

@@ -195,7 +195,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const selectedPlant = plants?.find((p: Plant) => p.id === selectedPlantId);
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-96 max-h-[85vh] overflow-hidden bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-2xl text-sm flex flex-col">
+    <div className="fixed top-[var(--inset-top)] right-[var(--inset-right)] z-50 w-96 max-h-[85vh] overflow-hidden bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-2xl text-sm flex flex-col">
       {/* Header */}
       <div className="sticky top-0 bg-gray-900 px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
         <h3 className="text-gray-100 font-medium flex items-center gap-2">

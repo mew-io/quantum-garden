@@ -262,7 +262,7 @@ export function ObservationContextPanel() {
   return (
     <div
       className="
-        pointer-events-none fixed bottom-4 left-4 z-40
+        pointer-events-none fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] z-40
         flex flex-col items-start
       "
     >

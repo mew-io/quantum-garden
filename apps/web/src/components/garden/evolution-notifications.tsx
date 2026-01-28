@@ -113,7 +113,7 @@ export function EvolutionNotifications() {
   return (
     <div
       className="
-        pointer-events-none fixed bottom-4 right-4 z-50
+        pointer-events-none fixed bottom-[var(--inset-bottom)] right-[var(--inset-right)] z-50
         flex flex-col items-end
       "
     >

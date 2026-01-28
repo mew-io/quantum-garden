@@ -55,7 +55,7 @@ export function Toolbar({
   };
 
   return (
-    <div className="fixed top-4 left-4 right-4 sm:right-auto z-50 flex flex-col gap-2">
+    <div className="fixed top-[var(--inset-top)] left-[var(--inset-left)] right-4 sm:right-auto z-50 flex flex-col gap-2">
       {/* Main Toolbar */}
       <div className="flex flex-wrap items-center gap-2 bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-700/50 p-2 shadow-xl max-w-full overflow-hidden">
         {/* Status Indicator */}

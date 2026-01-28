@@ -222,12 +222,16 @@ export function TimeTravelScrubber({
   if (!isActive) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto"
+      style={{ paddingBottom: "var(--safe-bottom)" }}
+    >
       {/* Collapse/Expand Toggle */}
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 text-white/90 rounded-full text-sm backdrop-blur-sm hover:bg-black/90 transition-colors"
+          className="absolute left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 text-white/90 rounded-full text-sm backdrop-blur-sm hover:bg-black/90 transition-colors"
+          style={{ bottom: "max(1rem, var(--safe-bottom))" }}
         >
           Show Timeline
         </button>

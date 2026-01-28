@@ -75,7 +75,7 @@ export function CooldownIndicator() {
   return (
     <div
       className="
-        fixed bottom-4 left-4 z-40
+        fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] z-40
         flex items-center gap-2
         pointer-events-none
         animate-in fade-in duration-300

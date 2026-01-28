@@ -1,7 +1,7 @@
 # Session Archive: Keyboard Shortcut Hints
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: fbe4b5b
 
 ---
 

@@ -34,9 +34,16 @@ export function useEvolution() {
    * Trigger germination for a dormant plant.
    *
    * Called by the GardenEvolutionSystem when a plant should germinate.
+   * Skipped if in time-travel mode (read-only historical view).
    */
   const triggerGermination = useCallback(
     async (plantId: string): Promise<void> => {
+      // Skip germination if in time-travel mode
+      const { isTimeTravelMode } = useGardenStore.getState();
+      if (isTimeTravelMode) {
+        return;
+      }
+
       await germinateMutation.mutateAsync({ plantId });
     },
     [germinateMutation]

@@ -1,12 +1,12 @@
 # Quantum Garden - Implementation Roadmap
 
-_Last updated: 2026-01-28 (Automated Validation Tests Added)_
+_Last updated: 2026-01-28 (Evolution Logic Tests Added - Autowork Loop 5)_
 
 ## Project Goal
 
 Build a slow-evolving generative environment where plants exist in quantum superposition until observed. The experience should be calm, contemplative, and grounded in real quantum computation via IonQ.
 
-**Current Focus**: Added automated validation tests for quantum pool selection and spatial indexing (27 new tests, 86 total). Core systems verified through automated testing. Next priority is extended manual testing and production readiness.
+**Current Focus**: Added evolution logic tests (33 new tests, 119 total). Core systems have comprehensive automated test coverage. Next priority is extended manual testing and production readiness.
 
 ## Strategic Roadmap
 
@@ -603,6 +603,43 @@ getEvolutionTimeline: publicProcedure
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Evolution Logic Tests (Autowork Loop 5)
+
+**Evolution Logic Module** (`apps/web/src/components/garden/evolution-logic.ts`):
+
+- [x] Extracted pure calculation functions from GardenEvolutionSystem for testability
+- [x] `getDistance()` - Euclidean distance between two positions
+- [x] `hasObservedNeighbors()` - Proximity bonus check (200px radius)
+- [x] `isInCluster()` - Clustering prevention check (3+ germinated in 150px radius)
+- [x] `getAgeMultiplier()` - Age-based germination bonus (1.0x to 2.5x over 5 min)
+- [x] `getGerminationProbability()` - Combined probability calculation
+- [x] `isEligibleForGermination()` - Eligibility check (dormant, unobserved, min dormancy)
+- [x] `EVOLUTION_CONFIG` - Centralized configuration constants
+
+**Evolution Logic Tests** (`apps/web/src/components/garden/__tests__/evolution-logic.test.ts`):
+
+- [x] 33 new tests covering all evolution logic functions
+- [x] `getDistance`: Basic calculation, negative coordinates, commutativity
+- [x] `hasObservedNeighbors`: Within radius, outside radius, unobserved plants, empty lists
+- [x] `isInCluster`: Above threshold, below threshold, dormant plants, distant plants
+- [x] `getAgeMultiplier`: Young plants, aging plants, max multiplier, custom config
+- [x] `getGerminationProbability`: Base chance, proximity bonus, clustering, age bonus, combined
+- [x] `isEligibleForGermination`: Valid dormant, already germinated, already observed, min dormancy
+
+**Test Suite Growth**:
+
+| Package                | Before | After   | New Tests |
+| ---------------------- | ------ | ------- | --------- |
+| @quantum-garden/shared | 60     | 60      | +0        |
+| web                    | 26     | 59      | +33       |
+| **Total**              | **86** | **119** | **+33**   |
+
+**Quality Checks**:
+
+- [x] TypeScript: PASS
+- [x] ESLint: PASS
+- [x] All 119 tests: PASS
 
 ### 2026-01-28 - Automated Validation Tests (Autowork Loop 4)
 

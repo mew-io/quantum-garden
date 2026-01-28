@@ -1,7 +1,7 @@
 # Session Archive: hasActiveAnimations Overlay Optimization
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (to be filled after commit)
+**Synthesis Commit**: 3f9a643
 
 ---
 

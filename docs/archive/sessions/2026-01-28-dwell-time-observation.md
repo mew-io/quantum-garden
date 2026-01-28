@@ -1,7 +1,7 @@
 # Session Archive: Dwell-Time Observation Mode
 
 **Date**: 2026-01-28
-**Synthesis Commit**: (pending)
+**Synthesis Commit**: 7792ec7
 
 ---
 

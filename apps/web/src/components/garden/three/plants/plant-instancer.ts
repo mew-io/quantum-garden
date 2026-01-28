@@ -308,10 +308,22 @@ export class PlantInstancer {
     this.instanceState[stateBase + 2] = plant.visualState === "collapsed" ? 1 : 0;
     this.instanceState[stateBase + 3] = animState.transitionProgress;
 
-    // Set animation (shimmerPhase, reserved)
+    // Calculate lifecycle progress for animations (0-1)
+    let lifecycleProgress = 0;
+    if (plant.germinatedAt && !plant.traits?.glyphPattern) {
+      const plantWithLifecycle = {
+        ...plant,
+        germinatedAt: plant.germinatedAt,
+        colorVariationName: plant.colorVariationName ?? null,
+      };
+      const lifecycleState = computeLifecycleState(plantWithLifecycle, variant, now);
+      lifecycleProgress = lifecycleState.totalProgress;
+    }
+
+    // Set animation (shimmerPhase, lifecycleProgress)
     const animBase = index * 2;
     this.instanceAnimation[animBase] = animState.shimmerPhase;
-    this.instanceAnimation[animBase + 1] = 0;
+    this.instanceAnimation[animBase + 1] = lifecycleProgress;
   }
 
   /**

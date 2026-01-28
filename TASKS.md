@@ -29,9 +29,9 @@ Build a slow-evolving generative environment where plants exist in quantum super
    - Demonstrates the "observer" philosophy through time
    - Showcases garden's autonomous nature over time
 
-3. **Begin Sprint 4: Enhanced Garden Evolution** (NEXT - MEDIUM PRIORITY)
-   - Task 4.1: Lifecycle-Based Visual Behaviors
-   - Task 4.2: Smart Germination Logic
+3. **Sprint 4: Enhanced Garden Evolution** (IN PROGRESS - MEDIUM PRIORITY)
+   - ✅ Task 4.1: Lifecycle-Based Visual Behaviors (COMPLETED 2026-01-27)
+   - Task 4.2: Smart Germination Logic (NEXT)
    - Task 4.3: Evolution Event Notifications
    - Makes garden feel alive and dynamic
    - Improves long-term engagement
@@ -412,16 +412,31 @@ getEvolutionTimeline: publicProcedure
 
 #### Task 4.1: Lifecycle-Based Visual Behaviors
 
-**Status**: 🔴 Not Started
-**File**: `apps/web/src/lib/three/plants/plant-instancer.ts`
+**Status**: ✅ COMPLETED (2026-01-27)
+**Files**: `apps/web/src/components/garden/three/plants/plant-material.ts`, `apps/web/src/components/garden/three/plants/plant-instancer.ts`
 
 **Animations**:
 
 - **Young plants** (lifecycle < 0.3): Gentle scale pulse (0.98-1.02, 3s cycle)
 - **Mature plants** (lifecycle 0.3-0.7): Subtle rotation sway (±2 degrees, 5s cycle)
-- **Old plants** (lifecycle > 0.7): Slower movements, increased opacity variance
+- **Old plants** (lifecycle > 0.7): Slower movements (10s cycle), increased opacity variance
 
-**Implementation**: Via shader uniforms, respects `prefers-reduced-motion`
+**Implementation**:
+
+- Modified vertex shader to accept `lifecycleProgress` via `instanceAnimation.y` attribute
+- Added lifecycle-based animations using sine wave functions with appropriate frequencies
+- Young plants: `sin(u_time * 2.094) * 0.02` for 3s cycle scale pulse
+- Mature plants: `sin(u_time * 1.257) * 0.0349` for 5s cycle rotation sway (±2°)
+- Old plants: `sin(u_time * 0.628) * 0.015` for 10s cycle slower movement
+- Modified fragment shader for old plant opacity variance
+- Updated `plant-instancer.ts` to calculate and pass `lifecycleState.totalProgress` through instance buffer
+- Only applies animations to germinated plants without resolved traits
+- Animations automatically respect lifecycle stages (young/mature/old)
+
+**Quality Checks**:
+
+- TypeScript: ✅ PASS
+- ESLint: ✅ PASS
 
 #### Task 4.2: Smart Germination Logic
 

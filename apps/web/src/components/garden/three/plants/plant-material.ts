@@ -27,7 +27,7 @@ const vertexShader = /* glsl */ `
   attribute vec3 instancePalette1;     // Second palette color (RGB)
   attribute vec3 instancePalette2;     // Third palette color (RGB)
   attribute vec4 instanceState;        // opacity, scale, visualState (0=superposed, 1=collapsed), transitionProgress
-  attribute vec2 instanceAnimation;    // shimmerPhase, reserved
+  attribute vec2 instanceAnimation;    // shimmerPhase, lifecycleProgress
 
   // Uniforms
   uniform float u_time;
@@ -43,6 +43,7 @@ const vertexShader = /* glsl */ `
   varying float v_visualState;
   varying float v_transitionProgress;
   varying float v_shimmerPhase;
+  varying float v_lifecycleProgress;
 
   void main() {
     // Pass attributes to fragment shader
@@ -55,6 +56,7 @@ const vertexShader = /* glsl */ `
     v_visualState = instanceState.z;
     v_transitionProgress = instanceState.w;
     v_shimmerPhase = instanceAnimation.x;
+    v_lifecycleProgress = instanceAnimation.y;
 
     // Calculate scale with transition pulse effect
     // Peak at 50% transition progress, returns to 1.0 at completion
@@ -64,11 +66,42 @@ const vertexShader = /* glsl */ `
       float eased = 1.0 - pow(1.0 - v_transitionProgress, 3.0);
       scalePulse = 1.0 + sin(eased * 3.14159) * 0.12;
     }
-    float finalScale = baseScale * scalePulse;
 
-    // Transform position
+    // Apply lifecycle-based animations (only if lifecycle has started)
+    float lifecycleScale = 1.0;
+    float lifecycleRotation = 0.0;
+
+    if (v_lifecycleProgress > 0.0) {
+      // Young plants (lifecycle < 0.3): gentle scale pulse (0.98-1.02, 3s cycle)
+      if (v_lifecycleProgress < 0.3) {
+        lifecycleScale = 1.0 + sin(u_time * 2.094) * 0.02; // 2.094 = 2π/3 for 3s cycle
+      }
+      // Mature plants (lifecycle 0.3-0.7): subtle rotation sway (±2 degrees, 5s cycle)
+      else if (v_lifecycleProgress < 0.7) {
+        lifecycleRotation = sin(u_time * 1.257) * 0.0349; // 1.257 = 2π/5 for 5s cycle, 0.0349 = 2° in radians
+      }
+      // Old plants (lifecycle > 0.7): slower movements
+      else {
+        lifecycleScale = 1.0 + sin(u_time * 0.628) * 0.015; // 0.628 = 2π/10 for 10s cycle, smaller amplitude
+      }
+    }
+
+    float finalScale = baseScale * scalePulse * lifecycleScale;
+
+    // Transform position with rotation
     // position is the local quad vertex (-0.5 to 0.5 range)
     vec3 scaled = position * u_patternSize * finalScale;
+
+    // Apply rotation if mature plant
+    if (lifecycleRotation != 0.0) {
+      float cosR = cos(lifecycleRotation);
+      float sinR = sin(lifecycleRotation);
+      float x = scaled.x * cosR - scaled.y * sinR;
+      float y = scaled.x * sinR + scaled.y * cosR;
+      scaled.x = x;
+      scaled.y = y;
+    }
+
     vec3 worldPos = scaled + instancePosition;
 
     // Pass UV coordinates (0-1 range on quad)
@@ -100,6 +133,7 @@ const fragmentShader = /* glsl */ `
   varying float v_visualState;
   varying float v_transitionProgress;
   varying float v_shimmerPhase;
+  varying float v_lifecycleProgress;
 
   void main() {
     // Calculate UV position within the pattern in the atlas
@@ -141,6 +175,13 @@ const fragmentShader = /* glsl */ `
       // During transition: smooth fade
       float eased = 1.0 - pow(1.0 - v_transitionProgress, 3.0);
       finalOpacity *= eased;
+    }
+
+    // Apply lifecycle opacity variance for old plants
+    if (v_lifecycleProgress > 0.7) {
+      // Old plants: subtle opacity variation (slower than shimmer)
+      float opacityVariance = sin(u_time * 0.8 + v_shimmerPhase) * 0.05;
+      finalOpacity = clamp(finalOpacity + opacityVariance, 0.15, 1.0);
     }
 
     gl_FragColor = vec4(color, finalOpacity);

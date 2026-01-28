@@ -72,8 +72,8 @@ export const GLYPH = {
 
 /** Garden canvas configuration */
 export const CANVAS = {
-  /** Background color */
-  BACKGROUND_COLOR: "#FFFFFF",
+  /** Background color - light warm cream for contrast with pastel plants */
+  BACKGROUND_COLOR: "#F5F0E8",
   /** Default width */
   DEFAULT_WIDTH: 1200,
   /** Default height */

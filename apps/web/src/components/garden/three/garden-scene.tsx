@@ -25,6 +25,7 @@ import { useEvolution } from "@/hooks/use-evolution";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
+import { debugLogger } from "@/lib/debug-logger";
 
 /**
  * Get the primary color from a plant's palette for celebration feedback.
@@ -101,6 +102,8 @@ export function GardenScene() {
     const container = containerRef.current;
     let mounted = true;
 
+    debugLogger.rendering.info("Initializing Three.js scene...");
+
     // Initialize Three.js scene
     const sceneManager = new SceneManager({
       container,
@@ -108,12 +111,21 @@ export function GardenScene() {
     });
     sceneManagerRef.current = sceneManager;
 
+    debugLogger.rendering.info("Scene manager created", {
+      canvasSize: {
+        width: sceneManager.canvas.width,
+        height: sceneManager.canvas.height,
+      },
+    });
+
     // Initialize plant instancer
     const plantInstancer = new PlantInstancer();
     plantInstancerRef.current = plantInstancer;
 
     // Add plant mesh to scene
     sceneManager.scene.add(plantInstancer.getMesh());
+
+    debugLogger.rendering.info("Plant instancer added to scene");
 
     // Initialize overlay manager
     const overlayManager = new OverlayManager(sceneManager);
@@ -137,8 +149,21 @@ export function GardenScene() {
 
     // Initial sync
     const initialPlants = useGardenStore.getState().plants;
+    debugLogger.rendering.info(`Initial plant sync: ${initialPlants.length} plants from store`);
     plantInstancer.syncPlants(convertToRenderable(initialPlants));
     overlayManager.setPlants(initialPlants);
+
+    // Log sample plant details for debugging if plants exist
+    if (initialPlants.length > 0 && initialPlants[0]) {
+      const sample = initialPlants[0];
+      debugLogger.rendering.debug("Sample plant data", {
+        id: sample.id.slice(0, 8),
+        position: sample.position,
+        variantId: sample.variantId,
+        observed: sample.observed,
+        germinatedAt: sample.germinatedAt,
+      });
+    }
 
     // Initialize observation system (after convertToRenderable and overlayManager)
     const observationSystem = new ObservationSystem(
@@ -292,7 +317,17 @@ export function GardenScene() {
       handleDebugVisibilityChange as EventListener
     );
 
+    // Handle plant selection from debug panel
+    const handlePlantDebugSelect = (e: CustomEvent<{ plantId: string | null }>) => {
+      overlayManager.setSelectedPlant(e.detail.plantId);
+    };
+    window.addEventListener(
+      "plant-debug-highlight" as keyof WindowEventMap,
+      handlePlantDebugSelect as EventListener
+    );
+
     // Start render loop
+    debugLogger.rendering.info("Starting render loop");
     sceneManager.start();
 
     // Cleanup
@@ -307,6 +342,10 @@ export function GardenScene() {
       window.removeEventListener(
         "debug-visibility-change" as keyof WindowEventMap,
         handleDebugVisibilityChange as EventListener
+      );
+      window.removeEventListener(
+        "plant-debug-highlight" as keyof WindowEventMap,
+        handlePlantDebugSelect as EventListener
       );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);

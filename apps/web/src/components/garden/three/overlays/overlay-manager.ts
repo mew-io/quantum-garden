@@ -71,10 +71,18 @@ export class OverlayManager {
   }
 
   /**
-   * Set plants for the vector plant overlay.
+   * Set plants for the vector plant overlay and debug overlay.
    */
   setPlants(plants: Plant[]): void {
     this.vectorPlants.setPlants(plants);
+    this.debug.setPlants(plants);
+  }
+
+  /**
+   * Set the selected plant for debug highlighting.
+   */
+  setSelectedPlant(plantId: string | null): void {
+    this.debug.setSelectedPlant(plantId);
   }
 
   /**

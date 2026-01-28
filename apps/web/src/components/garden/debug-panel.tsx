@@ -7,9 +7,14 @@ import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
+interface DebugPanelProps {
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
+}
+
 /**
  * Debug panel for viewing quantum garden internals.
- * Toggle with backtick (`) key.
+ * Toggle with backtick (`) key or via toolbar button.
  *
  * Features:
  * - Garden overview statistics
@@ -19,8 +24,19 @@ import type { Plant } from "@quantum-garden/shared";
  * - System state indicators
  * - Selected plant details
  */
-export function DebugPanel() {
-  const [isVisible, setIsVisible] = useState(false);
+export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
+  const [internalVisible, setInternalVisible] = useState(false);
+
+  // Use external control if provided, otherwise internal state
+  const isVisible = isOpen !== undefined ? isOpen : internalVisible;
+  const setIsVisible = (value: boolean | ((prev: boolean) => boolean)) => {
+    const newValue = typeof value === "function" ? value(isVisible) : value;
+    if (onToggle) {
+      onToggle(newValue);
+    } else {
+      setInternalVisible(newValue);
+    }
+  };
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
   const [activeTab, setActiveTab] = useState<"overview" | "logs" | "plants">("overview");
@@ -63,8 +79,11 @@ export function DebugPanel() {
     }
   );
 
-  // Toggle visibility with backtick key
+  // Toggle visibility with backtick key (only when not externally controlled)
   useEffect(() => {
+    // Skip internal keyboard handler if externally controlled
+    if (isOpen !== undefined) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
@@ -86,7 +105,22 @@ export function DebugPanel() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen]);
+
+  // Sync debug overlay visibility when isVisible changes from external control (toolbar button)
+  useEffect(() => {
+    // Only dispatch if using external control (isOpen prop is defined)
+    if (isOpen !== undefined) {
+      window.dispatchEvent(
+        new CustomEvent("debug-visibility-change", {
+          detail: { visible: isOpen },
+        })
+      );
+      if (isOpen) {
+        debugLogger.system.info("Debug panel opened via toolbar");
+      }
+    }
+  }, [isOpen]);
 
   // Listen for plant selection events from the canvas
   useEffect(() => {
@@ -404,6 +438,12 @@ export function DebugPanel() {
                     <span className="text-green-400">{selectedPlant.variantId}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-gray-500">Position</span>
+                    <span className="text-cyan-400 font-mono text-xs">
+                      ({selectedPlant.position.x.toFixed(0)}, {selectedPlant.position.y.toFixed(0)})
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-gray-500">State</span>
                     <span className={selectedPlant.observed ? "text-yellow-400" : "text-blue-400"}>
                       {selectedPlant.visualState}
@@ -459,7 +499,15 @@ export function DebugPanel() {
                 {plants?.map((plant: Plant) => (
                   <button
                     key={plant.id}
-                    onClick={() => setSelectedPlantId(plant.id)}
+                    onClick={() => {
+                      setSelectedPlantId(plant.id);
+                      // Dispatch event to highlight plant in debug overlay
+                      window.dispatchEvent(
+                        new CustomEvent("plant-debug-highlight", {
+                          detail: { plantId: plant.id },
+                        })
+                      );
+                    }}
                     className={`w-full text-left px-2 py-1.5 rounded text-xs flex justify-between items-center ${
                       plant.id === selectedPlantId
                         ? "bg-blue-900/50 text-blue-200"

@@ -24,15 +24,21 @@ function useIsTouchDevice() {
   return isTouch;
 }
 
+interface InfoOverlayProps {
+  forceShow?: boolean;
+  onDismiss?: () => void;
+}
+
 /**
  * Info overlay that explains how observation works.
  *
  * - Shows on first visit to the garden
+ * - Can be forced to show via Help button
  * - Device-aware messaging (desktop vs mobile)
  * - Dismissable with localStorage persistence
  * - Calm, minimal aesthetic matching garden style
  */
-export function InfoOverlay() {
+export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) {
   const [isDismissed, setIsDismissed] = useState(true); // Start dismissed to avoid flash
   const [isVisible, setIsVisible] = useState(false);
   const isTouch = useIsTouchDevice();
@@ -47,16 +53,25 @@ export function InfoOverlay() {
     }
   }, []);
 
+  // Handle forceShow from Help button
+  useEffect(() => {
+    if (forceShow) {
+      setIsDismissed(false);
+      setTimeout(() => setIsVisible(true), 50);
+    }
+  }, [forceShow]);
+
   const handleDismiss = () => {
     setIsVisible(false);
     // Wait for fade out animation before hiding
     setTimeout(() => {
       setIsDismissed(true);
       localStorage.setItem(STORAGE_KEY, "true");
+      onDismiss?.();
     }, 300);
   };
 
-  if (isDismissed) {
+  if (isDismissed && !forceShow) {
     return null;
   }
 

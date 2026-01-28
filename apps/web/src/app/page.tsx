@@ -8,6 +8,7 @@ import { DebugPanel } from "@/components/garden/debug-panel";
 import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
+import { Toolbar } from "@/components/garden/toolbar";
 import { useGardenStore } from "@/stores/garden-store";
 import { trpc } from "@/lib/trpc/client";
 
@@ -15,6 +16,10 @@ export default function Home() {
   const { isTimeTravelMode, setTimeTravelMode, setTimeTravelTimestamp, setPlants } =
     useGardenStore();
   const [gardenCreatedAt, setGardenCreatedAt] = useState<Date | null>(null);
+
+  // Panel visibility states
+  const [isDebugOpen, setIsDebugOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Fetch earliest plant creation time to determine garden age
   const { data: plants } = trpc.plants.list.useQuery();
@@ -62,7 +67,7 @@ export default function Home() {
     // Plants will be refreshed by the live query in usePlants hook
   }, [setTimeTravelMode, setTimeTravelTimestamp]);
 
-  // Keyboard shortcut: T to toggle time-travel mode
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only trigger if not typing in an input field
@@ -70,14 +75,40 @@ export default function Home() {
         return;
       }
 
+      // T - Toggle time-travel mode
       if (e.key === "t" || e.key === "T") {
         if (gardenCreatedAt) {
           setTimeTravelMode(!isTimeTravelMode);
           if (isTimeTravelMode) {
-            // Exiting time-travel mode
             handleReturnToLive();
           }
         }
+      }
+
+      // Backtick - Toggle debug panel
+      if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setIsDebugOpen((v) => {
+          const newValue = !v;
+          // Dispatch event for Three.js scene to react
+          window.dispatchEvent(
+            new CustomEvent("debug-visibility-change", {
+              detail: { visible: newValue },
+            })
+          );
+          return newValue;
+        });
+      }
+
+      // ? - Show help
+      if (e.key === "?") {
+        setShowHelp(true);
+      }
+
+      // Escape - Close all panels
+      if (e.key === "Escape") {
+        setIsDebugOpen(false);
+        setShowHelp(false);
       }
     };
 
@@ -89,8 +120,38 @@ export default function Home() {
     <ErrorBoundary>
       <main>
         <GardenScene />
-        <InfoOverlay />
-        <DebugPanel />
+
+        {/* Toolbar with visible controls */}
+        <Toolbar
+          isDebugOpen={isDebugOpen}
+          onDebugToggle={() => {
+            setIsDebugOpen((v) => {
+              const newValue = !v;
+              window.dispatchEvent(
+                new CustomEvent("debug-visibility-change", {
+                  detail: { visible: newValue },
+                })
+              );
+              return newValue;
+            });
+          }}
+          isTimeTravelAvailable={!!gardenCreatedAt}
+          onShowHelp={() => setShowHelp(true)}
+        />
+
+        {/* Panels */}
+        <InfoOverlay forceShow={showHelp} onDismiss={() => setShowHelp(false)} />
+        <DebugPanel
+          isOpen={isDebugOpen}
+          onToggle={(newValue) => {
+            setIsDebugOpen(newValue);
+            window.dispatchEvent(
+              new CustomEvent("debug-visibility-change", {
+                detail: { visible: newValue },
+              })
+            );
+          }}
+        />
         <EvolutionNotifications />
         <ObservationContextPanel />
         {gardenCreatedAt && (

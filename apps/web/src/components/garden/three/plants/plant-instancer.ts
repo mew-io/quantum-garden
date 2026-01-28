@@ -22,6 +22,47 @@ import { prefersReducedMotion } from "@/lib/accessibility";
 // Maximum number of plant instances
 const MAX_INSTANCES = 1000;
 
+/**
+ * Scale a pattern to PATTERN_SIZE x PATTERN_SIZE using nearest-neighbor interpolation.
+ *
+ * The quantum service returns 8x8 patterns, but the renderer expects 64x64.
+ * This function scales up smaller patterns to fill the expected size.
+ *
+ * @param pattern - The source pattern (may be 8x8 or any size)
+ * @returns Pattern scaled to PATTERN_SIZE x PATTERN_SIZE
+ */
+function scalePatternToSize(pattern: number[][]): number[][] {
+  const sourceHeight = pattern.length;
+  if (sourceHeight === 0) return [];
+
+  const sourceWidth = pattern[0]?.length ?? 0;
+  if (sourceWidth === 0) return [];
+
+  // Already the correct size, return as-is
+  if (sourceHeight === PATTERN_SIZE && sourceWidth === PATTERN_SIZE) {
+    return pattern;
+  }
+
+  const scaleX = PATTERN_SIZE / sourceWidth;
+  const scaleY = PATTERN_SIZE / sourceHeight;
+
+  const scaled: number[][] = [];
+
+  for (let y = 0; y < PATTERN_SIZE; y++) {
+    const row: number[] = [];
+    const sourceY = Math.floor(y / scaleY);
+    const sourceRow = pattern[sourceY] ?? [];
+
+    for (let x = 0; x < PATTERN_SIZE; x++) {
+      const sourceX = Math.floor(x / scaleX);
+      row.push(sourceRow[sourceX] ?? 0);
+    }
+    scaled.push(row);
+  }
+
+  return scaled;
+}
+
 // Z-layer offsets for plant categories
 const Z_LAYERS: Record<string, number> = {
   "ground-cover": 0,
@@ -116,10 +157,15 @@ export class PlantInstancer {
 
     // Create InstancedMesh
     this.mesh = new THREE.InstancedMesh(geometry, this.material, MAX_INSTANCES);
-    // Enable frustum culling - Three.js will skip rendering instances outside view
-    // Note: For 2D orthographic camera covering full canvas, this has minimal impact
-    // but is good practice for potential 3D/zoom features
-    this.mesh.frustumCulled = true;
+    // Disable frustum culling since we use custom positioning
+    this.mesh.frustumCulled = false;
+
+    // Initialize instance matrices to identity - required for THREE.js even when using custom attributes
+    const identityMatrix = new THREE.Matrix4();
+    for (let i = 0; i < MAX_INSTANCES; i++) {
+      this.mesh.setMatrixAt(i, identityMatrix);
+    }
+    this.mesh.instanceMatrix.needsUpdate = true;
 
     // Add instanced buffer attributes to geometry
     geometry.setAttribute(
@@ -391,8 +437,10 @@ export class PlantInstancer {
   ): { pattern: number[][]; palette: string[]; opacity: number; scale: number } {
     // If plant has resolved traits from quantum measurement, use those
     if (plant.traits?.glyphPattern) {
+      // Scale pattern to PATTERN_SIZE if needed (quantum service returns 8x8, we need 64x64)
+      const scaledPattern = scalePatternToSize(plant.traits.glyphPattern);
       return {
-        pattern: plant.traits.glyphPattern,
+        pattern: scaledPattern,
         palette: plant.traits.colorPalette ?? ["#888888", "#AAAAAA", "#CCCCCC"],
         opacity: plant.traits.opacity ?? GLYPH.COLLAPSED_OPACITY,
         scale: 1,

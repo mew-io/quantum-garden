@@ -60,14 +60,32 @@ export class OverlayManager {
 
   /**
    * Update all overlays. Called each frame.
+   * Uses hasActiveAnimations() checks to skip overlays with no work to do.
    */
   update(time: number, deltaTime: number): void {
+    // Reticle always needs updates (continuous drift animation)
     this.reticle.update(time, deltaTime);
-    this.entanglement.update(time);
-    this.dwell.update(time);
-    this.feedback.update(time);
-    this.vectorPlants.update(time);
-    this.debug.update(time, deltaTime);
+
+    // Only update overlays that have active animations
+    if (this.entanglement.hasActiveAnimations()) {
+      this.entanglement.update(time);
+    }
+
+    if (this.dwell.hasActiveAnimations()) {
+      this.dwell.update(time);
+    }
+
+    if (this.feedback.hasActiveAnimations()) {
+      this.feedback.update(time);
+    }
+
+    if (this.vectorPlants.hasActiveAnimations()) {
+      this.vectorPlants.update(time);
+    }
+
+    if (this.debug.hasActiveAnimations()) {
+      this.debug.update(time, deltaTime);
+    }
   }
 
   /**

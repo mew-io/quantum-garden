@@ -601,6 +601,14 @@ export class VectorPlantOverlay {
   }
 
   /**
+   * Check if there are any active animations that need updating.
+   * Returns true when there are vector plants to render.
+   */
+  hasActiveAnimations(): boolean {
+    return this.plants.length > 0;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {

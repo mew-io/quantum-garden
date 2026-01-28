@@ -270,6 +270,14 @@ export class EntanglementOverlay {
   }
 
   /**
+   * Check if there are any active animations that need updating.
+   * Returns true when there are entanglement groups or active pulses/waves.
+   */
+  hasActiveAnimations(): boolean {
+    return this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {

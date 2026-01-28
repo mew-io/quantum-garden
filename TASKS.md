@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28 (Partial buffer updates for plant instancer)_
+_Last updated: 2026-01-28 (hasActiveAnimations overlay optimization)_
 
 ## Project Status
 
@@ -43,7 +43,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 82  | ~~Implement material pooling for vector primitives~~            | Done     | `vector-plant-overlay.ts`  |
 | 83  | Audit texture atlas packing efficiency                          | P3       | `texture-atlas.ts`         |
 | 84  | ~~Use partial buffer updates for dirty instances~~              | ✅ Done  | `plant-instancer.ts`       |
-| 85  | Add `hasActiveAnimations()` check to overlays                   | P2       | `overlay-manager.ts`       |
+| 85  | ~~Add `hasActiveAnimations()` check to overlays~~               | ✅ Done  | `overlay-manager.ts`       |
 | 86  | Shallow compare entanglement groups before rebuild              | P2       | `entanglement-overlay.ts`  |
 | 87  | ~~Skip frame-level syncPlants when store just synced~~          | ✅ Done  | `garden-scene.tsx`         |
 | 88  | Profile render loop for 1000 plants                             | P2       | -                          |
@@ -182,6 +182,21 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - hasActiveAnimations Overlay Optimization
+
+- Implemented `hasActiveAnimations()` method on all overlay classes to skip unnecessary updates (#85)
+- **Problem**: OverlayManager's `update()` called all overlay update methods every frame, even when most overlays had no work to do
+- **Solution**: Added `hasActiveAnimations(): boolean` method to each overlay that returns whether the overlay needs updating
+- Overlay checks implemented:
+  - `FeedbackOverlay`: `this.activeAnimations.length > 0` (only during 0.8s celebration rings)
+  - `DwellOverlay`: `this.currentTargetId !== null && this.currentProgress > 0` (only during user dwell)
+  - `EntanglementOverlay`: `this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0`
+  - `VectorPlantOverlay`: `this.plants.length > 0` (only when vector plants exist)
+  - `DebugOverlay`: `this.isVisible` (only when debug panel is open)
+- Updated OverlayManager to check `hasActiveAnimations()` before calling each overlay's `update()`
+- ReticleOverlay always updates (continuous drift animation)
+- All 178 tests pass (60 shared + 118 web)
 
 ### 2026-01-28 - Partial Buffer Updates for Plant Instancer
 

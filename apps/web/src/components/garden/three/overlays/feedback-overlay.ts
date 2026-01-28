@@ -214,6 +214,13 @@ export class FeedbackOverlay {
   }
 
   /**
+   * Check if there are any active animations that need updating.
+   */
+  hasActiveAnimations(): boolean {
+    return this.activeAnimations.length > 0;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {

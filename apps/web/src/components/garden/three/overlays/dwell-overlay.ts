@@ -168,6 +168,14 @@ export class DwellOverlay {
   }
 
   /**
+   * Check if there are any active animations that need updating.
+   * Returns true when a dwell indicator is being shown.
+   */
+  hasActiveAnimations(): boolean {
+    return this.currentTargetId !== null && this.currentProgress > 0;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {

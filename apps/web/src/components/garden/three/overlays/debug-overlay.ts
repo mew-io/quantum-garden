@@ -294,6 +294,14 @@ export class DebugOverlay {
   }
 
   /**
+   * Check if there are any active animations that need updating.
+   * Debug overlay doesn't animate, so this returns whether it's visible.
+   */
+  hasActiveAnimations(): boolean {
+    return this.isVisible;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {

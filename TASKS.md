@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (5 Remaining)
+## Active Tasks (4 Remaining)
 
 ### Bugs & Performance
 
@@ -33,10 +33,9 @@ No active tasks.
 
 ### User Feedback & Discoverability
 
-| #   | Task                                     | Priority | File                            |
-| --- | ---------------------------------------- | -------- | ------------------------------- |
-| 58  | Create optional onboarding tour          | P3       | NEW                             |
-| 63  | Add "Don't show again" reset in settings | P3       | `observation-context-panel.tsx` |
+| #   | Task                            | Priority | File |
+| --- | ------------------------------- | -------- | ---- |
+| 58  | Create optional onboarding tour | P3       | NEW  |
 
 ### Quantum Accuracy
 
@@ -108,6 +107,28 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - UI Preferences Reset in Debug Panel (#63)
+
+- Created centralized `ui-preferences.ts` utility (`apps/web/src/lib/ui-preferences.ts`)
+- `UI_PREFERENCE_KEYS` - all localStorage keys for dismissable UI elements
+- `getUIPreferences()` - returns current state of all preferences
+- `resetAllUIPreferences()` - clears all "don't show again" settings
+- `resetUIPreference()` - reset a specific preference
+- `UI_PREFERENCE_LABELS` - human-readable labels for each preference
+- Identified 4 dismissable UI elements:
+  - First observation celebration
+  - Observation context panel
+  - Welcome info overlay
+  - Keyboard shortcut hint
+- Created `UIPreferencesSection` component in debug-panel.tsx:
+  - Shows count of dismissed UI elements
+  - Lists each dismissed element with amber dot indicator
+  - "Reset All Preferences" button with confirmation dialog
+  - Shows "No dismissed UI elements" when all preferences are clear
+  - Logs reset action via debugLogger
+- Added UI Preferences section to debug panel Overview tab (Controls section)
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - Confirmation Dialog for Observation Mode Switching (#56)
 

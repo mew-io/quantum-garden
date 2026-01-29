@@ -4,6 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
+import {
+  getUIPreferences,
+  resetAllUIPreferences,
+  UI_PREFERENCE_LABELS,
+} from "@/lib/ui-preferences";
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
@@ -445,6 +450,12 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </div>
             </section>
 
+            {/* UI Preferences Reset */}
+            <section>
+              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">UI Preferences</h4>
+              <UIPreferencesSection />
+            </section>
+
             {/* Keyboard Shortcuts */}
             <section>
               <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
@@ -740,6 +751,76 @@ function StatusBadge({
   return (
     <div className={`text-xs px-2 py-1 rounded border ${className}`}>
       <span className="opacity-60">{label}:</span> {text}
+    </div>
+  );
+}
+
+/**
+ * UI Preferences section showing dismissed UI elements and reset button.
+ */
+function UIPreferencesSection() {
+  const [preferences, setPreferences] = useState(() => getUIPreferences());
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const dismissedCount = Object.values(preferences).filter(Boolean).length;
+
+  const handleReset = () => {
+    resetAllUIPreferences();
+    setPreferences(getUIPreferences());
+    setShowConfirm(false);
+    debugLogger.system.info("UI preferences reset");
+  };
+
+  if (dismissedCount === 0) {
+    return (
+      <div className="bg-gray-800/50 rounded p-3 text-xs text-gray-500">
+        No dismissed UI elements
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-800/50 rounded p-3 space-y-2">
+      <div className="text-xs text-gray-400 mb-2">Dismissed UI elements ({dismissedCount}):</div>
+      <div className="space-y-1">
+        {(Object.keys(UI_PREFERENCE_LABELS) as Array<keyof typeof UI_PREFERENCE_LABELS>).map(
+          (key) =>
+            preferences[key] && (
+              <div key={key} className="flex items-center gap-2 text-xs text-gray-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500/60" />
+                {UI_PREFERENCE_LABELS[key]}
+              </div>
+            )
+        )}
+      </div>
+      {!showConfirm ? (
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="w-full mt-2 py-1.5 px-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+        >
+          Reset All Preferences
+        </button>
+      ) : (
+        <div className="mt-2 space-y-2">
+          <p className="text-xs text-amber-400">
+            This will restore all dismissed panels and hints.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="flex-1 py-1.5 px-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 py-1.5 px-2 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

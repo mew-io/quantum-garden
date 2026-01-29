@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (20 Remaining)
+## Active Tasks (19 Remaining)
 
 ### Bugs & Performance
 
@@ -51,7 +51,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                                | Priority | File                            |
 | --- | --------------------------------------------------- | -------- | ------------------------------- |
-| 91  | Standardize auto-dismiss timers in constants        | P2       | `constants.ts`                  |
 | 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
 | 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
@@ -116,6 +115,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Standardize Auto-Dismiss Timers (#91)
+
+- Added `UI_TIMING` constants to shared package `constants.ts`
+  - `NOTIFICATION_DISMISS_MS: 5000` (5s toast notification)
+  - `CONTEXT_PANEL_DISMISS_MS: 30000` (30s context panel)
+  - `MAX_NOTIFICATIONS: 3` (max visible notifications)
+- Updated `evolution-notifications.tsx` to use `UI_TIMING.NOTIFICATION_DISMISS_MS`
+- Updated `observation-context-panel.tsx` to use `UI_TIMING.CONTEXT_PANEL_DISMISS_MS`
+- Updated `garden-store.ts` to use `UI_TIMING.MAX_NOTIFICATIONS`
+- All 181 tests passing (60 shared + 121 web)
 
 ### 2026-01-28 - Wave Germination Tests (#108)
 

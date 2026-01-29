@@ -481,6 +481,118 @@ describe("GardenEvolutionSystem", () => {
 
       vi.spyOn(Math, "random").mockRestore();
     });
+
+    it("should pass wave context with isWave true and waveIndex/waveTotal numbers", async () => {
+      // Track any wave germination context
+      let waveContext: { isWave: boolean; waveIndex?: number; waveTotal?: number } | null = null;
+      const callback = vi.fn().mockImplementation(async (_plantId: string, context) => {
+        if (context.isWave && !waveContext) {
+          waveContext = context;
+        }
+      });
+      system.setGerminationCallback(callback);
+
+      // Create 6 dormant plants (above wave threshold)
+      // Space them far apart to avoid clustering and cooldown
+      const plants = [
+        createMockPlant("p1", 100, 100),
+        createMockPlant("p2", 500, 100),
+        createMockPlant("p3", 900, 100),
+        createMockPlant("p4", 100, 500),
+        createMockPlant("p5", 500, 500),
+        createMockPlant("p6", 900, 500),
+      ];
+      setMockPlants(plants);
+
+      // Mock random to trigger wave (0.01 < 0.05) and pass germination (0.01 < 0.15)
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+
+      // Advance time past minimum dormancy
+      vi.advanceTimersByTime(60 * 1000);
+
+      // Wave should have been triggered during interval checks
+      expect(waveContext).not.toBeNull();
+      expect(waveContext!.isWave).toBe(true);
+      expect(typeof waveContext!.waveIndex).toBe("number");
+      expect(typeof waveContext!.waveTotal).toBe("number");
+      expect(waveContext!.waveIndex).toBeGreaterThanOrEqual(1);
+      expect(waveContext!.waveTotal).toBeGreaterThanOrEqual(3);
+      expect(waveContext!.waveTotal).toBeLessThanOrEqual(5);
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should pass non-wave context for single germinations", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create only 2 dormant plants (below wave threshold)
+      const plants = [createMockPlant("p1", 100, 100), createMockPlant("p2", 500, 500)];
+      setMockPlants(plants);
+
+      // Mock random to pass germination check
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+      vi.advanceTimersByTime(60 * 1000);
+      callback.mockClear();
+
+      await system.triggerCheck();
+
+      // Should germinate 1 plant (MAX_GERMINATIONS_PER_CHECK without wave)
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // Context should indicate not a wave
+      expect(callback).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          isWave: false,
+          waveIndex: undefined,
+          waveTotal: undefined,
+        })
+      );
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
+
+    it("should trigger wave at exactly WAVE_MIN_DORMANT_COUNT threshold", async () => {
+      const callback = vi.fn().mockResolvedValue(undefined);
+      system.setGerminationCallback(callback);
+
+      // Create exactly 5 dormant plants (the minimum for waves)
+      const plants = [
+        createMockPlant("p1", 100, 100),
+        createMockPlant("p2", 500, 100),
+        createMockPlant("p3", 900, 100),
+        createMockPlant("p4", 100, 500),
+        createMockPlant("p5", 900, 500),
+      ];
+      setMockPlants(plants);
+
+      // Mock random to trigger wave (< 0.05) and pass germination
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+
+      system.start();
+      vi.advanceTimersByTime(60 * 1000);
+      callback.mockClear();
+
+      await system.triggerCheck();
+
+      // With exactly 5 plants, wave should trigger and germinate 3+ plants
+      expect(callback.mock.calls.length).toBeGreaterThanOrEqual(3);
+
+      // Verify wave context
+      expect(callback).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          isWave: true,
+        })
+      );
+
+      vi.spyOn(Math, "random").mockRestore();
+    });
   });
 
   describe("cooldown system", () => {

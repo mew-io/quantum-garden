@@ -51,38 +51,45 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ## 🌱 Evolution System
 
-The garden evolves continuously through the `GardenEvolutionSystem`. Plants begin as dormant seeds and germinate over time, whether anyone is watching or not.
+The garden evolves continuously through server-side evolution. Plants begin as dormant seeds and germinate over time, **whether anyone is watching or not**. The client is just a viewer—like visitors to a gallery exhibit.
+
+**Architecture**:
+
+- Evolution runs **server-side** via periodic cron jobs or workers
+- The web client polls every 5 seconds to pick up new germinations
+- All visitors see the same garden state at the same time
 
 **How It Works**:
 
-- The system checks dormant plants every 15 seconds
+- The system checks dormant plants every 15 seconds (or 1 minute on Vercel)
 - Each check evaluates germination probability based on multiple factors
 - Germinated plants become visible and begin their lifecycle animations
 
 **Germination Factors**:
 
-| Factor                 | Effect                                      |
-| ---------------------- | ------------------------------------------- |
-| Base probability       | 3% chance per check                         |
-| Observed neighbor      | 2x bonus if within 300px of observed plant  |
-| Clustering penalty     | 50% reduction if too close to other sprouts |
-| Per-plant cooldown     | 30% chance near recent germinations (2 min) |
-| Guaranteed germination | 100% after 15 minutes of dormancy           |
+| Factor                 | Effect                                     |
+| ---------------------- | ------------------------------------------ |
+| Base probability       | 15% chance per check                       |
+| Observed neighbor      | 2x bonus if within 200px of observed plant |
+| Clustering prevention  | 0% if 3+ germinated plants within 150px    |
+| Age weighting          | Up to 2.5x bonus for older dormant plants  |
+| Guaranteed germination | 100% after 15 minutes of dormancy          |
 
 **Wave Events** (5% chance):
 
 When the garden has 5+ dormant plants, a "wave" event may trigger 3-5 spatially distributed plants to germinate together. Waves create visually pleasing patterns spread across the garden.
 
-**Integration**:
+**Running the Evolution Worker**:
 
-The evolution system is managed by the `useEvolutionSystem` hook in `GardenScene`. It:
+```bash
+# Single evolution check (for testing)
+pnpm evolve
 
-- Starts automatically on component mount
-- Pauses during time-travel mode (preserving historical view)
-- Syncs evolution stats to the UI every 5 seconds
-- Cleans up gracefully on unmount
+# Continuous evolution (15-second interval, for local dev)
+pnpm evolve:watch
+```
 
-See [garden-evolution.ts](apps/web/src/components/garden/garden-evolution.ts) for the full implementation.
+See [src/server/evolution.ts](apps/web/src/server/evolution.ts) for the core evolution logic.
 
 ---
 
@@ -166,6 +173,91 @@ quantum-garden/
 ```
 
 See [docs/architecture.md](docs/architecture.md) for detailed system design.
+
+---
+
+## Infrastructure Requirements
+
+### Database
+
+**PostgreSQL 14+** is required. The application uses Prisma ORM.
+
+| Provider                         | Notes                                                            |
+| -------------------------------- | ---------------------------------------------------------------- |
+| [Neon](https://neon.tech)        | Serverless Postgres, free tier available, recommended for Vercel |
+| [Supabase](https://supabase.com) | Free tier available                                              |
+| [Railway](https://railway.app)   | Simple setup, auto-managed                                       |
+| [Render](https://render.com)     | Free tier available                                              |
+| Self-hosted                      | Docker: `docker compose up -d` (dev only)                        |
+
+### Environment Variables
+
+| Variable              | Required   | Description                                                |
+| --------------------- | ---------- | ---------------------------------------------------------- |
+| `DATABASE_URL`        | ✅         | PostgreSQL connection string                               |
+| `CRON_SECRET`         | Production | Secret for evolution cron endpoint authentication          |
+| `QUANTUM_SERVICE_URL` | Optional   | Quantum service URL (defaults to `http://localhost:18742`) |
+
+### Evolution Worker
+
+The garden evolves server-side. You need **one** of these:
+
+| Method                 | Best For                          | Interval   |
+| ---------------------- | --------------------------------- | ---------- |
+| Vercel Cron (built-in) | Vercel Pro deployments            | 1 minute   |
+| External cron service  | Vercel Hobby, or faster intervals | Any        |
+| Long-running worker    | Heroku, Railway, Render, VPS      | 15 seconds |
+
+See [Deployment](#deployment) for setup instructions.
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+The app is configured for Vercel with automatic cron-based evolution.
+
+1. **Deploy to Vercel**:
+
+   ```bash
+   vercel
+   ```
+
+2. **Configure Environment Variables**:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `CRON_SECRET` - Secret for cron endpoint authentication
+
+3. **Evolution Cron**:
+   - Vercel cron runs `/api/cron/evolve` every minute (minimum interval on Pro plan)
+   - Configured in `apps/web/vercel.json`
+   - Hobby plan: 1-day minimum interval (use external cron service instead)
+
+### Alternative: External Cron Service
+
+For more frequent evolution (15-second intervals) or on Vercel Hobby:
+
+1. Use a service like [cron-job.org](https://cron-job.org), [Upstash QStash](https://upstash.com/qstash), or GitHub Actions
+2. Call the evolution endpoint:
+   ```bash
+   curl -X POST https://your-app.vercel.app/api/cron/evolve \
+     -H "Authorization: Bearer YOUR_CRON_SECRET"
+   ```
+
+### Alternative: Long-Running Worker
+
+For platforms that support persistent processes (Heroku, Railway, Render, VPS):
+
+```bash
+# Start continuous evolution worker
+pnpm evolve:watch
+```
+
+This runs evolution checks every 15 seconds. Use a process manager like PM2:
+
+```bash
+pm2 start "pnpm evolve:watch" --name evolution-worker
+```
 
 ---
 

@@ -18,7 +18,9 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx scripts/seed-garden.ts",
-    "export-variants": "tsx scripts/export-variants.ts"
+    "export-variants": "tsx scripts/export-variants.ts",
+    "evolve": "tsx scripts/evolve-garden.ts",
+    "evolve:watch": "tsx scripts/evolve-garden.ts --watch"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

@@ -103,3 +103,11 @@ model EntanglementGroup {
   plants           Plant[]
   quantumCircuit   QuantumRecord @relation(fields: [quantumCircuitId], references: [id])
 }
+
+// Singleton state for the garden (server-side evolution tracking)
+model GardenState {
+  id                  String   @id @default("singleton")
+  lastEvolutionCheck  DateTime @default(now())
+  evolutionVersion    Int      @default(0) // Incremented on each evolution run
+  updatedAt           DateTime @updatedAt
+}

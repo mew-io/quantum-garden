@@ -21,8 +21,6 @@ import { disposeTextureAtlas } from "./core/texture-atlas";
 import { OverlayManager } from "./overlays";
 import { ObservationSystem } from "@/components/garden/observation-system";
 import { useObservation } from "@/hooks/use-observation";
-import { useEvolution } from "@/hooks/use-evolution";
-import { useEvolutionSystem } from "@/hooks/use-evolution-system";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
@@ -84,14 +82,8 @@ export function GardenScene() {
   // Observation hook for quantum measurement
   const { triggerObservation } = useObservation();
 
-  // Evolution hook for plant germination
-  const { triggerGermination } = useEvolution();
-
-  // Evolution system - manages automatic germination of dormant plants
-  // This is the critical hook that makes the garden continuously evolve
-  useEvolutionSystem({ triggerGermination });
-
-  // Load plants from server into store
+  // Load plants from server into store (polls every 5s to pick up server-side evolution)
+  // Evolution now runs server-side via cron/worker - client is just a viewer
   usePlants();
 
   // Store callback ref to keep it stable across renders

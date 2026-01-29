@@ -28,20 +28,21 @@ interface NotificationProps {
  * Get Tailwind classes for notification styling based on type.
  */
 function getNotificationStyles(type: NotificationType): string {
+  // All notifications use consistent /90 background opacity for calm aesthetic
   switch (type) {
     case "wave":
       // Purple theme for wave germinations - special event
-      return "border-purple-500/30 bg-purple-950/80 text-purple-100/90 hover:bg-purple-950/95";
+      return "border-purple-500/30 bg-purple-950/90 text-purple-100/90 hover:bg-purple-900/95";
     case "entanglement":
       // Pink theme for entanglement - quantum connection
-      return "border-pink-500/30 bg-pink-950/80 text-pink-100/90 hover:bg-pink-950/95";
+      return "border-pink-500/30 bg-pink-950/90 text-pink-100/90 hover:bg-pink-900/95";
     case "error":
       // Amber/red theme for errors
-      return "border-amber-500/30 bg-amber-950/80 text-amber-100/90 hover:bg-amber-950/95";
+      return "border-amber-500/30 bg-amber-950/90 text-amber-100/90 hover:bg-amber-900/95";
     case "germination":
     default:
       // Green theme for normal germinations
-      return "border-green-500/20 bg-black/80 text-green-100/90 hover:bg-black/90";
+      return "border-green-500/20 bg-gray-950/90 text-green-100/90 hover:bg-gray-900/95";
   }
 }
 
@@ -234,7 +235,7 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
         rounded-lg border
         text-sm
         shadow-lg backdrop-blur-sm
-        animate-in fade-in slide-in-from-right-5 duration-300
+        animate-in fade-in slide-in-from-right-5 duration-400
         cursor-pointer transition-colors
         overflow-hidden
         ${typeStyles}

@@ -74,6 +74,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
   const [showModeConfirm, setShowModeConfirm] = useState(false);
+  const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0); // 0 = stacked ghosts, 1 = flickering
   const [activeTab, setActiveTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
@@ -205,6 +206,21 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const cancelModeChange = useCallback(() => {
     setShowModeConfirm(false);
   }, []);
+
+  // Toggle superposition visualization mode
+  const toggleSuperpositionMode = useCallback(() => {
+    const newMode = superpositionMode === 0 ? 1 : 0;
+    setSuperpositionMode(newMode);
+    debugLogger.rendering.info(
+      `Superposition mode changed to ${newMode === 0 ? "stacked ghosts" : "flickering"}`
+    );
+
+    window.dispatchEvent(
+      new CustomEvent("superposition-mode-change", {
+        detail: { mode: newMode },
+      })
+    );
+  }, [superpositionMode]);
 
   // Toggle category filter
   const toggleCategory = (category: LogCategory) => {
@@ -445,6 +461,21 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                     }`}
                   >
                     {observationMode === "region" ? "REGION" : "CLICK"}
+                  </span>
+                </button>
+                <button
+                  onClick={toggleSuperpositionMode}
+                  className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
+                >
+                  <span className="text-xs">Superposition Display</span>
+                  <span
+                    className={`text-xs font-mono px-2 py-1 rounded ${
+                      superpositionMode === 0
+                        ? "bg-purple-900/50 text-purple-300"
+                        : "bg-cyan-900/50 text-cyan-300"
+                    }`}
+                  >
+                    {superpositionMode === 0 ? "GHOSTS" : "FLICKER"}
                   </span>
                 </button>
               </div>

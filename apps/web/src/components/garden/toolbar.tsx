@@ -69,7 +69,7 @@ export function Toolbar({
         {/* Status Indicator */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded">
           <span
-            className={`w-2 h-2 rounded-full ${plantCount === 0 ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-pulse"}`}
+            className={`w-2 h-2 rounded-full ${plantCount === 0 ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-organic-pulse"}`}
           />
           <span className="text-xs text-gray-400">
             {plantCount === 0 ? "Loading..." : `${plantCount} plants`}

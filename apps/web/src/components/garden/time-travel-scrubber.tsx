@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { trpc } from "@/lib/trpc/client";
+import { useGardenStore } from "@/stores/garden-store";
 import type { EvolutionEvent } from "@/server/routers/garden";
 
 interface TimeTravelScrubberProps {
@@ -46,6 +47,7 @@ export function TimeTravelScrubber({
   } | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const addNotification = useGardenStore((state) => state.addNotification);
 
   // Track "now" with periodic updates to keep timeline fresh
   // Updates every 10 seconds when timeline is active to avoid stale endpoints
@@ -252,11 +254,11 @@ export function TimeTravelScrubber({
                   key={speed}
                   onClick={() => setPlaybackSpeed(speed)}
                   className={`
-                    px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors
+                    px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150
                     ${
                       playbackSpeed === speed
-                        ? "bg-purple-500 text-white"
-                        : "text-white/60 hover:text-white hover:bg-white/10"
+                        ? "bg-purple-500 text-white scale-105"
+                        : "text-white/60 hover:text-white hover:bg-white/10 active:scale-95"
                     }
                   `}
                 >
@@ -307,6 +309,8 @@ export function TimeTravelScrubber({
               onClick={() => {
                 setIsPlaying(false);
                 onReturnToLive();
+                // Communicate that the garden evolved while they watched its past
+                addNotification("The garden evolved while you watched its past", "germination");
               }}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-500 transition-colors"
             >
@@ -332,7 +336,7 @@ export function TimeTravelScrubber({
 
               {/* Progress Fill */}
               <div
-                className="absolute top-0 left-0 bottom-0 bg-purple-500/20"
+                className="absolute top-0 left-0 bottom-0 bg-purple-500/20 transition-[width] duration-200 ease-out"
                 style={{ width: `${playheadProgress * 100}%` }}
               />
 
@@ -348,7 +352,7 @@ export function TimeTravelScrubber({
               {/* Event Tooltip */}
               {hoveredEvent && (
                 <div
-                  className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 rounded-lg shadow-xl border border-white/20 text-xs whitespace-nowrap pointer-events-none z-20"
+                  className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 rounded-lg shadow-xl border border-white/20 text-xs whitespace-nowrap pointer-events-none z-20 animate-in fade-in duration-150"
                   style={{
                     left: `${hoveredEvent.x}%`,
                     transform: "translateX(-50%)",

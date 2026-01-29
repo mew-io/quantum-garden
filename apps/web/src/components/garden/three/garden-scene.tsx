@@ -351,6 +351,18 @@ export function GardenScene() {
       handlePlantDebugSelect as EventListener
     );
 
+    // Handle superposition mode changes from debug panel
+    const handleSuperpositionModeChange = (e: CustomEvent<{ mode: 0 | 1 }>) => {
+      plantInstancer.setSuperpositionMode(e.detail.mode);
+      debugLogger.rendering.info(
+        `Superposition mode set to ${e.detail.mode === 0 ? "stacked ghosts" : "flickering"}`
+      );
+    };
+    window.addEventListener(
+      "superposition-mode-change" as keyof WindowEventMap,
+      handleSuperpositionModeChange as EventListener
+    );
+
     // Start render loop
     debugLogger.rendering.info("Starting render loop");
     sceneManager.start();
@@ -384,6 +396,10 @@ export function GardenScene() {
       window.removeEventListener(
         "plant-debug-highlight" as keyof WindowEventMap,
         handlePlantDebugSelect as EventListener
+      );
+      window.removeEventListener(
+        "superposition-mode-change" as keyof WindowEventMap,
+        handleSuperpositionModeChange as EventListener
       );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);

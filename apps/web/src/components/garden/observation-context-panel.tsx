@@ -145,9 +145,10 @@ function PanelContent({
   const education = getCircuitEducation(circuitId);
 
   // Animation classes based on entry/exit state
+  // Use ease-out for entry (decelerating), ease-in for exit (accelerating away)
   const animationClasses = isExiting
-    ? "animate-out fade-out slide-out-to-left-5 duration-300"
-    : "animate-in fade-in slide-in-from-left-5 duration-300";
+    ? "animate-out fade-out slide-out-to-left-5 duration-300 ease-in"
+    : "animate-in fade-in slide-in-from-left-5 duration-350 ease-out";
 
   return (
     <div

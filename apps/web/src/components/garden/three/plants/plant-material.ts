@@ -115,6 +115,9 @@ const vertexShader = /* glsl */ `
  * Fragment shader for plant rendering.
  *
  * Samples the pattern atlas and applies palette coloring with gradient effect.
+ * Enhanced superposition visualization modes:
+ * - Mode 0: Stacked ghosts (multiple offset samples with varying opacity)
+ * - Mode 1: Flickering (rapid opacity oscillation simulating quantum uncertainty)
  */
 const fragmentShader = /* glsl */ `
   precision highp float;
@@ -122,6 +125,7 @@ const fragmentShader = /* glsl */ `
   // Uniforms
   uniform sampler2D u_patternAtlas;
   uniform float u_time;
+  uniform int u_superpositionMode; // 0 = stacked ghosts (default), 1 = flickering
 
   // Varyings from vertex shader
   varying vec2 v_uv;
@@ -135,17 +139,19 @@ const fragmentShader = /* glsl */ `
   varying float v_shimmerPhase;
   varying float v_lifecycleProgress;
 
+  // Sample pattern with offset (for ghost effect)
+  float samplePatternOffset(vec2 uv, vec2 offset) {
+    vec2 offsetUV = uv + offset * v_uvBounds.zw;
+    vec2 atlasUV = v_uvBounds.xy + offsetUV * v_uvBounds.zw;
+    return texture2D(u_patternAtlas, atlasUV).r;
+  }
+
   void main() {
     // Calculate UV position within the pattern in the atlas
     vec2 atlasUV = v_uvBounds.xy + v_uv * v_uvBounds.zw;
 
     // Sample pattern from atlas (R channel = filled/empty)
     float patternValue = texture2D(u_patternAtlas, atlasUV).r;
-
-    // If pixel is empty, discard
-    if (patternValue < 0.5) {
-      discard;
-    }
 
     // Calculate distance from center for gradient coloring
     vec2 centerOffset = v_uv - 0.5;
@@ -166,15 +172,72 @@ const fragmentShader = /* glsl */ `
     // Calculate final opacity based on visual state
     float finalOpacity = v_opacity;
 
-    // Shimmer effect for superposed state
+    // Enhanced superposition visualization
     if (v_visualState < 0.5) {
-      // Superposed: apply shimmer
-      float shimmer = sin(u_time * 1.5 + v_shimmerPhase) * 0.08;
-      finalOpacity = max(0.15, finalOpacity + shimmer);
+      if (u_superpositionMode == 1) {
+        // MODE 1: Flickering - rapid opacity oscillation
+        // Multiple frequency shimmer creates unstable, flickering appearance
+        float shimmer1 = sin(u_time * 3.0 + v_shimmerPhase) * 0.15;
+        float shimmer2 = sin(u_time * 7.0 + v_shimmerPhase * 2.0) * 0.08;
+        float shimmer3 = sin(u_time * 13.0 + v_shimmerPhase * 3.0) * 0.05;
+
+        // Occasional "flash" effect (quantum fluctuation)
+        float flash = step(0.97, fract(sin(u_time * 0.5 + v_shimmerPhase) * 43758.5453));
+
+        finalOpacity = v_opacity + shimmer1 + shimmer2 + shimmer3 + flash * 0.3;
+        finalOpacity = clamp(finalOpacity, 0.1, 0.6);
+
+        // If pixel is empty, discard
+        if (patternValue < 0.5) {
+          discard;
+        }
+      } else {
+        // MODE 0: Stacked ghosts - sample with offsets for blur/uncertainty effect
+        // Create ghost layers at different time-varying offsets
+        float angle1 = u_time * 0.5 + v_shimmerPhase;
+        float angle2 = u_time * 0.5 + v_shimmerPhase + 2.094; // +120 degrees
+        float angle3 = u_time * 0.5 + v_shimmerPhase + 4.189; // +240 degrees
+
+        float ghostRadius = 0.03; // Subtle offset
+        vec2 offset1 = vec2(cos(angle1), sin(angle1)) * ghostRadius;
+        vec2 offset2 = vec2(cos(angle2), sin(angle2)) * ghostRadius;
+        vec2 offset3 = vec2(cos(angle3), sin(angle3)) * ghostRadius;
+
+        // Sample pattern at primary position and ghost offsets
+        float ghost1 = samplePatternOffset(v_uv, offset1);
+        float ghost2 = samplePatternOffset(v_uv, offset2);
+        float ghost3 = samplePatternOffset(v_uv, offset3);
+
+        // Combine: primary pattern + faint ghost layers
+        float combinedPattern = patternValue * 0.5 + ghost1 * 0.2 + ghost2 * 0.15 + ghost3 * 0.15;
+
+        // Basic shimmer
+        float shimmer = sin(u_time * 1.5 + v_shimmerPhase) * 0.08;
+        finalOpacity = v_opacity + shimmer;
+        finalOpacity = max(0.15, finalOpacity);
+
+        // Discard if all samples are empty
+        if (combinedPattern < 0.3) {
+          discard;
+        }
+
+        // Adjust opacity based on combined pattern strength
+        finalOpacity *= min(1.0, combinedPattern * 1.2);
+      }
     } else if (v_transitionProgress > 0.0 && v_transitionProgress < 1.0) {
       // During transition: smooth fade
       float eased = 1.0 - pow(1.0 - v_transitionProgress, 3.0);
       finalOpacity *= eased;
+
+      // If pixel is empty, discard
+      if (patternValue < 0.5) {
+        discard;
+      }
+    } else {
+      // Collapsed state: standard rendering
+      if (patternValue < 0.5) {
+        discard;
+      }
     }
 
     // Apply lifecycle opacity variance for old plants
@@ -187,6 +250,13 @@ const fragmentShader = /* glsl */ `
     gl_FragColor = vec4(color, finalOpacity);
   }
 `;
+
+/**
+ * Superposition visualization modes.
+ * 0 = Stacked ghosts (default): Multiple offset samples create blur/uncertainty
+ * 1 = Flickering: Rapid opacity oscillation simulates quantum fluctuations
+ */
+export type SuperpositionMode = 0 | 1;
 
 /**
  * Create a custom ShaderMaterial for plant rendering.
@@ -202,6 +272,7 @@ export function createPlantMaterial(atlasTexture: THREE.Texture): THREE.ShaderMa
       u_patternAtlas: { value: atlasTexture },
       u_time: { value: 0 },
       u_patternSize: { value: PATTERN_SIZE },
+      u_superpositionMode: { value: 0 }, // 0 = stacked ghosts (default)
     },
     transparent: true,
     depthWrite: false, // Important for proper transparency blending
@@ -216,5 +287,19 @@ export function createPlantMaterial(atlasTexture: THREE.Texture): THREE.ShaderMa
 export function updatePlantMaterialTime(material: THREE.ShaderMaterial, time: number): void {
   if (material.uniforms.u_time) {
     material.uniforms.u_time.value = time;
+  }
+}
+
+/**
+ * Set the superposition visualization mode.
+ * @param material - The plant shader material
+ * @param mode - 0 for stacked ghosts, 1 for flickering
+ */
+export function setSuperpositionMode(
+  material: THREE.ShaderMaterial,
+  mode: SuperpositionMode
+): void {
+  if (material.uniforms.u_superpositionMode) {
+    material.uniforms.u_superpositionMode.value = mode;
   }
 }

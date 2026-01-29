@@ -4,7 +4,7 @@
  * Loads plants from the server and syncs them to the Zustand store.
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 
@@ -17,6 +17,8 @@ import { useGardenStore } from "@/stores/garden-store";
  */
 export function usePlants() {
   const setPlants = useGardenStore((state) => state.setPlants);
+  const addNotification = useGardenStore((state) => state.addNotification);
+  const hasShownErrorRef = useRef(false);
 
   const {
     data: plants,
@@ -26,14 +28,27 @@ export function usePlants() {
     // Poll every 5 seconds to keep store fresh
     // Other components should use store data instead of making their own queries
     refetchInterval: 5000,
+    // Retry a few times before showing error
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Sync plants to store when data changes
   useEffect(() => {
     if (plants) {
       setPlants(plants);
+      // Reset error state on successful load
+      hasShownErrorRef.current = false;
     }
   }, [plants, setPlants]);
+
+  // Show notification on error (only once per error state)
+  useEffect(() => {
+    if (error && !hasShownErrorRef.current) {
+      hasShownErrorRef.current = true;
+      addNotification("Unable to load garden. Retrying...", "error");
+    }
+  }, [error, addNotification]);
 
   return {
     plants,

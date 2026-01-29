@@ -109,7 +109,7 @@ export function CooldownIndicator() {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: "stroke-dashoffset 0.1s linear" }}
+            style={{ transition: "stroke-dashoffset 0.25s ease-out" }}
           />
         </svg>
 

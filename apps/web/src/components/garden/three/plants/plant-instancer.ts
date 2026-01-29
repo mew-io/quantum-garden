@@ -16,7 +16,12 @@ import {
   type PlantVariant,
 } from "@quantum-garden/shared";
 import { type TextureAtlas, getTextureAtlas } from "../core/texture-atlas";
-import { createPlantMaterial, updatePlantMaterialTime } from "./plant-material";
+import {
+  createPlantMaterial,
+  updatePlantMaterialTime,
+  setSuperpositionMode,
+  type SuperpositionMode,
+} from "./plant-material";
 import { prefersReducedMotion } from "@/lib/accessibility";
 
 // Maximum number of plant instances
@@ -672,6 +677,21 @@ export class PlantInstancer {
       attr.addUpdateRange(startIndex * itemSize, count * itemSize);
       attr.needsUpdate = true;
     }
+  }
+
+  /**
+   * Set the superposition visualization mode.
+   * @param mode - 0 for stacked ghosts (default), 1 for flickering
+   */
+  setSuperpositionMode(mode: SuperpositionMode): void {
+    setSuperpositionMode(this.material, mode);
+  }
+
+  /**
+   * Get the current superposition visualization mode.
+   */
+  getSuperpositionMode(): SuperpositionMode {
+    return (this.material.uniforms.u_superpositionMode?.value ?? 0) as SuperpositionMode;
   }
 
   /**

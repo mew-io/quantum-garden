@@ -91,7 +91,7 @@ export function EvolutionStatusIndicator() {
           `}
         />
         <span className={evolutionPaused ? "text-amber-400" : "text-green-400"}>
-          {evolutionPaused ? "Paused" : "Active"}
+          {evolutionPaused ? "Paused" : "Evolving"}
         </span>
       </div>
 

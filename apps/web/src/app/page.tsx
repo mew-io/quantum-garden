@@ -143,23 +143,9 @@ export default function Home() {
 
         {/* Loading indicator during initial plant fetch */}
         {isPlantsLoading && (
-          <div
-            style={{
-              position: "fixed",
-              bottom: 20,
-              left: "50%",
-              transform: "translateX(-50%)",
-              padding: "8px 16px",
-              backgroundColor: "rgba(0, 0, 0, 0.6)",
-              color: "#fff",
-              borderRadius: 4,
-              fontSize: 14,
-              fontFamily: "monospace",
-              pointerEvents: "none",
-              zIndex: 100,
-            }}
-          >
-            Loading garden...
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-sm text-white rounded-lg text-sm font-mono pointer-events-none z-[100] animate-in fade-in duration-500 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+            The garden is awakening...
           </div>
         )}
 

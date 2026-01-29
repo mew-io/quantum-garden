@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
@@ -695,6 +695,13 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
 // Helper Components
 
+/**
+ * Stat component with smooth value transitions.
+ *
+ * When values change, a subtle highlight animation plays to indicate the update
+ * without being jarring. Uses a brief flash effect rather than interpolating
+ * values (which would feel laggy for real-time data like FPS).
+ */
 function Stat({
   label,
   value,
@@ -704,6 +711,21 @@ function Stat({
   value: string | number;
   color?: "white" | "red" | "green" | "yellow" | "cyan" | "purple";
 }) {
+  const prevValueRef = useRef<string | number>(value);
+  const [isFlashing, setIsFlashing] = useState(false);
+
+  // Detect value changes and trigger flash animation
+  useEffect(() => {
+    if (prevValueRef.current !== value) {
+      prevValueRef.current = value;
+      setIsFlashing(true);
+
+      // Reset flash after animation completes
+      const timer = setTimeout(() => setIsFlashing(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [value]);
+
   const colorClass = {
     white: "text-gray-100",
     red: "text-red-400",
@@ -713,14 +735,37 @@ function Stat({
     purple: "text-purple-400",
   }[color];
 
+  // Background flash color based on value color (subtle highlight)
+  const flashClass = isFlashing
+    ? color === "green"
+      ? "bg-green-500/20"
+      : color === "red"
+        ? "bg-red-500/20"
+        : color === "yellow"
+          ? "bg-yellow-500/20"
+          : color === "cyan"
+            ? "bg-cyan-500/20"
+            : color === "purple"
+              ? "bg-purple-500/20"
+              : "bg-white/10"
+    : "";
+
   return (
-    <div className="bg-gray-800/50 rounded px-3 py-2">
+    <div
+      className={`bg-gray-800/50 rounded px-3 py-2 transition-colors duration-300 ${flashClass}`}
+    >
       <div className="text-gray-500 text-xs">{label}</div>
-      <div className={`font-mono ${colorClass}`}>{value}</div>
+      <div className={`font-mono transition-opacity duration-150 ${colorClass}`}>{value}</div>
     </div>
   );
 }
 
+/**
+ * Status badge with smooth state transitions.
+ *
+ * Colors and text smoothly transition when the active state changes,
+ * providing visual feedback without jarring updates.
+ */
 function StatusBadge({
   label,
   active,
@@ -749,7 +794,7 @@ function StatusBadge({
   const text = active ? (activeText ?? "Active") : (inactiveText ?? "Inactive");
 
   return (
-    <div className={`text-xs px-2 py-1 rounded border ${className}`}>
+    <div className={`text-xs px-2 py-1 rounded border transition-all duration-300 ${className}`}>
       <span className="opacity-60">{label}:</span> {text}
     </div>
   );

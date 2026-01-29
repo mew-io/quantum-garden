@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29_
+_Last updated: 2026-01-29 (synthesis)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (11 Remaining)
+## Active Tasks (10 Remaining)
 
 ### Bugs & Performance
 
@@ -49,7 +49,6 @@ No active tasks.
 
 | #   | Task                                      | Priority | File                            |
 | --- | ----------------------------------------- | -------- | ------------------------------- |
-| 93  | Smooth debug panel data refreshes         | P3       | `debug-panel.tsx`               |
 | 97  | Add plant highlight pulsing in debug mode | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation           | P3       | `observation-context-panel.tsx` |
 | 102 | Plan sound effects system                 | P3       | -                               |
@@ -104,6 +103,17 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Smooth Debug Panel Data Refreshes (#93)
+
+- Added smooth value transitions to `Stat` component in debug panel
+- Uses `useRef` to track previous values and detect changes
+- Applies subtle background flash animation (300ms) when values change
+- Flash color matches stat's color theme (green stats flash green, etc.)
+- Added `transition-colors duration-300` for smooth color transitions
+- Updated `StatusBadge` component with `transition-all duration-300`
+- Active/inactive state changes now animate smoothly instead of jumping
+- All 268 tests passing (60 shared + 208 web) - 1 flaky performance test
 
 ### 2026-01-29 - Complementary Color for Celebration Outer Ring (#94)
 

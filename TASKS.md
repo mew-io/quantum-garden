@@ -4,11 +4,17 @@ _Last updated: 2026-01-28_
 
 ## Project Status
 
-The garden is now continuously evolving with the `GardenEvolutionSystem` properly integrated. The critical bug where the evolution system was never started has been fixed.
+The garden now features **server-side evolution** - plants germinate whether anyone is watching or not. The client is just a viewer, like visitors to a gallery exhibit. All visitors see the same garden state at the same time.
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
 **Test Coverage**: 268 tests passing (60 shared + 208 web)
+
+**Architecture Highlights**:
+
+- Server-side evolution via Vercel cron or standalone worker
+- 36 plant variants, all using smooth vector rendering
+- Real quantum data from IonQ simulator via pre-computed pool
 
 ---
 
@@ -107,6 +113,45 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Convert All Raster Variants to Vector Format
+
+- Converted final 5 geometric raster variants to vector rendering:
+  - `sumi-spirit`: Ink brush stroke enso with brushStroke easing
+  - `sacred-mandala`: Concentric circles with radial symmetry
+  - `crystal-lattice`: Interlocking diamond grid
+  - `stellar-geometry`: Nested star outlines
+  - `metatrons-cube`: Sacred geometry Flower of Life pattern
+- Removed 5 orphaned `*Vector` duplicate variant definitions
+- Fixed TypeScript errors: invalid `easing: "smooth"` and `strategy: "morphBetweenShapes"`
+- Updated PLANT_VARIANTS array from 41 to 36 variants
+- All variants now use smooth, resolution-independent vector rendering
+- Raster pattern functions preserved (underscore-prefixed) for potential future use
+
+### 2026-01-28 - Server-Side Evolution System
+
+Major architectural change: evolution moved from client-side to server-side.
+
+**Rationale**: The garden should evolve whether anyone is watching or not. The client is "just a view" - like visitors to a gallery exhibit. All visitors see the same garden state at the same time.
+
+**Implementation**:
+
+- Added `GardenState` model to Prisma schema with `lastEvolutionCheck` and `evolutionVersion`
+- Created server-side evolution module at `src/server/evolution.ts`
+- Created Vercel Cron API route at `src/app/api/cron/evolve/route.ts`
+- Created `vercel.json` with cron configuration (1-minute interval)
+- Created standalone worker script at `scripts/evolve-garden.ts`
+  - `pnpm evolve` - single evolution check
+  - `pnpm evolve:watch` - continuous 15-second interval
+- Disabled client-side evolution in `garden-scene.tsx`
+- Client now polls plants every 5 seconds via `usePlants`
+- Fixed bug: observed-but-not-germinated plants now properly included in evolution
+
+**Deployment Options**:
+
+- Vercel Pro: Built-in cron (1-minute minimum)
+- External cron service: Any interval via Bearer token auth
+- Long-running worker: 15-second intervals on Heroku/Railway/VPS
 
 ### 2026-01-28 - Performance Monitoring in Debug Panel (#90)
 

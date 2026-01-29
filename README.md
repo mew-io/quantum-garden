@@ -21,7 +21,7 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 ### What's Working ✓
 
 - Three.js rendering with efficient instanced plants (1000 plant capacity)
-- 41 plant variants (32 raster + 9 vector) across 6 categories with lifecycle animations
+- 36 plant variants across 6 categories, all using smooth vector rendering with lifecycle animations
 - Dual rendering modes: 64x64 pixel grids and smooth vector line rendering
 - Vector plants with progressive drawing transitions (brush stroke effects)
 - Lifecycle-based visual behaviors: GPU-accelerated shader animations for young/mature/old plants

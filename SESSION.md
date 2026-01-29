@@ -1,10 +1,3 @@
 # Session Log
 
-**Session Started**: (awaiting next session)
-**Previous Synthesis**: f48ff72
-
----
-
-## Notes
-
-(No active session)
+_This file tracks work done in the current session. Cleared after each synthesis._

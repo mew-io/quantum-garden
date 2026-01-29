@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import type { Plant, ObservationRegion, Reticle, Position } from "@quantum-garden/shared";
+import type {
+  Plant,
+  ObservationRegion,
+  Reticle,
+  Position,
+  QuantumEvent,
+} from "@quantum-garden/shared";
 
 /**
  * Evolution event notification.
@@ -82,6 +88,15 @@ interface GardenState {
   setEvolutionStats: (stats: EvolutionStats | null) => void;
   lastGerminationTime: number | null;
   setLastGerminationTime: (time: number | null) => void;
+
+  // Quantum event log
+  eventLog: QuantumEvent[];
+  addEvent: (event: Omit<QuantumEvent, "id">) => void;
+  clearEventLog: () => void;
+  selectedEventId: string | null;
+  setSelectedEventId: (id: string | null) => void;
+  historicalEventsLoaded: boolean;
+  setHistoricalEventsLoaded: (loaded: boolean) => void;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -158,4 +173,22 @@ export const useGardenStore = create<GardenState>((set) => ({
   setEvolutionStats: (stats) => set({ evolutionStats: stats }),
   lastGerminationTime: null,
   setLastGerminationTime: (time) => set({ lastGerminationTime: time }),
+
+  // Quantum event log (FIFO queue with max 50 events)
+  eventLog: [],
+  addEvent: (event) =>
+    set((state) => {
+      const newEvent: QuantumEvent = {
+        ...event,
+        id: `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+      // Keep only the most recent 50 events
+      const updatedLog = [...state.eventLog, newEvent].slice(-50);
+      return { eventLog: updatedLog };
+    }),
+  clearEventLog: () => set({ eventLog: [], historicalEventsLoaded: false }),
+  selectedEventId: null,
+  setSelectedEventId: (id) => set({ selectedEventId: id }),
+  historicalEventsLoaded: false,
+  setHistoricalEventsLoaded: (loaded) => set({ historicalEventsLoaded: loaded }),
 }));

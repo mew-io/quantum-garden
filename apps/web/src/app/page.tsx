@@ -8,10 +8,13 @@ import { DebugPanel } from "@/components/garden/debug-panel";
 import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
+import { QuantumEventLog } from "@/components/garden/quantum-event-log";
+import { EventDetailModal } from "@/components/garden/event-detail-modal";
 import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
 import { useGardenStore } from "@/stores/garden-store";
+import { useHistoricalEvents } from "@/hooks/use-historical-events";
 import { trpc } from "@/lib/trpc/client";
 
 export default function Home() {
@@ -44,6 +47,9 @@ export default function Home() {
     );
     setGardenCreatedAt(new Date(earliest.createdAt));
   }, [plants]);
+
+  // Load historical events into the Quantum Events panel
+  useHistoricalEvents({ gardenCreatedAt });
 
   // Query for historical state
   const [historicalTimestamp, setHistoricalTimestamp] = useState<Date | null>(null);
@@ -187,6 +193,8 @@ export default function Home() {
         />
         <EvolutionNotifications />
         <ObservationContextPanel />
+        <QuantumEventLog />
+        <EventDetailModal />
         <CooldownIndicator />
         <EvolutionPausedIndicator />
         {gardenCreatedAt && (

@@ -10,7 +10,7 @@ import { useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
-import type { ObservationPayload } from "@quantum-garden/shared";
+import type { ObservationPayload, CircuitType, ResolvedTraits } from "@quantum-garden/shared";
 
 /**
  * Hook that provides observation functionality.
@@ -22,6 +22,7 @@ export function useObservation() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
   const addNotification = useGardenStore((state) => state.addNotification);
   const setObservationContext = useGardenStore((state) => state.setObservationContext);
+  const addEvent = useGardenStore((state) => state.addEvent);
   const utils = trpc.useUtils();
 
   const recordObservationMutation = trpc.observation.recordObservation.useMutation({
@@ -52,12 +53,35 @@ export function useObservation() {
         isEntangled: result.entangledPartnersUpdated,
       });
 
+      // Add observation event to quantum event log
+      addEvent({
+        type: "observation",
+        timestamp: new Date(),
+        plantId: result.id,
+        variantId: result.variantId,
+        circuitId: result.circuitId as CircuitType,
+        executionMode: result.executionMode as "mock" | "simulator" | "hardware",
+        resolvedTraits: result.traits as unknown as ResolvedTraits,
+        entanglementGroupId: result.entangledPartnersUpdated
+          ? (result.entanglementGroupId ?? undefined)
+          : undefined,
+      });
+
       // If entangled partners were updated, refetch plants to get their new state
       if (result.entangledPartnersUpdated) {
         debugLogger.observation.info("Entangled partners also observed");
         utils.plants.list.invalidate();
         // Show entanglement notification
         addNotification("Entangled plants observed");
+
+        // Add entanglement correlation event to log
+        addEvent({
+          type: "entanglement",
+          timestamp: new Date(),
+          plantId: result.id,
+          variantId: result.variantId,
+          entanglementGroupId: result.entanglementGroupId ?? undefined,
+        });
       }
     },
     onError: (error) => {

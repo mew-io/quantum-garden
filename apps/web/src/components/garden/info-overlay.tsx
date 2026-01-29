@@ -97,7 +97,7 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
         </p>
 
         {/* Device-specific instructions */}
-        <div className="bg-gray-800/50 rounded-lg p-4 mb-6">
+        <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
           {isTouch ? (
             <p className="text-gray-300 text-sm">
               <span className="text-blue-400 font-medium">Touch and hold</span> on a plant to
@@ -109,6 +109,21 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
               garden. When it aligns with a plant, observation begins automatically.
             </p>
           )}
+        </div>
+
+        {/* Time-travel feature explanation */}
+        <div className="bg-purple-900/30 border border-purple-500/20 rounded-lg p-4 mb-6">
+          <p className="text-purple-300 text-xs uppercase tracking-wide mb-2 font-medium">
+            Time Travel
+          </p>
+          <p className="text-gray-300 text-sm">
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 bg-gray-800 text-purple-300 rounded text-xs font-mono mx-0.5">
+              T
+            </kbd>{" "}
+            to open the timeline and watch the garden&apos;s history unfold. Scrub through past
+            germinations and observations, or let it play back automatically.
+          </p>
         </div>
 
         {/* Keyboard shortcuts - desktop only */}

@@ -19,6 +19,7 @@ import { debugLogger } from "@/lib/debug-logger";
 export function useEvolution() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
   const addNotification = useGardenStore((state) => state.addNotification);
+  const addEvent = useGardenStore((state) => state.addEvent);
 
   const germinateMutation = trpc.plants.germinate.useMutation({
     onSuccess: (result) => {
@@ -35,6 +36,15 @@ export function useEvolution() {
 
       // Show notification
       addNotification("A plant has germinated");
+
+      // Add germination event to quantum event log
+      addEvent({
+        type: "germination",
+        timestamp: new Date(),
+        plantId: result.id,
+        variantId: result.variantId,
+        germinationType: "normal",
+      });
     },
     onError: (error) => {
       debugLogger.evolution.error("Germination failed", { error: error.message });

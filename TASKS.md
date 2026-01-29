@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (34 Remaining)
+## Active Tasks (33 Remaining)
 
 ### Bugs & Performance
 
@@ -66,7 +66,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
-| 99  | Add time-travel explanation to help                 | P2       | `info-overlay.tsx`              |
 | 101 | Complete keyboard shortcuts list                    | P2       | `toolbar.tsx`                   |
 | 102 | Plan sound effects system                           | P3       | -                               |
 | 103 | Add playback speed control to time-travel           | P3       | `time-travel-scrubber.tsx`      |
@@ -130,6 +129,61 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Quantum Event Log System
+
+- Created comprehensive quantum event logging system for educational transparency
+- **New Types in `@quantum-garden/shared`**:
+  - `QuantumEventType`: "observation" | "germination" | "entanglement" | "wave_germination"
+  - `CircuitType`: "superposition" | "bell_pair" | "ghz_state" | "interference" | "variational"
+  - `QuantumEvent`: Full event metadata including plant ID, circuit info, traits, entanglement groups
+- **New Components**:
+  - `quantum-event-log.tsx`: Persistent bottom-left panel showing quantum events as they happen
+    - Scrollable list with auto-scroll to bottom
+    - Filter chips for event types (observation/germination/entanglement/wave)
+    - Relative time formatting ("just now", "5m ago", etc.)
+    - Minimizable with event count badge
+    - Adjusts position when time-travel scrubber is visible
+  - `event-detail-modal.tsx`: Full-screen modal with educational content
+    - Circuit diagrams for each circuit type (superposition, Bell pair, GHZ state, etc.)
+    - Quantum concept explanations for all event types
+    - Event-specific details (variant, circuit, execution mode, etc.)
+    - Prev/Next navigation between events with keyboard support (arrows, Esc)
+- **New Hooks**:
+  - `use-historical-events.ts`: Loads historical events from evolution timeline into event log
+    - Queries `garden.getEvolutionTimeline` on mount
+    - Populates store with past germination/observation events
+    - One-time load with staleTime: Infinity
+- **Store Updates** (`garden-store.ts`):
+  - Added `eventLog: QuantumEvent[]` state (max 50 events, FIFO queue)
+  - Added `addEvent()`, `clearEventLog()`, `selectedEventId`, `setSelectedEventId()`
+  - Added `historicalEventsLoaded` flag to prevent duplicate loads
+- **Hook Updates**:
+  - `use-evolution.ts`: Logs germination events with plant ID and variant
+  - `use-observation.ts`: Logs observation events with circuit ID, execution mode, resolved traits
+    - Also logs entanglement correlation events when partners are updated
+- All 178 tests passing (60 shared + 118 web)
+
+### 2026-01-28 - Time-Travel Help Explanation (#99)
+
+- Added time-travel feature section to info overlay (`info-overlay.tsx`)
+- Purple-themed card with border accent explaining:
+  - How to access the timeline (press T key)
+  - What you can do (watch history, scrub through events, auto-playback)
+- Uses semantic `kbd` element for keyboard shortcut
+- Positioned after device instructions, before keyboard shortcuts section
+- All 178 tests passing
+
+### 2026-01-28 - Time-Travel Scrubber UI Polish
+
+- Improved visual styling of time-travel scrubber component
+- Header: Refined with border separation, better spacing
+- Buttons: Larger touch targets (px-4 py-2), rounded-lg, font-medium
+- "Show Timeline" button: Purple theme (bg-purple-600/90) with shadow
+- Play/Pause: Disabled state styling when at end of timeline
+- Timeline track: Border outline, purple progress fill, refined playhead with purple accent
+- Labels: Better contrast and spacing
+- Legend: Improved alignment and visual hierarchy
 
 ### 2026-01-28 - Entanglement Groups Shallow Comparison
 

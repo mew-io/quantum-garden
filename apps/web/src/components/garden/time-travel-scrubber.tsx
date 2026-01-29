@@ -227,16 +227,12 @@ export function TimeTravelScrubber({
   if (!isActive) return null;
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto"
-      style={{ paddingBottom: "var(--safe-bottom)" }}
-    >
+    <div className="fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] right-[var(--inset-right)] z-50 pointer-events-auto">
       {/* Collapse/Expand Toggle */}
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="absolute left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 text-white/90 rounded-full text-sm backdrop-blur-sm hover:bg-black/90 transition-colors"
-          style={{ bottom: "max(1rem, var(--safe-bottom))" }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-4 px-6 py-2.5 bg-purple-600/90 text-white rounded-full text-sm font-medium backdrop-blur-sm hover:bg-purple-600 transition-colors shadow-lg"
         >
           Show Timeline
         </button>
@@ -244,60 +240,66 @@ export function TimeTravelScrubber({
 
       {/* Expanded Timeline */}
       {isExpanded && (
-        <div className="bg-black/80 backdrop-blur-md border-t border-white/10">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            {/* Controls Row */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                {/* Mode Indicator */}
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-white/90 text-sm font-medium">Historical View</span>
-                </div>
-
-                {/* Current Time */}
-                <div className="text-white/60 text-sm">
-                  {formatTimeDuration(currentTime.getTime() - timeRange.start)} since creation
-                </div>
-              </div>
-
+        <div className="bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-t-xl shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              {/* Mode Indicator */}
               <div className="flex items-center gap-2">
-                {/* Play/Pause */}
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="px-3 py-1.5 bg-white/10 text-white/90 rounded text-sm hover:bg-white/20 transition-colors"
-                  disabled={playheadProgress >= 1}
-                >
-                  {isPlaying ? "Pause" : "Play"} (10x)
-                </button>
-
-                {/* Exit Timeline */}
-                <button
-                  onClick={() => {
-                    setIsPlaying(false);
-                    onReturnToLive();
-                  }}
-                  className="px-3 py-1.5 bg-emerald-600/80 text-white rounded text-sm hover:bg-emerald-600 transition-colors"
-                >
-                  Exit Timeline
-                </button>
-
-                {/* Collapse */}
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="px-3 py-1.5 bg-white/10 text-white/90 rounded text-sm hover:bg-white/20 transition-colors"
-                >
-                  Hide
-                </button>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                <span className="text-white text-sm font-medium">Historical View</span>
               </div>
+              {/* Current Time */}
+              <span className="text-white/50 text-sm">
+                {formatTimeDuration(currentTime.getTime() - timeRange.start)} since creation
+              </span>
             </div>
 
-            {/* Timeline */}
+            <div className="flex items-center gap-2">
+              {/* Play/Pause */}
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                disabled={playheadProgress >= 0.999}
+                className={`
+                  px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  ${
+                    playheadProgress >= 0.999
+                      ? "bg-white/5 text-white/30 cursor-not-allowed"
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  }
+                `}
+              >
+                {isPlaying ? "⏸ Pause" : "▶ Play"} (10x)
+              </button>
+
+              {/* Exit Timeline */}
+              <button
+                onClick={() => {
+                  setIsPlaying(false);
+                  onReturnToLive();
+                }}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-500 transition-colors"
+              >
+                Exit Timeline
+              </button>
+
+              {/* Collapse */}
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="px-4 py-2 bg-white/10 text-white/80 rounded-lg text-sm hover:bg-white/20 transition-colors"
+              >
+                Hide
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline Content */}
+          <div className="px-4 py-4">
+            {/* Timeline Track */}
             <div className="relative">
-              {/* Timeline Track */}
               <div
                 ref={timelineRef}
-                className="relative h-12 bg-white/5 rounded-lg cursor-pointer overflow-hidden"
+                className="relative h-14 bg-white/5 rounded-lg cursor-pointer overflow-hidden border border-white/10"
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
@@ -306,25 +308,25 @@ export function TimeTravelScrubber({
                 {/* Event Markers */}
                 {renderEventMarkers()}
 
+                {/* Progress Fill */}
+                <div
+                  className="absolute top-0 left-0 bottom-0 bg-purple-500/20"
+                  style={{ width: `${playheadProgress * 100}%` }}
+                />
+
                 {/* Playhead */}
                 <div
-                  className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10"
+                  className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
                   style={{ left: `${playheadProgress * 100}%` }}
                 >
                   {/* Playhead Handle */}
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg" />
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rounded-full shadow-lg border-2 border-purple-500" />
                 </div>
-
-                {/* Progress Fill */}
-                <div
-                  className="absolute top-0 left-0 bottom-0 bg-white/10"
-                  style={{ width: `${playheadProgress * 100}%` }}
-                />
 
                 {/* Event Tooltip */}
                 {hoveredEvent && (
                   <div
-                    className="absolute bottom-full mb-2 px-3 py-2 bg-gray-900/95 rounded-lg shadow-lg border border-white/10 text-xs whitespace-nowrap pointer-events-none z-20"
+                    className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 rounded-lg shadow-xl border border-white/20 text-xs whitespace-nowrap pointer-events-none z-20"
                     style={{
                       left: `${hoveredEvent.x}%`,
                       transform: "translateX(-50%)",
@@ -332,7 +334,7 @@ export function TimeTravelScrubber({
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-2 h-2 rounded-full"
+                        className="w-2.5 h-2.5 rounded-full"
                         style={{
                           backgroundColor:
                             hoveredEvent.event.type === "germination"
@@ -340,7 +342,7 @@ export function TimeTravelScrubber({
                               : "rgb(59, 130, 246)",
                         }}
                       />
-                      <span className="text-white/90 font-medium">
+                      <span className="text-white font-medium">
                         {hoveredEvent.event.type === "germination" ? "Germination" : "Observation"}
                       </span>
                     </div>
@@ -352,24 +354,26 @@ export function TimeTravelScrubber({
               </div>
 
               {/* Timeline Labels */}
-              <div className="flex justify-between mt-2 text-white/40 text-xs">
+              <div className="flex justify-between mt-2 px-1 text-white/50 text-xs">
                 <span>Start</span>
-                <span>{formatTimeDuration(timeRange.duration)} elapsed</span>
+                <span className="text-white/70">
+                  {formatTimeDuration(timeRange.duration)} elapsed
+                </span>
                 <span>Now</span>
               </div>
             </div>
 
             {/* Event Legend */}
-            <div className="flex items-center gap-4 mt-4 text-xs text-white/60">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span>Germination</span>
+            <div className="flex items-center gap-6 mt-3 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                <span className="text-white/60">Germination</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span>Observation</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="text-white/60">Observation</span>
               </div>
-              <div className="ml-auto">{events.length} events</div>
+              <div className="ml-auto text-white/40">{events.length} events</div>
             </div>
           </div>
         </div>

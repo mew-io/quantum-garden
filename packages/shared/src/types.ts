@@ -322,5 +322,67 @@ export interface JobStatsResponse {
   executionMode: "mock" | "simulator" | "hardware";
 }
 
+// =============================================================================
+// Quantum Event Log Types
+// =============================================================================
+
+/**
+ * Types of quantum events tracked in the event log.
+ */
+export type QuantumEventType = "observation" | "germination" | "entanglement" | "wave_germination";
+
+/**
+ * Circuit types for educational content mapping.
+ */
+export type CircuitType =
+  | "superposition"
+  | "bell_pair"
+  | "ghz_state"
+  | "interference"
+  | "variational";
+
+/**
+ * Unified quantum event for the event log.
+ *
+ * Captures all types of quantum events with relevant metadata
+ * for display in the persistent event log panel.
+ */
+export interface QuantumEvent {
+  /** Unique event ID */
+  id: string;
+  /** Type of quantum event */
+  type: QuantumEventType;
+  /** When the event occurred */
+  timestamp: Date;
+
+  // Plant info
+  /** ID of the primary plant involved */
+  plantId: string;
+  /** Plant variant ID */
+  variantId?: string;
+
+  // Observation-specific fields
+  /** Circuit type used (for observations) */
+  circuitId?: CircuitType;
+  /** Execution mode (mock, simulator, hardware) */
+  executionMode?: "mock" | "simulator" | "hardware";
+  /** Resolved traits from quantum measurement */
+  resolvedTraits?: ResolvedTraits;
+
+  // Entanglement-specific fields
+  /** Entanglement group ID */
+  entanglementGroupId?: string;
+  /** IDs of entangled partner plants */
+  partnerPlantIds?: string[];
+
+  // Germination-specific fields
+  /** Type of germination event */
+  germinationType?: "normal" | "wave" | "guaranteed";
+  /** How long the plant was dormant before germinating (ms) */
+  dormancyDuration?: number;
+  /** Number of plants in a wave germination */
+  waveSize?: number;
+}
+
 // Re-export quantum pool types
 export * from "./types/quantum-pool";

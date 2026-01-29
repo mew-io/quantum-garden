@@ -15,6 +15,8 @@ export const UI_PREFERENCE_KEYS = {
   INFO_OVERLAY: "quantum-garden-info-dismissed",
   /** Keyboard shortcut hint - shows once */
   KEYBOARD_HINT: "quantum-garden-keyboard-hint-shown",
+  /** Onboarding tour - shows once when triggered */
+  ONBOARDING_TOUR: "quantum-garden-tour-completed",
 } as const;
 
 /**
@@ -27,6 +29,7 @@ export function getUIPreferences(): Record<keyof typeof UI_PREFERENCE_KEYS, bool
       CONTEXT_PANEL: false,
       INFO_OVERLAY: false,
       KEYBOARD_HINT: false,
+      ONBOARDING_TOUR: false,
     };
   }
 
@@ -35,6 +38,7 @@ export function getUIPreferences(): Record<keyof typeof UI_PREFERENCE_KEYS, bool
     CONTEXT_PANEL: localStorage.getItem(UI_PREFERENCE_KEYS.CONTEXT_PANEL) === "true",
     INFO_OVERLAY: localStorage.getItem(UI_PREFERENCE_KEYS.INFO_OVERLAY) === "true",
     KEYBOARD_HINT: localStorage.getItem(UI_PREFERENCE_KEYS.KEYBOARD_HINT) === "true",
+    ONBOARDING_TOUR: localStorage.getItem(UI_PREFERENCE_KEYS.ONBOARDING_TOUR) === "true",
   };
 }
 
@@ -66,4 +70,5 @@ export const UI_PREFERENCE_LABELS: Record<keyof typeof UI_PREFERENCE_KEYS, strin
   CONTEXT_PANEL: "Observation context panel",
   INFO_OVERLAY: "Welcome info overlay",
   KEYBOARD_HINT: "Keyboard shortcut hint",
+  ONBOARDING_TOUR: "Onboarding tour",
 };

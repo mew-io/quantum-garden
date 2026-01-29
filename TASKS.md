@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - texture atlas optimization)_
+_Last updated: 2026-01-29 (synthesis - onboarding tour)_
 
 ## Project Status
 
@@ -30,9 +30,7 @@ No active tasks.
 
 ### User Feedback & Discoverability
 
-| #   | Task                            | Priority | File |
-| --- | ------------------------------- | -------- | ---- |
-| 58  | Create optional onboarding tour | P3       | NEW  |
+No active tasks.
 
 ### Polish
 
@@ -88,6 +86,33 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Optional Onboarding Tour (#58)
+
+- Created gentle, non-intrusive onboarding experience for first-time visitors
+- **New Component** (`apps/web/src/components/garden/onboarding-tour.tsx`):
+  - 8-step guided tour with spotlight highlighting
+  - Steps: Welcome → Canvas → Superposition → Observation → Toolbar → Timeline → Sound → Complete
+  - Keyboard navigation (arrow keys, Enter, Esc)
+  - Progress indicator dots
+  - Skip button always available
+  - Completion tracked in localStorage
+- **Updated Info Overlay**:
+  - Added "Take a Tour" button alongside "Enter the Garden"
+  - Tour starts after welcome overlay dismisses
+- **Updated UI Preferences**:
+  - Added `ONBOARDING_TOUR` preference key to `ui-preferences.ts`
+  - Updated `getUIPreferences()` and labels for preference management
+- **Updated Page Integration**:
+  - Added `isTourActive` state
+  - Integrated `OnboardingTour` component
+  - Connected tour trigger to InfoOverlay
+- **Design Philosophy**:
+  - Calm, contemplative pacing matching garden aesthetic
+  - Non-intrusive (optional, can skip anytime)
+  - Progressive revelation of features
+  - Purple theme consistent with quantum visual language
+- All 297 tests passing (TypeScript and ESLint clean)
 
 ### 2026-01-29 - Texture Atlas Optimization (#83)
 

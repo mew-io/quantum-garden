@@ -27,6 +27,7 @@ function useIsTouchDevice() {
 interface InfoOverlayProps {
   forceShow?: boolean;
   onDismiss?: () => void;
+  onStartTour?: () => void;
 }
 
 /**
@@ -38,7 +39,7 @@ interface InfoOverlayProps {
  * - Dismissable with localStorage persistence
  * - Calm, minimal aesthetic matching garden style
  */
-export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) {
+export function InfoOverlay({ forceShow = false, onDismiss, onStartTour }: InfoOverlayProps) {
   const [isDismissed, setIsDismissed] = useState(true); // Start dismissed to avoid flash
   const [isVisible, setIsVisible] = useState(false);
   const isTouch = useIsTouchDevice();
@@ -168,13 +169,27 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
           </div>
         )}
 
-        {/* Dismiss button */}
-        <button
-          onClick={handleDismiss}
-          className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded-lg transition-colors"
-        >
-          Enter the Garden
-        </button>
+        {/* Action buttons */}
+        <div className="flex items-center justify-center gap-3">
+          {onStartTour && (
+            <button
+              onClick={() => {
+                handleDismiss();
+                // Small delay to allow overlay to fade out first
+                setTimeout(() => onStartTour(), 350);
+              }}
+              className="px-4 py-2 border border-purple-500/50 hover:border-purple-400 text-purple-300 hover:text-purple-200 text-sm rounded-lg transition-colors"
+            >
+              Take a Tour
+            </button>
+          )}
+          <button
+            onClick={handleDismiss}
+            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded-lg transition-colors"
+          >
+            Enter the Garden
+          </button>
+        </div>
 
         {/* Subtle hint */}
         <p className="text-gray-600 text-xs mt-4">

@@ -14,6 +14,7 @@ import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
+import { OnboardingTour } from "@/components/garden/onboarding-tour";
 import { useGardenStore } from "@/stores/garden-store";
 import { useHistoricalEvents } from "@/hooks/use-historical-events";
 import { trpc } from "@/lib/trpc/client";
@@ -26,6 +27,7 @@ export default function Home() {
   // Panel visibility states
   const [isDebugOpen, setIsDebugOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
 
   // Fetch earliest plant creation time to determine garden age
   const { data: plants, isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
@@ -180,7 +182,11 @@ export default function Home() {
         />
 
         {/* Panels */}
-        <InfoOverlay forceShow={showHelp} onDismiss={() => setShowHelp(false)} />
+        <InfoOverlay
+          forceShow={showHelp}
+          onDismiss={() => setShowHelp(false)}
+          onStartTour={() => setIsTourActive(true)}
+        />
         <DebugPanel
           isOpen={isDebugOpen}
           onToggle={(newValue) => {
@@ -199,6 +205,7 @@ export default function Home() {
         <CooldownIndicator />
         <EvolutionPausedIndicator />
         <KeyboardShortcutHint />
+        <OnboardingTour isActive={isTourActive} onComplete={() => setIsTourActive(false)} />
         {gardenCreatedAt && (
           <TimeTravelScrubber
             isActive={isTimeTravelMode}

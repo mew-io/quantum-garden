@@ -1,12 +1,12 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - sound effects phase 2)_
+_Last updated: 2026-01-29 (autowork completion synthesis)_
 
 ## Project Status
 
 The garden now features **server-side evolution** - plants germinate whether anyone is watching or not. The client is just a viewer, like visitors to a gallery exhibit. All visitors see the same garden state at the same time.
 
-**Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
+**Current Focus**: All active tasks complete. Project is stable and feature-complete for core garden experience. Awaiting user direction for next priorities.
 
 **Test Coverage**: 297 tests passing (60 shared + 237 web) - 1 flaky performance test
 
@@ -15,6 +15,38 @@ The garden now features **server-side evolution** - plants germinate whether any
 - Server-side evolution via Vercel cron or standalone worker
 - 36 plant variants, all using smooth vector rendering
 - Real quantum data from IonQ simulator via pre-computed pool
+- Sound effects infrastructure complete (Phases 1-2), awaiting audio files
+
+---
+
+## Uncommitted Work (Ready for Review)
+
+The following changes are staged but not yet committed. They represent polish and UX improvements made during or after the autowork session:
+
+### Enhanced Superposition Visualization
+
+- Added dual visualization modes for superposed plants in shader:
+  - **Mode 0 (Stacked Ghosts)**: Multiple offset samples create blur/uncertainty effect
+  - **Mode 1 (Flickering)**: Rapid opacity oscillation simulates quantum fluctuations
+- Toggle switch in debug panel (Controls → Superposition Display)
+- Event-based communication between debug panel and garden scene
+
+### Status API Endpoint
+
+- New `/api/status` endpoint for deployment debugging
+- Returns version, environment, git commit/branch, timestamp, Node version
+
+### UI Polish Improvements
+
+- **Loading message**: "The garden is awakening..." with purple pulse indicator
+- **Organic pulse animation**: Custom 3s animation (slower than default Tailwind pulse)
+- **Error handling**: Plant loading errors now show user notification and retry
+- **Evolution status**: Changed "Active" label to "Evolving" for clarity
+- **Notification styling**: Consistent /90 background opacity across all types
+- **Animation easing**: Improved transitions (ease-out for entry, ease-in for exit)
+- **Cooldown indicator**: Smoother transition (0.25s ease-out)
+- **Time-travel scrubber**: Speed buttons have scale feedback on active/press states
+- **Timeline exit notification**: "The garden evolved while you watched its past"
 
 ---
 

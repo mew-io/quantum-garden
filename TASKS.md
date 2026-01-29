@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - context panel animation)_
+_Last updated: 2026-01-29 (synthesis - sound effects planning)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (8 Remaining)
+## Active Tasks (7 Remaining)
 
 ### Bugs & Performance
 
@@ -47,9 +47,9 @@ No active tasks.
 
 ### Polish
 
-| #   | Task                      | Priority | File |
-| --- | ------------------------- | -------- | ---- |
-| 102 | Plan sound effects system | P3       | -    |
+| #   | Task                              | Priority | File                             |
+| --- | --------------------------------- | -------- | -------------------------------- |
+| 119 | Implement sound effects (Phase 1) | P3       | See `docs/sound-effects-plan.md` |
 
 ### Testing & Documentation
 
@@ -101,6 +101,29 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Sound Effects System Planning (#102)
+
+- Created comprehensive planning document at `docs/sound-effects-plan.md`
+- **Design Philosophy**: Meditative (not distracting), optional by default, minimal and purposeful
+- **Sound Categories**:
+  - Ambient background: Soft wind/nature loop, quantum hum undertone
+  - Evolution events: Germination chimes, wave cascades
+  - Observation feedback: Resonant tones, entanglement harmonics
+  - UI feedback: Soft panel clicks (subtle)
+- **Technical Approach**: Howler.js (~10KB gzipped)
+  - AudioManager singleton pattern
+  - Sound sprites for efficient loading
+  - Lazy loading (don't block page load)
+- **File Budget**: ~1.7 MB total (ambient loop + effect sprites)
+- **Implementation Phases**: 4 phases over 4-5 sessions
+  1. Foundation: AudioManager, mute/volume, toolbar toggle
+  2. Ambient: Loop with crossfade, autoplay handling
+  3. Effects: Sprite sheet, integration points
+  4. Polish: Fine-tuning, spatial panning
+- **Integration Points Identified**: `use-observation.ts`, `evolution-worker.ts`, panel components
+- **User Preferences**: Sound toggle in toolbar, volume slider in debug panel, localStorage persistence
+- Planning only (no code changes)
 
 ### 2026-01-29 - Context Panel Animation Improvements (#98)
 

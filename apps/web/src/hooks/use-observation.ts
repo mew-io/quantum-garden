@@ -72,7 +72,7 @@ export function useObservation() {
         debugLogger.observation.info("Entangled partners also observed");
         utils.plants.list.invalidate();
         // Show entanglement notification
-        addNotification("Entangled plants observed");
+        addNotification("Entangled plants observed", "entanglement");
 
         // Add entanglement correlation event to log
         addEvent({
@@ -87,7 +87,7 @@ export function useObservation() {
     onError: (error) => {
       debugLogger.observation.error("Observation failed", { error: error.message });
       // Show user-facing error notification
-      addNotification("Observation failed. Please try again.");
+      addNotification("Observation failed. Please try again.", "error");
     },
   });
 

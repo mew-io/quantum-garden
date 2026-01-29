@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (9 Remaining)
+## Active Tasks (8 Remaining)
 
 ### Bugs & Performance
 
@@ -29,9 +29,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ### Evolution Improvements
 
-| #   | Task                        | Priority | File                          |
-| --- | --------------------------- | -------- | ----------------------------- |
-| 16  | Add wave notification style | P3       | `evolution-notifications.tsx` |
+No active tasks.
 
 ### User Feedback & Discoverability
 
@@ -113,6 +111,19 @@ The garden now features **server-side evolution** - plants germinate whether any
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Type-Based Notification Styling (#16)
+
+- Added `NotificationType` to garden-store.ts: `"germination" | "wave" | "entanglement" | "error"`
+- Updated `EvolutionNotification` interface with `type` field
+- Updated `addNotification` to accept optional type parameter (defaults to "germination")
+- Wave notifications use purple theme (`border-purple-500/30 bg-purple-950/80`)
+- Entanglement notifications use pink theme (`border-pink-500/30 bg-pink-950/80`)
+- Error notifications use amber theme (`border-amber-500/30 bg-amber-950/80`)
+- Each type has distinct icon: wave (network), entanglement (chain link), error (warning), germination (sun)
+- Updated `use-evolution.ts` to pass "wave" type for wave germinations
+- Updated `use-observation.ts` to pass "entanglement" and "error" types
+- All 268 tests passing
 
 ### 2026-01-28 - Convert All Raster Variants to Vector Format
 

@@ -9,12 +9,18 @@ import {
 } from "@quantum-garden/shared";
 
 /**
+ * Notification type determines visual styling.
+ */
+export type NotificationType = "germination" | "wave" | "entanglement" | "error";
+
+/**
  * Evolution event notification.
  */
 export interface EvolutionNotification {
   id: string;
   message: string;
   timestamp: number;
+  type: NotificationType;
 }
 
 /**
@@ -88,7 +94,7 @@ interface GardenState {
 
   // Evolution notifications
   notifications: EvolutionNotification[];
-  addNotification: (message: string) => void;
+  addNotification: (message: string, type?: NotificationType) => void;
   removeNotification: (id: string) => void;
 
   // Observation context panel
@@ -162,12 +168,13 @@ export const useGardenStore = create<GardenState>((set) => ({
 
   // Evolution notifications (max 3 visible at once)
   notifications: [],
-  addNotification: (message) =>
+  addNotification: (message, type = "germination") =>
     set((state) => {
-      const newNotification = {
+      const newNotification: EvolutionNotification = {
         id: `notification-${Date.now()}-${Math.random()}`,
         message,
         timestamp: Date.now(),
+        type,
       };
       // Keep only the most recent notifications (max configured limit)
       const keepCount = UI_TIMING.MAX_NOTIFICATIONS - 1;

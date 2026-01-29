@@ -83,7 +83,7 @@ export function useEvolution() {
         if (context.waveIndex === context.waveTotal) {
           // Last plant in wave - show batched notification and event
           const waveSize = context.waveTotal;
-          addNotification(`${waveSize} plants germinated`);
+          addNotification(`${waveSize} plants germinated`, "wave");
 
           // Add a single wave_germination event
           addEvent({

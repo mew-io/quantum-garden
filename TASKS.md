@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - sound effects phase 1)_
+_Last updated: 2026-01-29 (synthesis - visual regression testing)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (4 Remaining)
+## Active Tasks (3 Remaining)
 
 ### Bugs & Performance
 
@@ -45,9 +45,7 @@ No active tasks.
 
 ### Testing & Documentation
 
-| #   | Task                                 | Priority | File              |
-| --- | ------------------------------------ | -------- | ----------------- |
-| 111 | Add visual regression test checklist | P3       | `docs/testing.md` |
+No active tasks.
 
 ---
 
@@ -93,6 +91,27 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Visual Regression Test Checklist (#111)
+
+- Created comprehensive testing guide at `docs/testing.md`
+- **Automated Tests Section**:
+  - Commands for running tests
+  - Test coverage table (268 tests across 12 files)
+- **Visual Regression Checklist** covering:
+  - Plant Rendering: superposed, collapsed, transition states
+  - Lifecycle Stages: seedling, mature, aged
+  - Color Variations
+  - Overlays: debug, feedback, entanglement, dwell
+  - UI Components: toolbar, debug panel, notifications, context panel, time-travel
+  - Responsive Behavior: desktop, tablet, mobile
+  - Animation Smoothness
+  - Performance Indicators
+  - Browser-Specific tests: Chrome, Firefox, Safari
+  - Edge Cases
+- **Reporting Issues** - Template for visual bug reports
+- **Adding New Visual Tests** - Guidelines for extending checklist
+- Documentation only (no code changes)
 
 ### 2026-01-29 - Sound Effects Phase 1 Foundation (#119)
 

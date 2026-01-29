@@ -45,7 +45,7 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 ### Coming Soon 🎯
 
 - Performance optimizations for large gardens
-- Sound effects (optional audio feedback)
+- Sound effects (optional audio feedback) - Phase 1-2 complete, pending audio files
 
 ---
 

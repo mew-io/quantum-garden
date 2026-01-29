@@ -288,20 +288,22 @@ useEffect(() => {
 
 ## Implementation Tasks
 
-### Phase 1: Foundation (1 session)
+### Phase 1: Foundation (1 session) ✅ COMPLETE
 
-- [ ] Install Howler.js dependency
-- [ ] Create AudioManager singleton
-- [ ] Implement mute/volume controls
-- [ ] Add sound toggle to toolbar
-- [ ] Store preferences in localStorage
+- [x] Install Howler.js dependency
+- [x] Create AudioManager singleton
+- [x] Implement mute/volume controls
+- [x] Add sound toggle to toolbar
+- [x] Store preferences in localStorage
 
-### Phase 2: Ambient Audio (1 session)
+### Phase 2: Ambient Audio (1 session) ✅ COMPLETE (infrastructure)
 
-- [ ] Source or create ambient loop (royalty-free)
-- [ ] Implement ambient playback with crossfade
-- [ ] Connect to user preference state
-- [ ] Handle browser autoplay restrictions
+- [ ] Source or create ambient loop (royalty-free) **← Pending: need actual audio file**
+- [x] Implement ambient playback with crossfade (2s fade in/out)
+- [x] Connect to user preference state (auto-start when enabled)
+- [x] Handle browser autoplay restrictions
+
+**To enable**: Add `ambient-loop.mp3` to `/public/sounds/` and set `AMBIENT.READY = true` in `audio-manager.ts`.
 
 ### Phase 3: Effect Sounds (1-2 sessions)
 

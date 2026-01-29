@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - onboarding tour)_
+_Last updated: 2026-01-29 (synthesis - sound effects phase 2)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (1 Remaining)
+## Active Tasks (0 Remaining)
 
 ### Bugs & Performance
 
@@ -34,9 +34,7 @@ No active tasks.
 
 ### Polish
 
-| #   | Task                              | Priority | File                             |
-| --- | --------------------------------- | -------- | -------------------------------- |
-| 120 | Implement sound effects (Phase 2) | P3       | See `docs/sound-effects-plan.md` |
+No active tasks.
 
 ### Testing & Documentation
 
@@ -86,6 +84,33 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Sound Effects Phase 2: Ambient Audio (#120)
+
+- Implemented ambient audio infrastructure with fade in/out transitions
+- **Updated `audio-manager.ts`**:
+  - Added `AMBIENT` constants (path, volume multiplier, fade duration)
+  - Implemented `loadAmbientLoop()` using Howl with HTML5 streaming
+  - Implemented `playAmbient()` with 2-second fade-in
+  - Implemented `stopAmbient()` with 2-second fade-out
+  - Added `updateAmbientVolume()` for smooth volume changes during master volume adjustment
+  - Updated `setEnabled()` to auto-start/stop ambient
+  - Updated `setVolume()` to update ambient volume
+  - Ambient volume is 25% of master (subtle background)
+- **Updated `use-audio.ts` hook**:
+  - Added `playAmbient()` and `stopAmbient()` methods
+- **Updated `docs/sound-effects-plan.md`**:
+  - Marked Phase 1 and Phase 2 as complete
+  - Added instructions for enabling ambient with actual audio file
+- **Architecture Decisions**:
+  - Used `html5: true` in Howl for better streaming of long ambient loops
+  - 2-second fade duration for smooth transitions
+  - Ambient starts at 0 volume and fades in (avoids jarring audio start)
+  - `AMBIENT.READY = false` acts as feature flag until audio file is added
+- **To Enable Ambient Audio**:
+  1. Add `ambient-loop.mp3` to `/public/sounds/`
+  2. Set `AMBIENT.READY = true` in `audio-manager.ts`
+- All 297 tests passing (TypeScript and ESLint clean)
 
 ### 2026-01-29 - Optional Onboarding Tour (#58)
 

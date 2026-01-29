@@ -36,6 +36,10 @@ interface UseAudioReturn extends AudioState {
   playEffect: (effect: SoundEffect, options?: { pan?: number }) => void;
   /** Initialize the audio system (must be called from user gesture) */
   init: () => Promise<void>;
+  /** Start playing ambient loop */
+  playAmbient: () => void;
+  /** Stop playing ambient loop */
+  stopAmbient: () => void;
 }
 
 /**
@@ -113,6 +117,14 @@ export function useAudio(): UseAudioReturn {
     await audioManager.init();
   }, []);
 
+  const playAmbient = useCallback(() => {
+    audioManager.playAmbient();
+  }, []);
+
+  const stopAmbient = useCallback(() => {
+    audioManager.stopAmbient();
+  }, []);
+
   return {
     ...state,
     setEnabled,
@@ -120,5 +132,7 @@ export function useAudio(): UseAudioReturn {
     setVolume,
     playEffect,
     init,
+    playAmbient,
+    stopAmbient,
   };
 }

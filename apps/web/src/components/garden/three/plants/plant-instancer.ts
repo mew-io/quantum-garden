@@ -424,9 +424,13 @@ export class PlantInstancer {
       scale = interpolated.scale;
     }
 
-    // Adjust opacity for superposed state
+    // Adjust opacity based on visual state
     if (plant.visualState === "superposed") {
       opacity = GLYPH.SUPERPOSED_OPACITY;
+    } else if (plant.visualState === "collapsed" && plant.traits?.opacity !== undefined) {
+      // Apply quantum-measured opacity for collapsed plants
+      // Higher measurement consistency = higher opacity (0.7 - 1.0 range)
+      opacity = plant.traits.opacity;
     }
 
     return { pattern, palette, opacity, scale };

@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (27 Remaining)
+## Active Tasks (23 Remaining)
 
 ### Bugs & Performance
 
@@ -22,14 +22,10 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Evolution Improvements
 
-| #   | Task                                          | Priority | File                          |
-| --- | --------------------------------------------- | -------- | ----------------------------- |
-| 13  | Create EvolutionStatusIndicator component     | P2       | NEW                           |
-| 14  | Update debug panel evolution badge from store | P2       | `debug-panel.tsx`             |
-| 15  | Batch wave notifications                      | P2       | `use-evolution.ts`            |
-| 16  | Add wave notification style                   | P3       | `evolution-notifications.tsx` |
-| 18  | Add dormant plant count to debug panel        | P3       | `debug-panel.tsx`             |
-| 19  | Add last germination time to debug panel      | P3       | `debug-panel.tsx`             |
+| #   | Task                        | Priority | File                          |
+| --- | --------------------------- | -------- | ----------------------------- |
+| 15  | Batch wave notifications    | P2       | `use-evolution.ts`            |
+| 16  | Add wave notification style | P3       | `evolution-notifications.tsx` |
 
 ### User Feedback & Discoverability
 
@@ -123,6 +119,30 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Debug Panel Evolution Improvements (#14, #18, #19)
+
+- Updated debug panel evolution badge to use `evolutionPaused` from store
+- Added evolution stats display in System State section:
+  - Dormant count from `evolutionStats.dormantCount`
+  - Tracked count from `evolutionStats.trackedCount`
+  - Last germination time with relative format
+- Added `formatRelativeTime()` helper function
+- All 178 tests passing (60 shared + 118 web)
+
+### 2026-01-28 - EvolutionStatusIndicator Component (#13)
+
+- Created `evolution-status-indicator.tsx` component
+- Displays real-time evolution system status:
+  - Status dot (green pulsing = active, amber = paused)
+  - Dormant plant count with seed icon
+  - Time since last germination with sprout icon
+- `formatRelativeTime()` helper for "just now", "2m ago", etc.
+- Updates relative time every 10 seconds
+- ARIA label for accessibility
+- Positioned bottom-right, above notifications
+- Integrated into `page.tsx`
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Vector Plant Keyframe Mesh Caching (#89)
 

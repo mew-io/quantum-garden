@@ -8,6 +8,23 @@ import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
 /**
+ * Format relative time since a timestamp.
+ * Returns human-readable strings like "just now", "2m ago", "1h ago"
+ */
+function formatRelativeTime(timestamp: number | null): string {
+  if (!timestamp) return "—";
+
+  const now = Date.now();
+  const diff = now - timestamp;
+
+  if (diff < 10_000) return "just now";
+  if (diff < 60_000) return `${Math.floor(diff / 1000)}s ago`;
+  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`;
+  return `${Math.floor(diff / 86400_000)}d ago`;
+}
+
+/**
  * Check if debug mode is enabled via environment variable.
  * In production, set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
  * Defaults to true in development for convenience.
@@ -61,7 +78,14 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   });
 
   // Get garden store state
-  const { isTimeTravelMode, notifications, observationContext } = useGardenStore();
+  const {
+    isTimeTravelMode,
+    evolutionPaused,
+    evolutionStats,
+    lastGerminationTime,
+    notifications,
+    observationContext,
+  } = useGardenStore();
 
   // Get debug logs
   const allLogs = useDebugLogs();
@@ -240,7 +264,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               <div className="flex flex-wrap gap-2">
                 <StatusBadge
                   label="Evolution"
-                  active={!isTimeTravelMode}
+                  active={!evolutionPaused}
                   activeColor="green"
                   inactiveText="Paused"
                 />
@@ -267,6 +291,25 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                   />
                 )}
               </div>
+              {/* Evolution Stats from Store */}
+              {evolutionStats && (
+                <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                  <span className="text-gray-500">
+                    Dormant: <span className="text-yellow-400">{evolutionStats.dormantCount}</span>
+                  </span>
+                  <span className="text-gray-500">
+                    Tracked: <span className="text-cyan-400">{evolutionStats.trackedCount}</span>
+                  </span>
+                  {lastGerminationTime && (
+                    <span className="text-gray-500">
+                      Last germination:{" "}
+                      <span className="text-green-400">
+                        {formatRelativeTime(lastGerminationTime)}
+                      </span>
+                    </span>
+                  )}
+                </div>
+              )}
             </section>
 
             {/* Garden Overview */}

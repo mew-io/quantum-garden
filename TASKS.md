@@ -8,11 +8,11 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 191 tests passing (60 shared + 131 web)
+**Test Coverage**: 237 tests passing (60 shared + 177 web)
 
 ---
 
-## Active Tasks (13 Remaining)
+## Active Tasks (12 Remaining)
 
 ### Bugs & Performance
 
@@ -62,7 +62,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                   | Priority | File              |
 | --- | -------------------------------------- | -------- | ----------------- |
-| 110 | Add store tests for evolution state    | P2       | NEW               |
 | 111 | Add visual regression test checklist   | P3       | `docs/testing.md` |
 | 117 | Test with 100+ plants for performance  | P2       | -                 |
 | 118 | Test extended session for memory leaks | P2       | -                 |
@@ -111,6 +110,22 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Garden Store Unit Tests (#110)
+
+- Created comprehensive test file at `apps/web/src/stores/__tests__/garden-store.test.ts`
+- 46 test cases covering 10 major store state areas:
+  - Evolution State (7 tests): `evolutionPaused`, `evolutionStats`, `lastGerminationTime`
+  - Time-Travel Mode (4 tests): enable/disable, timestamp handling
+  - Notifications (5 tests): add, remove, MAX_NOTIFICATIONS limit
+  - Plants State (5 tests): set, update, isolation of updates
+  - Dwell State (4 tests): target, progress, reset
+  - Cooldown State (2 tests): cooldown flag
+  - Observation Context (3 tests): set, clear
+  - Quantum Event Log (7 tests): add events, 50-event FIFO limit, clear, selection
+  - Reticle State (4 tests): set, update position
+  - Active Region (3 tests): set, clear
+- All 237 tests passing (60 shared + 177 web)
 
 ### 2026-01-28 - Germination Flow Integration Tests (#107)
 

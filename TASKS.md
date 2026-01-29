@@ -8,9 +8,11 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
+**Test Coverage**: 191 tests passing (60 shared + 131 web)
+
 ---
 
-## Active Tasks (14 Remaining)
+## Active Tasks (13 Remaining)
 
 ### Bugs & Performance
 
@@ -58,13 +60,12 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Testing & Documentation
 
-| #   | Task                                      | Priority | File              |
-| --- | ----------------------------------------- | -------- | ----------------- |
-| 107 | Add integration test for germination flow | P2       | NEW               |
-| 110 | Add store tests for evolution state       | P2       | NEW               |
-| 111 | Add visual regression test checklist      | P3       | `docs/testing.md` |
-| 117 | Test with 100+ plants for performance     | P2       | -                 |
-| 118 | Test extended session for memory leaks    | P2       | -                 |
+| #   | Task                                   | Priority | File              |
+| --- | -------------------------------------- | -------- | ----------------- |
+| 110 | Add store tests for evolution state    | P2       | NEW               |
+| 111 | Add visual regression test checklist   | P3       | `docs/testing.md` |
+| 117 | Test with 100+ plants for performance  | P2       | -                 |
+| 118 | Test extended session for memory leaks | P2       | -                 |
 
 ---
 
@@ -110,6 +111,20 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Germination Flow Integration Tests (#107)
+
+- Created comprehensive integration test file at `apps/web/src/components/garden/__tests__/germination-flow.integration.test.ts`
+- 10 new test cases covering the complete germination flow:
+  - Basic germination flow (detecting dormant plants, triggering callbacks, skipping germinated plants)
+  - Time-travel mode handling
+  - Multiple plant germination over time
+  - Wave germination with context (isWave, waveIndex, waveTotal)
+  - Evolution stats tracking (dormant count, updates during germination)
+  - Cooldown behavior (reduced probability for nearby plants after germination)
+  - Clustering prevention (blocking germination in crowded areas)
+  - Error handling (graceful recovery from callback failures)
+- All 191 tests passing (60 shared + 131 web)
 
 ### 2026-01-28 - Mock Trait Algorithm Alignment (#76)
 
@@ -769,4 +784,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (178+)
+- All tests passing (191)

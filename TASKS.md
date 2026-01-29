@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (30 Remaining)
+## Active Tasks (29 Remaining)
 
 ### Bugs & Performance
 
@@ -61,7 +61,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 91  | Standardize auto-dismiss timers in constants        | P2       | `constants.ts`                  |
 | 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
 | 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
-| 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 102 | Plan sound effects system                           | P3       | -                               |
@@ -126,6 +125,19 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Entanglement Wave Visual Enhancement
+
+- Enhanced quantum correlation wave particles (#95)
+- Updated wave visual constants in `entanglement-overlay.ts`:
+  - `WAVE_COLOR`: 0xffffff → 0xc4b5fd (purple, matching line color for cohesion)
+  - `WAVE_SIZE`: 6 → 10 (67% increase for better visibility)
+  - `WAVE_ALPHA`: 0.9 → 0.95 (slightly brighter)
+  - Added `WAVE_GLOW_SIZE` and `WAVE_GLOW_ALPHA` constants (for future use)
+- Updated wave material with additive blending for natural glow effect
+- Added `depthWrite: false` to prevent z-fighting with additive blending
+- Increased circle geometry segments from 16 to 24 for smoother appearance
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Entanglement Line Visibility Improvement
 

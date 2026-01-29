@@ -22,10 +22,13 @@ const ENTANGLEMENT = {
   DASH_SIZE: 6, // Tighter dash pattern for more solid appearance
   GAP_SIZE: 3,
   // Wave particle settings
-  WAVE_COLOR: 0xffffff,
-  WAVE_SIZE: 6,
+  WAVE_COLOR: 0xc4b5fd, // Match line color for cohesive look
+  WAVE_SIZE: 10, // Increased from 6 for better visibility
   WAVE_DURATION: 0.6, // How long the wave takes to travel
-  WAVE_ALPHA: 0.9,
+  WAVE_ALPHA: 0.95,
+  // Glow effect settings
+  WAVE_GLOW_SIZE: 20, // Larger, softer glow behind wave
+  WAVE_GLOW_ALPHA: 0.4,
 };
 
 interface EntanglementGroup {
@@ -71,12 +74,15 @@ export class EntanglementOverlay {
     });
 
     // Create wave particle material and geometry (reusable)
+    // Uses additive blending for natural glow effect
     this.waveMaterial = new THREE.MeshBasicMaterial({
       color: ENTANGLEMENT.WAVE_COLOR,
       transparent: true,
       opacity: ENTANGLEMENT.WAVE_ALPHA,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false, // Prevent z-fighting with additive blending
     });
-    this.waveGeometry = new THREE.CircleGeometry(ENTANGLEMENT.WAVE_SIZE, 16);
+    this.waveGeometry = new THREE.CircleGeometry(ENTANGLEMENT.WAVE_SIZE, 24); // More segments for smoother circle
 
     // Subscribe to store changes
     this.storeUnsubscribe = useGardenStore.subscribe((state) => {

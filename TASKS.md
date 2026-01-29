@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (32 Remaining)
+## Active Tasks (31 Remaining)
 
 ### Bugs & Performance
 
@@ -44,7 +44,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 62  | Add keyboard shortcut discovery hint              | P2       | `page.tsx`                      |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
 | 64  | Show entanglement lines more prominently          | P2       | `entanglement-overlay.ts`       |
-| 65  | Add entanglement legend to info overlay           | P2       | `info-overlay.tsx`              |
 
 ### Quantum Accuracy
 
@@ -128,6 +127,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Entanglement Legend in Info Overlay
+
+- Added entanglement explanation section to `info-overlay.tsx` (#65)
+- Pink-themed card with chain link icon explaining:
+  - What quantum entanglement means in the garden
+  - How observing one plant reveals traits in entangled partners
+  - The concept of "quantum connection" between plants
+- New `EntanglementIcon` component (chain link SVG in pink)
+- Positioned between device instructions and time-travel section
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Complete Keyboard Shortcuts List
 

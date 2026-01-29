@@ -111,6 +111,21 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
           )}
         </div>
 
+        {/* Entanglement explanation */}
+        <div className="bg-pink-900/20 border border-pink-500/20 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <EntanglementIcon />
+            <p className="text-pink-300 text-xs uppercase tracking-wide font-medium">
+              Quantum Entanglement
+            </p>
+          </div>
+          <p className="text-gray-300 text-sm">
+            Some plants share a <span className="text-pink-400">quantum connection</span>. When you
+            observe one, its entangled partners instantly reveal correlated traits—no matter how far
+            apart they are.
+          </p>
+        </div>
+
         {/* Time-travel feature explanation */}
         <div className="bg-purple-900/30 border border-purple-500/20 rounded-lg p-4 mb-6">
           <p className="text-purple-300 text-xs uppercase tracking-wide mb-2 font-medium">
@@ -167,5 +182,25 @@ export function InfoOverlay({ forceShow = false, onDismiss }: InfoOverlayProps) 
         </p>
       </div>
     </div>
+  );
+}
+
+/**
+ * Entanglement icon - two connected circles representing quantum connection.
+ */
+function EntanglementIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className="text-pink-400"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
   );
 }

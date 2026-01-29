@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useGardenStore } from "@/stores/garden-store";
+import { useAudio } from "@/lib/audio";
 
 /**
  * Check if debug mode is enabled via environment variable.
@@ -35,6 +36,13 @@ export function Toolbar({
 }: ToolbarProps) {
   const { isTimeTravelMode, setTimeTravelMode, plants } = useGardenStore();
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const { isEnabled: isSoundEnabled, toggleEnabled: toggleSound, init: initAudio } = useAudio();
+
+  // Handle sound toggle - must init on user gesture
+  const handleSoundToggle = () => {
+    initAudio();
+    toggleSound();
+  };
 
   // Use store data (kept fresh by usePlants hook's polling in GardenScene)
   // Memoize computed values to avoid recalculating on every render
@@ -78,6 +86,15 @@ export function Toolbar({
           shortcut="?"
           onClick={onShowHelp}
           active={false}
+        />
+
+        {/* Sound Toggle */}
+        <ToolbarButton
+          icon={isSoundEnabled ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
+          label={isSoundEnabled ? "Sound" : "Muted"}
+          onClick={handleSoundToggle}
+          active={isSoundEnabled}
+          activeColor="cyan"
         />
 
         {/* Debug Button - hidden in production */}
@@ -367,6 +384,40 @@ function EyeIcon() {
     >
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function SpeakerOnIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  );
+}
+
+function SpeakerOffIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <line x1="23" y1="9" x2="17" y2="15" />
+      <line x1="17" y1="9" x2="23" y2="15" />
     </svg>
   );
 }

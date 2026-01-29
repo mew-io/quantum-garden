@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - superposition rendering review)_
+_Last updated: 2026-01-29 (synthesis - sound effects phase 1)_
 
 ## Project Status
 
@@ -41,7 +41,7 @@ No active tasks.
 
 | #   | Task                              | Priority | File                             |
 | --- | --------------------------------- | -------- | -------------------------------- |
-| 119 | Implement sound effects (Phase 1) | P3       | See `docs/sound-effects-plan.md` |
+| 120 | Implement sound effects (Phase 2) | P3       | See `docs/sound-effects-plan.md` |
 
 ### Testing & Documentation
 
@@ -93,6 +93,37 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Sound Effects Phase 1 Foundation (#119)
+
+- Implemented sound effects system foundation per `docs/sound-effects-plan.md`
+- **Dependencies Added**:
+  - `howler@2.2.4` - Audio library for sound management
+  - `@types/howler@2.2.12` - TypeScript definitions
+- **New Files Created** (`apps/web/src/lib/audio/`):
+  - `audio-manager.ts` - Singleton AudioManager class
+    - Manages global mute/volume state
+    - Lazy-loads audio on user gesture (browser autoplay policy compliance)
+    - Persists preferences to localStorage
+    - Subscription pattern for reactive state updates
+    - Stubs for `playEffect()` and `playAmbient()` (Phase 2-3)
+  - `hooks/use-audio.ts` - React hook for audio
+    - Uses `useSyncExternalStore` for reactive state
+    - Exposes: `isEnabled`, `volume`, `toggleEnabled`, `setVolume`, `playEffect`, `init`
+    - Memoized callbacks for performance
+  - `index.ts` - Clean exports
+- **Toolbar Integration**:
+  - Added sound toggle button with speaker on/off icons
+  - Integrates with `useAudio` hook
+  - Initializes audio on user gesture (click)
+  - Cyan active color when sound is enabled
+- **Phase 1 Checklist Completed**:
+  - [x] Install Howler.js dependency
+  - [x] Create AudioManager singleton
+  - [x] Implement mute/volume controls
+  - [x] Add sound toggle to toolbar
+  - [x] Store preferences in localStorage
+- All 208 tests passing (TypeScript and ESLint clean)
 
 ### 2026-01-29 - Superposition Rendering Review (Decision: Keep Current) (#79)
 

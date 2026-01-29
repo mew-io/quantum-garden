@@ -13,9 +13,12 @@
 
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { useGardenStore } from "@/stores/garden-store";
 import { UI_TIMING } from "@quantum-garden/shared";
+
+/** Animation duration in ms for entry/exit transitions */
+const ANIMATION_DURATION_MS = 350;
 
 /**
  * Educational content for each quantum circuit type.
@@ -126,30 +129,41 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
 
 /**
  * Panel content when observation context is active.
+ * Supports both entry and exit animations via the isExiting prop.
  */
 function PanelContent({
   circuitId,
   onDismiss,
   onDontShowAgain,
+  isExiting,
 }: {
   circuitId: string;
   onDismiss: () => void;
   onDontShowAgain: () => void;
+  isExiting: boolean;
 }) {
   const education = getCircuitEducation(circuitId);
 
+  // Animation classes based on entry/exit state
+  const animationClasses = isExiting
+    ? "animate-out fade-out slide-out-to-left-5 duration-300"
+    : "animate-in fade-in slide-in-from-left-5 duration-300";
+
   return (
     <div
-      className="
+      className={`
         w-[320px] rounded-lg border border-green-500/20
         bg-black/85 p-4 shadow-xl backdrop-blur-md
-        animate-in slide-in-from-left-5 duration-300
-      "
+        ${animationClasses}
+      `}
       role="dialog"
       aria-labelledby="context-title"
     >
-      {/* Header */}
-      <div className="mb-3 flex items-start justify-between">
+      {/* Header - appears first */}
+      <div
+        className={`mb-3 flex items-start justify-between ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+        style={{ animationDelay: isExiting ? "0ms" : "50ms", animationFillMode: "backwards" }}
+      >
         <div>
           <h3 id="context-title" className="text-sm font-medium text-green-100">
             {education.name}
@@ -182,14 +196,27 @@ function PanelContent({
         </button>
       </div>
 
-      {/* Circuit Diagram */}
-      <CircuitDiagram lines={education.diagram} />
+      {/* Circuit Diagram - appears second */}
+      <div
+        className={!isExiting ? "animate-in fade-in duration-300" : ""}
+        style={{ animationDelay: isExiting ? "0ms" : "100ms", animationFillMode: "backwards" }}
+      >
+        <CircuitDiagram lines={education.diagram} />
+      </div>
 
-      {/* Explanation */}
-      <p className="mt-3 text-xs leading-relaxed text-green-100/70">{education.explanation}</p>
+      {/* Explanation - appears third */}
+      <p
+        className={`mt-3 text-xs leading-relaxed text-green-100/70 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+        style={{ animationDelay: isExiting ? "0ms" : "150ms", animationFillMode: "backwards" }}
+      >
+        {education.explanation}
+      </p>
 
-      {/* Footer actions */}
-      <div className="mt-4 flex items-center justify-between text-xs">
+      {/* Footer actions - appears last */}
+      <div
+        className={`mt-4 flex items-center justify-between text-xs ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+        style={{ animationDelay: isExiting ? "0ms" : "200ms", animationFillMode: "backwards" }}
+      >
         <a
           href={education.learnMoreUrl}
           className="
@@ -220,10 +247,17 @@ function PanelContent({
  * is observed. Positioned on the left side of the screen.
  *
  * User preferences (hide permanently) are stored in localStorage.
+ *
+ * Features improved animations:
+ * - Entry: Fade in + slide from left
+ * - Exit: Fade out + slide to left (with delayed removal)
  */
 export function ObservationContextPanel() {
   const { observationContext, clearObservationContext } = useGardenStore();
   const [isHiddenPermanently, setIsHiddenPermanently] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const [visibleContext, setVisibleContext] = useState(observationContext);
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check localStorage preference on mount
   useEffect(() => {
@@ -233,30 +267,71 @@ export function ObservationContextPanel() {
     }
   }, []);
 
-  // Handle dismiss
+  // Track context changes for exit animation
+  useEffect(() => {
+    // Clear any pending exit timer
+    if (exitTimerRef.current) {
+      clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+
+    if (observationContext) {
+      // New context arrived - show immediately
+      setIsExiting(false);
+      setVisibleContext(observationContext);
+    } else if (visibleContext && !isExiting) {
+      // Context cleared - start exit animation
+      setIsExiting(true);
+      exitTimerRef.current = setTimeout(() => {
+        setVisibleContext(null);
+        setIsExiting(false);
+      }, ANIMATION_DURATION_MS);
+    }
+  }, [observationContext, visibleContext, isExiting]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) {
+        clearTimeout(exitTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Handle dismiss with exit animation
   const handleDismiss = useCallback(() => {
-    clearObservationContext();
+    setIsExiting(true);
+    exitTimerRef.current = setTimeout(() => {
+      clearObservationContext();
+      setVisibleContext(null);
+      setIsExiting(false);
+    }, ANIMATION_DURATION_MS);
   }, [clearObservationContext]);
 
-  // Handle "don't show again"
+  // Handle "don't show again" with exit animation
   const handleDontShowAgain = useCallback(() => {
     localStorage.setItem("quantum-garden-hide-context-panel", "true");
     setIsHiddenPermanently(true);
-    clearObservationContext();
+    setIsExiting(true);
+    exitTimerRef.current = setTimeout(() => {
+      clearObservationContext();
+      setVisibleContext(null);
+      setIsExiting(false);
+    }, ANIMATION_DURATION_MS);
   }, [clearObservationContext]);
 
   // Auto-dismiss after configured duration (see UI_TIMING.CONTEXT_PANEL_DISMISS_MS)
   useEffect(() => {
-    if (observationContext) {
+    if (observationContext && !isExiting) {
       const timer = setTimeout(() => {
-        clearObservationContext();
+        handleDismiss();
       }, UI_TIMING.CONTEXT_PANEL_DISMISS_MS);
       return () => clearTimeout(timer);
     }
-  }, [observationContext, clearObservationContext]);
+  }, [observationContext, isExiting, handleDismiss]);
 
-  // Don't render if hidden permanently or no context
-  if (isHiddenPermanently || !observationContext) {
+  // Don't render if hidden permanently or no visible context
+  if (isHiddenPermanently || !visibleContext) {
     return null;
   }
 
@@ -269,9 +344,10 @@ export function ObservationContextPanel() {
     >
       <div className="pointer-events-auto">
         <PanelContent
-          circuitId={observationContext.circuitId}
+          circuitId={visibleContext.circuitId}
           onDismiss={handleDismiss}
           onDontShowAgain={handleDontShowAgain}
+          isExiting={isExiting}
         />
       </div>
     </div>

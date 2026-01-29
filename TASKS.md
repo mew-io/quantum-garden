@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis)_
+_Last updated: 2026-01-29 (synthesis - context panel animation)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (9 Remaining)
+## Active Tasks (8 Remaining)
 
 ### Bugs & Performance
 
@@ -47,10 +47,9 @@ No active tasks.
 
 ### Polish
 
-| #   | Task                            | Priority | File                            |
-| --- | ------------------------------- | -------- | ------------------------------- |
-| 98  | Improve context panel animation | P3       | `observation-context-panel.tsx` |
-| 102 | Plan sound effects system       | P3       | -                               |
+| #   | Task                      | Priority | File |
+| --- | ------------------------- | -------- | ---- |
+| 102 | Plan sound effects system | P3       | -    |
 
 ### Testing & Documentation
 
@@ -102,6 +101,22 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Context Panel Animation Improvements (#98)
+
+- Added exit animation support with `isExiting` state tracking
+- Entry animation: fade-in + slide-from-left (350ms duration)
+- Exit animation: fade-out + slide-to-left (350ms duration)
+- Added content stagger animations for progressive reveal:
+  - Header: 50ms delay
+  - Circuit diagram: 100ms delay
+  - Explanation: 150ms delay
+  - Footer actions: 200ms delay
+- Updated `PanelContent` component with `isExiting` prop
+- Auto-dismiss and "Don't show again" now use smooth exit animation
+- Uses `visibleContext` state to delay removal until animation completes
+- Proper cleanup of exit timers via `exitTimerRef`
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - Plant Highlight Pulsing in Debug Mode (#97)
 

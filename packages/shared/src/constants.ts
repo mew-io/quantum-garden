@@ -97,3 +97,13 @@ export const API = {
   /** Quantum service health check */
   QUANTUM_HEALTH: "/health",
 } as const;
+
+/** UI timing configuration */
+export const UI_TIMING = {
+  /** Toast notification auto-dismiss (milliseconds) */
+  NOTIFICATION_DISMISS_MS: 5000,
+  /** Context panel auto-dismiss (milliseconds) */
+  CONTEXT_PANEL_DISMISS_MS: 30000,
+  /** Maximum visible notifications at once */
+  MAX_NOTIFICATIONS: 3,
+} as const;

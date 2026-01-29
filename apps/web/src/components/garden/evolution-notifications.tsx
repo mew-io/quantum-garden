@@ -13,9 +13,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useGardenStore } from "@/stores/garden-store";
-
-/** Auto-dismiss duration in milliseconds */
-const DISMISS_DURATION = 5000;
+import { UI_TIMING } from "@quantum-garden/shared";
 
 interface NotificationProps {
   id: string;
@@ -29,7 +27,7 @@ interface NotificationProps {
  */
 function Notification({ id, message, onDismiss }: NotificationProps) {
   const [isPaused, setIsPaused] = useState(false);
-  const remainingTimeRef = useRef(DISMISS_DURATION);
+  const remainingTimeRef = useRef<number>(UI_TIMING.NOTIFICATION_DISMISS_MS);
   const startTimeRef = useRef(Date.now());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

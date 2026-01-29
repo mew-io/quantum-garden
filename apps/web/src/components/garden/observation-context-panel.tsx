@@ -15,6 +15,7 @@
 
 import { useEffect, useCallback, useState } from "react";
 import { useGardenStore } from "@/stores/garden-store";
+import { UI_TIMING } from "@quantum-garden/shared";
 
 /**
  * Educational content for each quantum circuit type.
@@ -244,12 +245,12 @@ export function ObservationContextPanel() {
     clearObservationContext();
   }, [clearObservationContext]);
 
-  // Auto-dismiss after 30 seconds (increased from 15s for better readability)
+  // Auto-dismiss after configured duration (see UI_TIMING.CONTEXT_PANEL_DISMISS_MS)
   useEffect(() => {
     if (observationContext) {
       const timer = setTimeout(() => {
         clearObservationContext();
-      }, 30000);
+      }, UI_TIMING.CONTEXT_PANEL_DISMISS_MS);
       return () => clearTimeout(timer);
     }
   }, [observationContext, clearObservationContext]);

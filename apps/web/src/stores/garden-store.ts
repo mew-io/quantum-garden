@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import type {
-  Plant,
-  ObservationRegion,
-  Reticle,
-  Position,
-  QuantumEvent,
+import {
+  UI_TIMING,
+  type Plant,
+  type ObservationRegion,
+  type Reticle,
+  type Position,
+  type QuantumEvent,
 } from "@quantum-garden/shared";
 
 /**
@@ -150,8 +151,9 @@ export const useGardenStore = create<GardenState>((set) => ({
         message,
         timestamp: Date.now(),
       };
-      // Keep only the most recent notifications (max 3)
-      const existingNotifications = state.notifications.slice(-2); // Keep last 2
+      // Keep only the most recent notifications (max configured limit)
+      const keepCount = UI_TIMING.MAX_NOTIFICATIONS - 1;
+      const existingNotifications = state.notifications.slice(-keepCount);
       return {
         notifications: [...existingNotifications, newNotification],
       };

@@ -4,15 +4,35 @@
  * Generates a texture atlas containing all plant patterns as binary data.
  * The shader uses this atlas to determine which pixels to fill.
  * Color gradients are computed in the shader based on distance from center.
+ *
+ * Memory optimization: Uses single-channel RED format (1 byte/pixel) instead
+ * of RGBA (4 bytes/pixel). The shader only reads the R channel anyway.
+ *
+ * Dynamic sizing: Starts at 512x512 (64 pattern capacity), grows to 2048x2048
+ * (1024 patterns) only when needed. Typical usage (36 variants) stays small.
  */
 
 import * as THREE from "three";
 import { PATTERN_SIZE } from "@quantum-garden/shared";
 
-// Atlas configuration
-const ATLAS_SIZE = 2048; // 2048x2048 texture
-const PATTERNS_PER_ROW = Math.floor(ATLAS_SIZE / PATTERN_SIZE); // 32 patterns per row
-const MAX_PATTERNS = PATTERNS_PER_ROW * PATTERNS_PER_ROW; // 1024 max patterns
+// Atlas configuration - supports dynamic resizing
+const MIN_ATLAS_SIZE = 512; // Start small (64 pattern capacity)
+const MAX_ATLAS_SIZE = 2048; // Max size (1024 pattern capacity)
+
+/**
+ * Calculate patterns per row for a given atlas size.
+ */
+function getPatternsPerRow(atlasSize: number): number {
+  return Math.floor(atlasSize / PATTERN_SIZE);
+}
+
+/**
+ * Calculate max patterns for a given atlas size.
+ */
+function getMaxPatterns(atlasSize: number): number {
+  const perRow = getPatternsPerRow(atlasSize);
+  return perRow * perRow;
+}
 
 /**
  * Stores metadata for a pattern in the atlas.
@@ -25,29 +45,55 @@ export interface PatternAtlasEntry {
 }
 
 /**
+ * Statistics about atlas usage.
+ */
+export interface AtlasStats {
+  /** Current atlas dimensions (square) */
+  atlasSize: number;
+  /** Number of patterns stored */
+  patternCount: number;
+  /** Maximum patterns at current size */
+  maxPatterns: number;
+  /** Atlas utilization (0-1) */
+  utilization: number;
+  /** Memory used in bytes */
+  memoryBytes: number;
+  /** Memory saved vs RGBA format */
+  memorySavedBytes: number;
+}
+
+/**
  * Manages the texture atlas for plant patterns.
  *
  * Patterns are stored as binary data (R channel = filled/empty).
  * The atlas is dynamically populated as new patterns are encountered.
+ *
+ * Optimizations:
+ * - Single-channel RED format (1 byte/pixel vs 4 for RGBA)
+ * - Dynamic sizing: starts at 512x512, grows to 2048x2048 as needed
  */
 export class TextureAtlas {
   private texture: THREE.DataTexture;
   private data: Uint8Array;
   private patternMap: Map<string, PatternAtlasEntry> = new Map();
   private nextIndex: number = 0;
+  private currentSize: number;
 
-  constructor() {
-    // Create RGBA data array (4 bytes per pixel)
-    this.data = new Uint8Array(ATLAS_SIZE * ATLAS_SIZE * 4);
-    // Initialize to transparent black
+  constructor(initialSize: number = MIN_ATLAS_SIZE) {
+    this.currentSize = Math.min(Math.max(initialSize, MIN_ATLAS_SIZE), MAX_ATLAS_SIZE);
+
+    // Create single-channel data array (1 byte per pixel)
+    // Using RED format saves 75% memory vs RGBA
+    this.data = new Uint8Array(this.currentSize * this.currentSize);
+    // Initialize to 0 (empty)
     this.data.fill(0);
 
-    // Create DataTexture
+    // Create DataTexture with RED format (single channel)
     this.texture = new THREE.DataTexture(
       this.data,
-      ATLAS_SIZE,
-      ATLAS_SIZE,
-      THREE.RGBAFormat,
+      this.currentSize,
+      this.currentSize,
+      THREE.RedFormat,
       THREE.UnsignedByteType
     );
     this.texture.needsUpdate = true;
@@ -72,10 +118,16 @@ export class TextureAtlas {
       return existing;
     }
 
-    // Add new pattern
-    if (this.nextIndex >= MAX_PATTERNS) {
-      console.warn("Texture atlas full, reusing first slot");
-      return this.patternMap.values().next().value!;
+    // Check if we need to grow the atlas
+    const maxPatterns = getMaxPatterns(this.currentSize);
+    if (this.nextIndex >= maxPatterns) {
+      if (this.currentSize < MAX_ATLAS_SIZE) {
+        // Grow the atlas
+        this.growAtlas();
+      } else {
+        console.warn("Texture atlas at maximum size, reusing first slot");
+        return this.patternMap.values().next().value!;
+      }
     }
 
     const index = this.nextIndex++;
@@ -89,39 +141,99 @@ export class TextureAtlas {
   }
 
   /**
+   * Grow the atlas to the next size level.
+   * Copies existing pattern data to the new larger atlas.
+   */
+  private growAtlas(): void {
+    const oldSize = this.currentSize;
+    const newSize = Math.min(oldSize * 2, MAX_ATLAS_SIZE);
+    if (newSize === oldSize) return;
+
+    const oldPatternsPerRow = getPatternsPerRow(oldSize);
+
+    // Create new larger data array (single channel)
+    const newData = new Uint8Array(newSize * newSize);
+    newData.fill(0);
+
+    // Copy existing pattern data row by row
+    // Since patterns are stored in a grid, we need to copy each row of the old atlas
+    for (let y = 0; y < oldSize; y++) {
+      const oldRowStart = y * oldSize;
+      const newRowStart = y * newSize;
+      newData.set(this.data.subarray(oldRowStart, oldRowStart + oldSize), newRowStart);
+    }
+
+    // Update references
+    this.data = newData;
+    this.currentSize = newSize;
+
+    // Dispose old texture and create new one
+    this.texture.dispose();
+    this.texture = new THREE.DataTexture(
+      this.data,
+      this.currentSize,
+      this.currentSize,
+      THREE.RedFormat,
+      THREE.UnsignedByteType
+    );
+    this.texture.needsUpdate = true;
+    this.texture.magFilter = THREE.NearestFilter;
+    this.texture.minFilter = THREE.NearestFilter;
+    this.texture.wrapS = THREE.ClampToEdgeWrapping;
+    this.texture.wrapT = THREE.ClampToEdgeWrapping;
+
+    // Recalculate UV bounds for all existing patterns
+    // Use OLD patterns per row since that's how indices were originally assigned
+    // Pixel positions stay the same, only UV coordinates change (new normalization)
+    for (const entry of this.patternMap.values()) {
+      const col = entry.index % oldPatternsPerRow;
+      const row = Math.floor(entry.index / oldPatternsPerRow);
+      const startX = col * PATTERN_SIZE;
+      const startY = row * PATTERN_SIZE;
+
+      entry.uvBounds = [
+        startX / this.currentSize,
+        startY / this.currentSize,
+        PATTERN_SIZE / this.currentSize,
+        PATTERN_SIZE / this.currentSize,
+      ];
+    }
+
+    console.log(`Texture atlas grew from ${oldSize} to ${newSize}`);
+  }
+
+  /**
    * Add a pattern to the atlas at the given index.
    */
   private addPatternToAtlas(index: number, pattern: number[][]): PatternAtlasEntry {
-    // Calculate position in atlas
-    const col = index % PATTERNS_PER_ROW;
-    const row = Math.floor(index / PATTERNS_PER_ROW);
+    // Calculate position in atlas using current size
+    const patternsPerRow = getPatternsPerRow(this.currentSize);
+    const col = index % patternsPerRow;
+    const row = Math.floor(index / patternsPerRow);
     const startX = col * PATTERN_SIZE;
     const startY = row * PATTERN_SIZE;
 
-    // Copy pattern data to atlas
+    // Copy pattern data to atlas (single-channel RED format)
     for (let y = 0; y < PATTERN_SIZE; y++) {
       const patternRow = pattern[y];
       if (!patternRow) continue;
 
       for (let x = 0; x < PATTERN_SIZE; x++) {
         const value = patternRow[x] ?? 0;
-        // Store in atlas (RGBA format)
+        // Store in atlas (single-channel format - 1 byte per pixel)
         // Y is flipped because texture coordinates go up, pattern coordinates go down
         const atlasY = startY + (PATTERN_SIZE - 1 - y);
-        const pixelIndex = (atlasY * ATLAS_SIZE + startX + x) * 4;
-        // Store filled value in R channel (255 = filled, 0 = empty)
+        const pixelIndex = atlasY * this.currentSize + startX + x;
+        // Store filled value (255 = filled, 0 = empty)
         this.data[pixelIndex] = value > 0 ? 255 : 0;
-        this.data[pixelIndex + 1] = 0;
-        this.data[pixelIndex + 2] = 0;
-        this.data[pixelIndex + 3] = 255; // Full alpha
       }
     }
 
-    // Calculate UV bounds (normalized 0-1)
-    const u = startX / ATLAS_SIZE;
-    const v = startY / ATLAS_SIZE;
-    const width = PATTERN_SIZE / ATLAS_SIZE;
-    const height = PATTERN_SIZE / ATLAS_SIZE;
+    // Calculate UV bounds (normalized 0-1) using current size
+    const u = startX / this.currentSize;
+    const v = startY / this.currentSize;
+    const width = PATTERN_SIZE / this.currentSize;
+    const height = PATTERN_SIZE / this.currentSize;
 
     return {
       index,
@@ -157,6 +269,32 @@ export class TextureAtlas {
    */
   get patternCount(): number {
     return this.nextIndex;
+  }
+
+  /**
+   * Get the current atlas size (width/height in pixels).
+   */
+  get atlasSize(): number {
+    return this.currentSize;
+  }
+
+  /**
+   * Get statistics about atlas usage.
+   * Useful for debugging and performance monitoring.
+   */
+  getStats(): AtlasStats {
+    const maxPatterns = getMaxPatterns(this.currentSize);
+    const memoryBytes = this.currentSize * this.currentSize; // 1 byte per pixel
+    const rgbaEquivalent = this.currentSize * this.currentSize * 4;
+
+    return {
+      atlasSize: this.currentSize,
+      patternCount: this.nextIndex,
+      maxPatterns,
+      utilization: maxPatterns > 0 ? this.nextIndex / maxPatterns : 0,
+      memoryBytes,
+      memorySavedBytes: rgbaEquivalent - memoryBytes,
+    };
   }
 
   /**

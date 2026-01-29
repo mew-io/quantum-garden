@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - adaptive spatial grid)_
+_Last updated: 2026-01-29 (synthesis - texture atlas optimization)_
 
 ## Project Status
 
@@ -8,7 +8,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 276 tests passing (60 shared + 216 web) - 1 flaky performance test
+**Test Coverage**: 297 tests passing (60 shared + 237 web) - 1 flaky performance test
 
 **Architecture Highlights**:
 
@@ -18,13 +18,11 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (2 Remaining)
+## Active Tasks (1 Remaining)
 
 ### Bugs & Performance
 
-| #   | Task                                   | Priority | File               |
-| --- | -------------------------------------- | -------- | ------------------ |
-| 83  | Audit texture atlas packing efficiency | P3       | `texture-atlas.ts` |
+No active tasks.
 
 ### Evolution Improvements
 
@@ -90,6 +88,36 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Texture Atlas Optimization (#83)
+
+- Optimized texture atlas for major memory reduction (98.4% for typical usage)
+- **Single-channel RED format** (75% memory reduction):
+  - Changed from RGBA (4 bytes/pixel) to RED (1 byte/pixel)
+  - Shader already only reads R channel, so no shader changes needed
+  - Memory: 16MB → 4MB at max size
+- **Dynamic atlas sizing** (additional 63x reduction for typical usage):
+  - Starts at 512x512 (64 pattern capacity) instead of fixed 2048x2048
+  - Grows to 1024x1024, then 2048x2048 only when needed
+  - Typical usage (36 variants) stays at 512x512 = 256KB
+  - Previous: always 16MB regardless of usage
+- **Added statistics API**:
+  - `getStats()` method returns: atlasSize, patternCount, maxPatterns, utilization, memoryBytes, memorySavedBytes
+  - `atlasSize` getter for current dimensions
+- **Memory savings (typical usage with 36 variants)**:
+  - Before: 2048×2048×4 = 16,777,216 bytes (16 MB)
+  - After: 512×512×1 = 262,144 bytes (256 KB)
+  - **Reduction: 98.4%**
+- **Tests Added** (21 new tests):
+  - Initialization tests (4): min size, zero patterns, custom size, clamping
+  - Memory optimization tests (2): single byte per pixel, savings vs RGBA
+  - Pattern storage tests (4): store/retrieve, duplicates, UV bounds
+  - Dynamic sizing tests (5): growth trigger, UV update, position preservation, max cap
+  - Statistics tests (2): utilization, all stats
+  - Pattern hashing tests (2): consistency, uniqueness
+  - Disposal tests (1): cleanup
+  - Global atlas tests (2): singleton, recreation after disposal
+- All 297 tests passing (60 shared + 237 web)
 
 ### 2026-01-29 - Adaptive Spatial Grid (#74)
 

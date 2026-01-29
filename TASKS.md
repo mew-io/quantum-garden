@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - opacity bug fix)_
+_Last updated: 2026-01-29 (synthesis - superposition rendering review)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (5 Remaining)
+## Active Tasks (4 Remaining)
 
 ### Bugs & Performance
 
@@ -36,12 +36,6 @@ No active tasks.
 | #   | Task                            | Priority | File |
 | --- | ------------------------------- | -------- | ---- |
 | 58  | Create optional onboarding tour | P3       | NEW  |
-
-### Quantum Accuracy
-
-| #   | Task                                                  | Priority | File                 |
-| --- | ----------------------------------------------------- | -------- | -------------------- |
-| 79  | Consider probability-weighted superposition rendering | P3       | `plant-instancer.ts` |
 
 ### Polish
 
@@ -99,6 +93,23 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Superposition Rendering Review (Decision: Keep Current) (#79)
+
+- Reviewed probability-weighted superposition rendering proposal
+- **Current Implementation**: Superposed plants render at 0.3 opacity with ±0.08 shimmer oscillation
+  - Each plant has random shimmer phase for visual desynchronization
+  - GPU shader handles shimmer: `sin(u_time * 1.5 + v_shimmerPhase) * 0.08`
+- **Options Evaluated**:
+  1. Multiple ghost variants (2-3 overlapping probable outcomes)
+  2. Probability-derived base opacity (more certain = more opaque)
+  3. Circuit-type shimmer variation (different circuits = different shimmer)
+- **Decision**: Keep current implementation
+  - **Philosophical accuracy**: Showing weighted ghosts implies pre-knowledge, breaking quantum metaphor
+  - **Visual clarity**: Multiple overlapping variants would clutter the garden
+  - **Performance**: Current implementation is efficient (single draw call per plant)
+  - **Effective metaphor**: The shimmer already represents quantum uncertainty
+- No code changes (design validation)
 
 ### 2026-01-29 - Opacity Bug Fix for Collapsed Plants (#78)
 

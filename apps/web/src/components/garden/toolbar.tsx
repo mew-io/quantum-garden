@@ -127,19 +127,32 @@ export function Toolbar({
 
       {/* Keyboard Shortcuts Panel */}
       {showShortcuts && (
-        <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200 max-w-xs">
           <h3 className="text-gray-200 text-sm font-medium mb-3">Keyboard Shortcuts</h3>
+
+          {/* General shortcuts */}
           <div className="space-y-2">
-            <ShortcutRow shortcut="`" description="Toggle debug panel" />
-            <ShortcutRow shortcut="T" description="Toggle time-travel" />
             <ShortcutRow shortcut="?" description="Show help" />
+            <ShortcutRow shortcut="T" description="Toggle timeline" />
+            <ShortcutRow shortcut="`" description="Toggle debug panel" />
             <ShortcutRow shortcut="Esc" description="Close panels" />
           </div>
+
+          {/* Event log navigation */}
           <div className="mt-4 pt-3 border-t border-gray-700/50">
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Interaction</h4>
-            <p className="text-gray-500 text-xs">
-              Move your cursor over plants to observe them. Observed plants reveal their quantum
-              traits.
+            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Event Navigation</h4>
+            <div className="space-y-2">
+              <ShortcutRow shortcut="←" description="Previous event" />
+              <ShortcutRow shortcut="→" description="Next event" />
+            </div>
+          </div>
+
+          {/* Interaction hint */}
+          <div className="mt-4 pt-3 border-t border-gray-700/50">
+            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Observation</h4>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              The reticle drifts across the garden. When it aligns with a plant, observation begins
+              automatically.
             </p>
           </div>
         </div>

@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (33 Remaining)
+## Active Tasks (32 Remaining)
 
 ### Bugs & Performance
 
@@ -66,7 +66,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 95  | Increase entanglement wave size and add glow        | P2       | `entanglement-overlay.ts`       |
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
-| 101 | Complete keyboard shortcuts list                    | P2       | `toolbar.tsx`                   |
 | 102 | Plan sound effects system                           | P3       | -                               |
 | 103 | Add playback speed control to time-travel           | P3       | `time-travel-scrubber.tsx`      |
 | 104 | Add "scrub to now" quick button                     | P3       | `time-travel-scrubber.tsx`      |
@@ -129,6 +128,18 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Complete Keyboard Shortcuts List
+
+- Expanded keyboard shortcuts panel in `toolbar.tsx` (#101)
+- Added Event Navigation section with arrow key shortcuts (left/right arrows for prev/next event)
+- Reorganized into three sections:
+  1. General shortcuts (?, T, `, Esc)
+  2. Event Navigation (left/right arrows)
+  3. Observation (interaction hint)
+- Added `max-w-xs` to panel for better presentation
+- Changed "time-travel" to "timeline" for consistency with button label
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Quantum Event Log System
 

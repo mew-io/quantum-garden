@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (4 Remaining)
+## Active Tasks (11 Remaining)
 
 ### Bugs & Performance
 
@@ -47,13 +47,12 @@ No active tasks.
 
 ### Polish
 
-| #   | Task                                                | Priority | File                            |
-| --- | --------------------------------------------------- | -------- | ------------------------------- |
-| 93  | Smooth debug panel data refreshes                   | P3       | `debug-panel.tsx`               |
-| 94  | Make celebration outer ring use complementary color | P3       | `feedback-overlay.ts`           |
-| 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
-| 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
-| 102 | Plan sound effects system                           | P3       | -                               |
+| #   | Task                                      | Priority | File                            |
+| --- | ----------------------------------------- | -------- | ------------------------------- |
+| 93  | Smooth debug panel data refreshes         | P3       | `debug-panel.tsx`               |
+| 97  | Add plant highlight pulsing in debug mode | P3       | `debug-overlay.ts`              |
+| 98  | Improve context panel animation           | P3       | `observation-context-panel.tsx` |
+| 102 | Plan sound effects system                 | P3       | -                               |
 
 ### Testing & Documentation
 
@@ -105,6 +104,16 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Complementary Color for Celebration Outer Ring (#94)
+
+- Added `computeComplementaryColor` function to compute complementary colors (180° hue shift in HSL space)
+- Updated `triggerCelebration` method to use computed complementary color for outer ring
+- When a primary color is provided, outer ring uses complementary color instead of fixed white
+- Falls back to white for achromatic (gray) colors to ensure visibility
+- Examples: Green plants show magenta outer ring, blue plants show orange outer ring
+- Creates more visually harmonious celebration effects that complement each plant's color
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - Jump to Now Button for Time-Travel Scrubber (#104)
 

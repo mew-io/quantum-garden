@@ -58,6 +58,73 @@ function hexStringToNumber(hex: string): number {
 }
 
 /**
+ * Compute the complementary color of a hex color.
+ * Complementary colors are opposite on the color wheel (180° hue shift in HSL space).
+ */
+function computeComplementaryColor(hexColor: number): number {
+  // Extract RGB components
+  const r = (hexColor >> 16) & 0xff;
+  const g = (hexColor >> 8) & 0xff;
+  const b = hexColor & 0xff;
+
+  // Convert RGB to HSL
+  const rNorm = r / 255;
+  const gNorm = g / 255;
+  const bNorm = b / 255;
+
+  const max = Math.max(rNorm, gNorm, bNorm);
+  const min = Math.min(rNorm, gNorm, bNorm);
+  const delta = max - min;
+
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (delta !== 0) {
+    s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+
+    if (max === rNorm) {
+      h = ((gNorm - bNorm) / delta + (gNorm < bNorm ? 6 : 0)) / 6;
+    } else if (max === gNorm) {
+      h = ((bNorm - rNorm) / delta + 2) / 6;
+    } else {
+      h = ((rNorm - gNorm) / delta + 4) / 6;
+    }
+  }
+
+  // Rotate hue by 180 degrees for complementary color
+  h = (h + 0.5) % 1;
+
+  // Convert back to RGB
+  const hueToRgb = (p: number, q: number, t: number): number => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+
+  let rOut, gOut, bOut;
+  if (s === 0) {
+    // Achromatic (gray) - return white as complementary for better visibility
+    return 0xffffff;
+  } else {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    rOut = hueToRgb(p, q, h + 1 / 3);
+    gOut = hueToRgb(p, q, h);
+    bOut = hueToRgb(p, q, h - 1 / 3);
+  }
+
+  const rFinal = Math.round(rOut * 255);
+  const gFinal = Math.round(gOut * 255);
+  const bFinal = Math.round(bOut * 255);
+
+  return (rFinal << 16) | (gFinal << 8) | bFinal;
+}
+
+/**
  * Renders expanding ring animations when observations complete.
  */
 export class FeedbackOverlay {
@@ -134,8 +201,12 @@ export class FeedbackOverlay {
     const innerRing = this.createRing(innerColor);
     innerRing.position.set(x, y, 2);
 
-    // Create outer ring (white for contrast)
-    const outerRing = this.createRing(OBSERVATION_FEEDBACK.SECONDARY_COLOR);
+    // Create outer ring with complementary color for visual harmony
+    // Falls back to white if no primary color provided
+    const outerColor = primaryColor
+      ? computeComplementaryColor(innerColor)
+      : OBSERVATION_FEEDBACK.SECONDARY_COLOR;
+    const outerRing = this.createRing(outerColor);
     outerRing.position.set(x, y, 2);
     outerRing.visible = false; // Starts hidden, appears after delay
 

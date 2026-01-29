@@ -16,7 +16,8 @@ Quantum Garden follows a modular architecture with clear separation between fron
 │  │       FRONTEND          │       API ROUTES        │          │
 │  │  - Three.js canvas      │  - tRPC endpoints       │          │
 │  │  - Observation system   │  - Prisma queries       │          │
-│  │  - Zustand state        │  - Quantum service calls│          │
+│  │  - Evolution system     │  - Quantum service calls│          │
+│  │  - Zustand state        │                         │          │
 │  └─────────────────────────┴─────────────────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -82,61 +83,63 @@ Quantum Garden follows a modular architecture with clear separation between fron
 
 ## Data Flow
 
-### Plant Creation (Pre-computation Strategy)
+### Quantum Pool (Pre-computation Strategy)
 
-**Current Implementation** (Mock Traits):
+The garden uses a pre-computed quantum pool for instant trait revelation:
 
-1. System generates a quantum circuit encoding trait possibilities
-2. Circuit definition stored in database with placeholder
-3. Plant record created with `visualState: "superposed"`
-4. Mock traits generated from circuit seed at observation time
+1. **Pool Generation** (one-time setup):
+   - Generate 500 quantum circuits (100 per circuit type)
+   - Execute on IonQ simulator with error mitigation disabled
+   - Store measurement results in database as immutable pool
 
-**Planned Implementation** (Real Quantum):
+2. **Trait Selection** (on observation):
+   - Hash plant ID to deterministically select pool index
+   - Retrieve pre-computed quantum measurements
+   - Map measurements to plant traits instantly (<50ms)
 
-1. System generates quantum circuit encoding trait possibilities
-2. Circuit submitted to IonQ simulator as background job
-3. Job ID and circuit definition stored in database
-4. Background worker polls job status
-5. When complete, traits computed from quantum measurements
-6. Traits stored in database, ready for observation reveal
+This approach provides authentic quantum data with zero latency during observation.
 
-### Observation (Immediate Trigger)
+### Evolution System
 
-**Current Implementation** (Debug Mode):
+Plants germinate automatically through the `GardenEvolutionSystem`:
 
-1. User clicks plant (debug mode only)
-2. Frontend sends observation request to API
-3. API generates mock traits if not pre-computed
-4. Plant state updated to `visualState: "collapsed"`
-5. Frontend renders collapse transition animation
+1. System checks dormant plants every 15 seconds
+2. Each plant evaluated for germination probability:
+   - Base 3% chance per check
+   - 2x bonus near observed plants
+   - 50% penalty near other sprouts (clustering prevention)
+   - 30% chance during cooldown (2 min after nearby germination)
+   - 100% guaranteed after 15 minutes dormancy
+3. Wave events (5% chance): 3-5 plants germinate together
+4. System pauses during time-travel mode
 
-**Planned Implementation** (Region-Based):
+### Observation Flow
+
+The observation system uses dwell-time triggers:
 
 1. Reticle drifts autonomously across canvas
-2. Invisible observation region positioned in garden
-3. Alignment detection: reticle + region + plant overlap
-4. When all conditions met → observation triggers **immediately** (no dwell)
-5. Frontend sends observation request to API
-6. API verifies plant is unobserved
-7. If traits ready: Return traits, collapse visual state
-8. If traits pending: Return `waitingForQuantum`, keep superposed
-9. Frontend renders collapse transition (1.5s animation)
-10. Entangled partners automatically collapse with correlated traits
-
-**Note**: No dwell time required - observation is instantaneous upon alignment.
+2. When reticle overlaps eligible plant, dwell timer starts
+3. After dwell duration (configurable, default 1.5s): observation triggers
+4. Frontend sends observation request to API
+5. API selects traits from quantum pool based on plant ID hash
+6. Plant state updated to `visualState: "collapsed"`
+7. Frontend renders celebration animation
+8. Entangled partners revealed with correlated traits
+9. Event logged to quantum event panel
 
 ---
 
 ## Key Design Decisions
 
-### Why PixiJS?
+### Why Three.js?
 
-PixiJS provides hardware-accelerated 2D rendering with:
+Three.js provides high-performance WebGL rendering with:
 
+- InstancedMesh for efficient rendering of 1000+ plants
 - Smooth animations at 60fps
-- Pixel-perfect rendering for glyphs
-- Efficient batch rendering for many plants
-- Cross-browser WebGL support
+- Flexible rendering: 64x64 pixel grids and vector line art
+- GPU-accelerated shaders for lifecycle animations
+- Rich overlay system for visual feedback
 
 ### Why tRPC?
 
@@ -176,7 +179,15 @@ quantum-garden/
 │   │   ├── prisma/              # Database schema
 │   │   └── src/
 │   │       ├── app/             # Next.js App Router
-│   │       ├── components/      # React components
+│   │       ├── components/
+│   │       │   └── garden/      # Core garden components
+│   │       │       ├── three/   # Three.js rendering
+│   │       │       ├── garden-evolution.ts  # Evolution system
+│   │       │       └── *.tsx    # UI overlays
+│   │       ├── hooks/           # React hooks
+│   │       │   ├── use-evolution-system.ts
+│   │       │   ├── use-observation.ts
+│   │       │   └── use-plants.ts
 │   │       ├── lib/             # Utilities
 │   │       ├── server/          # tRPC routers
 │   │       └── stores/          # Zustand stores
@@ -189,7 +200,7 @@ quantum-garden/
 │           └── routers/         # FastAPI endpoints
 │
 ├── packages/
-│   └── shared/                  # Shared TypeScript types
+│   └── shared/                  # Shared TypeScript types & constants
 │
 └── docs/                        # Documentation
 ```

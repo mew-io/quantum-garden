@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (18 Remaining)
+## Active Tasks (17 Remaining)
 
 ### Bugs & Performance
 
@@ -65,7 +65,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 107 | Add integration test for germination flow | P2       | NEW                    |
 | 110 | Add store tests for evolution state       | P2       | NEW                    |
 | 111 | Add visual regression test checklist      | P3       | `docs/testing.md`      |
-| 112 | Update README with evolution system info  | P2       | `README.md`            |
 | 114 | Update architecture docs                  | P2       | `docs/architecture.md` |
 | 117 | Test with 100+ plants for performance     | P2       | -                      |
 | 118 | Test extended session for memory leaks    | P2       | -                      |
@@ -114,6 +113,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - README Evolution System Documentation (#112)
+
+- Added comprehensive Evolution System section to README
+- Explains GardenEvolutionSystem and 15-second check interval
+- Germination factors table (base probability, bonuses, penalties)
+- Wave events documentation (5% chance, 3-5 plants)
+- useEvolutionSystem hook integration details
+- Link to source implementation
 
 ### 2026-01-28 - Keyboard Shortcut Discovery Hint (#62)
 

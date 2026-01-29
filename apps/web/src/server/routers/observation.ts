@@ -33,11 +33,11 @@ function seededRandom(seed: number): () => number {
  * to ensure they receive identical (correlated) traits. Non-entangled
  * plants should also use seedOffset = 0.
  *
- * The traits generated are:
- * - glyphPattern: Selected from predefined patterns based on variant/seed
+ * The traits generated are aligned with the Python quantum mapping algorithm:
+ * - glyphPattern: Selected from predefined patterns based on seed
  * - colorPalette: Uses variant's palette or falls back to randomized selection
- * - growthRate: 0.5 to 1.5 (slow to fast lifecycle)
- * - opacity: 0.7 to 1.0 (maintains visibility)
+ * - growthRate: 0.5 to 2.0 (matches quantum variance-based calculation)
+ * - opacity: 0.7 to 1.0 (matches quantum consistency-based calculation)
  */
 function generateMockTraits(
   circuitDefinition: string,
@@ -78,8 +78,9 @@ function generateMockTraits(
     colorPalette = selectedPalette?.colors ?? COLOR_PALETTES[0]!.colors;
   }
 
-  // Generate growth rate (0.5 to 1.5)
-  const growthRate = 0.5 + random();
+  // Generate growth rate (0.5 to 2.0)
+  // Range matches Python quantum mapping: 0.5 + (variance / 16) * 1.5
+  const growthRate = 0.5 + random() * 1.5;
 
   // Generate opacity (0.7 to 1.0)
   const opacity = 0.7 + random() * 0.3;

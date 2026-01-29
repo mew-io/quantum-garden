@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (15 Remaining)
+## Active Tasks (14 Remaining)
 
 ### Bugs & Performance
 
@@ -40,7 +40,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                                  | Priority | File                 |
 | --- | ----------------------------------------------------- | -------- | -------------------- |
-| 76  | Align mock trait algorithm with quantum mapping       | P2       | `observation.ts`     |
 | 77  | Parameterize growth rate calculation for qubit count  | P3       | `observation.ts`     |
 | 78  | Review opacity-from-consistency logic                 | P3       | `observation.ts`     |
 | 79  | Consider probability-weighted superposition rendering | P3       | `plant-instancer.ts` |
@@ -111,6 +110,14 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Mock Trait Algorithm Alignment (#76)
+
+- Aligned mock trait generation with Python quantum mapping algorithm
+- **Problem**: Growth rate range in TypeScript mock (0.5-1.5) didn't match Python quantum mapping (0.5-2.0)
+- **Fix**: Changed `0.5 + random()` to `0.5 + random() * 1.5` for correct 0.5-2.0 range
+- Updated JSDoc comments to clarify alignment with quantum mapping
+- All 181 tests passing (60 shared + 121 web)
 
 ### 2026-01-28 - Entanglement Pool Index Correlation Fix (#75)
 

@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (10 Remaining)
+## Active Tasks (9 Remaining)
 
 ### Bugs & Performance
 
@@ -47,11 +47,10 @@ No active tasks.
 
 ### Polish
 
-| #   | Task                                      | Priority | File                            |
-| --- | ----------------------------------------- | -------- | ------------------------------- |
-| 97  | Add plant highlight pulsing in debug mode | P3       | `debug-overlay.ts`              |
-| 98  | Improve context panel animation           | P3       | `observation-context-panel.tsx` |
-| 102 | Plan sound effects system                 | P3       | -                               |
+| #   | Task                            | Priority | File                            |
+| --- | ------------------------------- | -------- | ------------------------------- |
+| 98  | Improve context panel animation | P3       | `observation-context-panel.tsx` |
+| 102 | Plan sound effects system       | P3       | -                               |
 
 ### Testing & Documentation
 
@@ -103,6 +102,18 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Plant Highlight Pulsing in Debug Mode (#97)
+
+- Added gentle pulse animation for selected plants in debug panel's Plants tab
+- When a plant is selected, its debug marker (box, dot, crosshair) pulses:
+  - Scale oscillates between 1.0 and 1.15 (15% breathing effect)
+  - Opacity oscillates between 0.7 and 1.0
+  - 2 Hz frequency for smooth, non-distracting animation
+- Implemented via `selectedMarkerComponents` tracking in `debug-overlay.ts`
+- Updated `update()` method to animate selected plant markers each frame
+- All markers (bounding box, center dot, crosshair) animate together in sync
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - Smooth Debug Panel Data Refreshes (#93)
 

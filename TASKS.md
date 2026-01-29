@@ -8,11 +8,11 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 237 tests passing (60 shared + 177 web)
+**Test Coverage**: 251 tests passing (60 shared + 191 web)
 
 ---
 
-## Active Tasks (12 Remaining)
+## Active Tasks (11 Remaining)
 
 ### Bugs & Performance
 
@@ -63,7 +63,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | #   | Task                                   | Priority | File              |
 | --- | -------------------------------------- | -------- | ----------------- |
 | 111 | Add visual regression test checklist   | P3       | `docs/testing.md` |
-| 117 | Test with 100+ plants for performance  | P2       | -                 |
 | 118 | Test extended session for memory leaks | P2       | -                 |
 
 ---
@@ -110,6 +109,22 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Performance Tests for 100+ Plants (#117)
+
+- Created comprehensive performance test file at `apps/web/src/components/garden/__tests__/performance.test.ts`
+- 14 test cases validating efficient handling of large plant counts:
+  - **SpatialGrid with 100+ plants** (4 tests): rebuild times <10ms/50ms/100ms for 100/500/1000 plants
+  - **SpatialGrid query performance** (3 tests): O(1) average query time, efficient edge queries
+  - **Plant state update simulation** (3 tests): hash-based dirty detection, partial buffer updates
+  - **Grid-based plant distribution** (2 tests): clustered and uniform distribution handling
+  - **Memory efficiency** (2 tests): no leaks during rebuilds, efficient cell reuse
+- Key performance findings:
+  - SpatialGrid maintains O(1) average query time regardless of total plants
+  - Hash comparison for 500 plants takes <5ms
+  - 1000-plant rebuild completes in <100ms
+  - Partial buffer updates work for contiguous changes, full update for scattered
+- All 251 tests passing (60 shared + 191 web)
 
 ### 2026-01-28 - Garden Store Unit Tests (#110)
 
@@ -799,4 +814,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (191)
+- All tests passing (251)

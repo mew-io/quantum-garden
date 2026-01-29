@@ -8,11 +8,11 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 251 tests passing (60 shared + 191 web)
+**Test Coverage**: 268 tests passing (60 shared + 208 web)
 
 ---
 
-## Active Tasks (11 Remaining)
+## Active Tasks (10 Remaining)
 
 ### Bugs & Performance
 
@@ -60,10 +60,9 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Testing & Documentation
 
-| #   | Task                                   | Priority | File              |
-| --- | -------------------------------------- | -------- | ----------------- |
-| 111 | Add visual regression test checklist   | P3       | `docs/testing.md` |
-| 118 | Test extended session for memory leaks | P2       | -                 |
+| #   | Task                                 | Priority | File              |
+| --- | ------------------------------------ | -------- | ----------------- |
+| 111 | Add visual regression test checklist | P3       | `docs/testing.md` |
 
 ---
 
@@ -109,6 +108,19 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Memory Leak Tests for Extended Sessions (#118)
+
+- Created comprehensive memory leak test file at `apps/web/src/components/garden/__tests__/memory-leaks.test.ts`
+- 17 test cases covering:
+  - **GardenEvolutionSystem resource cleanup** (6 tests): interval clearing, map cleanup, rapid start/stop cycles
+  - **SpatialGrid memory management** (3 tests): rebuild cycles, empty rebuilds, cell movement
+  - **Subscription cleanup patterns** (2 tests): zustand patterns, ordering
+  - **Extended session simulation** (3 tests): 60-minute sessions, rapid queries, state changes
+  - **Callback cleanup** (2 tests): reference cleanup, error handling
+  - **Cache size limits** (1 test): many unique variants
+- Identified key memory leak risk areas for ongoing monitoring
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-28 - Performance Tests for 100+ Plants (#117)
 

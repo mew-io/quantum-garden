@@ -168,13 +168,19 @@ export function TimeTravelScrubber({
           return now;
         }
 
-        onScrubToTime(newTime);
         return newTime;
       });
     }, 100); // 10fps playback
 
     return () => clearInterval(interval);
-  }, [isPlaying, isActive, playbackSpeed, now, onScrubToTime]);
+  }, [isPlaying, isActive, playbackSpeed, now]);
+
+  // Sync currentTime changes to parent (separate effect to avoid setState-in-render)
+  useEffect(() => {
+    if (isPlaying && isActive) {
+      onScrubToTime(currentTime);
+    }
+  }, [currentTime, isPlaying, isActive, onScrubToTime]);
 
   // Calculate playhead position (clamped to 0-1 range)
   const playheadProgress = useMemo(() => {

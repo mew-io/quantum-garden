@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (17 Remaining)
+## Active Tasks (16 Remaining)
 
 ### Bugs & Performance
 
@@ -60,14 +60,13 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ### Testing & Documentation
 
-| #   | Task                                      | Priority | File                   |
-| --- | ----------------------------------------- | -------- | ---------------------- |
-| 107 | Add integration test for germination flow | P2       | NEW                    |
-| 110 | Add store tests for evolution state       | P2       | NEW                    |
-| 111 | Add visual regression test checklist      | P3       | `docs/testing.md`      |
-| 114 | Update architecture docs                  | P2       | `docs/architecture.md` |
-| 117 | Test with 100+ plants for performance     | P2       | -                      |
-| 118 | Test extended session for memory leaks    | P2       | -                      |
+| #   | Task                                      | Priority | File              |
+| --- | ----------------------------------------- | -------- | ----------------- |
+| 107 | Add integration test for germination flow | P2       | NEW               |
+| 110 | Add store tests for evolution state       | P2       | NEW               |
+| 111 | Add visual regression test checklist      | P3       | `docs/testing.md` |
+| 117 | Test with 100+ plants for performance     | P2       | -                 |
+| 118 | Test extended session for memory leaks    | P2       | -                 |
 
 ---
 
@@ -113,6 +112,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Architecture Documentation Update (#114)
+
+- Updated system diagram to include evolution system
+- Replaced mock traits with quantum pool description
+- Updated observation flow to reflect dwell-time triggers
+- Added evolution system section with germination factors
+- Fixed "Why Three.js?" (was incorrectly labeled PixiJS)
+- Expanded file organization with hooks and garden components
 
 ### 2026-01-28 - README Evolution System Documentation (#112)
 

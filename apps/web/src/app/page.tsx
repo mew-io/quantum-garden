@@ -13,7 +13,6 @@ import { EventDetailModal } from "@/components/garden/event-detail-modal";
 import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
-import { EvolutionStatusIndicator } from "@/components/garden/evolution-status-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
 import { useGardenStore } from "@/stores/garden-store";
 import { useHistoricalEvents } from "@/hooks/use-historical-events";
@@ -199,7 +198,6 @@ export default function Home() {
         <EventDetailModal />
         <CooldownIndicator />
         <EvolutionPausedIndicator />
-        <EvolutionStatusIndicator />
         <KeyboardShortcutHint />
         {gardenCreatedAt && (
           <TimeTravelScrubber

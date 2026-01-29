@@ -2058,32 +2058,34 @@ function createCosmicLotusPatterns() {
 }
 
 // Generate all patterns once at module load
-const simpleBloomPatterns = createSimpleBloomPatterns();
-const quantumTulipPatterns = createQuantumTulipPatterns();
-const softMossPatterns = createSoftMossPatterns();
-const pebblePatchPatterns = createPebblePatchPatterns();
-const meadowTuftPatterns = createMeadowTuftPatterns();
-const whisperReedPatterns = createWhisperReedPatterns();
-const pulsingOrbPatterns = createPulsingOrbPatterns();
-const dewdropDaisyPatterns = createDewdropDaisyPatterns();
-const midnightPoppyPatterns = createMidnightPoppyPatterns();
-const bellClusterPatterns = createBellClusterPatterns();
-const cloudBushPatterns = createCloudBushPatterns();
-const berryThicketPatterns = createBerryThicketPatterns();
-const saplingHopePatterns = createSaplingHopePatterns();
-const weepingWillowPatterns = createWeepingWillowPatterns();
-const fractalBloomPatterns = createFractalBloomPatterns();
-const phoenixFlamePatterns = createPhoenixFlamePatterns();
-const crystalClusterPatterns = createCrystalClusterPatterns();
-const kaleidoscopeStarPatterns = createKaleidoscopeStarPatterns();
-const vortexSpiralPatterns = createVortexSpiralPatterns();
-const nebulaBloomPatterns = createNebulaBloomPatterns();
-const auroraWispPatterns = createAuroraWispPatterns();
-const prismaticFernPatterns = createPrismaticFernPatterns();
-const quantumRosePatterns = createQuantumRosePatterns();
-const starMossPatterns = createStarMossPatterns();
-const dreamVinePatterns = createDreamVinePatterns();
-const cosmicLotusPatterns = createCosmicLotusPatterns();
+// NOTE: These raster patterns are preserved for potential future raster rendering option
+// but currently unused since all variants now use vector rendering.
+const _simpleBloomPatterns = createSimpleBloomPatterns();
+const _quantumTulipPatterns = createQuantumTulipPatterns();
+const _softMossPatterns = createSoftMossPatterns();
+const _pebblePatchPatterns = createPebblePatchPatterns();
+const _meadowTuftPatterns = createMeadowTuftPatterns();
+const _whisperReedPatterns = createWhisperReedPatterns();
+const _pulsingOrbPatterns = createPulsingOrbPatterns();
+const _dewdropDaisyPatterns = createDewdropDaisyPatterns();
+const _midnightPoppyPatterns = createMidnightPoppyPatterns();
+const _bellClusterPatterns = createBellClusterPatterns();
+const _cloudBushPatterns = createCloudBushPatterns();
+const _berryThicketPatterns = createBerryThicketPatterns();
+const _saplingHopePatterns = createSaplingHopePatterns();
+const _weepingWillowPatterns = createWeepingWillowPatterns();
+const _fractalBloomPatterns = createFractalBloomPatterns();
+const _phoenixFlamePatterns = createPhoenixFlamePatterns();
+const _crystalClusterPatterns = createCrystalClusterPatterns();
+const _kaleidoscopeStarPatterns = createKaleidoscopeStarPatterns();
+const _vortexSpiralPatterns = createVortexSpiralPatterns();
+const _nebulaBloomPatterns = createNebulaBloomPatterns();
+const _auroraWispPatterns = createAuroraWispPatterns();
+const _prismaticFernPatterns = createPrismaticFernPatterns();
+const _quantumRosePatterns = createQuantumRosePatterns();
+const _starMossPatterns = createStarMossPatterns();
+const _dreamVinePatterns = createDreamVinePatterns();
+const _cosmicLotusPatterns = createCosmicLotusPatterns();
 
 // ============================================================================
 // FLOWERS - Moderate rarity, multi-stage lifecycle, focal interest
@@ -2102,43 +2104,89 @@ const simpleBloom: PlantVariant = {
   description: "A gentle plant with a classic bud-bloom-fade lifecycle",
   rarity: 1.0, // Most common
   requiresObservationToGerminate: true,
-  tweenBetweenKeyframes: true, // Smooth transitions between lifecycle stages
-  keyframes: [
+  renderMode: "vector",
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "bud",
       duration: 15,
-      pattern: simpleBloomPatterns.bud,
-      // Sage palette - quiet growth
-      palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
-      opacity: 0.6,
+      primitives: [
+        // Small bud
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 4, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 4, 6),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#D0E8D0", // Sage
+      strokeOpacity: 0.6,
       scale: 0.7,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "sprout",
       duration: 20,
-      pattern: simpleBloomPatterns.sprout,
-      // Mint palette - fresh clarity
-      palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
-      opacity: 0.8,
+      primitives: [
+        // Growing bud with emerging petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 8),
+        // Petal hints
+        vectorCircle(VECTOR_CENTER - 5, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER + 5, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 3),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 16),
+        // Small leaves
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 6, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER + 6, VECTOR_CENTER + 4),
+      ],
+      strokeColor: "#C0E0E0", // Mint
+      strokeOpacity: 0.8,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bloom",
       duration: 45,
-      pattern: simpleBloomPatterns.bloom,
-      // Sage palette at full
-      palette: ["#D0E8D0", "#E0F0E0", "#F0F8F0"],
-      opacity: 1.0,
+      primitives: [
+        // Full flower center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 7),
+        // 5 petals in bloom
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER + 2, 4),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER + 2, 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 18),
+        // Leaves
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER - 8, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 8, VECTOR_CENTER + 4),
+      ],
+      strokeColor: "#D0E8D0", // Sage at full
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "fade",
       duration: 25,
-      pattern: simpleBloomPatterns.fade,
-      // Canvas palette - returning to neutral
-      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
-      opacity: 0.5,
+      primitives: [
+        // Fading flower
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 6),
+        // Drooping petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 4),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 6, 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#E8E8F0", // Canvas - neutral
+      strokeOpacity: 0.5,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
@@ -2157,70 +2205,102 @@ const quantumTulip: PlantVariant = {
   description: "A tulip that blooms in soft pastel colors based on quantum measurement",
   rarity: 0.5, // Less common
   requiresObservationToGerminate: true,
-  tweenBetweenKeyframes: true, // Smooth transitions between lifecycle stages
-  keyframes: [
+  renderMode: "vector",
+  tweenBetweenKeyframes: true,
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "bulb",
       duration: 20,
-      pattern: quantumTulipPatterns.bulb,
-      // Canvas palette - pure potential
-      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
-      opacity: 0.5,
+      primitives: [
+        // Tulip bulb shape
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 3),
+      ],
+      strokeColor: "#E8E8F0", // Canvas - potential
+      strokeOpacity: 0.5,
       scale: 0.6,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "stem",
       duration: 15,
-      pattern: quantumTulipPatterns.stem,
-      // Mint palette - fresh clarity
-      palette: ["#C0E0E0", "#D0F0E0", "#E8F8F0"],
-      opacity: 0.7,
+      primitives: [
+        // Growing stem and bud
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 7),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER, VECTOR_CENTER + 16),
+        // Leaf
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER - 6, VECTOR_CENTER + 10),
+      ],
+      strokeColor: "#C0E0E0", // Mint
+      strokeOpacity: 0.7,
       scale: 0.8,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bloom",
       duration: 60,
-      pattern: quantumTulipPatterns.bloom,
-      // Default: Blossom palette (overridden by colorVariations)
-      palette: ["#F0D0E0", "#E0E8F0", "#E8F0E8"],
-      opacity: 1.0,
+      primitives: [
+        // Tulip cup shape - overlapping petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER - 3, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER + 3, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 6),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER, VECTOR_CENTER + 18),
+        // Leaves
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 8, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 7, VECTOR_CENTER + 14),
+      ],
+      strokeColor: "#F0D0E0", // Blossom (overridden by colorVariations)
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "wilt",
       duration: 30,
-      pattern: quantumTulipPatterns.wilt,
-      // Canvas palette - fading to neutral
-      palette: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
-      opacity: 0.4,
+      primitives: [
+        // Wilting tulip
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 10, 4),
+        // Drooping stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER + 2, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#E8E8F0", // Fading
+      strokeOpacity: 0.4,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
   // Color variations - quantum selects one
   colorVariations: [
     {
       name: "coral",
-      weight: 1.0, // Common
+      weight: 1.0,
       palettes: {
-        // Soft coral pink - gentle warmth
         bloom: ["#F0C0C0", "#F0D0D0", "#F8E8E8"],
         wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
     },
     {
       name: "peach",
-      weight: 0.8, // Slightly less common
+      weight: 0.8,
       palettes: {
-        // Warm peach apricot - sunset glow
         bloom: ["#F0D0B0", "#F0E0C0", "#F8F0E0"],
         wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
     },
     {
       name: "lavender",
-      weight: 0.5, // Rare
+      weight: 0.5,
       palettes: {
-        // Lavender lilac - dreamy calm
         bloom: ["#E0C0F0", "#E0D0F0", "#F0E8F8"],
         wilt: ["#E8E8F0", "#F0F0F0", "#F8F8F8"],
       },
@@ -2229,9 +2309,9 @@ const quantumTulip: PlantVariant = {
 };
 
 /**
- * Dewdrop Daisy
+ * Dewdrop Daisy (Vector)
  *
- * A cheerful daisy with clustered thin petals and a sparkle effect.
+ * A cheerful daisy with radiating petals and a sparkle effect.
  * Moderate rarity - more interesting than basic flowers.
  * Scale: 1.0x (standard)
  */
@@ -2241,67 +2321,149 @@ const dewdropDaisy: PlantVariant = {
   description: "A cheerful daisy that sparkles like morning dew in the light",
   rarity: 0.7, // Moderate
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "bud",
       duration: 12,
-      pattern: dewdropDaisyPatterns.bud,
-      // Soft yellow-green for emerging bud
-      palette: ["#E8F0D0", "#F0F8E0", "#F8FCF0"],
-      opacity: 0.5,
+      primitives: [
+        // Small bud center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 6),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#E8F0D0", // Soft yellow-green
+      strokeOpacity: 0.5,
       scale: 0.6,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "unfurl",
       duration: 15,
-      pattern: dewdropDaisyPatterns.unfurl,
-      // Warming yellow
-      palette: ["#F8F0D0", "#FCF8E0", "#FFFCF0"],
-      opacity: 0.7,
+      primitives: [
+        // Growing center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 8),
+        // Initial petal hints (5 directions)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 12, VECTOR_CENTER - 10, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 12, VECTOR_CENTER + 10, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 6, VECTOR_CENTER - 14, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 6, VECTOR_CENTER + 14, VECTOR_CENTER - 8),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#F8F0D0", // Warming yellow
+      strokeOpacity: 0.7,
       scale: 0.8,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bloom",
       duration: 20,
-      pattern: dewdropDaisyPatterns.bloom,
-      // Bright daisy white with golden center
-      palette: ["#F8F0E0", "#FCF8F0", "#FFFFF8"],
-      opacity: 1.0,
+      primitives: [
+        // Golden center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 6),
+        // Layer 1 petals (8 directions)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 12, VECTOR_CENTER - 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER + 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 6, VECTOR_CENTER - 18, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 6, VECTOR_CENTER + 18, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER - 4, VECTOR_CENTER - 8, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER - 2),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 20),
+      ],
+      strokeColor: "#F8F0E0", // Bright daisy white
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "sparkle",
       duration: 8,
-      pattern: dewdropDaisyPatterns.sparkle,
-      // Bright white sparkle
-      palette: ["#FFFFF0", "#FFFFF8", "#FFFFFF"],
-      opacity: 1.0,
+      primitives: [
+        // Bright center star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER - 8, 8, 4, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 3),
+        // Sparkle rays (12 directions for radiance)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 12, VECTOR_CENTER - 18, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 12, VECTOR_CENTER + 18, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 6, VECTOR_CENTER - 22, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER - 6, VECTOR_CENTER + 22, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER + 2, VECTOR_CENTER - 20, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER + 2, VECTOR_CENTER + 20, VECTOR_CENTER + 4),
+        // Dewdrop sparkle points
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 14, 1.5),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 14, 1.5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 26, 1.5),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 20),
+      ],
+      strokeColor: "#FFFFF8", // Bright white sparkle
+      strokeOpacity: 1.0,
       scale: 1.05,
+      transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
     {
       name: "bloom-2",
       duration: 25,
-      pattern: dewdropDaisyPatterns.bloom,
-      // Back to normal bloom
-      palette: ["#F8F0E0", "#FCF8F0", "#FFFFF8"],
-      opacity: 1.0,
+      primitives: [
+        // Golden center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 6),
+        // Layer 1 petals (8 directions)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 12, VECTOR_CENTER - 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER + 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 6, VECTOR_CENTER - 18, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 6, VECTOR_CENTER + 18, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER - 4, VECTOR_CENTER - 8, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER - 2),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 20),
+      ],
+      strokeColor: "#F8F0E0", // Back to normal
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "fade",
       duration: 20,
-      pattern: dewdropDaisyPatterns.fade,
-      // Fading to neutral
-      palette: ["#F0F0E8", "#F8F8F0", "#FCFCF8"],
-      opacity: 0.5,
+      primitives: [
+        // Fading center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 5),
+        // Drooping petals
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 2, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 8, VECTOR_CENTER - 10, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 8, VECTOR_CENTER + 10, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 4, VECTOR_CENTER - 12, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 4, VECTOR_CENTER + 12, VECTOR_CENTER - 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#F0F0E8", // Fading to neutral
+      strokeOpacity: 0.5,
       scale: 0.85,
+      transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Midnight Poppy
+ * Midnight Poppy (Vector)
  *
  * A dramatic flower with deep, rich colors and a dramatic open/close cycle.
  * Uncommon rarity - visually striking and memorable.
@@ -2313,44 +2475,96 @@ const midnightPoppy: PlantVariant = {
   description: "A dramatic poppy with deep colors that opens and closes in a mesmerizing cycle",
   rarity: 0.4, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Continuously opens and closes
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "closed",
       duration: 15,
-      pattern: midnightPoppyPatterns.closed,
-      // Deep burgundy - mysterious
-      palette: ["#8B2252", "#A03060", "#B84070"],
-      opacity: 0.7,
+      primitives: [
+        // Closed bud - tight cup shape
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 4),
+        // Tight petals folded up
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER - 2, VECTOR_CENTER - 3, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 2, VECTOR_CENTER + 3, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER, VECTOR_CENTER - 16),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#8B2252", // Deep burgundy
+      strokeOpacity: 0.7,
       scale: 0.75,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "opening",
       duration: 12,
-      pattern: midnightPoppyPatterns.opening,
-      // Deepening red-purple
-      palette: ["#9B3060", "#B04070", "#C85080"],
-      opacity: 0.85,
+      primitives: [
+        // Dark center emerging
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 7),
+        // Petals starting to unfurl (cup opening)
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 14, 4),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 14, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#9B3060", // Deepening red-purple
+      strokeOpacity: 0.85,
       scale: 0.9,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "open",
       duration: 30,
-      pattern: midnightPoppyPatterns.open,
-      // Rich, dramatic deep red with dark center
-      palette: ["#A82860", "#C03878", "#D85090"],
-      opacity: 1.0,
+      primitives: [
+        // Dark dramatic center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 4, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 4, 5),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER - 4, 6, 3, 5),
+        // Full open petals - dramatic spread
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 6, 7),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 6, 7),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 20, 6),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 12, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 12, 5),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 20),
+      ],
+      strokeColor: "#C03878", // Rich dramatic deep red
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "closing",
       duration: 12,
-      pattern: midnightPoppyPatterns.closing,
-      // Returning to deep tones
-      palette: ["#9B3060", "#B04070", "#C85080"],
-      opacity: 0.85,
+      primitives: [
+        // Center retreating
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 7),
+        // Petals curling back inward
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 14, 4),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 14, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#9B3060", // Returning to deep tones
+      strokeOpacity: 0.85,
       scale: 0.95,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
@@ -2362,58 +2576,143 @@ const midnightPoppy: PlantVariant = {
  * Uncommon rarity - staggered animation is visually interesting.
  * Scale: 1.2x (taller due to hanging structure)
  */
+/**
+ * Bell Cluster (Vector)
+ *
+ * Multiple hanging bell-shaped flowers that bloom in sequence.
+ * Uncommon rarity - staggered animation is visually interesting.
+ * Scale: 1.2x (taller due to hanging structure)
+ */
 const bellCluster: PlantVariant = {
   id: "bell-cluster",
   name: "Bell Cluster",
   description: "Delicate bells that bloom one after another in a gentle cascade",
   rarity: 0.4, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "buds",
       duration: 18,
-      pattern: bellClusterPatterns.buds,
-      // Soft lilac for closed buds
-      palette: ["#D8C8E0", "#E0D0E8", "#E8E0F0"],
-      opacity: 0.5,
+      primitives: [
+        // Main stem arching over
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 8, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER + 8, VECTOR_CENTER - 10),
+        // Three closed bell buds hanging down
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 12, VECTOR_CENTER - 10, VECTOR_CENTER - 4),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 2, 3),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER, VECTOR_CENTER),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 2, 3),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
+      ],
+      strokeColor: "#D8C8E0", // Soft lilac
+      strokeOpacity: 0.5,
       scale: 0.7,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "first",
       duration: 15,
-      pattern: bellClusterPatterns.first,
-      // First bell opening - brightening
-      palette: ["#E0D0E8", "#E8D8F0", "#F0E8F8"],
-      opacity: 0.7,
+      primitives: [
+        // Main stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 10, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER + 8, VECTOR_CENTER - 12),
+        // First bell open (left)
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 14, VECTOR_CENTER - 12, VECTOR_CENTER - 4),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 2, 4),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 5),
+        // Second bell still closed
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER, VECTOR_CENTER),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 2, 3),
+        // Third bell still closed
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
+      ],
+      strokeColor: "#E0D0E8", // Brightening
+      strokeOpacity: 0.7,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "second",
       duration: 15,
-      pattern: bellClusterPatterns.second,
-      // Two bells open - more vibrant
-      palette: ["#E8D8F0", "#F0E0F8", "#F8F0FC"],
-      opacity: 0.85,
+      primitives: [
+        // Main stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 12, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 14),
+        // First bell open (left)
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 16, VECTOR_CENTER - 14, VECTOR_CENTER - 4),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 2, 4),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 3, 5),
+        // Second bell open (center)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER, VECTOR_CENTER),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 2, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 5),
+        // Third bell still closed
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 14, VECTOR_CENTER + 12, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER, 3),
+      ],
+      strokeColor: "#E8D8F0", // More vibrant
+      strokeOpacity: 0.85,
       scale: 0.95,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "full",
       duration: 40,
-      pattern: bellClusterPatterns.full,
-      // All bells open - full bloom
-      palette: ["#F0E0F8", "#F8E8FC", "#FCF4FF"],
-      opacity: 1.0,
+      primitives: [
+        // Main stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER - 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER + 12, VECTOR_CENTER - 16),
+        // All three bells fully open
+        // Left bell
+        vectorLine(VECTOR_CENTER - 14, VECTOR_CENTER - 18, VECTOR_CENTER - 16, VECTOR_CENTER - 6),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 4, 5),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 2, 6),
+        // Center bell (slightly lower)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 6),
+        // Right bell
+        vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER - 16, VECTOR_CENTER + 14, VECTOR_CENTER - 4),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 2, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 4, 6),
+      ],
+      strokeColor: "#F0E0F8", // Full bloom lilac
+      strokeOpacity: 1.0,
       scale: 1.2,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "fade",
       duration: 20,
-      pattern: bellClusterPatterns.fade,
-      // Fading bells
-      palette: ["#E8E0F0", "#F0F0F8", "#F8F8FC"],
-      opacity: 0.4,
+      primitives: [
+        // Main stem drooping slightly
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 10, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER + 8, VECTOR_CENTER - 10),
+        // Fading bells
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 12, VECTOR_CENTER - 12, VECTOR_CENTER - 4),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 2, 4),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 4, 4),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 4, 4),
+      ],
+      strokeColor: "#E8E0F0", // Fading
+      strokeOpacity: 0.4,
       scale: 1.0,
+      transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
   ],
 };
@@ -2423,9 +2722,9 @@ const bellCluster: PlantVariant = {
 // ============================================================================
 
 /**
- * Soft Moss
+ * Soft Moss (Vector)
  *
- * A very common ground cover that slowly fades in and stays static.
+ * A very common ground cover rendered with soft vector circles.
  * Minimal visual interest - just ambient texture.
  * Scale: 0.4x (small)
  */
@@ -2435,34 +2734,59 @@ const softMoss: PlantVariant = {
   description: "A gentle ground cover that spreads slowly across the garden floor",
   rarity: 1.2, // Very common
   requiresObservationToGerminate: false, // Grows without observation
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "emerging",
       duration: 30,
-      pattern: softMossPatterns.emerging,
-      // Muted olive green - earthy
-      palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
-      opacity: 0.3,
+      primitives: [
+        // Central soft cluster
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        // Scattered spores emerging
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 4, 2),
+        vectorCircle(VECTOR_CENTER + 5, VECTOR_CENTER - 3, 2),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER + 5, 2),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER + 4, 1.5),
+      ],
+      strokeColor: "#C8D8C0", // Muted olive green
+      strokeOpacity: 0.3,
       scale: 0.3,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "settled",
-      duration: 120, // Long duration - just sits there
-      pattern: softMossPatterns.settled,
-      // Muted olive green - earthy
-      palette: ["#C8D8C0", "#D0E0C8", "#D8E8D0"],
-      opacity: 0.5,
+      duration: 120,
+      primitives: [
+        // Fuller moss cluster
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 14),
+        // Scattered outer circles
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 5, 3),
+        vectorCircle(VECTOR_CENTER - 7, VECTOR_CENTER + 8, 3),
+        vectorCircle(VECTOR_CENTER + 9, VECTOR_CENTER + 6, 2.5),
+        vectorCircle(VECTOR_CENTER - 3, VECTOR_CENTER - 10, 2),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER + 10, 2),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 2),
+        vectorCircle(VECTOR_CENTER + 11, VECTOR_CENTER - 1, 2),
+      ],
+      strokeColor: "#D0E0C8", // Lighter olive
+      strokeOpacity: 0.5,
       scale: 0.4,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Pebble Patch
+ * Pebble Patch (Vector)
  *
- * Scattered dots representing small stones. Completely static.
- * The simplest possible variant - no animation at all.
+ * Scattered circles representing small stones.
+ * Completely static - the simplest possible variant.
  * Scale: 0.35x (tiny)
  */
 const pebblePatch: PlantVariant = {
@@ -2471,15 +2795,28 @@ const pebblePatch: PlantVariant = {
   description: "Tiny stones scattered on the garden floor",
   rarity: 1.3, // Most common
   requiresObservationToGerminate: false,
-  tweenBetweenKeyframes: false, // No need for tweening - static
-  keyframes: [
+  renderMode: "vector",
+  tweenBetweenKeyframes: false,
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "stones",
-      duration: 999, // Effectively permanent
-      pattern: pebblePatchPatterns.stones,
-      // Warm gray - stone-like
-      palette: ["#D8D8D0", "#E0E0D8", "#E8E8E0"],
-      opacity: 0.4,
+      duration: 999,
+      primitives: [
+        // Scattered pebbles of varying sizes
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 4, 2.5),
+        vectorCircle(VECTOR_CENTER - 3, VECTOR_CENTER + 5, 2),
+        vectorCircle(VECTOR_CENTER + 9, VECTOR_CENTER + 3, 2.5),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER + 2, 2),
+        vectorCircle(VECTOR_CENTER + 2, VECTOR_CENTER - 8, 2),
+        vectorCircle(VECTOR_CENTER - 5, VECTOR_CENTER - 2, 1.5),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER + 7, 2),
+        vectorCircle(VECTOR_CENTER - 1, VECTOR_CENTER + 10, 1.5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 7, 2),
+      ],
+      strokeColor: "#D8D8D0", // Warm gray
+      strokeOpacity: 0.4,
       scale: 0.35,
     },
   ],
@@ -2490,10 +2827,10 @@ const pebblePatch: PlantVariant = {
 // ============================================================================
 
 /**
- * Meadow Tuft
+ * Meadow Tuft (Vector)
  *
  * A cluster of grass blades that gently sways back and forth.
- * Simple 2-frame loop for subtle motion.
+ * Simple 2-frame loop for subtle motion using vector lines.
  * Scale: 0.6x
  */
 const meadowTuft: PlantVariant = {
@@ -2502,32 +2839,52 @@ const meadowTuft: PlantVariant = {
   description: "A small cluster of grass that sways gently in an invisible breeze",
   rarity: 1.1, // Very common
   requiresObservationToGerminate: false,
+  renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "sway-left",
       duration: 4,
-      pattern: meadowTuftPatterns.swayLeft,
-      // Soft green - fresh grass
-      palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
-      opacity: 0.7,
+      primitives: [
+        // Grass blades leaning left
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 14, VECTOR_CENTER - 10, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER + 14, VECTOR_CENTER - 5, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER + 14, VECTOR_CENTER, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER + 14, VECTOR_CENTER + 4, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER + 14, VECTOR_CENTER + 8, VECTOR_CENTER - 10),
+        // Base cluster
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 4),
+      ],
+      strokeColor: "#B8D8B0", // Soft green
+      strokeOpacity: 0.7,
       scale: 0.6,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "sway-right",
       duration: 4,
-      pattern: meadowTuftPatterns.swayRight,
-      // Soft green - fresh grass
-      palette: ["#B8D8B0", "#C8E0C0", "#D8E8D0"],
-      opacity: 0.7,
+      primitives: [
+        // Grass blades leaning right
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 14, VECTOR_CENTER - 4, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER + 14, VECTOR_CENTER + 1, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER + 14, VECTOR_CENTER + 4, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER + 14, VECTOR_CENTER + 9, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER + 14, VECTOR_CENTER + 14, VECTOR_CENTER - 12),
+        // Base cluster
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 4),
+      ],
+      strokeColor: "#C8E0C0", // Soft green
+      strokeOpacity: 0.7,
       scale: 0.6,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Whisper Reed
+ * Whisper Reed (Vector)
  *
  * Tall thin reeds that lean slightly in the wind.
  * Taller and thinner than meadow tuft.
@@ -2539,26 +2896,46 @@ const whisperReed: PlantVariant = {
   description: "Tall thin reeds that sway with an invisible wind",
   rarity: 0.9, // Common
   requiresObservationToGerminate: false,
+  renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "lean-left",
       duration: 5,
-      pattern: whisperReedPatterns.leanLeft,
-      // Pale green-gray - reed color
-      palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
-      opacity: 0.6,
+      primitives: [
+        // Tall reed stems leaning left
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER + 16, VECTOR_CENTER - 10, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 4, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER + 16, VECTOR_CENTER + 2, VECTOR_CENTER - 18),
+        // Reed tips (small circles)
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 19, 1.5),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 21, 1.5),
+        vectorCircle(VECTOR_CENTER + 2, VECTOR_CENTER - 19, 1.5),
+      ],
+      strokeColor: "#C0D0C0", // Pale green-gray
+      strokeOpacity: 0.6,
       scale: 0.75,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "lean-right",
       duration: 5,
-      pattern: whisperReedPatterns.leanRight,
-      // Pale green-gray - reed color
-      palette: ["#C0D0C0", "#D0DCD0", "#E0E8E0"],
-      opacity: 0.6,
+      primitives: [
+        // Tall reed stems leaning right
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER + 16, VECTOR_CENTER - 2, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER + 4, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER + 16, VECTOR_CENTER + 10, VECTOR_CENTER - 18),
+        // Reed tips (small circles)
+        vectorCircle(VECTOR_CENTER - 2, VECTOR_CENTER - 19, 1.5),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 21, 1.5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 19, 1.5),
+      ],
+      strokeColor: "#D0DCD0", // Pale green-gray
+      strokeOpacity: 0.6,
       scale: 0.75,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
@@ -2568,7 +2945,7 @@ const whisperReed: PlantVariant = {
 // ============================================================================
 
 /**
- * Cloud Bush
+ * Cloud Bush (Vector)
  *
  * A rounded, puffy shrub with a breathing scale animation.
  * Berry details appear at maturity.
@@ -2580,59 +2957,117 @@ const cloudBush: PlantVariant = {
   description: "A soft, rounded shrub that breathes gently and grows delicate berries",
   rarity: 0.4, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Breathing animation loops
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "base",
       duration: 25,
-      pattern: cloudBushPatterns.base,
-      // Soft sage green - foundation
-      palette: ["#A8C8A8", "#B8D8B8", "#C8E0C8"],
-      opacity: 0.6,
+      primitives: [
+        // Base puffy circles (cloud shape)
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 4, 10),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER + 2, 7),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER + 2, 7),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 4, 6),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 4, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 5),
+      ],
+      strokeColor: "#A8C8A8", // Soft sage green
+      strokeOpacity: 0.6,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "full",
       duration: 20,
-      pattern: cloudBushPatterns.full,
-      // Richer green - expanded
-      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
-      opacity: 0.8,
+      primitives: [
+        // Fuller, expanded cloud shape
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 12),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER + 3, 9),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 3, 9),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 5, 8),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 5, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 8, 7),
+        // Extra fluff
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER, 5),
+      ],
+      strokeColor: "#98C098", // Richer green
+      strokeOpacity: 0.8,
       scale: 1.2,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "breathe-in",
       duration: 6,
-      pattern: cloudBushPatterns.full,
-      // Same full pattern, slightly smaller scale
-      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
-      opacity: 0.85,
+      primitives: [
+        // Slightly contracted
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 5, 11),
+        vectorCircle(VECTOR_CENTER - 9, VECTOR_CENTER + 2, 8),
+        vectorCircle(VECTOR_CENTER + 9, VECTOR_CENTER + 2, 8),
+        vectorCircle(VECTOR_CENTER - 5, VECTOR_CENTER - 4, 7),
+        vectorCircle(VECTOR_CENTER + 5, VECTOR_CENTER - 4, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 7, 6),
+        vectorCircle(VECTOR_CENTER - 13, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER + 13, VECTOR_CENTER, 4),
+      ],
+      strokeColor: "#98C098",
+      strokeOpacity: 0.85,
       scale: 1.15,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "breathe-out",
       duration: 6,
-      pattern: cloudBushPatterns.full,
-      // Expand slightly
-      palette: ["#98C098", "#A8D0A8", "#B8DCB8"],
-      opacity: 0.9,
+      primitives: [
+        // Expanded breathing
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 7, 13),
+        vectorCircle(VECTOR_CENTER - 11, VECTOR_CENTER + 4, 10),
+        vectorCircle(VECTOR_CENTER + 11, VECTOR_CENTER + 4, 10),
+        vectorCircle(VECTOR_CENTER - 7, VECTOR_CENTER - 5, 9),
+        vectorCircle(VECTOR_CENTER + 7, VECTOR_CENTER - 5, 9),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 9, 8),
+        vectorCircle(VECTOR_CENTER - 15, VECTOR_CENTER + 1, 6),
+        vectorCircle(VECTOR_CENTER + 15, VECTOR_CENTER + 1, 6),
+      ],
+      strokeColor: "#98C098",
+      strokeOpacity: 0.9,
       scale: 1.25,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "berried",
       duration: 40,
-      pattern: cloudBushPatterns.berried,
-      // Green with hints of berry color
-      palette: ["#90B890", "#A0C8A0", "#E0A8B0"],
-      opacity: 1.0,
+      primitives: [
+        // Full bush with berries
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 14),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 5, 11),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER + 5, 11),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 6, 10),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 6, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 10, 9),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 2, 7),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 2, 7),
+        // Berry clusters (small circles)
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER + 10, 2),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER + 12, 2),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 2),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER + 9, 2),
+        vectorCircle(VECTOR_CENTER - 2, VECTOR_CENTER + 6, 1.5),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER + 7, 1.5),
+      ],
+      strokeColor: "#90B890", // Green with berry hint
+      strokeOpacity: 1.0,
       scale: 1.3,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Berry Thicket
+ * Berry Thicket (Vector)
  *
  * A dense shrub with fruits that materialize over its lifecycle.
  * More complex than cloud-bush with a full fruiting progression.
@@ -2644,43 +3079,118 @@ const berryThicket: PlantVariant = {
   description: "A dense thicket that slowly produces clusters of vibrant berries",
   rarity: 0.4, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "sparse",
       duration: 20,
-      pattern: berryThicketPatterns.sparse,
-      // Dark green foliage - dense base
-      palette: ["#708870", "#809880", "#90A890"],
-      opacity: 0.5,
+      primitives: [
+        // Sparse branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 10, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER - 8, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER + 10, VECTOR_CENTER),
+        // Sparse leaves
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 12, 4),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 10, 4),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 2, 3),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
+      ],
+      strokeColor: "#708870", // Dark green
+      strokeOpacity: 0.5,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "growing",
       duration: 25,
-      pattern: berryThicketPatterns.growing,
-      // Richer green, first berry hints
-      palette: ["#688868", "#789878", "#88A888"],
-      opacity: 0.7,
+      primitives: [
+        // Denser branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER - 12, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER + 10, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER - 14, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER + 14, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 10, VECTOR_CENTER - 16, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 8, VECTOR_CENTER + 14, VECTOR_CENTER - 12),
+        // Fuller leaves
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 6, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 4, 5),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 14, 4),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 12, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 4),
+      ],
+      strokeColor: "#688868", // Richer green
+      strokeOpacity: 0.7,
       scale: 1.2,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "fruiting",
       duration: 30,
-      pattern: berryThicketPatterns.fruiting,
-      // Green with berry accents
-      palette: ["#608060", "#709070", "#C87890"],
-      opacity: 0.9,
+      primitives: [
+        // Full branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 14, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER + 12, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 6),
+        // Foliage
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 18, 6),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 8, 6),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 6, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 5),
+        // Early berries
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 16, 2),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 14, 2),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 6, 2),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 4, 2),
+      ],
+      strokeColor: "#608060", // Green with berry hints
+      strokeOpacity: 0.9,
       scale: 1.3,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "ripe",
       duration: 45,
-      pattern: berryThicketPatterns.ripe,
-      // Full berry colors - rich and vibrant
-      palette: ["#587858", "#689068", "#D86080"],
-      opacity: 1.0,
+      primitives: [
+        // Full dense branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 16, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 14, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER - 18, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER + 18, VECTOR_CENTER - 10),
+        // Dense foliage
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 22, 7),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 20, 7),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 12, 7),
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 10, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 18, 5),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 18, 5),
+        // Ripe berry clusters
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 20, 2.5),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 18, 2.5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 18, 2.5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 16, 2.5),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 10, 2.5),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 8, 2.5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 8, 2.5),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 6, 2.5),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 14, 2),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 14, 2),
+      ],
+      strokeColor: "#587858", // Deep green with vibrant berries
+      strokeOpacity: 1.0,
       scale: 1.4,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
@@ -2690,7 +3200,7 @@ const berryThicket: PlantVariant = {
 // ============================================================================
 
 /**
- * Sapling Hope
+ * Sapling Hope (Vector)
  *
  * A delicate young tree with branches and leaves that unfurl progressively.
  * Rare and memorable - a hopeful discovery in the garden.
@@ -2702,58 +3212,135 @@ const saplingHope: PlantVariant = {
   description: "A young tree whose leaves unfurl one by one, symbol of new growth",
   rarity: 0.3, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "seedling",
       duration: 20,
-      pattern: saplingHopePatterns.seedling,
-      // Fresh spring green - new life
-      palette: ["#C0E0B0", "#D0E8C0", "#E0F0D0"],
-      opacity: 0.4,
+      primitives: [
+        // Tiny seedling stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER, VECTOR_CENTER - 4),
+        // First tiny leaves
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 6, 3),
+      ],
+      strokeColor: "#C0E0B0", // Fresh spring green
+      strokeOpacity: 0.4,
       scale: 0.6,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "sprout",
       duration: 25,
-      pattern: saplingHopePatterns.sprout,
-      // Brightening green
-      palette: ["#B0D8A0", "#C0E0B0", "#D8F0C8"],
-      opacity: 0.6,
+      primitives: [
+        // Growing trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER, VECTOR_CENTER - 8),
+        // First branch pair
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 8, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER - 10),
+        // Growing leaves
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 10, 4),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 10, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 3),
+      ],
+      strokeColor: "#B0D8A0", // Brightening green
+      strokeOpacity: 0.6,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "growing",
       duration: 30,
-      pattern: saplingHopePatterns.growing,
-      // Healthy green
-      palette: ["#A0D090", "#B0D8A0", "#C8E8B8"],
-      opacity: 0.8,
+      primitives: [
+        // Stronger trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 12),
+        // Lower branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER - 12, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER + 12, VECTOR_CENTER - 4),
+        // Upper branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER - 10, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER + 10, VECTOR_CENTER - 14),
+        // Crown leaves
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 4, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 4, 5),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 4),
+      ],
+      strokeColor: "#A0D090", // Healthy green
+      strokeOpacity: 0.8,
       scale: 1.2,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "young",
       duration: 40,
-      pattern: saplingHopePatterns.young,
-      // Rich verdant green
-      palette: ["#90C880", "#A8D898", "#C0E8B0"],
-      opacity: 0.95,
+      primitives: [
+        // Strong trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER, VECTOR_CENTER - 16),
+        // Lower branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER - 16, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER + 16, VECTOR_CENTER - 2),
+        // Middle branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 14, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 14, VECTOR_CENTER - 14),
+        // Upper branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 10, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 20),
+        // Full crown
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 2, 6),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 2, 6),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 14, 6),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 14, 6),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 20, 5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 20, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 22, 5),
+      ],
+      strokeColor: "#90C880", // Rich verdant green
+      strokeOpacity: 0.95,
       scale: 1.5,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "mature",
       duration: 60,
-      pattern: saplingHopePatterns.mature,
-      // Deep forest green with golden highlights
-      palette: ["#80B870", "#98C888", "#B8D8A0"],
-      opacity: 1.0,
+      primitives: [
+        // Mature trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 22, VECTOR_CENTER, VECTOR_CENTER - 18),
+        // Lower branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 18, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER + 18, VECTOR_CENTER),
+        // Middle branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER - 16, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER + 16, VECTOR_CENTER - 12),
+        // Upper branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 12, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 12, VECTOR_CENTER - 22),
+        // Top crown
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER, VECTOR_CENTER - 26),
+        // Dense mature crown
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER, 7),
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER, 7),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 12, 7),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 12, 7),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 22, 6),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 22, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 26, 6),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 18, 5),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 18, 5),
+      ],
+      strokeColor: "#80B870", // Deep forest green
+      strokeOpacity: 1.0,
       scale: 1.8,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Weeping Willow
+ * Weeping Willow (Vector)
  *
  * A tall tree with cascading fronds that sway in a gentle wave.
  * Rare and calming - creates a sense of shelter and peace.
@@ -2765,62 +3352,149 @@ const weepingWillow: PlantVariant = {
   description: "A graceful tree with cascading fronds that dance in invisible wind",
   rarity: 0.25, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Continuous gentle sway
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "sapling",
       duration: 25,
-      pattern: weepingWillowPatterns.sapling,
-      // Pale willow green
-      palette: ["#B8D0A0", "#C8D8B0", "#D8E8C8"],
-      opacity: 0.5,
+      primitives: [
+        // Young trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER, VECTOR_CENTER - 8),
+        // Early drooping branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 8, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER - 6, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER + 6, VECTOR_CENTER + 2),
+      ],
+      strokeColor: "#B8D0A0", // Pale willow green
+      strokeOpacity: 0.5,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "growing",
       duration: 30,
-      pattern: weepingWillowPatterns.growing,
-      // Silvery green
-      palette: ["#A8C898", "#B8D4A8", "#C8E0B8"],
-      opacity: 0.7,
+      primitives: [
+        // Growing trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 22, VECTOR_CENTER, VECTOR_CENTER - 14),
+        // Upper branches (arch up then droop)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 10, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 16),
+        // Cascading fronds
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 16, VECTOR_CENTER - 14, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 16, VECTOR_CENTER + 14, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 14, VECTOR_CENTER - 8, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 14, VECTOR_CENTER + 8, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER - 2, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER + 2, VECTOR_CENTER + 8),
+      ],
+      strokeColor: "#A8C898", // Silvery green
+      strokeOpacity: 0.7,
       scale: 1.5,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "full",
       duration: 15,
-      pattern: weepingWillowPatterns.full,
-      // Full willow green
-      palette: ["#98C088", "#A8D098", "#B8DCB0"],
-      opacity: 0.9,
+      primitives: [
+        // Full trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 24, VECTOR_CENTER, VECTOR_CENTER - 18),
+        // Upper branches arching
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER - 14, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER + 14, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER - 8, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 8, VECTOR_CENTER - 24),
+        // Full cascading fronds
+        vectorLine(VECTOR_CENTER - 14, VECTOR_CENTER - 22, VECTOR_CENTER - 18, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER + 14, VECTOR_CENTER - 22, VECTOR_CENTER + 18, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 24, VECTOR_CENTER - 12, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 24, VECTOR_CENTER + 12, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER - 20, VECTOR_CENTER - 6, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 20, VECTOR_CENTER + 6, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER, VECTOR_CENTER + 14),
+      ],
+      strokeColor: "#98C088", // Full willow green
+      strokeOpacity: 0.9,
       scale: 2.0,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "sway-left",
       duration: 8,
-      pattern: weepingWillowPatterns.swayLeft,
-      // Slightly lighter during movement
-      palette: ["#A0C890", "#B0D8A0", "#C0E4B8"],
-      opacity: 1.0,
+      primitives: [
+        // Trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 26, VECTOR_CENTER, VECTOR_CENTER - 20),
+        // Branches arching
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER - 16, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 12, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER - 10, VECTOR_CENTER - 26),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER + 6, VECTOR_CENTER - 24),
+        // Fronds swaying left
+        vectorLine(VECTOR_CENTER - 16, VECTOR_CENTER - 24, VECTOR_CENTER - 24, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER - 22, VECTOR_CENTER + 8, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 26, VECTOR_CENTER - 18, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 24, VECTOR_CENTER + 2, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 22, VECTOR_CENTER - 12, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER - 20, VECTOR_CENTER - 4, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER - 18, VECTOR_CENTER - 8, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#A0C890", // Lighter during movement
+      strokeOpacity: 1.0,
       scale: 2.3,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "sway-right",
       duration: 8,
-      pattern: weepingWillowPatterns.swayRight,
-      // Slightly lighter during movement
-      palette: ["#A0C890", "#B0D8A0", "#C0E4B8"],
-      opacity: 1.0,
+      primitives: [
+        // Trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 26, VECTOR_CENTER, VECTOR_CENTER - 20),
+        // Branches arching
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER - 12, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 16, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER - 6, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER + 10, VECTOR_CENTER - 26),
+        // Fronds swaying right
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 22, VECTOR_CENTER - 8, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER + 16, VECTOR_CENTER - 24, VECTOR_CENTER + 24, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 24, VECTOR_CENTER - 2, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 26, VECTOR_CENTER + 18, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER - 20, VECTOR_CENTER + 4, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 22, VECTOR_CENTER + 12, VECTOR_CENTER + 12),
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER - 18, VECTOR_CENTER + 8, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#A0C890", // Lighter during movement
+      strokeOpacity: 1.0,
       scale: 2.3,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "rest",
       duration: 12,
-      pattern: weepingWillowPatterns.full,
-      // Return to full color
-      palette: ["#98C088", "#A8D098", "#B8DCB0"],
-      opacity: 1.0,
+      primitives: [
+        // Full trunk
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 28, VECTOR_CENTER, VECTOR_CENTER - 22),
+        // Upper branches arching
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER - 16, VECTOR_CENTER - 26),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER + 16, VECTOR_CENTER - 26),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER - 10, VECTOR_CENTER - 28),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER + 10, VECTOR_CENTER - 28),
+        // Full resting fronds
+        vectorLine(VECTOR_CENTER - 16, VECTOR_CENTER - 26, VECTOR_CENTER - 20, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER + 16, VECTOR_CENTER - 26, VECTOR_CENTER + 20, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 28, VECTOR_CENTER - 14, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 28, VECTOR_CENTER + 14, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 24, VECTOR_CENTER - 8, VECTOR_CENTER + 16),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 24, VECTOR_CENTER + 8, VECTOR_CENTER + 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 22, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#98C088", // Full color
+      strokeOpacity: 1.0,
       scale: 2.5,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
@@ -2830,7 +3504,7 @@ const weepingWillow: PlantVariant = {
 // ============================================================================
 
 /**
- * Pulsing Orb
+ * Pulsing Orb (Vector)
  *
  * An ethereal orb that continuously pulses with soft light.
  * Rare and magical - a special discovery in the garden.
@@ -2842,26 +3516,59 @@ const pulsingOrb: PlantVariant = {
   description: "An ethereal orb that gently pulses with morning light",
   rarity: 0.3, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Loops forever
   tweenBetweenKeyframes: true, // Smooth transitions
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "dim",
       duration: 8,
-      pattern: pulsingOrbPatterns.dim,
-      // Sky palette - morning light (dimmed)
-      palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
-      opacity: 0.4,
+      primitives: [
+        // Dim orb - concentric circles
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 14),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 18),
+        // 4-point star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 20, 10, 4),
+        // Corner sparkle dots
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 16, 2),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 16, 2),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 16, 2),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 16, 2),
+      ],
+      strokeColor: "#C0D8F0", // Sky - morning light (dimmed)
+      strokeOpacity: 0.4,
       scale: 0.9,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "bright",
       duration: 5,
-      pattern: pulsingOrbPatterns.bright,
-      // Sky palette - morning light (bright)
-      palette: ["#C0D8F0", "#D0E0F0", "#E8F0F8"],
-      opacity: 1.0,
+      primitives: [
+        // Bright orb - dense center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 16),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 22),
+        // Bright star burst
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 24, 12, 8),
+        // Energy rings
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 26),
+        // Sparkle points
+        vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER - 20, 2.5),
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 20, 2.5),
+        vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER + 20, 2.5),
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER + 20, 2.5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 28, 2),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 28, 2),
+        vectorCircle(VECTOR_CENTER - 28, VECTOR_CENTER, 2),
+        vectorCircle(VECTOR_CENTER + 28, VECTOR_CENTER, 2),
+      ],
+      strokeColor: "#D0E0F0", // Sky - morning light (bright)
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
@@ -2873,46 +3580,109 @@ const pulsingOrb: PlantVariant = {
  * Rare abstract ethereal variant.
  * Scale: 1.0x (standard)
  */
+/**
+ * Fractal Bloom (Vector)
+ *
+ * A self-similar recursive pattern that grows in complexity.
+ * Rare abstract ethereal variant.
+ * Scale: 1.0x (standard)
+ */
 const fractalBloom: PlantVariant = {
   id: "fractal-bloom",
   name: "Fractal Bloom",
   description: "A mesmerizing recursive pattern that grows in self-similar complexity",
   rarity: 0.2, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "seed",
       duration: 15,
-      pattern: fractalBloomPatterns.seed,
-      // Lavender - mysterious origin
-      palette: ["#E0C0F0", "#E8D0F0", "#F0E0F8"],
-      opacity: 0.5,
+      primitives: [
+        // Central seed
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        // First fractal branches (3)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 6),
+      ],
+      strokeColor: "#E0C0F0", // Lavender
+      strokeOpacity: 0.5,
       scale: 0.7,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "sprout",
       duration: 20,
-      pattern: fractalBloomPatterns.sprout,
-      // Brightening purple
-      palette: ["#D0B0E8", "#E0C0F0", "#E8D0F8"],
-      opacity: 0.75,
+      primitives: [
+        // Center grows
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        // Main branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER + 8),
+        // Sub-branches (first recursion)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER - 6, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 6, VECTOR_CENTER - 22),
+        vectorLine(VECTOR_CENTER - 14, VECTOR_CENTER + 8, VECTOR_CENTER - 20, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER + 14, VECTOR_CENTER + 8, VECTOR_CENTER + 20, VECTOR_CENTER + 4),
+        // Small terminal circles
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 22, 3),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 22, 3),
+        vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER + 4, 3),
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER + 4, 3),
+      ],
+      strokeColor: "#D0B0E8", // Brightening purple
+      strokeOpacity: 0.75,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bloom",
       duration: 60,
-      pattern: fractalBloomPatterns.bloom,
-      // Full vibrant purple
-      palette: ["#C8A8E0", "#D8B8F0", "#E8C8F8"],
-      opacity: 1.0,
+      primitives: [
+        // Full fractal center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        // Main branches
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 20),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 17, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 17, VECTOR_CENTER + 10),
+        // First recursion
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER - 8, VECTOR_CENTER - 28),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER + 8, VECTOR_CENTER - 28),
+        vectorLine(VECTOR_CENTER - 17, VECTOR_CENTER + 10, VECTOR_CENTER - 25, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER - 17, VECTOR_CENTER + 10, VECTOR_CENTER - 22, VECTOR_CENTER + 18),
+        vectorLine(VECTOR_CENTER + 17, VECTOR_CENTER + 10, VECTOR_CENTER + 25, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER + 17, VECTOR_CENTER + 10, VECTOR_CENTER + 22, VECTOR_CENTER + 18),
+        // Second recursion (smaller)
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 28, 4),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 28, 4),
+        vectorCircle(VECTOR_CENTER - 25, VECTOR_CENTER + 4, 4),
+        vectorCircle(VECTOR_CENTER + 25, VECTOR_CENTER + 4, 4),
+        vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER + 18, 4),
+        vectorCircle(VECTOR_CENTER + 22, VECTOR_CENTER + 18, 4),
+        // Tertiary details
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 24, 2),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 24, 2),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 30, 2),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 30, 2),
+      ],
+      strokeColor: "#C8A8E0", // Full vibrant purple
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Phoenix Flame
+ * Phoenix Flame (Vector)
  *
  * A rising fire-like pattern with wing animations.
  * Very rare abstract ethereal variant.
@@ -2924,41 +3694,89 @@ const phoenixFlame: PlantVariant = {
   description: "Rising flames take the form of a mythical bird spreading its wings",
   rarity: 0.15, // Very rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "ember",
       duration: 12,
-      pattern: phoenixFlamePatterns.ember,
-      // Warm ember orange
-      palette: ["#F0A850", "#F8B860", "#FCC870"],
-      opacity: 0.6,
+      primitives: [
+        // Glowing ember core
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 10),
+        // Rising flame wisps
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 6, VECTOR_CENTER - 8, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER + 6, VECTOR_CENTER + 8, VECTOR_CENTER - 4),
+      ],
+      strokeColor: "#F0A850", // Warm ember orange
+      strokeOpacity: 0.6,
       scale: 0.75,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "rising",
       duration: 15,
-      pattern: phoenixFlamePatterns.rising,
-      // Brightening flame
-      palette: ["#F89840", "#FCA850", "#FCB860"],
-      opacity: 0.85,
+      primitives: [
+        // Core flame
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 9),
+        // Rising flames
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER + 4, VECTOR_CENTER - 12, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER + 4, VECTOR_CENTER + 12, VECTOR_CENTER - 10),
+        // Wing hints
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 4, VECTOR_CENTER - 16, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 4, VECTOR_CENTER + 16, VECTOR_CENTER - 8),
+        // Flame tips
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 3),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 10, 3),
+      ],
+      strokeColor: "#F89840", // Brightening flame
+      strokeOpacity: 0.85,
       scale: 0.95,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "blaze",
       duration: 25,
-      pattern: phoenixFlamePatterns.blaze,
-      // Full radiant flame
-      palette: ["#F88830", "#FC9840", "#FCA850"],
-      opacity: 1.0,
+      primitives: [
+        // Blazing core
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 4, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 4, 8),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 10, 5, 6),
+        // Full phoenix form
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 22),
+        // Left wing
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER - 8, VECTOR_CENTER - 20, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 6, VECTOR_CENTER - 24, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 8, VECTOR_CENTER - 22, VECTOR_CENTER - 16),
+        // Right wing
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 8, VECTOR_CENTER + 20, VECTOR_CENTER - 4),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 6, VECTOR_CENTER + 24, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER - 8, VECTOR_CENTER + 22, VECTOR_CENTER - 16),
+        // Flame tips
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 22, 4),
+        vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER - 4, 3),
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 4, 3),
+        vectorCircle(VECTOR_CENTER - 24, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER - 16, 3),
+        vectorCircle(VECTOR_CENTER + 22, VECTOR_CENTER - 16, 3),
+      ],
+      strokeColor: "#F88830", // Full radiant flame
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Crystal Cluster
+ * Crystal Cluster (Vector)
  *
  * Geometric crystal growth with faceted forms.
  * Rare abstract ethereal variant.
@@ -2970,40 +3788,69 @@ const crystalCluster: PlantVariant = {
   description: "Geometric crystals that grow with angular precision and inner light",
   rarity: 0.25, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "nucleation",
       duration: 18,
-      pattern: crystalClusterPatterns.nucleation,
-      // Ice blue - crystal seed
-      palette: ["#B0D8F0", "#C0E0F8", "#D0E8FC"],
-      opacity: 0.4,
+      primitives: [
+        // Initial crystal seed
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 6, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+      ],
+      strokeColor: "#B0D8F0", // Ice blue
+      strokeOpacity: 0.4,
       scale: 0.6,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "formation",
       duration: 25,
-      pattern: crystalClusterPatterns.formation,
-      // Brightening crystalline
-      palette: ["#A0D0E8", "#B0D8F0", "#C0E0F8"],
-      opacity: 0.7,
+      primitives: [
+        // Central crystal
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 8, 14),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        // Secondary crystals forming
+        vectorDiamond(VECTOR_CENTER - 10, VECTOR_CENTER + 4, 5, 8),
+        vectorDiamond(VECTOR_CENTER + 8, VECTOR_CENTER + 6, 4, 7),
+        vectorDiamond(VECTOR_CENTER - 4, VECTOR_CENTER - 10, 4, 6),
+      ],
+      strokeColor: "#A0D0E8", // Brightening
+      strokeOpacity: 0.7,
       scale: 0.75,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "growth",
       duration: 50,
-      pattern: crystalClusterPatterns.growth,
-      // Full radiant crystal
-      palette: ["#90C8E0", "#A0D0E8", "#B0D8F0"],
-      opacity: 1.0,
+      primitives: [
+        // Main crystal cluster
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 4, 10, 18),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 4, 6),
+        // Surrounding crystals
+        vectorDiamond(VECTOR_CENTER - 14, VECTOR_CENTER + 6, 6, 12),
+        vectorDiamond(VECTOR_CENTER + 12, VECTOR_CENTER + 8, 5, 10),
+        vectorDiamond(VECTOR_CENTER - 6, VECTOR_CENTER - 16, 5, 10),
+        vectorDiamond(VECTOR_CENTER + 8, VECTOR_CENTER - 14, 4, 8),
+        vectorDiamond(VECTOR_CENTER - 10, VECTOR_CENTER - 8, 4, 8),
+        vectorDiamond(VECTOR_CENTER + 16, VECTOR_CENTER - 2, 4, 8),
+        // Inner glow lines
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER - 14, VECTOR_CENTER + 6, VECTOR_CENTER - 14, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER + 8, VECTOR_CENTER + 12, VECTOR_CENTER + 2),
+      ],
+      strokeColor: "#90C8E0", // Full crystal
+      strokeOpacity: 1.0,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Kaleidoscope Star
+ * Kaleidoscope Star (Vector)
  *
  * Rotating geometric-organic hybrid pattern.
  * Rare abstract ethereal variant with continuous rotation.
@@ -3015,32 +3862,62 @@ const kaleidoscopeStar: PlantVariant = {
   description: "A complex geometric pattern that rotates in mesmerizing symmetry",
   rarity: 0.2, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "rotate1",
       duration: 10,
-      pattern: kaleidoscopeStarPatterns.rotate1,
-      // Rainbow pastel - shifting colors
-      palette: ["#F0C0D0", "#D0E0F0", "#E0F0D0"],
-      opacity: 0.9,
+      primitives: [
+        // Central star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 12, 6, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        // Outer star rotated
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 20, 10, 8),
+        // Concentric ring
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 16),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 24),
+        // Cardinal diamonds
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 22, 4, 6),
+        vectorDiamond(VECTOR_CENTER + 22, VECTOR_CENTER, 4, 6),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 22, 4, 6),
+        vectorDiamond(VECTOR_CENTER - 22, VECTOR_CENTER, 4, 6),
+      ],
+      strokeColor: "#F0C0D0", // Rainbow pastel
+      strokeOpacity: 0.9,
       scale: 1.1,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "rotate2",
       duration: 10,
-      pattern: kaleidoscopeStarPatterns.rotate2,
-      // Shifted pastel colors
-      palette: ["#E0D0F0", "#F0E0C0", "#C0F0E0"],
-      opacity: 1.0,
+      primitives: [
+        // Central star (rotated position)
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 14, 7, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 9),
+        // Outer star
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 22, 11, 8),
+        // Concentric rings
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 18),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 26),
+        // Diagonal diamonds
+        vectorDiamond(VECTOR_CENTER - 16, VECTOR_CENTER - 16, 4, 6),
+        vectorDiamond(VECTOR_CENTER + 16, VECTOR_CENTER - 16, 4, 6),
+        vectorDiamond(VECTOR_CENTER + 16, VECTOR_CENTER + 16, 4, 6),
+        vectorDiamond(VECTOR_CENTER - 16, VECTOR_CENTER + 16, 4, 6),
+      ],
+      strokeColor: "#E0D0F0", // Shifted pastel
+      strokeOpacity: 1.0,
       scale: 1.15,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Vortex Spiral
+ * Vortex Spiral (Vector)
  *
  * Swirling energy pattern with dynamic motion.
  * Rare abstract ethereal variant with pulsing spiral arms.
@@ -3052,41 +3929,77 @@ const vortexSpiral: PlantVariant = {
   description: "Swirling energy spirals that pulse with hypnotic rhythm",
   rarity: 0.25, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "calm",
       duration: 12,
-      pattern: vortexSpiralPatterns.calm,
-      // Deep blue-purple - calm center
-      palette: ["#9080C0", "#A090D0", "#B0A0E0"],
-      opacity: 0.6,
+      primitives: [
+        // Calm center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        // Spiral arms (3)
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER + 4, VECTOR_CENTER - 14, VECTOR_CENTER + 14),
+        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER - 4, VECTOR_CENTER - 12, VECTOR_CENTER - 16),
+      ],
+      strokeColor: "#9080C0", // Deep blue-purple
+      strokeOpacity: 0.6,
       scale: 0.85,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "spin",
       duration: 8,
-      pattern: vortexSpiralPatterns.spin,
-      // Vibrant purple - spinning
-      palette: ["#A090D0", "#B0A0E0", "#C0B0F0"],
-      opacity: 0.85,
+      primitives: [
+        // Spinning center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 14),
+        // Spiral arms extended
+        vectorLine(VECTOR_CENTER + 5, VECTOR_CENTER - 2, VECTOR_CENTER + 20, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER + 4, VECTOR_CENTER - 18, VECTOR_CENTER + 16),
+        vectorLine(VECTOR_CENTER - 1, VECTOR_CENTER - 5, VECTOR_CENTER - 14, VECTOR_CENTER - 20),
+        // Spiral tips
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 14, 3),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER + 16, 3),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 20, 3),
+      ],
+      strokeColor: "#A090D0", // Vibrant purple
+      strokeOpacity: 0.85,
       scale: 1.0,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "whirl",
       duration: 6,
-      pattern: vortexSpiralPatterns.whirl,
-      // Bright radiant purple - peak intensity
-      palette: ["#B0A0E0", "#C0B0F0", "#D0C0F8"],
-      opacity: 1.0,
+      primitives: [
+        // Intense whirling center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 16),
+        // Whirling arms
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 4, VECTOR_CENTER + 24, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER - 5, VECTOR_CENTER + 5, VECTOR_CENTER - 22, VECTOR_CENTER + 18),
+        vectorLine(VECTOR_CENTER - 1, VECTOR_CENTER - 6, VECTOR_CENTER - 16, VECTOR_CENTER - 24),
+        // Energy particles
+        vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER - 18, 4),
+        vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER + 18, 4),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 24, 4),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 4, 6),
+      ],
+      strokeColor: "#B0A0E0", // Bright radiant
+      strokeOpacity: 1.0,
       scale: 1.05,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Nebula Bloom
+ * Nebula Bloom (Vector)
  *
  * Cosmic cloud-flower hybrid that forms from diffuse clouds.
  * Very rare abstract ethereal variant.
@@ -3098,40 +4011,80 @@ const nebulaBloom: PlantVariant = {
   description: "Cosmic clouds coalesce into a radiant bloom of stellar light",
   rarity: 0.15, // Very rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "drift",
       duration: 20,
-      pattern: nebulaBloomPatterns.drift,
-      // Soft nebula colors - diffuse
-      palette: ["#D0C0E0", "#E0D0F0", "#E8E0F8"],
-      opacity: 0.3,
+      primitives: [
+        // Diffuse cloud clusters
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 6, 8),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 4, 7),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER + 8, 6),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 6, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+      ],
+      strokeColor: "#D0C0E0", // Soft nebula
+      strokeOpacity: 0.3,
       scale: 0.8,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "coalescence",
       duration: 25,
-      pattern: nebulaBloomPatterns.coalescence,
-      // Forming nebula - brightening
-      palette: ["#C0B0D8", "#D0C0E8", "#E0D0F8"],
-      opacity: 0.6,
+      primitives: [
+        // Coalescing clouds
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 14),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 20),
+        // Forming petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 8, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 16, 6),
+      ],
+      strokeColor: "#C0B0D8", // Brightening
+      strokeOpacity: 0.6,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "radiance",
       duration: 60,
-      pattern: nebulaBloomPatterns.radiance,
-      // Full stellar bloom - radiant
-      palette: ["#B0A0D0", "#C0B0E0", "#D0C0F0"],
-      opacity: 1.0,
+      primitives: [
+        // Radiant stellar center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 16, 8, 8),
+        // Full bloom petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 20, 8),
+        vectorCircle(VECTOR_CENTER - 17, VECTOR_CENTER - 10, 7),
+        vectorCircle(VECTOR_CENTER + 17, VECTOR_CENTER - 10, 7),
+        vectorCircle(VECTOR_CENTER - 17, VECTOR_CENTER + 10, 7),
+        vectorCircle(VECTOR_CENTER + 17, VECTOR_CENTER + 10, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 20, 8),
+        // Outer glow
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 26),
+        // Stellar dust
+        vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER - 18, 3),
+        vectorCircle(VECTOR_CENTER + 22, VECTOR_CENTER - 18, 3),
+        vectorCircle(VECTOR_CENTER - 24, VECTOR_CENTER + 14, 2),
+        vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER + 14, 2),
+      ],
+      strokeColor: "#B0A0D0", // Full radiant
+      strokeOpacity: 1.0,
       scale: 1.2,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Aurora Wisp
+ * Aurora Wisp (Vector)
  *
  * Northern lights captured as flowing ethereal ribbons.
  * Shimmers and dances with aurora-like movement.
@@ -3143,41 +4096,77 @@ const auroraWisp: PlantVariant = {
   description: "Northern lights captured in flowing ribbons of ethereal beauty",
   rarity: 0.18, // Very rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Continuous flowing animation
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "shimmer",
       duration: 18,
-      pattern: auroraWispPatterns.shimmer,
-      // Soft cyan-green aurora
-      palette: ["#B8E8E0", "#C8F0E8", "#D8F8F0"],
-      opacity: 0.5,
+      primitives: [
+        // Soft flowing ribbons
+        vectorLine(VECTOR_CENTER - 16, VECTOR_CENTER + 12, VECTOR_CENTER - 8, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 8, VECTOR_CENTER + 4, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER + 4, VECTOR_CENTER + 14, VECTOR_CENTER - 10),
+        // Ethereal glow points
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 2, 5),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 4, 4),
+      ],
+      strokeColor: "#B8E8E0", // Soft cyan-green
+      strokeOpacity: 0.5,
       scale: 0.85,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "flow",
       duration: 22,
-      pattern: auroraWispPatterns.flow,
-      // Brightening aurora
-      palette: ["#A8E0D8", "#B8E8E0", "#C8F0E8"],
-      opacity: 0.75,
+      primitives: [
+        // Flowing wave ribbons
+        vectorLine(VECTOR_CENTER - 20, VECTOR_CENTER + 10, VECTOR_CENTER - 10, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 10, VECTOR_CENTER + 2, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER + 6, VECTOR_CENTER + 16, VECTOR_CENTER - 12),
+        vectorLine(VECTOR_CENTER + 16, VECTOR_CENTER - 12, VECTOR_CENTER + 22, VECTOR_CENTER - 8),
+        // Wave crests
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 4, 6),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 2, 5),
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 10, 4),
+      ],
+      strokeColor: "#A8E0D8", // Brightening
+      strokeOpacity: 0.75,
       scale: 1.0,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "dance",
       duration: 30,
-      pattern: auroraWispPatterns.dance,
-      // Full aurora brilliance
-      palette: ["#98D8D0", "#A8E0D8", "#B8E8E0"],
-      opacity: 1.0,
+      primitives: [
+        // Dancing ribbons in full flow
+        vectorLine(VECTOR_CENTER - 24, VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER + 14, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER + 14, VECTOR_CENTER - 16, VECTOR_CENTER + 26, VECTOR_CENTER - 6),
+        // Brilliant aurora nodes
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 2, 6),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 4, 7),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 2, 7),
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 10, 6),
+        // Shimmer particles
+        vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER + 6, 3),
+        vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER - 4, 3),
+      ],
+      strokeColor: "#98D8D0", // Full brilliance
+      strokeOpacity: 1.0,
       scale: 1.15,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Prismatic Fern
+ * Prismatic Fern (Vector)
  *
  * Rainbow light refracted through crystalline fronds.
  * Each frond acts as a living prism.
@@ -3188,40 +4177,84 @@ const prismaticFern: PlantVariant = {
   description: "Crystal fronds that refract light into rainbow patterns",
   rarity: 0.2, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "sprout",
       duration: 20,
-      pattern: prismaticFernPatterns.sprout,
-      // Soft pastel rainbow start
-      palette: ["#E8D0F0", "#F0D8F8", "#F8E0FF"],
-      opacity: 0.6,
+      primitives: [
+        // Initial fern curl
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER - 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 3),
+        // First frond hints
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 6, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 6, VECTOR_CENTER - 10),
+      ],
+      strokeColor: "#E8D0F0", // Soft pastel
+      strokeOpacity: 0.6,
       scale: 0.75,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "unfurling",
       duration: 25,
-      pattern: prismaticFernPatterns.unfurling,
-      // Vibrant spectrum emerging
-      palette: ["#D8C0E8", "#E8D0F0", "#F0D8F8"],
-      opacity: 0.8,
+      primitives: [
+        // Central stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER, VECTOR_CENTER - 14),
+        // Unfurling fronds (pairs)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER - 12, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 12, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 14, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 14, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER - 10, VECTOR_CENTER - 2),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
+        // Frond tips
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 18, 3),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 18, 3),
+      ],
+      strokeColor: "#D8C0E8", // Vibrant
+      strokeOpacity: 0.8,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "prismatic",
       duration: 55,
-      pattern: prismaticFernPatterns.prismatic,
-      // Full rainbow refraction
-      palette: ["#C8B0E0", "#D8C0E8", "#E8D0F0"],
-      opacity: 1.0,
+      primitives: [
+        // Full stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER, VECTOR_CENTER - 18),
+        // Full frond pairs (multiple levels)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER - 16, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 14, VECTOR_CENTER + 16, VECTOR_CENTER - 24),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 18, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER + 18, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER - 16, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER + 16, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER - 12, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER + 12, VECTOR_CENTER + 2),
+        // Prismatic refraction points
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 24, 4),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 24, 4),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 14, 3),
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 14, 3),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 6, 3),
+        // Rainbow tip
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER - 20, 6, 3, 6),
+      ],
+      strokeColor: "#C8B0E0", // Full rainbow
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Quantum Rose
+ * Quantum Rose (Vector)
  *
  * Rose petals existing in quantum superposition until observed.
  * Collapses into a classical rose when measured.
@@ -3232,40 +4265,82 @@ const quantumRose: PlantVariant = {
   description: "A rose existing in superposition, collapsing into beauty when observed",
   rarity: 0.12, // Very rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "bud",
       duration: 18,
-      pattern: quantumRosePatterns.bud,
-      // Rose petal colors - soft
-      palette: ["#F0C8D8", "#F8D0E0", "#FFD8E8"],
-      opacity: 0.6,
+      primitives: [
+        // Rose bud center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 7),
+        // Closed petals
+        vectorCircle(VECTOR_CENTER - 3, VECTOR_CENTER - 10, 4),
+        vectorCircle(VECTOR_CENTER + 3, VECTOR_CENTER - 10, 4),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#F0C8D8", // Soft rose
+      strokeOpacity: 0.6,
       scale: 0.7,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "superposed",
       duration: 28,
-      pattern: quantumRosePatterns.superposed,
-      // Quantum shimmer - multiple states
-      palette: ["#E8B8D0", "#F0C0D8", "#F8C8E0"],
-      opacity: 0.7,
+      primitives: [
+        // Quantum shimmer center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 8),
+        // Multiple superposed petals (ghost-like)
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 10, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 4, 4),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 4, 4),
+        // Quantum probability waves
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 14),
+        // Stem
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
+      ],
+      strokeColor: "#E8B8D0", // Quantum shimmer
+      strokeOpacity: 0.7,
       scale: 0.95,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "collapsed",
       duration: 60,
-      pattern: quantumRosePatterns.collapsed,
-      // Classical rose - deep color
-      palette: ["#E0A8C8", "#E8B0D0", "#F0B8D8"],
-      opacity: 1.0,
+      primitives: [
+        // Classical rose center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 6),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER - 6, 8, 4, 5),
+        // Full bloom petals (layered)
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 10, 6),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 10, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 18, 6),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 2, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 2, 5),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 14, 5),
+        // Stem with thorns
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 20),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER - 4, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER + 4, VECTOR_CENTER + 12),
+      ],
+      strokeColor: "#E0A8C8", // Classical rose
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Star Moss
+ * Star Moss (Vector)
  *
  * Bioluminescent moss forming living constellations.
  * Grows from sparse stars to dense galaxy.
@@ -3276,40 +4351,85 @@ const starMoss: PlantVariant = {
   description: "Bioluminescent moss forming constellations across the ground",
   rarity: 0.3, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "sparse",
       duration: 25,
-      pattern: starMossPatterns.sparse,
-      // Soft starlight
-      palette: ["#D0D8F0", "#D8E0F8", "#E0E8FF"],
-      opacity: 0.5,
+      primitives: [
+        // Sparse star points
+        vectorStar(VECTOR_CENTER - 10, VECTOR_CENTER - 8, 4, 2, 4),
+        vectorStar(VECTOR_CENTER + 8, VECTOR_CENTER - 6, 3, 1.5, 4),
+        vectorStar(VECTOR_CENTER - 6, VECTOR_CENTER + 10, 3, 1.5, 4),
+        vectorStar(VECTOR_CENTER + 12, VECTOR_CENTER + 6, 4, 2, 4),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 5, 2.5, 4),
+        // Dim connecting lines
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 6),
+      ],
+      strokeColor: "#D0D8F0", // Soft starlight
+      strokeOpacity: 0.5,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "growing",
       duration: 30,
-      pattern: starMossPatterns.growing,
-      // Constellation forming
-      palette: ["#C0D0E8", "#C8D8F0", "#D0E0F8"],
-      opacity: 0.75,
+      primitives: [
+        // More stars forming
+        vectorStar(VECTOR_CENTER - 12, VECTOR_CENTER - 10, 5, 2.5, 4),
+        vectorStar(VECTOR_CENTER + 10, VECTOR_CENTER - 8, 4, 2, 4),
+        vectorStar(VECTOR_CENTER - 8, VECTOR_CENTER + 12, 4, 2, 4),
+        vectorStar(VECTOR_CENTER + 14, VECTOR_CENTER + 8, 5, 2.5, 4),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 3, 5),
+        vectorStar(VECTOR_CENTER - 4, VECTOR_CENTER - 14, 3, 1.5, 4),
+        vectorStar(VECTOR_CENTER + 6, VECTOR_CENTER + 14, 3, 1.5, 4),
+        // Constellation lines
+        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 10, VECTOR_CENTER, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER + 12, VECTOR_CENTER, VECTOR_CENTER),
+      ],
+      strokeColor: "#C0D0E8", // Constellation
+      strokeOpacity: 0.75,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "galaxy",
       duration: 50,
-      pattern: starMossPatterns.galaxy,
-      // Dense starfield
-      palette: ["#B0C8E0", "#B8D0E8", "#C0D8F0"],
-      opacity: 1.0,
+      primitives: [
+        // Dense starfield
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 4, 6),
+        vectorStar(VECTOR_CENTER - 14, VECTOR_CENTER - 12, 6, 3, 4),
+        vectorStar(VECTOR_CENTER + 12, VECTOR_CENTER - 10, 5, 2.5, 4),
+        vectorStar(VECTOR_CENTER - 10, VECTOR_CENTER + 14, 5, 2.5, 4),
+        vectorStar(VECTOR_CENTER + 16, VECTOR_CENTER + 10, 6, 3, 4),
+        vectorStar(VECTOR_CENTER - 6, VECTOR_CENTER - 18, 4, 2, 4),
+        vectorStar(VECTOR_CENTER + 8, VECTOR_CENTER + 18, 4, 2, 4),
+        vectorStar(VECTOR_CENTER - 18, VECTOR_CENTER - 4, 4, 2, 4),
+        vectorStar(VECTOR_CENTER + 20, VECTOR_CENTER - 2, 4, 2, 4),
+        // Galaxy spiral hint
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 20),
+        // Star dust
+        vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER + 8, 2),
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 14, 2),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 16, 2),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 22, 2),
+      ],
+      strokeColor: "#B0C8E0", // Dense starfield
+      strokeOpacity: 1.0,
       scale: 1.1,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Dream Vine
+ * Dream Vine (Vector)
  *
  * Ethereal vines that flow like liquid dreams.
  * Weaves through space with impossible grace.
@@ -3320,41 +4440,80 @@ const dreamVine: PlantVariant = {
   description: "Ethereal vines flowing through space like liquid dreams",
   rarity: 0.22, // Rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   loop: true, // Continuous flowing
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "tendril",
       duration: 20,
-      pattern: dreamVinePatterns.tendril,
-      // Soft dreamy purple
-      palette: ["#D8C8E8", "#E0D0F0", "#E8D8F8"],
-      opacity: 0.5,
+      primitives: [
+        // Initial tendril curl
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER, VECTOR_CENTER + 4),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER - 6, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 10),
+        // Curl tips
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 6, 2),
+      ],
+      strokeColor: "#D8C8E8", // Soft dreamy
+      strokeOpacity: 0.5,
       scale: 0.8,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "weaving",
       duration: 25,
-      pattern: dreamVinePatterns.weaving,
-      // Flowing lavender
-      palette: ["#C8B8E0", "#D0C0E8", "#D8C8F0"],
-      opacity: 0.75,
+      primitives: [
+        // Weaving vine path
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 4, VECTOR_CENTER + 8),
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER + 6, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 10),
+        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 10, VECTOR_CENTER + 4, VECTOR_CENTER - 16),
+        // Leaf nodes
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER + 8, 3),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 16, 4),
+      ],
+      strokeColor: "#C8B8E0", // Flowing lavender
+      strokeOpacity: 0.75,
       scale: 1.0,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "cascade",
       duration: 35,
-      pattern: dreamVinePatterns.cascade,
-      // Full ethereal bloom
-      palette: ["#B8A8D8", "#C0B0E0", "#C8B8E8"],
-      opacity: 1.0,
+      primitives: [
+        // Full cascading vine
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER - 6, VECTOR_CENTER + 10),
+        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 10, VECTOR_CENTER + 8, VECTOR_CENTER + 2),
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER + 2, VECTOR_CENTER - 10, VECTOR_CENTER - 8),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER + 6, VECTOR_CENTER - 16),
+        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 16, VECTOR_CENTER - 4, VECTOR_CENTER - 22),
+        // Secondary tendrils
+        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER + 2, VECTOR_CENTER + 16, VECTOR_CENTER + 6),
+        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER - 18, VECTOR_CENTER - 6),
+        // Dream flower nodes
+        vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER + 10, 4),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER + 2, 5),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 8, 4),
+        vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 22, 4),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 6, 3),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 6, 3),
+      ],
+      strokeColor: "#B8A8D8", // Full ethereal
+      strokeOpacity: 1.0,
       scale: 1.15,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
   ],
 };
 
 /**
- * Cosmic Lotus
+ * Cosmic Lotus (Vector)
  *
  * Sacred geometry meets cosmic bloom.
  * Unfolds according to the flower of life pattern.
@@ -3365,34 +4524,80 @@ const cosmicLotus: PlantVariant = {
   description: "Sacred geometry blooming into transcendent cosmic flower",
   rarity: 0.1, // Very rare
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "seed",
       duration: 22,
-      pattern: cosmicLotusPatterns.seed,
-      // Sacred gold tones
-      palette: ["#F0E0C8", "#F8E8D0", "#FFF0D8"],
-      opacity: 0.6,
+      primitives: [
+        // Sacred seed geometry
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        // Vesica piscis hint
+        vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER, 6),
+      ],
+      strokeColor: "#F0E0C8", // Sacred gold
+      strokeOpacity: 0.6,
       scale: 0.75,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "opening",
       duration: 30,
-      pattern: cosmicLotusPatterns.opening,
-      // Brightening sacred light
-      palette: ["#E8D8B8", "#F0E0C0", "#F8E8C8"],
-      opacity: 0.8,
+      primitives: [
+        // Opening sacred geometry
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 16),
+        // Flower of life pattern (6 overlapping circles)
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 6),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 6, 6),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 6, 6),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER + 6, 6),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 6, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 12, 6),
+        // Petals emerging
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 18, 4),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 9, 4),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 9, 4),
+      ],
+      strokeColor: "#E8D8B8", // Brightening
+      strokeOpacity: 0.8,
       scale: 0.95,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "transcendent",
       duration: 65,
-      pattern: cosmicLotusPatterns.transcendent,
-      // Full cosmic radiance
-      palette: ["#E0D0B0", "#E8D8B8", "#F0E0C0"],
-      opacity: 1.0,
+      primitives: [
+        // Transcendent center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 12, 6, 12),
+        // Full flower of life
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 7),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 7, 7),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 7, 7),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 7, 7),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER + 7, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 7),
+        // Outer lotus petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 24, 6),
+        vectorCircle(VECTOR_CENTER - 21, VECTOR_CENTER - 12, 5),
+        vectorCircle(VECTOR_CENTER + 21, VECTOR_CENTER - 12, 5),
+        vectorCircle(VECTOR_CENTER - 21, VECTOR_CENTER + 12, 5),
+        vectorCircle(VECTOR_CENTER + 21, VECTOR_CENTER + 12, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 24, 6),
+        // Cosmic radiance
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 28),
+      ],
+      strokeColor: "#E0D0B0", // Full cosmic
+      strokeOpacity: 1.0,
       scale: 1.2,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
   ],
 };
@@ -3489,7 +4694,7 @@ function createSumiSpiritPatterns() {
   return { touch, draw, flow, settle, rest };
 }
 
-const sumiSpiritPatterns = createSumiSpiritPatterns();
+const _sumiSpiritPatterns = createSumiSpiritPatterns();
 
 /**
  * Sumi Spirit
@@ -3506,91 +4711,89 @@ const sumiSpirit: PlantVariant = {
   description: "An ink brush stroke enso that embodies the beauty of imperfection",
   rarity: 0.15, // Rare - contemplative piece
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "touch",
       duration: 8,
-      pattern: sumiSpiritPatterns.touch,
-      // Spirit blue - initial ink touch
-      palette: ["#1E3A5F", "#2D4A6F", "#3D5A7F"],
-      opacity: 0.6,
+      primitives: [
+        // Initial brush touch - small arc starting the stroke
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 180, 240, 6),
+        // Small dot where brush touches
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 2),
+      ],
+      strokeColor: "#1E3A5F", // Deep indigo
+      strokeOpacity: 0.6,
       scale: 0.8,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "draw",
       duration: 12,
-      pattern: sumiSpiritPatterns.draw,
-      // Spirit blue - stroke extending
-      palette: ["#1E3A5F", "#3A5A8F", "#5A7AAF"],
-      opacity: 0.75,
+      primitives: [
+        // Brush extending - larger arc
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 150, 300, 12),
+        // Inner stroke following the arc
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 160, 280, 8),
+      ],
+      strokeColor: "#3A5A8F", // Mid indigo-blue
+      strokeOpacity: 0.75,
       scale: 0.9,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "flow",
       duration: 18,
-      pattern: sumiSpiritPatterns.flow,
-      // Spirit blue - flowing ink
-      palette: ["#1E3A5F", "#4A6FA5", "#7A9FC5"],
-      opacity: 0.85,
+      primitives: [
+        // Flowing ink - most of the enso
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 120, 350, 18),
+        // Inner flow
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 130, 340, 14),
+        // Brush thickness variation
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 12, 150, 320, 10),
+      ],
+      strokeColor: "#4A6FA5", // Spirit blue
+      strokeOpacity: 0.85,
       scale: 0.95,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "settle",
       duration: 25,
-      pattern: sumiSpiritPatterns.settle,
-      // Spirit blue - settling
-      palette: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
-      opacity: 0.95,
+      primitives: [
+        // Nearly complete enso with characteristic gap at top
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 22, 100, 380, 22),
+        // Inner rings showing brush texture
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 110, 370, 18),
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 120, 360, 14),
+        // Small accent at brush end
+        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 21, 2),
+      ],
+      strokeColor: "#5A8FC5", // Lighter spirit blue
+      strokeOpacity: 0.95,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
     {
       name: "rest",
       duration: 60,
-      pattern: sumiSpiritPatterns.rest,
-      // Spirit blue - final form
-      palette: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
-      opacity: 1.0,
+      primitives: [
+        // Final enso form - beautiful imperfection with gap at ~70° (top-right)
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 24, 80, 400, 24),
+        // Inner strokes showing brush character
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 90, 390, 20),
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 100, 380, 16),
+        // Subtle inner detail
+        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 11, 120, 360, 10),
+        // Brush lift point
+        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 13, 1.5),
+      ],
+      strokeColor: "#7A9FC5", // Pale spirit blue
+      strokeOpacity: 1.0,
       scale: 1.0,
-    },
-  ],
-  // Color variations - quantum selects one
-  colorVariations: [
-    {
-      name: "spirit-blue",
-      weight: 1.0, // Primary (most common)
-      palettes: {
-        // Deep indigo to pale blue - like Haku's dragon form
-        touch: ["#1E3A5F", "#2D4A6F", "#3D5A7F"],
-        draw: ["#1E3A5F", "#3A5A8F", "#5A7AAF"],
-        flow: ["#1E3A5F", "#4A6FA5", "#7A9FC5"],
-        settle: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
-        rest: ["#1E3A5F", "#4A6FA5", "#A8C5E5"],
-      },
-    },
-    {
-      name: "classic-sumi",
-      weight: 0.7, // Traditional ink
-      palettes: {
-        // Deep black to gray wash - traditional sumi ink
-        touch: ["#1A1A2E", "#2A2A3E", "#3A3A4E"],
-        draw: ["#1A1A2E", "#3A3A4E", "#5A5A6E"],
-        flow: ["#1A1A2E", "#4A4A5E", "#6A6A7E"],
-        settle: ["#1A1A2E", "#4A4A5E", "#8A8A9E"],
-        rest: ["#1A1A2E", "#4A4A5E", "#8A8A9E"],
-      },
-    },
-    {
-      name: "autumn-red",
-      weight: 0.4, // Rare - vermillion seal ink
-      palettes: {
-        // Vermillion to pale gold - like autumn leaves or seal ink
-        touch: ["#8B2635", "#9B3645", "#AB4655"],
-        draw: ["#8B2635", "#A84A3C", "#C56A5C"],
-        flow: ["#8B2635", "#C85A3C", "#D89070"],
-        settle: ["#8B2635", "#C85A3C", "#E8C4A8"],
-        rest: ["#8B2635", "#C85A3C", "#E8C4A8"],
-      },
+      transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
   ],
 };
@@ -3606,7 +4809,7 @@ const sumiSpirit: PlantVariant = {
  * 6 petals arranged in a hexagonal pattern for meditative clarity.
  * Extended 8-stage lifecycle for slow, meditative unfolding.
  */
-function createZenLotusPatterns() {
+function _createZenLotusPatterns() {
   const center = PATTERN_SIZE / 2;
 
   // Seed: Simple circular seed, potential contained
@@ -3703,10 +4906,8 @@ function createZenLotusPatterns() {
   return { seed, bud, rise, open, unfurl, bloom, breathe, rest, close };
 }
 
-const zenLotusPatterns = createZenLotusPatterns();
-
 /**
- * Zen Lotus
+ * Zen Lotus (Vector)
  *
  * A simple, geometric lotus with clean lines and perfect 6-fold symmetry.
  * Embodies meditative clarity and stillness.
@@ -3718,79 +4919,208 @@ const zenLotus: PlantVariant = {
   description: "A geometric lotus of pure form and meditative symmetry",
   rarity: 0.2, // Uncommon
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "seed",
       duration: 10,
-      pattern: zenLotusPatterns.seed,
-      palette: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
-      opacity: 0.5,
+      primitives: [
+        // Small seed circle
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+      ],
+      strokeColor: "#E8EBE8", // White-jade
+      strokeOpacity: 0.5,
       scale: 0.5,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bud",
       duration: 12,
-      pattern: zenLotusPatterns.bud,
-      palette: ["#E8EBE8", "#EEF1EE", "#F4F7F4"],
-      opacity: 0.6,
+      primitives: [
+        // Bud center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 7),
+        // First petal hints (6-fold)
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER, VECTOR_CENTER - 14),
+        vectorLine(VECTOR_CENTER - 7, VECTOR_CENTER - 4, VECTOR_CENTER - 12, VECTOR_CENTER - 7),
+        vectorLine(VECTOR_CENTER + 7, VECTOR_CENTER - 4, VECTOR_CENTER + 12, VECTOR_CENTER - 7),
+      ],
+      strokeColor: "#E8EBE8",
+      strokeOpacity: 0.6,
       scale: 0.65,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "rise",
       duration: 12,
-      pattern: zenLotusPatterns.rise,
-      palette: ["#E4E9E6", "#ECEFE9", "#F2F5F2"],
-      opacity: 0.7,
+      primitives: [
+        // Rising center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 9),
+        // 6 petals emerging
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER, VECTOR_CENTER - 18),
+        vectorLine(VECTOR_CENTER - 9, VECTOR_CENTER - 5, VECTOR_CENTER - 16, VECTOR_CENTER - 9),
+        vectorLine(VECTOR_CENTER + 9, VECTOR_CENTER - 5, VECTOR_CENTER + 16, VECTOR_CENTER - 9),
+        vectorLine(VECTOR_CENTER - 9, VECTOR_CENTER + 5, VECTOR_CENTER - 16, VECTOR_CENTER + 9),
+        vectorLine(VECTOR_CENTER + 9, VECTOR_CENTER + 5, VECTOR_CENTER + 16, VECTOR_CENTER + 9),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER, VECTOR_CENTER + 16),
+      ],
+      strokeColor: "#E4E9E6",
+      strokeOpacity: 0.7,
       scale: 0.75,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "open",
       duration: 15,
-      pattern: zenLotusPatterns.open,
-      palette: ["#E0E5E2", "#E8EDE9", "#F0F5F1"],
-      opacity: 0.8,
+      primitives: [
+        // Opening center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 12),
+        // 6 petals opening wider
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 18, 4),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 9, 4),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 9, 4),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 9, 4),
+        vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 9, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 18, 4),
+      ],
+      strokeColor: "#E0E5E2",
+      strokeOpacity: 0.8,
       scale: 0.85,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "unfurl",
       duration: 18,
-      pattern: zenLotusPatterns.unfurl,
-      palette: ["#DCE2DC", "#E6ECE6", "#F0F6F0"],
-      opacity: 0.9,
+      primitives: [
+        // Unfurling center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 13),
+        // Inner petal layer (6)
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 5),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 8, 5),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 5),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 8, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 16, 5),
+        // Outer petal hints
+        vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 20, 3),
+        vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 20, 3),
+      ],
+      strokeColor: "#DCE2DC",
+      strokeOpacity: 0.9,
       scale: 0.92,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "bloom",
       duration: 40,
-      pattern: zenLotusPatterns.bloom,
-      palette: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
-      opacity: 1.0,
+      primitives: [
+        // Full bloom center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 4, 6),
+        // Inner petal ring (6)
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 7, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 7, 5),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 7, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER + 7, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 5),
+        // Outer petal ring (6)
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 22, 4),
+        vectorCircle(VECTOR_CENTER - 19, VECTOR_CENTER - 11, 4),
+        vectorCircle(VECTOR_CENTER + 19, VECTOR_CENTER - 11, 4),
+        vectorCircle(VECTOR_CENTER - 19, VECTOR_CENTER + 11, 4),
+        vectorCircle(VECTOR_CENTER + 19, VECTOR_CENTER + 11, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 22, 4),
+      ],
+      strokeColor: "#D8DED8",
+      strokeOpacity: 1.0,
       scale: 1.0,
+      transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
     {
       name: "breathe",
       duration: 25,
-      pattern: zenLotusPatterns.breathe,
-      palette: ["#D8DED8", "#E4EAE4", "#F0F6F0"],
-      opacity: 1.0,
+      primitives: [
+        // Breathing - slightly expanded
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 7),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 11),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 9, 5, 6),
+        // Inner ring expanded
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 6),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 8, 6),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 8, 6),
+        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 6),
+        vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 8, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 16, 6),
+        // Outer ring expanded
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 24, 5),
+        vectorCircle(VECTOR_CENTER - 21, VECTOR_CENTER - 12, 5),
+        vectorCircle(VECTOR_CENTER + 21, VECTOR_CENTER - 12, 5),
+        vectorCircle(VECTOR_CENTER - 21, VECTOR_CENTER + 12, 5),
+        vectorCircle(VECTOR_CENTER + 21, VECTOR_CENTER + 12, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 24, 5),
+      ],
+      strokeColor: "#D8DED8",
+      strokeOpacity: 1.0,
       scale: 1.05,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "rest",
       duration: 20,
-      pattern: zenLotusPatterns.rest,
-      palette: ["#E0E5E0", "#E8EDE8", "#F0F5F0"],
-      opacity: 0.9,
+      primitives: [
+        // Resting - back to normal
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 4, 6),
+        // Inner petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 5),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 7, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 7, 5),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 7, 5),
+        vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER + 7, 5),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 5),
+        // Outer petals
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 22, 4),
+        vectorCircle(VECTOR_CENTER - 19, VECTOR_CENTER - 11, 4),
+        vectorCircle(VECTOR_CENTER + 19, VECTOR_CENTER - 11, 4),
+      ],
+      strokeColor: "#E0E5E0",
+      strokeOpacity: 0.9,
       scale: 0.95,
+      transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
     {
       name: "close",
       duration: 15,
-      pattern: zenLotusPatterns.close,
-      palette: ["#E4E9E4", "#ECEFEC", "#F2F5F2"],
-      opacity: 0.7,
+      primitives: [
+        // Closing center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
+        // Petals folding inward
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 4),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 6, 4),
+        vectorCircle(VECTOR_CENTER - 10, VECTOR_CENTER + 6, 4),
+        vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 6, 4),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 12, 4),
+      ],
+      strokeColor: "#E4E9E4",
+      strokeOpacity: 0.7,
       scale: 0.8,
+      transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
   ],
   // Color variations - quantum selects one
@@ -3885,7 +5215,7 @@ function createSacredMandalaPatterns() {
   return { seed, rings, radiate, complete };
 }
 
-const sacredMandalaPatterns = createSacredMandalaPatterns();
+const _sacredMandalaPatterns = createSacredMandalaPatterns();
 
 /**
  * Sacred Mandala - Concentric circles and radiating lines forming a contemplative pattern
@@ -3896,38 +5226,51 @@ const sacredMandala: PlantVariant = {
   description: "Precise geometric circles and radiating lines forming a contemplative pattern",
   rarity: 0.1,
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "seed",
       duration: 10,
-      pattern: sacredMandalaPatterns.seed,
-      palette: ["#909090", "#909090", "#909090"],
-      opacity: 0.5,
+      primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
+      strokeColor: "#909090",
+      strokeOpacity: 0.5,
       scale: 0.7,
     },
     {
       name: "rings",
       duration: 15,
-      pattern: sacredMandalaPatterns.rings,
-      palette: ["#808080", "#808080", "#808080"],
-      opacity: 0.7,
+      primitives: [...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18])],
+      strokeColor: "#808080",
+      strokeOpacity: 0.7,
       scale: 0.85,
     },
     {
       name: "radiate",
       duration: 20,
-      pattern: sacredMandalaPatterns.radiate,
-      palette: ["#707070", "#707070", "#707070"],
-      opacity: 0.85,
+      primitives: [
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18, 24]),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 6, 26),
+      ],
+      strokeColor: "#707070",
+      strokeOpacity: 0.85,
       scale: 0.95,
     },
     {
       name: "complete",
       duration: 60,
-      pattern: sacredMandalaPatterns.complete,
-      palette: ["#606060", "#606060", "#606060"],
-      opacity: 1.0,
+      primitives: [
+        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [5, 10, 15, 20, 26]),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 5, 28),
+        // Diamonds at cardinal points
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 18, 5, 7),
+        vectorDiamond(VECTOR_CENTER + 18, VECTOR_CENTER, 5, 7),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 18, 5, 7),
+        vectorDiamond(VECTOR_CENTER - 18, VECTOR_CENTER, 5, 7),
+      ],
+      strokeColor: "#606060",
+      strokeOpacity: 1.0,
       scale: 1.0,
     },
   ],
@@ -3992,7 +5335,7 @@ function createCrystalLatticePatterns() {
   return { diamond, grid, expand, full };
 }
 
-const crystalLatticePatterns = createCrystalLatticePatterns();
+const _crystalLatticePatterns = createCrystalLatticePatterns();
 
 /**
  * Crystal Lattice - Interlocking diamond grid with thin connecting lines
@@ -4003,38 +5346,74 @@ const crystalLattice: PlantVariant = {
   description: "Interlocking diamond grid evoking crystalline molecular structures",
   rarity: 0.1,
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "diamond",
       duration: 10,
-      pattern: crystalLatticePatterns.diamond,
-      palette: ["#888888", "#888888", "#888888"],
-      opacity: 0.5,
+      primitives: [vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 14, 18)],
+      strokeColor: "#888888",
+      strokeOpacity: 0.5,
       scale: 0.7,
     },
     {
       name: "grid",
       duration: 15,
-      pattern: crystalLatticePatterns.grid,
-      palette: ["#787878", "#787878", "#787878"],
-      opacity: 0.7,
+      primitives: [
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 12, 16),
+        vectorDiamond(VECTOR_CENTER - 10, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER + 10, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 10, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 10, 8, 12),
+      ],
+      strokeColor: "#787878",
+      strokeOpacity: 0.7,
       scale: 0.85,
     },
     {
       name: "expand",
       duration: 20,
-      pattern: crystalLatticePatterns.expand,
-      palette: ["#686868", "#686868", "#686868"],
-      opacity: 0.85,
+      primitives: [
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER - 14, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER + 14, VECTOR_CENTER, 10, 14),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 14, 10, 14),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 14, 10, 14),
+        // Connecting lines
+        vectorLine(VECTOR_CENTER - 5, VECTOR_CENTER, VECTOR_CENTER - 9, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER + 5, VECTOR_CENTER, VECTOR_CENTER + 9, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 7, VECTOR_CENTER, VECTOR_CENTER - 7),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 7, VECTOR_CENTER, VECTOR_CENTER + 7),
+      ],
+      strokeColor: "#686868",
+      strokeOpacity: 0.85,
       scale: 0.95,
     },
     {
       name: "full",
       duration: 60,
-      pattern: crystalLatticePatterns.full,
-      palette: ["#585858", "#585858", "#585858"],
-      opacity: 1.0,
+      primitives: [
+        // Core structure
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER - 12, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER + 12, VECTOR_CENTER, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 12, 8, 12),
+        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 12, 8, 12),
+        // Diagonal diamonds
+        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER - 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER - 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER + 9, 6, 8),
+        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER + 9, 6, 8),
+        // Connecting lines
+        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 6),
+        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 6),
+      ],
+      strokeColor: "#585858",
+      strokeOpacity: 1.0,
       scale: 1.0,
     },
   ],
@@ -4075,7 +5454,7 @@ function createStellarGeometryPatterns() {
   return { point, star, rays, nested };
 }
 
-const stellarGeometryPatterns = createStellarGeometryPatterns();
+const _stellarGeometryPatterns = createStellarGeometryPatterns();
 
 /**
  * Stellar Geometry - Star outlines with radiating lines
@@ -4086,38 +5465,56 @@ const stellarGeometry: PlantVariant = {
   description: "Nested star outlines radiating with precise mathematical beauty",
   rarity: 0.1,
   requiresObservationToGerminate: true,
+  renderMode: "vector",
   tweenBetweenKeyframes: true,
-  keyframes: [
+  keyframes: [],
+  vectorKeyframes: [
     {
       name: "point",
       duration: 8,
-      pattern: stellarGeometryPatterns.point,
-      palette: ["#909090", "#909090", "#909090"],
-      opacity: 0.5,
+      primitives: [
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 4, 7),
+      ],
+      strokeColor: "#909090",
+      strokeOpacity: 0.5,
       scale: 0.6,
     },
     {
       name: "star",
       duration: 12,
-      pattern: stellarGeometryPatterns.star,
-      palette: ["#808080", "#808080", "#808080"],
-      opacity: 0.7,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+      ],
+      strokeColor: "#808080",
+      strokeOpacity: 0.7,
       scale: 0.8,
     },
     {
       name: "rays",
       duration: 18,
-      pattern: stellarGeometryPatterns.rays,
-      palette: ["#707070", "#707070", "#707070"],
-      opacity: 0.85,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 9, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 26, -90),
+      ],
+      strokeColor: "#707070",
+      strokeOpacity: 0.85,
       scale: 0.9,
     },
     {
       name: "nested",
       duration: 60,
-      pattern: stellarGeometryPatterns.nested,
-      palette: ["#606060", "#606060", "#606060"],
-      opacity: 1.0,
+      primitives: [
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 24, 12, -90),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 10, 5, -90),
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 12, 24, 28, -90),
+      ],
+      strokeColor: "#606060",
+      strokeOpacity: 1.0,
       scale: 1.0,
     },
   ],
@@ -4221,7 +5618,7 @@ function createMetatronsCubePatterns() {
   return { circle, six, connect, complete };
 }
 
-const metatronsCubePatterns = createMetatronsCubePatterns();
+const _metatronsCubePatterns = createMetatronsCubePatterns();
 
 /**
  * Metatron's Cube - Sacred geometry pattern of overlapping circles and lines
@@ -4231,267 +5628,6 @@ const metatronsCube: PlantVariant = {
   name: "Metatron's Cube",
   description: "Sacred geometry of overlapping circles forming the Flower of Life",
   rarity: 0.08,
-  requiresObservationToGerminate: true,
-  tweenBetweenKeyframes: true,
-  keyframes: [
-    {
-      name: "circle",
-      duration: 10,
-      pattern: metatronsCubePatterns.circle,
-      palette: ["#888888", "#888888", "#888888"],
-      opacity: 0.5,
-      scale: 0.7,
-    },
-    {
-      name: "six",
-      duration: 15,
-      pattern: metatronsCubePatterns.six,
-      palette: ["#787878", "#787878", "#787878"],
-      opacity: 0.7,
-      scale: 0.85,
-    },
-    {
-      name: "connect",
-      duration: 20,
-      pattern: metatronsCubePatterns.connect,
-      palette: ["#686868", "#686868", "#686868"],
-      opacity: 0.85,
-      scale: 0.92,
-    },
-    {
-      name: "complete",
-      duration: 60,
-      pattern: metatronsCubePatterns.complete,
-      palette: ["#585858", "#585858", "#585858"],
-      opacity: 1.0,
-      scale: 1.0,
-    },
-  ],
-};
-
-// ============================================================================
-// VECTOR VARIANTS
-// ============================================================================
-// True vector rendering using Three.js Line primitives.
-// These render with smooth lines, no pixelation.
-
-/**
- * Sacred Mandala (Vector) - Smooth vector version
- * Concentric circles with 8-fold radial symmetry
- */
-const sacredMandalaVector: PlantVariant = {
-  id: "sacred-mandala-vector",
-  name: "Sacred Mandala (Vector)",
-  description: "Precise geometric circles rendered with smooth vector lines",
-  rarity: 0.06,
-  requiresObservationToGerminate: true,
-  renderMode: "vector",
-  tweenBetweenKeyframes: true,
-  keyframes: [], // Required but unused for vector mode
-  vectorKeyframes: [
-    {
-      name: "seed",
-      duration: 10,
-      primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
-      strokeColor: "#909090",
-      strokeOpacity: 0.5,
-      scale: 0.7,
-    },
-    {
-      name: "rings",
-      duration: 15,
-      primitives: [...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18])],
-      strokeColor: "#808080",
-      strokeOpacity: 0.7,
-      scale: 0.85,
-    },
-    {
-      name: "radiate",
-      duration: 20,
-      primitives: [
-        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18, 24]),
-        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 6, 26),
-      ],
-      strokeColor: "#707070",
-      strokeOpacity: 0.85,
-      scale: 0.95,
-    },
-    {
-      name: "complete",
-      duration: 60,
-      primitives: [
-        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [5, 10, 15, 20, 26]),
-        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 5, 28),
-        // Diamonds at cardinal points
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 18, 5, 7),
-        vectorDiamond(VECTOR_CENTER + 18, VECTOR_CENTER, 5, 7),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 18, 5, 7),
-        vectorDiamond(VECTOR_CENTER - 18, VECTOR_CENTER, 5, 7),
-      ],
-      strokeColor: "#606060",
-      strokeOpacity: 1.0,
-      scale: 1.0,
-    },
-  ],
-};
-
-/**
- * Crystal Lattice (Vector) - Smooth vector version
- * Interlocking diamond grid pattern
- */
-const crystalLatticeVector: PlantVariant = {
-  id: "crystal-lattice-vector",
-  name: "Crystal Lattice (Vector)",
-  description: "Interlocking diamond grid with smooth vector lines",
-  rarity: 0.06,
-  requiresObservationToGerminate: true,
-  renderMode: "vector",
-  tweenBetweenKeyframes: true,
-  keyframes: [],
-  vectorKeyframes: [
-    {
-      name: "diamond",
-      duration: 10,
-      primitives: [vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 14, 18)],
-      strokeColor: "#888888",
-      strokeOpacity: 0.5,
-      scale: 0.7,
-    },
-    {
-      name: "grid",
-      duration: 15,
-      primitives: [
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 12, 16),
-        vectorDiamond(VECTOR_CENTER - 10, VECTOR_CENTER, 8, 12),
-        vectorDiamond(VECTOR_CENTER + 10, VECTOR_CENTER, 8, 12),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 10, 8, 12),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 10, 8, 12),
-      ],
-      strokeColor: "#787878",
-      strokeOpacity: 0.7,
-      scale: 0.85,
-    },
-    {
-      name: "expand",
-      duration: 20,
-      primitives: [
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 10, 14),
-        vectorDiamond(VECTOR_CENTER - 14, VECTOR_CENTER, 10, 14),
-        vectorDiamond(VECTOR_CENTER + 14, VECTOR_CENTER, 10, 14),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 14, 10, 14),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 14, 10, 14),
-        // Connecting lines
-        vectorLine(VECTOR_CENTER - 5, VECTOR_CENTER, VECTOR_CENTER - 9, VECTOR_CENTER),
-        vectorLine(VECTOR_CENTER + 5, VECTOR_CENTER, VECTOR_CENTER + 9, VECTOR_CENTER),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 7, VECTOR_CENTER, VECTOR_CENTER - 7),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 7, VECTOR_CENTER, VECTOR_CENTER + 7),
-      ],
-      strokeColor: "#686868",
-      strokeOpacity: 0.85,
-      scale: 0.95,
-    },
-    {
-      name: "full",
-      duration: 60,
-      primitives: [
-        // Core structure
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 8, 12),
-        vectorDiamond(VECTOR_CENTER - 12, VECTOR_CENTER, 8, 12),
-        vectorDiamond(VECTOR_CENTER + 12, VECTOR_CENTER, 8, 12),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 12, 8, 12),
-        vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 12, 8, 12),
-        // Diagonal diamonds
-        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER - 9, 6, 8),
-        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER - 9, 6, 8),
-        vectorDiamond(VECTOR_CENTER - 9, VECTOR_CENTER + 9, 6, 8),
-        vectorDiamond(VECTOR_CENTER + 9, VECTOR_CENTER + 9, 6, 8),
-        // Connecting lines
-        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER),
-        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 6),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 6),
-      ],
-      strokeColor: "#585858",
-      strokeOpacity: 1.0,
-      scale: 1.0,
-    },
-  ],
-};
-
-/**
- * Stellar Geometry (Vector) - Smooth vector version
- * Star outlines with radiating lines
- */
-const stellarGeometryVector: PlantVariant = {
-  id: "stellar-geometry-vector",
-  name: "Stellar Geometry (Vector)",
-  description: "Nested star outlines with smooth vector rendering",
-  rarity: 0.06,
-  requiresObservationToGerminate: true,
-  renderMode: "vector",
-  tweenBetweenKeyframes: true,
-  keyframes: [],
-  vectorKeyframes: [
-    {
-      name: "point",
-      duration: 8,
-      primitives: [
-        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
-        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 4, 7),
-      ],
-      strokeColor: "#909090",
-      strokeOpacity: 0.5,
-      scale: 0.6,
-    },
-    {
-      name: "star",
-      duration: 12,
-      primitives: [
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
-        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
-      ],
-      strokeColor: "#808080",
-      strokeOpacity: 0.7,
-      scale: 0.8,
-    },
-    {
-      name: "rays",
-      duration: 18,
-      primitives: [
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 9, -90),
-        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
-        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 26, -90),
-      ],
-      strokeColor: "#707070",
-      strokeOpacity: 0.85,
-      scale: 0.9,
-    },
-    {
-      name: "nested",
-      duration: 60,
-      primitives: [
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 24, 12, -90),
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 10, 5, -90),
-        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
-        ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 12, 24, 28, -90),
-      ],
-      strokeColor: "#606060",
-      strokeOpacity: 1.0,
-      scale: 1.0,
-    },
-  ],
-};
-
-/**
- * Metatron's Cube (Vector) - Smooth vector version
- * Flower of Life pattern with connecting lines
- */
-const metatronsCubeVector: PlantVariant = {
-  id: "metatrons-cube-vector",
-  name: "Metatron's Cube (Vector)",
-  description: "Sacred geometry Flower of Life with smooth vector lines",
-  rarity: 0.05,
   requiresObservationToGerminate: true,
   renderMode: "vector",
   tweenBetweenKeyframes: true,
@@ -4547,8 +5683,9 @@ const metatronsCubeVector: PlantVariant = {
 };
 
 // ============================================================================
-// COLORFUL VECTOR VARIANTS
+// LOOPING VECTOR VARIANTS
 // ============================================================================
+// Colorful vector variants with animation loops.
 
 /**
  * Pulsing Orb (Vector) - Smooth vector version
@@ -4827,115 +5964,15 @@ function vectorArcSegments(
 }
 
 /**
- * Sumi Spirit (Vector)
- *
- * A vector version of the Sumi Spirit - an enso (incomplete circle) brush stroke
- * rendered with smooth vector lines. The gap represents the Zen concept of
- * imperfection and incompleteness (wabi-sabi).
- *
- * Colors match the pixel version's spirit-blue palette.
- */
-const sumiSpiritVector: PlantVariant = {
-  id: "sumi-spirit-vector",
-  name: "Sumi Spirit (Vector)",
-  description: "An enso brush stroke rendered with smooth vector lines",
-  rarity: 0.1, // Rarer than pixel version
-  requiresObservationToGerminate: true,
-  renderMode: "vector",
-  tweenBetweenKeyframes: true,
-  keyframes: [],
-  vectorKeyframes: [
-    {
-      name: "touch",
-      duration: 8,
-      primitives: [
-        // Initial brush touch - small arc starting the stroke
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 180, 240, 6),
-        // Small dot where brush touches
-        vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER + 8, 2),
-      ],
-      strokeColor: "#1E3A5F", // Deep indigo
-      strokeOpacity: 0.6,
-      scale: 0.8,
-      transitionHint: { strategy: "progressive", easing: "brushStroke" },
-    },
-    {
-      name: "draw",
-      duration: 12,
-      primitives: [
-        // Brush extending - larger arc
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 150, 300, 12),
-        // Inner stroke following the arc
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 160, 280, 8),
-      ],
-      strokeColor: "#3A5A8F", // Mid indigo-blue
-      strokeOpacity: 0.75,
-      scale: 0.9,
-      transitionHint: { strategy: "progressive", easing: "brushStroke" },
-    },
-    {
-      name: "flow",
-      duration: 18,
-      primitives: [
-        // Flowing ink - most of the enso
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 120, 350, 18),
-        // Inner flow
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 130, 340, 14),
-        // Brush thickness variation
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 12, 150, 320, 10),
-      ],
-      strokeColor: "#4A6FA5", // Spirit blue
-      strokeOpacity: 0.85,
-      scale: 0.95,
-      transitionHint: { strategy: "progressive", easing: "brushStroke" },
-    },
-    {
-      name: "settle",
-      duration: 25,
-      primitives: [
-        // Nearly complete enso with characteristic gap at top
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 22, 100, 380, 22),
-        // Inner rings showing brush texture
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 18, 110, 370, 18),
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 14, 120, 360, 14),
-        // Small accent at brush end
-        vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 21, 2),
-      ],
-      strokeColor: "#5A8FC5", // Lighter spirit blue
-      strokeOpacity: 0.95,
-      scale: 1.0,
-      transitionHint: { strategy: "progressive", easing: "brushStroke" },
-    },
-    {
-      name: "rest",
-      duration: 60,
-      primitives: [
-        // Final enso form - beautiful imperfection with gap at ~70° (top-right)
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 24, 80, 400, 24),
-        // Inner strokes showing brush character
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 20, 90, 390, 20),
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 16, 100, 380, 16),
-        // Subtle inner detail
-        ...vectorArcSegments(VECTOR_CENTER, VECTOR_CENTER, 11, 120, 360, 10),
-        // Brush lift point
-        vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER - 13, 1.5),
-      ],
-      strokeColor: "#7A9FC5", // Pale spirit blue
-      strokeOpacity: 1.0,
-      scale: 1.0,
-      transitionHint: { strategy: "progressive", easing: "brushStroke" },
-    },
-  ],
-};
-
-/**
  * All registered plant variants.
+ *
+ * All variants now use vector rendering for smooth, resolution-independent visuals.
  *
  * Organized by category:
  * - Ground Cover: softMoss, pebblePatch (very common, ambient)
  * - Grasses: meadowTuft, whisperReed (common, gentle motion)
  * - Flowers: simpleBloom, quantumTulip, dewdropDaisy, midnightPoppy, bellCluster,
- *            zenLotus
+ *            zenLotus (moderate to uncommon)
  * - Shrubs: cloudBush, berryThicket (uncommon, mid-ground structure)
  * - Trees: saplingHope, weepingWillow (rare, landmark elements)
  * - Ethereal: pulsingOrb, fractalBloom, phoenixFlame, crystalCluster,
@@ -4944,15 +5981,11 @@ const sumiSpiritVector: PlantVariant = {
  *             sumiSpirit (rare, abstract magical effects)
  * - Geometric: sacredMandala, crystalLattice, stellarGeometry, metatronsCube
  *              (rare, minimalist line-work patterns)
- * - Geometric Vector: sacredMandalaVector, crystalLatticeVector,
- *                     stellarGeometryVector, metatronsCubeVector
- *                     (very rare, smooth vector line rendering)
- * - Ethereal Vector: pulsingOrbVector, phoenixFlameVector,
- *                    kaleidoscopeStarVector, vortexSpiralVector,
- *                    sumiSpiritVector
- *                    (very rare, colorful smooth vector with looping)
+ * - Looping Vector: pulsingOrbVector, phoenixFlameVector,
+ *                   kaleidoscopeStarVector, vortexSpiralVector
+ *                   (very rare, colorful smooth vectors with animation loops)
  *
- * Total: 41 variants
+ * Total: 36 variants
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -4995,17 +6028,11 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   crystalLattice,
   stellarGeometry,
   metatronsCube,
-  // Geometric Vector (very rare - smooth vector line-work)
-  sacredMandalaVector,
-  crystalLatticeVector,
-  stellarGeometryVector,
-  metatronsCubeVector,
   // Ethereal Vector (very rare - colorful smooth vectors with looping)
   pulsingOrbVector,
   phoenixFlameVector,
   kaleidoscopeStarVector,
   vortexSpiralVector,
-  sumiSpiritVector,
 ];
 
 /**

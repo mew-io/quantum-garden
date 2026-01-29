@@ -85,6 +85,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     lastGerminationTime,
     notifications,
     observationContext,
+    performanceStats,
   } = useGardenStore();
 
   // Get debug logs
@@ -258,6 +259,39 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {activeTab === "overview" && (
           <>
+            {/* Performance Metrics */}
+            {performanceStats && (
+              <section>
+                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Performance</h4>
+                <div className="grid grid-cols-4 gap-2">
+                  <Stat
+                    label="FPS"
+                    value={performanceStats.fps.toFixed(0)}
+                    color={
+                      performanceStats.fps >= 55
+                        ? "green"
+                        : performanceStats.fps >= 30
+                          ? "yellow"
+                          : "red"
+                    }
+                  />
+                  <Stat
+                    label="Frame"
+                    value={`${performanceStats.frameTimeMs.toFixed(1)}ms`}
+                    color={
+                      performanceStats.frameTimeMs <= 18
+                        ? "green"
+                        : performanceStats.frameTimeMs <= 33
+                          ? "yellow"
+                          : "red"
+                    }
+                  />
+                  <Stat label="Draws" value={performanceStats.drawCalls} color="cyan" />
+                  <Stat label="Tris" value={performanceStats.triangles} color="purple" />
+                </div>
+              </section>
+            )}
+
             {/* System State Indicators */}
             <section>
               <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">System State</h4>

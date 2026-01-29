@@ -342,9 +342,22 @@ export function GardenScene() {
     debugLogger.rendering.info("Starting render loop");
     sceneManager.start();
 
+    // Push performance metrics to store periodically (every 500ms)
+    const performanceInterval = setInterval(() => {
+      if (!mounted) return;
+      const metrics = sceneManager.performanceMetrics;
+      useGardenStore.getState().setPerformanceStats({
+        fps: metrics.fps,
+        frameTimeMs: metrics.frameTimeMs,
+        drawCalls: metrics.drawCalls,
+        triangles: metrics.triangles,
+      });
+    }, 500);
+
     // Cleanup
     return () => {
       mounted = false;
+      clearInterval(performanceInterval);
       unsubscribe();
       sceneManager.canvas.removeEventListener("click", handleClick);
       window.removeEventListener(

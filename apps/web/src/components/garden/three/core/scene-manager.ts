@@ -16,6 +16,20 @@ export interface SceneManagerConfig {
 }
 
 /**
+ * Performance metrics for the render loop.
+ */
+export interface PerformanceMetrics {
+  /** Frames per second (rolling average over 60 frames) */
+  fps: number;
+  /** Frame time in milliseconds (rolling average) */
+  frameTimeMs: number;
+  /** Number of draw calls in the last frame */
+  drawCalls: number;
+  /** Number of triangles rendered in the last frame */
+  triangles: number;
+}
+
+/**
  * Manages the core Three.js scene, camera, and renderer.
  *
  * Provides:
@@ -34,6 +48,16 @@ export class SceneManager {
   private updateCallbacks: Set<(deltaTime: number) => void> = new Set();
   private postRenderCallbacks: Set<() => void> = new Set();
   private lastTime: number = 0;
+
+  // Performance tracking
+  private frameTimes: number[] = [];
+  private readonly FRAME_SAMPLE_SIZE = 60;
+  private _performanceMetrics: PerformanceMetrics = {
+    fps: 0,
+    frameTimeMs: 0,
+    drawCalls: 0,
+    triangles: 0,
+  };
 
   constructor(config: SceneManagerConfig) {
     this.container = config.container;
@@ -132,7 +156,14 @@ export class SceneManager {
 
     const now = performance.now();
     const deltaTime = (now - this.lastTime) / 1000; // Convert to seconds
+    const frameTimeMs = now - this.lastTime;
     this.lastTime = now;
+
+    // Track frame times for rolling average
+    this.frameTimes.push(frameTimeMs);
+    if (this.frameTimes.length > this.FRAME_SAMPLE_SIZE) {
+      this.frameTimes.shift();
+    }
 
     // Call all update callbacks
     for (const callback of this.updateCallbacks) {
@@ -142,11 +173,38 @@ export class SceneManager {
     // Render main scene
     this.renderer.render(this.scene, this.camera);
 
+    // Update performance metrics after render
+    this.updatePerformanceMetrics();
+
     // Call post-render callbacks (e.g., overlays)
     for (const callback of this.postRenderCallbacks) {
       callback();
     }
   };
+
+  /**
+   * Update performance metrics from renderer info.
+   */
+  private updatePerformanceMetrics(): void {
+    // Calculate rolling average FPS and frame time
+    if (this.frameTimes.length > 0) {
+      const avgFrameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+      this._performanceMetrics.frameTimeMs = avgFrameTime;
+      this._performanceMetrics.fps = avgFrameTime > 0 ? 1000 / avgFrameTime : 0;
+    }
+
+    // Get renderer info
+    const info = this.renderer.info;
+    this._performanceMetrics.drawCalls = info.render.calls;
+    this._performanceMetrics.triangles = info.render.triangles;
+  }
+
+  /**
+   * Get current performance metrics.
+   */
+  get performanceMetrics(): PerformanceMetrics {
+    return { ...this._performanceMetrics };
+  }
 
   /**
    * Handle window resize.

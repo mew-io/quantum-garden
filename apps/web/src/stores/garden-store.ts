@@ -35,6 +35,20 @@ export interface EvolutionStats {
 }
 
 /**
+ * Performance metrics from the render loop.
+ */
+export interface PerformanceStats {
+  /** Frames per second (rolling average) */
+  fps: number;
+  /** Frame time in milliseconds (rolling average) */
+  frameTimeMs: number;
+  /** Number of draw calls in the last frame */
+  drawCalls: number;
+  /** Number of triangles rendered in the last frame */
+  triangles: number;
+}
+
+/**
  * Client-side garden state.
  *
  * Manages the visual and interactive state of the garden,
@@ -98,6 +112,10 @@ interface GardenState {
   setSelectedEventId: (id: string | null) => void;
   historicalEventsLoaded: boolean;
   setHistoricalEventsLoaded: (loaded: boolean) => void;
+
+  // Performance monitoring
+  performanceStats: PerformanceStats | null;
+  setPerformanceStats: (stats: PerformanceStats | null) => void;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -193,4 +211,8 @@ export const useGardenStore = create<GardenState>((set) => ({
   setSelectedEventId: (id) => set({ selectedEventId: id }),
   historicalEventsLoaded: false,
   setHistoricalEventsLoaded: (loaded) => set({ historicalEventsLoaded: loaded }),
+
+  // Performance monitoring
+  performanceStats: null,
+  setPerformanceStats: (stats) => set({ performanceStats: stats }),
 }));

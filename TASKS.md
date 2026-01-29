@@ -12,7 +12,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (10 Remaining)
+## Active Tasks (9 Remaining)
 
 ### Bugs & Performance
 
@@ -20,7 +20,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | --- | ------------------------------------------------ | -------- | ------------------ |
 | 74  | Make spatial grid adaptive to plant distribution | P3       | `spatial-grid.ts`  |
 | 83  | Audit texture atlas packing efficiency           | P3       | `texture-atlas.ts` |
-| 90  | Add performance monitoring to debug panel        | P3       | `debug-panel.tsx`  |
 
 ### Evolution Improvements
 
@@ -108,6 +107,21 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Performance Monitoring in Debug Panel (#90)
+
+- Added performance metrics tracking to SceneManager with rolling averages
+- New `PerformanceMetrics` interface (fps, frameTimeMs, drawCalls, triangles)
+- Frame time tracking with 60-frame rolling average for stable readings
+- Integrated with Three.js renderer info for draw calls and triangle count
+- Added `PerformanceStats` interface and state to garden store
+- GardenScene pushes metrics to store every 500ms via setInterval
+- Debug panel displays metrics in new "Performance" section at top of Overview tab
+- 4-column grid: FPS, Frame time, Draw calls, Triangles
+- Color-coded thresholds:
+  - FPS: green (55+), yellow (30-54), red (<30)
+  - Frame time: green (<=18ms), yellow (<=33ms), red (>33ms)
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-28 - Memory Leak Tests for Extended Sessions (#118)
 
@@ -826,4 +840,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (251)
+- All tests passing (268)

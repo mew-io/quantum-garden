@@ -6,10 +6,20 @@
  *
  * - Starts automatically on component mount
  * - Pauses during time-travel mode
- * - Syncs stats to the garden store
+ * - Syncs stats to the garden store every 5 seconds
  * - Cleans up on unmount
  *
- * @param triggerGermination - Callback to germinate a plant by ID
+ * The evolution system periodically checks dormant plants and triggers
+ * germination based on various factors including:
+ * - Time since dormancy began (guaranteed after 15 minutes)
+ * - Proximity to observed plants (2x bonus)
+ * - Clustering prevention (avoids crowded areas)
+ * - Per-plant cooldowns (reduced chance near recent germinations)
+ * - Wave events (3-5 plants germinate together, 5% chance)
+ *
+ * @module hooks/use-evolution-system
+ * @see {@link GardenEvolutionSystem} for the underlying system implementation
+ * @see {@link useEvolution} for the germination callback provider
  */
 
 import { useEffect, useRef } from "react";
@@ -21,15 +31,35 @@ import { createGardenEvolutionSystem } from "@/components/garden/garden-evolutio
 import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
 
+/**
+ * Options for the useEvolutionSystem hook.
+ */
 interface UseEvolutionSystemOptions {
-  /** Callback to trigger plant germination */
+  /**
+   * Callback to trigger plant germination.
+   * Called by the evolution system when a plant should germinate.
+   *
+   * @param plantId - The unique identifier of the plant to germinate
+   * @param context - Wave context indicating if this is part of a wave event
+   * @returns Promise that resolves when germination is complete
+   */
   triggerGermination: (plantId: string, context: GerminationContext) => Promise<void>;
 }
 
+/**
+ * Return value from the useEvolutionSystem hook.
+ */
 interface EvolutionSystemState {
-  /** Whether the evolution system is currently running */
+  /**
+   * Whether the evolution system is currently running.
+   * False during time-travel mode or when system is paused.
+   */
   isRunning: boolean;
-  /** Current stats from the evolution system */
+  /**
+   * Current statistics from the evolution system.
+   * Updated every 5 seconds while the system is running.
+   * Null before initialization or after unmount.
+   */
   stats: { dormantCount: number; trackedCount: number } | null;
 }
 
@@ -38,6 +68,36 @@ interface EvolutionSystemState {
  *
  * Creates the system on mount, connects the germination callback,
  * pauses during time-travel mode, and cleans up on unmount.
+ *
+ * @param options - Configuration options including the germination callback
+ * @returns Current state of the evolution system
+ *
+ * @example
+ * ```tsx
+ * function GardenScene() {
+ *   const { triggerGermination } = useEvolution();
+ *   const { isRunning, stats } = useEvolutionSystem({ triggerGermination });
+ *
+ *   return (
+ *     <div>
+ *       <span>Evolution: {isRunning ? 'Active' : 'Paused'}</span>
+ *       {stats && <span>Dormant plants: {stats.dormantCount}</span>}
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @remarks
+ * This hook should be used in the GardenScene component to integrate
+ * the evolution system with React's lifecycle. The system automatically:
+ *
+ * 1. Creates a new GardenEvolutionSystem instance on mount
+ * 2. Connects the provided germination callback
+ * 3. Starts the periodic evolution checks (every 15 seconds)
+ * 4. Syncs evolution stats to the Zustand store (every 5 seconds)
+ * 5. Pauses when entering time-travel mode
+ * 6. Resumes when exiting time-travel mode
+ * 7. Destroys the system and clears intervals on unmount
  */
 export function useEvolutionSystem({
   triggerGermination,

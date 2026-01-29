@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (23 Remaining)
+## Active Tasks (21 Remaining)
 
 ### Bugs & Performance
 
@@ -24,7 +24,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                        | Priority | File                          |
 | --- | --------------------------- | -------- | ----------------------------- |
-| 15  | Batch wave notifications    | P2       | `use-evolution.ts`            |
 | 16  | Add wave notification style | P3       | `evolution-notifications.tsx` |
 
 ### User Feedback & Discoverability
@@ -70,7 +69,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 110 | Add store tests for evolution state       | P2       | NEW                       |
 | 111 | Add visual regression test checklist      | P3       | `docs/testing.md`         |
 | 112 | Update README with evolution system info  | P2       | `README.md`               |
-| 113 | Add JSDoc to useEvolutionSystem hook      | P2       | `use-evolution-system.ts` |
 | 114 | Update architecture docs                  | P2       | `docs/architecture.md`    |
 | 117 | Test with 100+ plants for performance     | P2       | -                         |
 | 118 | Test extended session for memory leaks    | P2       | -                         |
@@ -119,6 +117,27 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - JSDoc for useEvolutionSystem Hook (#113)
+
+- Added comprehensive JSDoc documentation to `use-evolution-system.ts`
+- Module-level documentation explaining evolution system behavior
+- Documented interface types (`UseEvolutionSystemOptions`, `EvolutionSystemState`)
+- Added `@example` block showing typical usage pattern
+- Added `@remarks` section explaining lifecycle behavior
+- Added `@see` references to related modules
+- All 178 tests passing (60 shared + 118 web)
+
+### 2026-01-28 - Batch Wave Notifications (#15)
+
+- Wave germinations now show single batched notification "3 plants germinated" instead of multiple individual notifications
+- Added `GerminationContext` type to `garden-evolution.ts` with `isWave`, `waveIndex`, `waveTotal` fields
+- Modified `GardenEvolutionSystem` to pass wave context through germination callback
+- Updated `use-evolution.ts` to collect wave germinations and batch notifications for wave events
+- Created single `wave_germination` event in quantum event log for wave events
+- Removed auto-open behavior from quantum event modal - events still logged but modal only opens on user click
+- Updated all tests to account for new callback signature
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Debug Panel Evolution Improvements (#14, #18, #19)
 

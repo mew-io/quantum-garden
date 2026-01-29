@@ -39,7 +39,7 @@ export function TimeTravelScrubber({
 }: TimeTravelScrubberProps) {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSpeed] = useState(10); // 10x speed
+  const [playbackSpeed, setPlaybackSpeed] = useState(10); // Default 10x speed
   const [hoveredEvent, setHoveredEvent] = useState<{
     event: EvolutionEvent;
     x: number;
@@ -245,6 +245,26 @@ export function TimeTravelScrubber({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Playback Speed Control */}
+            <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+              {[1, 2, 5, 10, 20].map((speed) => (
+                <button
+                  key={speed}
+                  onClick={() => setPlaybackSpeed(speed)}
+                  className={`
+                    px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors
+                    ${
+                      playbackSpeed === speed
+                        ? "bg-purple-500 text-white"
+                        : "text-white/60 hover:text-white hover:bg-white/10"
+                    }
+                  `}
+                >
+                  {speed}x
+                </button>
+              ))}
+            </div>
+
             {/* Play/Pause */}
             <button
               onClick={() => setIsPlaying(!isPlaying)}
@@ -258,7 +278,7 @@ export function TimeTravelScrubber({
                 }
               `}
             >
-              {isPlaying ? "⏸ Pause" : "▶ Play"} (10x)
+              {isPlaying ? "⏸ Pause" : "▶ Play"}
             </button>
 
             {/* Exit Timeline */}

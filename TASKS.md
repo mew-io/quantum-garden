@@ -54,7 +54,6 @@ No active tasks.
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 102 | Plan sound effects system                           | P3       | -                               |
-| 103 | Add playback speed control to time-travel           | P3       | `time-travel-scrubber.tsx`      |
 | 104 | Add "scrub to now" quick button                     | P3       | `time-travel-scrubber.tsx`      |
 
 ### Testing & Documentation
@@ -107,6 +106,16 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Playback Speed Control for Time-Travel Scrubber (#103)
+
+- Added playback speed control button group to time-travel scrubber
+- 5 speed options: 1x, 2x, 5x, 10x, 20x (default: 10x)
+- Styled as segmented control with purple highlight for active speed
+- Compact pill buttons with hover states in `bg-white/5` container
+- Removed hardcoded "(10x)" label from Play button
+- Consistent UI styling with existing scrubber controls
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - UI Preferences Reset in Debug Panel (#63)
 

@@ -88,4 +88,4 @@ const relativeTime = useMemo(
 
 ## Synthesis
 
-**Synthesis Commit**: (to be filled after commit)
+**Synthesis Commit**: b199d9c

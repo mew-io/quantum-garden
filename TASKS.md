@@ -10,16 +10,15 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (28 Remaining)
+## Active Tasks (27 Remaining)
 
 ### Bugs & Performance
 
-| #   | Task                                             | Priority | File                      |
-| --- | ------------------------------------------------ | -------- | ------------------------- |
-| 74  | Make spatial grid adaptive to plant distribution | P3       | `spatial-grid.ts`         |
-| 83  | Audit texture atlas packing efficiency           | P3       | `texture-atlas.ts`        |
-| 89  | Cache previous keyframe meshes in vector overlay | P2       | `vector-plant-overlay.ts` |
-| 90  | Add performance monitoring to debug panel        | P3       | `debug-panel.tsx`         |
+| #   | Task                                             | Priority | File               |
+| --- | ------------------------------------------------ | -------- | ------------------ |
+| 74  | Make spatial grid adaptive to plant distribution | P3       | `spatial-grid.ts`  |
+| 83  | Audit texture atlas packing efficiency           | P3       | `texture-atlas.ts` |
+| 90  | Add performance monitoring to debug panel        | P3       | `debug-panel.tsx`  |
 
 ### Evolution Improvements
 
@@ -124,6 +123,21 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Vector Plant Keyframe Mesh Caching (#89)
+
+- Implemented keyframe mesh caching in `vector-plant-overlay.ts`
+- Added `KeyframeMeshCache` type and `keyframeMeshCache` field
+- New helper methods:
+  - `getKeyframeCacheKey()` - Generates cache key from variant, keyframe index, and color
+  - `tryUseCachedMeshes()` - Clones cached meshes into plant group
+  - `cacheMeshes()` - Stores cloned meshes after first render
+  - `clearPlantGroup()` - Extracted common cleanup logic
+- Updated `updatePlantGroup()` to check cache for static keyframes
+- Static keyframes: O(1) clone instead of O(primitives) geometry creation
+- Transitioning keyframes: Still rebuild (draw fractions change each frame)
+- Updated `dispose()` to clean up cached mesh geometry
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Render Loop Performance Analysis (#88)
 

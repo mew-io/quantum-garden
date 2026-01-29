@@ -43,25 +43,52 @@ interface UseAudioReturn extends AudioState {
 }
 
 /**
+ * Cached client snapshot - only updated when values actually change.
+ * This prevents infinite loops in useSyncExternalStore.
+ */
+let cachedSnapshot: AudioState = {
+  isEnabled: false,
+  volume: 0.7,
+  isInitialized: false,
+};
+
+/**
  * Get a snapshot of the current audio state.
+ * Returns cached snapshot if values haven't changed to maintain referential equality.
  */
 function getSnapshot(): AudioState {
-  return {
-    isEnabled: audioManager.isEnabled,
-    volume: audioManager.volume,
-    isInitialized: audioManager.isInitialized,
-  };
+  const isEnabled = audioManager.isEnabled;
+  const volume = audioManager.volume;
+  const isInitialized = audioManager.isInitialized;
+
+  // Only create a new object if values have changed
+  if (
+    cachedSnapshot.isEnabled !== isEnabled ||
+    cachedSnapshot.volume !== volume ||
+    cachedSnapshot.isInitialized !== isInitialized
+  ) {
+    cachedSnapshot = { isEnabled, volume, isInitialized };
+  }
+
+  return cachedSnapshot;
 }
+
+/**
+ * Cached server-side snapshot to avoid infinite loops during hydration.
+ * Must be a stable reference - useSyncExternalStore requires getServerSnapshot
+ * to return the same object on every call.
+ */
+const SERVER_SNAPSHOT: AudioState = {
+  isEnabled: false,
+  volume: 0.7,
+  isInitialized: false,
+};
 
 /**
  * Server-side snapshot (sound disabled by default).
  */
 function getServerSnapshot(): AudioState {
-  return {
-    isEnabled: false,
-    volume: 0.7,
-    isInitialized: false,
-  };
+  return SERVER_SNAPSHOT;
 }
 
 /**

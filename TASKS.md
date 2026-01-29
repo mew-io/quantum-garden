@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (31 Remaining)
+## Active Tasks (30 Remaining)
 
 ### Bugs & Performance
 
@@ -43,7 +43,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
 | 62  | Add keyboard shortcut discovery hint              | P2       | `page.tsx`                      |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
-| 64  | Show entanglement lines more prominently          | P2       | `entanglement-overlay.ts`       |
 
 ### Quantum Accuracy
 
@@ -127,6 +126,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Entanglement Line Visibility Improvement
+
+- Improved entanglement connection line visibility (#64)
+- Updated visual constants in `entanglement-overlay.ts`:
+  - `LINE_COLOR`: 0x9b87f5 → 0xc4b5fd (lighter purple, better contrast)
+  - `LINE_WIDTH`: 1.5 → 2 (thicker lines)
+  - `LINE_ALPHA`: 0.3 → 0.5 (increased opacity from 30% to 50%)
+  - `PULSE_ALPHA`: 0.8 → 0.9 (more visible pulse effect)
+  - `DASH_SIZE`: 8 → 6, `GAP_SIZE`: 4 → 3 (tighter dash pattern)
+- All 178 tests passing (60 shared + 118 web)
 
 ### 2026-01-28 - Entanglement Legend in Info Overlay
 

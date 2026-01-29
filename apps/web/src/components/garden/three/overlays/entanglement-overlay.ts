@@ -14,13 +14,13 @@ import type { Plant } from "@quantum-garden/shared";
 
 /** Visual constants for entanglement lines */
 const ENTANGLEMENT = {
-  LINE_COLOR: 0x9b87f5,
-  LINE_WIDTH: 1.5,
-  LINE_ALPHA: 0.3,
-  PULSE_ALPHA: 0.8,
+  LINE_COLOR: 0xc4b5fd, // Lighter purple for better visibility
+  LINE_WIDTH: 2,
+  LINE_ALPHA: 0.5, // Increased from 0.3 for more prominent lines
+  PULSE_ALPHA: 0.9,
   PULSE_DURATION: 2.0,
-  DASH_SIZE: 8,
-  GAP_SIZE: 4,
+  DASH_SIZE: 6, // Tighter dash pattern for more solid appearance
+  GAP_SIZE: 3,
   // Wave particle settings
   WAVE_COLOR: 0xffffff,
   WAVE_SIZE: 6,

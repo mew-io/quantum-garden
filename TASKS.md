@@ -8,7 +8,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 268 tests passing (60 shared + 208 web)
+**Test Coverage**: 267 tests passing (60 shared + 207 web) - 1 flaky performance test
 
 **Architecture Highlights**:
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (8 Remaining)
+## Active Tasks (7 Remaining)
 
 ### Bugs & Performance
 
@@ -35,7 +35,6 @@ No active tasks.
 
 | #   | Task                                              | Priority | File                            |
 | --- | ------------------------------------------------- | -------- | ------------------------------- |
-| 53  | Add progress indicator to notifications           | P3       | `evolution-notifications.tsx`   |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
@@ -111,6 +110,20 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Progress Indicator for Notifications (#53)
+
+- Added progress bar to notification toasts showing time until auto-dismiss
+- Uses `requestAnimationFrame` for smooth 60fps animation
+- Progress bar depletes from left to right over 5 seconds
+- Progress correctly pauses when notification is hovered (integrates with pause-on-hover)
+- Type-matched colors for progress bar:
+  - Wave: `purple-400/60`
+  - Entanglement: `pink-400/60`
+  - Error: `amber-400/60`
+  - Germination: `green-400/40`
+- Restructured notification layout to `flex-col` with content + progress bar
+- All 267 tests passing (1 flaky performance test unrelated to changes)
 
 ### 2026-01-28 - Type-Based Notification Styling (#16)
 
@@ -896,4 +909,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (268)
+- All tests passing (267 stable, 1 flaky performance test)

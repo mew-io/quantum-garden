@@ -123,14 +123,49 @@ function NotificationIcon({ type }: { type: NotificationType }) {
 }
 
 /**
+ * Get progress bar color based on notification type.
+ */
+function getProgressBarColor(type: NotificationType): string {
+  switch (type) {
+    case "wave":
+      return "bg-purple-400/60";
+    case "entanglement":
+      return "bg-pink-400/60";
+    case "error":
+      return "bg-amber-400/60";
+    case "germination":
+    default:
+      return "bg-green-400/40";
+  }
+}
+
+/**
  * Single toast notification component.
  * Supports pause-on-hover: timer pauses when user hovers over the notification.
+ * Shows a progress bar indicating time until auto-dismiss.
  */
 function Notification({ id, message, type, onDismiss }: NotificationProps) {
   const [isPaused, setIsPaused] = useState(false);
+  const [progress, setProgress] = useState(100);
   const remainingTimeRef = useRef<number>(UI_TIMING.NOTIFICATION_DISMISS_MS);
+  const totalDuration = UI_TIMING.NOTIFICATION_DISMISS_MS;
   const startTimeRef = useRef(Date.now());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // Update progress bar using requestAnimationFrame for smooth animation
+  const updateProgress = useCallback(() => {
+    if (isPaused) return;
+
+    const elapsed = Date.now() - startTimeRef.current;
+    const currentRemaining = Math.max(0, remainingTimeRef.current - elapsed);
+    const newProgress = (currentRemaining / totalDuration) * 100;
+    setProgress(newProgress);
+
+    if (newProgress > 0) {
+      animationFrameRef.current = requestAnimationFrame(updateProgress);
+    }
+  }, [isPaused, totalDuration]);
 
   // Start or resume the dismiss timer
   const startTimer = useCallback(() => {
@@ -141,7 +176,13 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
     timerRef.current = setTimeout(() => {
       onDismiss(id);
     }, remainingTimeRef.current);
-  }, [id, onDismiss]);
+
+    // Start progress animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    animationFrameRef.current = requestAnimationFrame(updateProgress);
+  }, [id, onDismiss, updateProgress]);
 
   // Pause the timer and save remaining time
   const pauseTimer = useCallback(() => {
@@ -152,6 +193,11 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
       const elapsed = Date.now() - startTimeRef.current;
       remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
     }
+    // Stop progress animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
   }, []);
 
   // Start timer on mount
@@ -160,6 +206,9 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [startTimer]);
@@ -175,16 +224,19 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
 
   const typeStyles = getNotificationStyles(type);
 
+  const progressBarColor = getProgressBarColor(type);
+
   return (
     <div
       className={`
         mb-2 min-w-[240px] max-w-[320px]
-        flex items-center
-        rounded-lg border px-4 py-3
+        flex flex-col
+        rounded-lg border
         text-sm
         shadow-lg backdrop-blur-sm
         animate-in fade-in slide-in-from-right-5 duration-300
         cursor-pointer transition-colors
+        overflow-hidden
         ${typeStyles}
       `}
       onClick={() => onDismiss(id)}
@@ -193,8 +245,17 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
       role="status"
       aria-live="polite"
     >
-      <NotificationIcon type={type} />
-      <span>{message}</span>
+      <div className="flex items-center px-4 py-3">
+        <NotificationIcon type={type} />
+        <span>{message}</span>
+      </div>
+      {/* Progress bar showing time until auto-dismiss */}
+      <div className="h-0.5 w-full bg-black/20">
+        <div
+          className={`h-full transition-none ${progressBarColor}`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }

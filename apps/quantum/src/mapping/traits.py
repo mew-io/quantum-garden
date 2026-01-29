@@ -69,7 +69,9 @@ GLYPH_PATTERNS = [
 ]
 
 
-def map_measurements_to_traits(measurements: list[int]) -> dict[str, Any]:
+def map_measurements_to_traits(
+    measurements: list[int], qubit_count: int = 5
+) -> dict[str, Any]:
     """
     Map quantum measurements to visual plant traits.
 
@@ -78,6 +80,7 @@ def map_measurements_to_traits(measurements: list[int]) -> dict[str, Any]:
 
     Args:
         measurements: List of integer measurement results
+        qubit_count: Number of qubits used in the circuit (default: 5)
 
     Returns:
         Dictionary of resolved visual traits
@@ -111,7 +114,11 @@ def map_measurements_to_traits(measurements: list[int]) -> dict[str, Any]:
     mean_value = sum(measurements) / len(measurements)
     variance = sum((x - mean_value) ** 2 for x in measurements) / len(measurements)
     # Normalize variance to growth rate (0.5 - 2.0)
-    growth_rate = 0.5 + (variance / 16) * 1.5  # Assuming 5-bit values
+    # Max variance occurs when measurements are evenly split between 0 and max_value
+    # For n qubits: max_value = 2^n - 1, max_variance ≈ (max_value/2)^2 = 2^(2n-2)
+    max_variance = 2 ** (2 * qubit_count - 2)
+    normalized_variance = min(variance / max_variance, 1.0)
+    growth_rate = 0.5 + normalized_variance * 1.5
     growth_rate = min(2.0, max(0.5, growth_rate))
 
     # Opacity based on measurement consistency

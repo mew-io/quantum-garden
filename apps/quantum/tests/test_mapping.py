@@ -63,3 +63,32 @@ def test_growth_rate_bounds():
         traits = map_measurements_to_traits(measurements)
 
         assert 0.5 <= traits["growthRate"] <= 2.0
+
+
+def test_growth_rate_scales_with_qubit_count():
+    """Test that growth rate calculation scales properly with qubit count."""
+    # Same measurements should produce different growth rates
+    # for different qubit counts because max_variance changes
+    measurements = [0, 15, 0, 15, 0, 15]  # High variance pattern
+
+    # With 4 qubits (max_value=15), this is extreme variance
+    traits_4q = map_measurements_to_traits(measurements, qubit_count=4)
+
+    # With 6 qubits (max_value=63), same measurements are less extreme
+    traits_6q = map_measurements_to_traits(measurements, qubit_count=6)
+
+    # Higher qubit count means larger max_variance, so normalized variance is smaller
+    # This should result in lower growth rate
+    assert traits_4q["growthRate"] > traits_6q["growthRate"]
+    assert 0.5 <= traits_4q["growthRate"] <= 2.0
+    assert 0.5 <= traits_6q["growthRate"] <= 2.0
+
+
+def test_growth_rate_with_single_qubit():
+    """Test growth rate calculation with single qubit (edge case)."""
+    # Single qubit: max_value = 1, measurements are 0 or 1
+    measurements = [0, 1, 0, 1, 0, 1]  # Maximum variance for 1 qubit
+    traits = map_measurements_to_traits(measurements, qubit_count=1)
+
+    # Should still produce valid growth rate within bounds
+    assert 0.5 <= traits["growthRate"] <= 2.0

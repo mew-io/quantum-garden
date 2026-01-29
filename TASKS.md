@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - sound effects planning)_
+_Last updated: 2026-01-29 (synthesis - qubit count parameterization)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (7 Remaining)
+## Active Tasks (6 Remaining)
 
 ### Bugs & Performance
 
@@ -41,7 +41,6 @@ No active tasks.
 
 | #   | Task                                                  | Priority | File                 |
 | --- | ----------------------------------------------------- | -------- | -------------------- |
-| 77  | Parameterize growth rate calculation for qubit count  | P3       | `observation.ts`     |
 | 78  | Review opacity-from-consistency logic                 | P3       | `observation.ts`     |
 | 79  | Consider probability-weighted superposition rendering | P3       | `plant-instancer.ts` |
 
@@ -101,6 +100,23 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Qubit Count Parameterization for Growth Rate (#77)
+
+- Parameterized growth rate calculation in `apps/quantum/src/mapping/traits.py`
+- **Problem**: Growth rate used hardcoded `variance / 16` divisor
+  - Comment said "Assuming 5-bit values" but divisor 16 is for 4-bit (2^4)
+  - Formula wasn't adaptable to different circuit configurations
+- **Solution**: Added `qubit_count` parameter (default: 5) to `map_measurements_to_traits()`
+  - Max variance formula: `2^(2n-2)` where n = qubit count
+  - Normalized variance: `min(variance / max_variance, 1.0)`
+  - Growth rate: `0.5 + normalized_variance * 1.5` (range: 0.5 to 2.0)
+- **Tests Added** (2 new tests in `apps/quantum/tests/test_mapping.py`):
+  - `test_growth_rate_scales_with_qubit_count`: Verifies growth rate changes appropriately for different qubit counts
+  - `test_growth_rate_with_single_qubit`: Edge case test for single qubit circuits
+- **Documentation**: Updated `docs/quantum-circuits.md` with Growth Rate Calculation section
+- All Python tests passing (8/8)
+- All TypeScript tests passing (268 tests)
 
 ### 2026-01-29 - Sound Effects System Planning (#102)
 

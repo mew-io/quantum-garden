@@ -90,7 +90,7 @@ When you observe an entangled plant:
 Quantum measurement produces a bitstring (e.g., `10110`). This maps to visual traits:
 
 ```python
-def map_measurements_to_traits(measurements: list[int]) -> dict:
+def map_measurements_to_traits(measurements: list[int], qubit_count: int = 5) -> dict:
     # Most frequent measurement determines base traits
     most_common = Counter(measurements).most_common(1)[0][0]
 
@@ -101,15 +101,25 @@ def map_measurements_to_traits(measurements: list[int]) -> dict:
     return {
         "glyphPattern": PATTERNS[pattern_bits % len(PATTERNS)],
         "colorPalette": PALETTES[color_bits % len(PALETTES)],
-        "growthRate": calculate_growth_rate(measurements),
+        "growthRate": calculate_growth_rate(measurements, qubit_count),
         "opacity": calculate_opacity(measurements),
     }
 ```
 
+### Growth Rate Calculation
+
+Growth rate is derived from measurement variance, normalized by the maximum possible variance for the given qubit count:
+
+- **Max variance formula**: `2^(2n-2)` where `n` is qubit count
+- **Normalization**: `normalized_variance = variance / max_variance`
+- **Growth rate**: `0.5 + normalized_variance * 1.5` (range: 0.5 to 2.0)
+
+This ensures consistent growth rate mapping regardless of circuit complexity.
+
 ### Probability and Visual Consistency
 
 - Higher measurement probability → more consistent appearance
-- Variance in measurements → affects growth rate
+- Variance in measurements → affects growth rate (parameterized by qubit count)
 - Dominant outcome → determines base pattern and colors
 
 ---

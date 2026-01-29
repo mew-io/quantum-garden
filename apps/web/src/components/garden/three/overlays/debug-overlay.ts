@@ -26,6 +26,13 @@ export class DebugOverlay {
   private plants: Plant[] = [];
   private selectedPlantId: string | null = null;
 
+  // Pulse animation for selected plant
+  private selectedMarkerComponents: {
+    box: THREE.Line | null;
+    dot: THREE.Mesh | null;
+    crosshair: THREE.LineSegments | null;
+  } = { box: null, dot: null, crosshair: null };
+
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "debug-overlay";
@@ -153,6 +160,9 @@ export class DebugOverlay {
     });
     this.plantMarkers.clear();
 
+    // Clear selected marker references
+    this.selectedMarkerComponents = { box: null, dot: null, crosshair: null };
+
     if (!this.isVisible) return;
 
     // Create markers for each plant
@@ -252,6 +262,11 @@ export class DebugOverlay {
 
       this.plantMarkersGroup.add(markerGroup);
       this.plantMarkers.set(plant.id, markerGroup);
+
+      // Store references to selected plant's components for animation
+      if (isSelected) {
+        this.selectedMarkerComponents = { box, dot, crosshair };
+      }
     }
   }
 
@@ -287,17 +302,45 @@ export class DebugOverlay {
 
   /**
    * Update the overlay each frame.
+   * Animates the selected plant marker with a gentle pulse effect.
    */
-  update(_time: number, _deltaTime: number): void {
-    // No per-frame updates needed
-    // Region updates happen via setActiveRegion calls
+  update(time: number, _deltaTime: number): void {
+    // Animate selected plant marker with pulse effect
+    if (this.selectedPlantId && this.isVisible) {
+      const { box, dot, crosshair } = this.selectedMarkerComponents;
+
+      // Pulse frequency: 2 Hz (2 cycles per second)
+      const pulsePhase = (time * 2 * Math.PI * 2) % (Math.PI * 2);
+
+      // Scale pulse: oscillates between 1.0 and 1.15
+      const scalePulse = 1.0 + Math.sin(pulsePhase) * 0.15;
+
+      // Opacity pulse: oscillates between 0.7 and 1.0
+      const opacityPulse = 0.85 + Math.sin(pulsePhase) * 0.15;
+
+      if (box) {
+        box.scale.set(scalePulse, scalePulse, 1);
+        (box.material as THREE.LineBasicMaterial).opacity = opacityPulse;
+      }
+
+      if (dot) {
+        dot.scale.set(scalePulse, scalePulse, 1);
+        (dot.material as THREE.MeshBasicMaterial).opacity = opacityPulse;
+      }
+
+      if (crosshair) {
+        crosshair.scale.set(scalePulse, scalePulse, 1);
+        (crosshair.material as THREE.LineBasicMaterial).opacity = opacityPulse;
+      }
+    }
   }
 
   /**
    * Check if there are any active animations that need updating.
-   * Debug overlay doesn't animate, so this returns whether it's visible.
+   * Returns true when visible (for region updates) or when animating selected plant.
    */
   hasActiveAnimations(): boolean {
+    // Always need updates when visible (selected plant pulse animation)
     return this.isVisible;
   }
 

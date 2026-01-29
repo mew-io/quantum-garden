@@ -68,6 +68,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   };
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
+  const [showModeConfirm, setShowModeConfirm] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
@@ -176,10 +177,16 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
       );
   }, []);
 
-  // Handle observation mode changes
-  const toggleObservationMode = useCallback(() => {
+  // Show confirmation dialog before switching observation mode
+  const requestModeChange = useCallback(() => {
+    setShowModeConfirm(true);
+  }, []);
+
+  // Actually perform the observation mode change after confirmation
+  const confirmModeChange = useCallback(() => {
     const newMode = observationMode === "region" ? "click" : "region";
     setObservationMode(newMode);
+    setShowModeConfirm(false);
     debugLogger.observation.info(`Observation mode changed to ${newMode}`);
 
     window.dispatchEvent(
@@ -188,6 +195,11 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
       })
     );
   }, [observationMode]);
+
+  // Cancel the mode change
+  const cancelModeChange = useCallback(() => {
+    setShowModeConfirm(false);
+  }, []);
 
   // Toggle category filter
   const toggleCategory = (category: LogCategory) => {
@@ -416,7 +428,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Controls</h4>
               <div className="space-y-2">
                 <button
-                  onClick={toggleObservationMode}
+                  onClick={requestModeChange}
                   className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
                 >
                   <span className="text-xs">Toggle Observation Mode</span>
@@ -638,6 +650,34 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
           Refresh All
         </button>
       </div>
+
+      {/* Observation Mode Change Confirmation Dialog */}
+      {showModeConfirm && (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+          <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mx-4 max-w-xs shadow-xl">
+            <h4 className="text-gray-100 font-medium mb-2">Switch Observation Mode?</h4>
+            <p className="text-gray-400 text-xs mb-4">
+              {observationMode === "region"
+                ? "Switching to Click mode allows direct click observation (debug only)."
+                : "Switching to Region mode enables automatic dwell-based observation."}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={cancelModeChange}
+                className="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmModeChange}
+                className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded text-xs"
+              >
+                Switch Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

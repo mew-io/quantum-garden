@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (6 Remaining)
+## Active Tasks (5 Remaining)
 
 ### Bugs & Performance
 
@@ -33,11 +33,10 @@ No active tasks.
 
 ### User Feedback & Discoverability
 
-| #   | Task                                              | Priority | File                            |
-| --- | ------------------------------------------------- | -------- | ------------------------------- |
-| 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
-| 58  | Create optional onboarding tour                   | P3       | NEW                             |
-| 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
+| #   | Task                                     | Priority | File                            |
+| --- | ---------------------------------------- | -------- | ------------------------------- |
+| 58  | Create optional onboarding tour          | P3       | NEW                             |
+| 63  | Add "Don't show again" reset in settings | P3       | `observation-context-panel.tsx` |
 
 ### Quantum Accuracy
 
@@ -109,6 +108,22 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Confirmation Dialog for Observation Mode Switching (#56)
+
+- Added confirmation dialog when users switch observation modes in debug panel
+- New `showModeConfirm` state tracks whether confirmation is displayed
+- Split toggle function into three parts:
+  - `requestModeChange()` - shows confirmation dialog
+  - `confirmModeChange()` - actually performs the mode switch
+  - `cancelModeChange()` - dismisses the dialog
+- Confirmation dialog overlay includes:
+  - Dark backdrop with blur effect
+  - Centered modal with title and context-aware explanation
+  - Explains what each mode does before switching
+  - Cancel (gray) and Switch Mode (purple) buttons
+- Prevents accidental observation mode changes during gameplay
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - First Observation Celebration (#59)
 

@@ -29,6 +29,10 @@ function seededRandom(seed: number): () => number {
  * to produce reproducible, deterministic trait values. Used as fallback
  * when quantum service is unreachable or returns an error.
  *
+ * For entangled plants, use seedOffset = 0 for all plants in the group
+ * to ensure they receive identical (correlated) traits. Non-entangled
+ * plants should also use seedOffset = 0.
+ *
  * The traits generated are:
  * - glyphPattern: Selected from predefined patterns based on variant/seed
  * - colorPalette: Uses variant's palette or falls back to randomized selection
@@ -152,16 +156,19 @@ export const observationRouter = router({
         // Load the quantum pool
         const pool = await getQuantumPool();
 
-        // Select result deterministically based on plant ID
+        // For entangled plants, use the entanglement group ID to select from pool.
+        // This ensures all plants in the same entanglement group get correlated quantum results.
+        // For non-entangled plants, use the individual plant ID.
+        const poolSeed = plant.entanglementGroupId ?? plant.id;
         const circuitPool = pool.pools[circuitId];
-        const poolResult = selectFromPool(circuitPool, plant.id);
+        const poolResult = selectFromPool(circuitPool, poolSeed);
 
         // Use the pre-computed traits
         resolvedTraits = poolResult.traits as ResolvedTraits;
         executionMode = poolResult.executionMode;
 
         console.log(
-          `[Quantum] Plant ${plant.id} using pool result ${poolResult.index} from ${circuitId} (mode: ${executionMode})`
+          `[Quantum] Plant ${plant.id} using pool result ${poolResult.index} from ${circuitId} (mode: ${executionMode}, seed: ${plant.entanglementGroupId ? "group" : "plant"})`
         );
       } catch (error) {
         // Pool unavailable - fall back to mock traits
@@ -222,27 +229,33 @@ export const observationRouter = router({
               // Load the quantum pool
               const partnerPool = await getQuantumPool();
 
-              // Select result deterministically based on partner ID
+              // Use the SAME entanglement group ID as the primary plant to get correlated results.
+              // This is the key to quantum entanglement: all plants in the group share
+              // the same quantum measurement outcome.
               const partnerCircuitPool = partnerPool.pools[partnerCircuitId];
-              const partnerPoolResult = selectFromPool(partnerCircuitPool, partner.id);
+              const partnerPoolResult = selectFromPool(
+                partnerCircuitPool,
+                plant.entanglementGroupId!
+              );
 
-              // Use the pre-computed traits
+              // Use the pre-computed traits (same as primary plant for true correlation)
               correlatedTraits = partnerPoolResult.traits as ResolvedTraits;
 
               console.log(
-                `[Quantum] Entangled partner ${partner.id} using pool result ${partnerPoolResult.index} from ${partnerCircuitId}`
+                `[Quantum] Entangled partner ${partner.id} using pool result ${partnerPoolResult.index} from ${partnerCircuitId} (correlated with group ${plant.entanglementGroupId})`
               );
             } catch (error) {
               // Pool unavailable - fall back to mock traits
+              // Use seedOffset = 0 for all entangled partners to maintain correlation
               console.warn(
-                `[Quantum] Pool unavailable for partner ${partner.id}, using mock:`,
+                `[Quantum] Pool unavailable for partner ${partner.id}, using correlated mock traits:`,
                 error instanceof Error ? error.message : error
               );
               correlatedTraits = generateMockTraits(
                 partnerCircuit as string,
                 partner.variantId,
                 partner.colorVariationName,
-                i + 1
+                0 // Same seed as primary plant for correlated traits
               );
             }
 

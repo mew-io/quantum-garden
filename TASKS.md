@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (16 Remaining)
+## Active Tasks (15 Remaining)
 
 ### Bugs & Performance
 
@@ -40,7 +40,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 | #   | Task                                                  | Priority | File                 |
 | --- | ----------------------------------------------------- | -------- | -------------------- |
-| 75  | Fix entanglement to use correlated pool indices       | P2       | `observation.ts`     |
 | 76  | Align mock trait algorithm with quantum mapping       | P2       | `observation.ts`     |
 | 77  | Parameterize growth rate calculation for qubit count  | P3       | `observation.ts`     |
 | 78  | Review opacity-from-consistency logic                 | P3       | `observation.ts`     |
@@ -112,6 +111,17 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Entanglement Pool Index Correlation Fix (#75)
+
+- Fixed entanglement observation to use correlated pool indices
+- **Problem**: Primary plants and entangled partners each used their own ID for pool selection
+- This caused independent (uncorrelated) quantum results instead of true quantum correlation
+- **Solution**: Both primary and partner plants now use `entanglementGroupId` as the pool seed
+- All plants in an entanglement group now get the SAME pool result, creating authentic quantum correlation
+- Updated mock trait fallback to use `seedOffset = 0` for all entangled partners
+- Updated JSDoc comments to clarify entanglement correlation behavior
+- All 181 tests passing (60 shared + 121 web)
 
 ### 2026-01-28 - Architecture Documentation Update (#114)
 

@@ -98,8 +98,13 @@ export class ObservationSystem {
     this.onObservation = onObservation;
     this.config = { ...DEFAULT_CONFIG, ...config };
 
-    // Initialize spatial grid with cell size matching region radius
-    this.spatialGrid = new SpatialGrid(this.config.regionRadius);
+    // Initialize spatial grid with adaptive cell sizing
+    // Cell size adapts to plant distribution while staying >= region radius
+    // to ensure efficient queries for observation regions
+    this.spatialGrid = new SpatialGrid(this.config.regionRadius, {
+      minCellSize: this.config.regionRadius, // At least as large as query region
+      targetPlantsPerCell: 15, // Slightly higher for observation queries
+    });
     this.spatialGrid.rebuild(plants);
 
     // Initialize with first region

@@ -27,7 +27,7 @@ cd apps/quantum && source .venv/bin/activate && python -m pytest
 | Area                  | Test File                              | Tests |
 | --------------------- | -------------------------------------- | ----- |
 | Garden Evolution      | `garden-evolution.test.ts`             | 28    |
-| Spatial Grid          | `spatial-grid.test.ts`                 | 16    |
+| Spatial Grid          | `spatial-grid.test.ts`                 | 24    |
 | Evolution Logic       | `evolution-logic.test.ts`              | 41    |
 | Performance           | `performance.test.ts`                  | 14    |
 | Germination Flow      | `germination-flow.integration.test.ts` | 10    |
@@ -39,7 +39,7 @@ cd apps/quantum && source .venv/bin/activate && python -m pytest
 | Shared Types          | `quantum-pool.test.ts`                 | 11    |
 | Lifecycle             | `lifecycle.test.ts`                    | 49    |
 
-**Total: 268 tests** (60 shared + 208 web)
+**Total: 276 tests** (60 shared + 216 web)
 
 ---
 

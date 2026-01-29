@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - visual regression testing)_
+_Last updated: 2026-01-29 (synthesis - adaptive spatial grid)_
 
 ## Project Status
 
@@ -8,7 +8,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 268 tests passing (60 shared + 208 web) - 1 flaky performance test
+**Test Coverage**: 276 tests passing (60 shared + 216 web) - 1 flaky performance test
 
 **Architecture Highlights**:
 
@@ -18,14 +18,13 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (3 Remaining)
+## Active Tasks (2 Remaining)
 
 ### Bugs & Performance
 
-| #   | Task                                             | Priority | File               |
-| --- | ------------------------------------------------ | -------- | ------------------ |
-| 74  | Make spatial grid adaptive to plant distribution | P3       | `spatial-grid.ts`  |
-| 83  | Audit texture atlas packing efficiency           | P3       | `texture-atlas.ts` |
+| #   | Task                                   | Priority | File               |
+| --- | -------------------------------------- | -------- | ------------------ |
+| 83  | Audit texture atlas packing efficiency | P3       | `texture-atlas.ts` |
 
 ### Evolution Improvements
 
@@ -91,6 +90,34 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Adaptive Spatial Grid (#74)
+
+- Made spatial grid adaptive to plant distribution for optimized query performance
+- **Problem**: Fixed cell size was suboptimal:
+  - Dense clusters had too many plants per cell (slow queries)
+  - Sparse areas had empty cells (wasted overhead)
+- **Solution**: Added adaptive cell sizing that calculates optimal cell size on each rebuild:
+  1. Calculate bounding box of all plants
+  2. Compute ideal cell count: `plantCount / targetPlantsPerCell`
+  3. Derive cell size: `sqrt(area / cellCount)`
+  4. Clamp to min/max bounds (80-300px default)
+- **New Features**:
+  - `AdaptiveConfig` interface with `targetPlantsPerCell`, `minCellSize`, `maxCellSize`
+  - `calculateOptimalCellSize()` method using bounding box analysis
+  - `setAdaptiveMode()` to enable/disable at runtime
+  - `getStats()` for debugging (avgPlantsPerCell, maxPlantsPerCell, etc.)
+- **ObservationSystem Integration**: Uses adaptive mode with `minCellSize: regionRadius`
+- **Tests Added** (8 new tests):
+  - Fixed cell size when adaptive mode disabled
+  - Adaptive cell size calculation based on distribution
+  - Respects minCellSize with few plants
+  - Respects maxCellSize with many spread plants
+  - Enable/disable adaptive mode at runtime
+  - Provides useful grid statistics
+  - Different behavior for clustered vs uniform distributions
+  - Maintains query correctness with adaptive sizing
+- All 276 tests passing (60 shared + 216 web)
 
 ### 2026-01-29 - Visual Regression Test Checklist (#111)
 
@@ -1143,4 +1170,4 @@ See `docs/archive/sessions/` for detailed session notes from previous sprints:
 
 - 60fps with 1000 plants
 - No memory leaks in extended sessions
-- All tests passing (267 stable, 1 flaky performance test)
+- All tests passing (276 stable, 1 flaky performance test)

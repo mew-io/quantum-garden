@@ -266,4 +266,178 @@ describe("SpatialGrid", () => {
       expect(found.length).toBe(1);
     });
   });
+
+  describe("adaptive cell sizing", () => {
+    it("should use fixed cell size when adaptive mode is disabled", () => {
+      const grid = new SpatialGrid(100); // No adaptive config = fixed mode
+      const plants = Array.from({ length: 100 }, (_, i) =>
+        createMockPlant(`p${i}`, i * 10, i * 10)
+      );
+
+      grid.rebuild(plants);
+
+      expect(grid.getCellSize()).toBe(100);
+      expect(grid.isAdaptiveModeEnabled()).toBe(false);
+    });
+
+    it("should adapt cell size based on plant distribution when enabled", () => {
+      const grid = new SpatialGrid(100, {
+        targetPlantsPerCell: 10,
+        minCellSize: 50,
+        maxCellSize: 500,
+      });
+
+      // Spread 100 plants across a 1000x1000 area
+      const plants: Plant[] = [];
+      for (let i = 0; i < 100; i++) {
+        plants.push(createMockPlant(`p${i}`, (i % 10) * 100, Math.floor(i / 10) * 100));
+      }
+
+      grid.rebuild(plants);
+
+      expect(grid.isAdaptiveModeEnabled()).toBe(true);
+      // With 100 plants and target 10 per cell, we need ~10 cells
+      // Area ~1000x1000, so cell size ~sqrt(1000000/10) = ~316
+      // But capped at maxCellSize = 500
+      const cellSize = grid.getCellSize();
+      expect(cellSize).toBeGreaterThanOrEqual(50);
+      expect(cellSize).toBeLessThanOrEqual(500);
+    });
+
+    it("should respect minCellSize with very few plants", () => {
+      const grid = new SpatialGrid(100, {
+        targetPlantsPerCell: 10,
+        minCellSize: 80,
+        maxCellSize: 500,
+      });
+
+      // Only 3 plants in a small area
+      const plants = [
+        createMockPlant("p1", 10, 10),
+        createMockPlant("p2", 20, 20),
+        createMockPlant("p3", 30, 30),
+      ];
+
+      grid.rebuild(plants);
+
+      // Should clamp to minCellSize
+      expect(grid.getCellSize()).toBe(80);
+    });
+
+    it("should respect maxCellSize with many spread plants", () => {
+      const grid = new SpatialGrid(100, {
+        targetPlantsPerCell: 100, // Very high target = want large cells
+        minCellSize: 50,
+        maxCellSize: 200,
+      });
+
+      // 10 plants across huge area would want very large cells
+      const plants: Plant[] = [];
+      for (let i = 0; i < 10; i++) {
+        plants.push(createMockPlant(`p${i}`, i * 500, i * 500));
+      }
+
+      grid.rebuild(plants);
+
+      // Should clamp to maxCellSize
+      expect(grid.getCellSize()).toBe(200);
+    });
+
+    it("should enable/disable adaptive mode at runtime", () => {
+      const grid = new SpatialGrid(100);
+
+      expect(grid.isAdaptiveModeEnabled()).toBe(false);
+
+      grid.setAdaptiveMode(true, { targetPlantsPerCell: 5 });
+      expect(grid.isAdaptiveModeEnabled()).toBe(true);
+
+      // Rebuild should now use adaptive sizing
+      const plants = Array.from({ length: 50 }, (_, i) => createMockPlant(`p${i}`, i * 20, i * 20));
+      grid.rebuild(plants);
+
+      // Cell size should have changed from original 100
+      const cellSize = grid.getCellSize();
+      expect(cellSize).not.toBe(100); // Changed adaptively
+
+      // Disable and verify
+      grid.setAdaptiveMode(false);
+      expect(grid.isAdaptiveModeEnabled()).toBe(false);
+    });
+
+    it("should provide useful grid statistics", () => {
+      const grid = new SpatialGrid(100, { targetPlantsPerCell: 10 });
+      const plants: Plant[] = [];
+
+      // 20 plants clustered in one corner
+      for (let i = 0; i < 20; i++) {
+        plants.push(createMockPlant(`p${i}`, 50 + (i % 5) * 10, 50 + Math.floor(i / 5) * 10));
+      }
+
+      grid.rebuild(plants);
+
+      const stats = grid.getStats();
+      expect(stats.plantCount).toBe(20);
+      expect(stats.cellCount).toBeGreaterThan(0);
+      expect(stats.avgPlantsPerCell).toBe(stats.plantCount / stats.cellCount);
+      expect(stats.maxPlantsPerCell).toBeGreaterThanOrEqual(stats.avgPlantsPerCell);
+      expect(stats.adaptiveMode).toBe(true);
+    });
+
+    it("should handle clustered vs uniform distribution differently", () => {
+      // Clustered distribution
+      const clusteredGrid = new SpatialGrid(100, {
+        targetPlantsPerCell: 10,
+        minCellSize: 50,
+        maxCellSize: 500,
+      });
+      const clusteredPlants: Plant[] = [];
+      for (let i = 0; i < 100; i++) {
+        // All plants in 100x100 area
+        clusteredPlants.push(createMockPlant(`p${i}`, Math.random() * 100, Math.random() * 100));
+      }
+      clusteredGrid.rebuild(clusteredPlants);
+      const clusteredCellSize = clusteredGrid.getCellSize();
+
+      // Uniform distribution
+      const uniformGrid = new SpatialGrid(100, {
+        targetPlantsPerCell: 10,
+        minCellSize: 50,
+        maxCellSize: 500,
+      });
+      const uniformPlants: Plant[] = [];
+      for (let i = 0; i < 100; i++) {
+        // Plants spread across 1000x1000 area
+        uniformPlants.push(createMockPlant(`p${i}`, (i % 10) * 100, Math.floor(i / 10) * 100));
+      }
+      uniformGrid.rebuild(uniformPlants);
+      const uniformCellSize = uniformGrid.getCellSize();
+
+      // Clustered distribution should have smaller cells (smaller bounding box)
+      expect(clusteredCellSize).toBeLessThan(uniformCellSize);
+    });
+
+    it("should maintain query correctness with adaptive sizing", () => {
+      const grid = new SpatialGrid(100, {
+        targetPlantsPerCell: 10,
+        minCellSize: 50,
+        maxCellSize: 300,
+      });
+
+      // Create plants in known positions
+      const plants = [
+        createMockPlant("center", 500, 500),
+        createMockPlant("near", 520, 520),
+        createMockPlant("far", 800, 800),
+      ];
+
+      grid.rebuild(plants);
+
+      // Query should still work correctly regardless of cell size
+      const found = grid.getPlantsInRegion({ x: 500, y: 500 }, 50);
+      expect(found.map((p) => p.id).sort()).toEqual(["center", "near"]);
+
+      const foundFar = grid.getPlantsInRegion({ x: 800, y: 800 }, 50);
+      expect(foundFar.map((p) => p.id)).toEqual(["far"]);
+    });
+  });
 });

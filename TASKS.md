@@ -10,7 +10,7 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 
 ---
 
-## Active Tasks (19 Remaining)
+## Active Tasks (18 Remaining)
 
 ### Bugs & Performance
 
@@ -34,7 +34,6 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
 | 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
-| 62  | Add keyboard shortcut discovery hint              | P2       | `page.tsx`                      |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
 
 ### Quantum Accuracy
@@ -115,6 +114,16 @@ The garden is now continuously evolving with the `GardenEvolutionSystem` properl
 ---
 
 ## Completed Work
+
+### 2026-01-28 - Keyboard Shortcut Discovery Hint (#62)
+
+- Created `KeyboardShortcutHint` component in `keyboard-shortcut-hint.tsx`
+- Shows one-time floating hint on first visit
+- Appears after 3 seconds, auto-dismisses after 8 seconds
+- Only shown on desktop (hidden on touch devices)
+- Tracked via localStorage to never show again
+- Points users to press "?" for keyboard shortcuts
+- All 181 tests passing (60 shared + 121 web)
 
 ### 2026-01-28 - Standardize Auto-Dismiss Timers (#91)
 

@@ -49,6 +49,43 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ---
 
+## 🌱 Evolution System
+
+The garden evolves continuously through the `GardenEvolutionSystem`. Plants begin as dormant seeds and germinate over time, whether anyone is watching or not.
+
+**How It Works**:
+
+- The system checks dormant plants every 15 seconds
+- Each check evaluates germination probability based on multiple factors
+- Germinated plants become visible and begin their lifecycle animations
+
+**Germination Factors**:
+
+| Factor                 | Effect                                      |
+| ---------------------- | ------------------------------------------- |
+| Base probability       | 3% chance per check                         |
+| Observed neighbor      | 2x bonus if within 300px of observed plant  |
+| Clustering penalty     | 50% reduction if too close to other sprouts |
+| Per-plant cooldown     | 30% chance near recent germinations (2 min) |
+| Guaranteed germination | 100% after 15 minutes of dormancy           |
+
+**Wave Events** (5% chance):
+
+When the garden has 5+ dormant plants, a "wave" event may trigger 3-5 spatially distributed plants to germinate together. Waves create visually pleasing patterns spread across the garden.
+
+**Integration**:
+
+The evolution system is managed by the `useEvolutionSystem` hook in `GardenScene`. It:
+
+- Starts automatically on component mount
+- Pauses during time-travel mode (preserving historical view)
+- Syncs evolution stats to the UI every 5 seconds
+- Cleans up gracefully on unmount
+
+See [garden-evolution.ts](apps/web/src/components/garden/garden-evolution.ts) for the full implementation.
+
+---
+
 ## ✅ Quantum Integration Status
 
 **Real quantum execution is fully active.** Plants reveal traits from a pre-computed pool of 500 authentic quantum results generated from IonQ simulator.

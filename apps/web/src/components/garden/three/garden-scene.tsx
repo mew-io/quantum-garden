@@ -25,6 +25,7 @@ import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
 import { debugLogger } from "@/lib/debug-logger";
+import { isFirstObservation } from "@/lib/first-observation";
 
 /**
  * Get the primary color from a plant's palette for celebration feedback.
@@ -167,6 +168,9 @@ export function GardenScene() {
       initialPlants,
       () => overlayManager.reticle.getPosition(),
       (payload) => {
+        // Check if this is the user's first observation before triggering callback
+        const isFirst = isFirstObservation();
+
         observationCallbackRef.current(payload);
 
         // Find the observed plant
@@ -175,12 +179,19 @@ export function GardenScene() {
           // Get plant's primary color for celebration feedback
           const primaryColor = getPlantPrimaryColor(plant);
 
-          // Trigger celebration feedback with plant's color
-          overlayManager.feedback.triggerCelebration(
-            plant.position.x,
-            plant.position.y,
-            primaryColor
-          );
+          // Trigger celebration feedback - enhanced for first observation
+          if (isFirst) {
+            overlayManager.feedback.triggerFirstObservationCelebration(
+              plant.position.x,
+              plant.position.y
+            );
+          } else {
+            overlayManager.feedback.triggerCelebration(
+              plant.position.x,
+              plant.position.y,
+              primaryColor
+            );
+          }
 
           // Trigger entanglement pulse if plant is entangled
           if (plant.entanglementGroupId) {
@@ -275,6 +286,9 @@ export function GardenScene() {
       });
 
       if (clickedPlant) {
+        // Check if this is the user's first observation
+        const isFirst = isFirstObservation();
+
         // Get plant's primary color for celebration feedback
         const primaryColor = getPlantPrimaryColor(clickedPlant);
 
@@ -286,12 +300,19 @@ export function GardenScene() {
           timestamp: new Date(),
         });
 
-        // Trigger celebration feedback with plant's color
-        overlayManager.feedback.triggerCelebration(
-          clickedPlant.position.x,
-          clickedPlant.position.y,
-          primaryColor
-        );
+        // Trigger celebration feedback - enhanced for first observation
+        if (isFirst) {
+          overlayManager.feedback.triggerFirstObservationCelebration(
+            clickedPlant.position.x,
+            clickedPlant.position.y
+          );
+        } else {
+          overlayManager.feedback.triggerCelebration(
+            clickedPlant.position.x,
+            clickedPlant.position.y,
+            primaryColor
+          );
+        }
 
         // Trigger entanglement pulse if plant is entangled
         if (clickedPlant.entanglementGroupId) {

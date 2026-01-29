@@ -10,6 +10,7 @@ import { useCallback } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
+import { isFirstObservation, markFirstObservationComplete } from "@/lib/first-observation";
 import type { ObservationPayload, CircuitType, ResolvedTraits } from "@quantum-garden/shared";
 
 /**
@@ -66,6 +67,12 @@ export function useObservation() {
           ? (result.entanglementGroupId ?? undefined)
           : undefined,
       });
+
+      // Show special notification for first observation
+      if (isFirstObservation()) {
+        addNotification("Your first quantum observation!", "germination");
+        markFirstObservationComplete();
+      }
 
       // If entangled partners were updated, refetch plants to get their new state
       if (result.entangledPartnersUpdated) {

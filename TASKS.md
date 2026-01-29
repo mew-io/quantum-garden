@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-28_
+_Last updated: 2026-01-29_
 
 ## Project Status
 
@@ -8,7 +8,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 **Current Focus**: Bug fixes, performance optimization, and polish. Accessibility and mobile touch are deferred to the final phase.
 
-**Test Coverage**: 267 tests passing (60 shared + 207 web) - 1 flaky performance test
+**Test Coverage**: 268 tests passing (60 shared + 208 web) - 1 flaky performance test
 
 **Architecture Highlights**:
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (7 Remaining)
+## Active Tasks (6 Remaining)
 
 ### Bugs & Performance
 
@@ -37,7 +37,6 @@ No active tasks.
 | --- | ------------------------------------------------- | -------- | ------------------------------- |
 | 56  | Add confirmation when switching observation modes | P3       | `debug-panel.tsx`               |
 | 58  | Create optional onboarding tour                   | P3       | NEW                             |
-| 59  | Add "first observation" celebration               | P3       | `use-observation.ts`            |
 | 63  | Add "Don't show again" reset in settings          | P3       | `observation-context-panel.tsx` |
 
 ### Quantum Accuracy
@@ -110,6 +109,24 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - First Observation Celebration (#59)
+
+- Added special celebration effect for user's first-ever observation in the garden
+- Created `first-observation.ts` utility for localStorage tracking:
+  - `isFirstObservation()` - checks if user has made their first observation
+  - `markFirstObservationComplete()` - marks first observation as done
+  - `resetFirstObservation()` - for testing/settings reset
+- Enhanced `FeedbackOverlay` with `FIRST_OBSERVATION_FEEDBACK` constants:
+  - Gold primary color (`0xffd700`) for the special moment
+  - Purple quantum accent third ring (`0xc4b5fd`)
+  - Three expanding rings (80px, 120px, 160px) vs normal two rings (50px, 70px)
+  - Longer duration (1.4s vs 0.8s) and higher quality (64 segments vs 48)
+- Added `triggerFirstObservationCelebration()` method for enhanced visual
+- Integrated into garden-scene.tsx to detect and trigger first observation
+- Added "Your first quantum observation!" notification via use-observation.ts
+- Works in both dwell mode and debug click mode
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-28 - Progress Indicator for Notifications (#53)
 

@@ -21,12 +21,32 @@ const OBSERVATION_FEEDBACK = {
   SEGMENTS: 48,
 };
 
+/** Enhanced constants for first observation celebration */
+const FIRST_OBSERVATION_FEEDBACK = {
+  INNER_START_RADIUS: 25,
+  INNER_END_RADIUS: 80,
+  OUTER_START_RADIUS: 35,
+  OUTER_END_RADIUS: 120,
+  THIRD_START_RADIUS: 45,
+  THIRD_END_RADIUS: 160,
+  DURATION: 1.4, // Longer duration for emphasis
+  OUTER_DELAY: 0.15,
+  THIRD_DELAY: 0.3,
+  PRIMARY_COLOR: 0xffd700, // Gold for special moment
+  SECONDARY_COLOR: 0xffffff,
+  TERTIARY_COLOR: 0xc4b5fd, // Purple quantum accent
+  START_ALPHA: 1.0,
+  SEGMENTS: 64, // Smoother rings
+};
+
 interface FeedbackAnimation {
   x: number;
   y: number;
   startTime: number;
   innerRing: THREE.LineLoop;
   outerRing: THREE.LineLoop;
+  thirdRing?: THREE.LineLoop; // Optional third ring for first observation
+  isFirstObservation?: boolean;
 }
 
 /**
@@ -132,6 +152,74 @@ export class FeedbackOverlay {
   }
 
   /**
+   * Trigger an enhanced celebration for the user's first observation.
+   * Creates a more dramatic effect with three rings and gold color.
+   *
+   * @param x - X position in world coordinates
+   * @param y - Y position in world coordinates
+   */
+  triggerFirstObservationCelebration(x: number, y: number): void {
+    // Create inner ring (gold)
+    const innerMaterial = new THREE.LineBasicMaterial({
+      color: FIRST_OBSERVATION_FEEDBACK.PRIMARY_COLOR,
+      transparent: true,
+      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
+    });
+    const innerGeometry = this.getRingGeometry(1);
+    const innerRing = new THREE.LineLoop(innerGeometry, innerMaterial);
+    innerRing.scale.set(
+      FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      1
+    );
+    innerRing.position.set(x, y, 2);
+
+    // Create outer ring (white)
+    const outerMaterial = new THREE.LineBasicMaterial({
+      color: FIRST_OBSERVATION_FEEDBACK.SECONDARY_COLOR,
+      transparent: true,
+      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
+    });
+    const outerRing = new THREE.LineLoop(innerGeometry, outerMaterial);
+    outerRing.scale.set(
+      FIRST_OBSERVATION_FEEDBACK.OUTER_START_RADIUS,
+      FIRST_OBSERVATION_FEEDBACK.OUTER_START_RADIUS,
+      1
+    );
+    outerRing.position.set(x, y, 2);
+    outerRing.visible = false;
+
+    // Create third ring (purple quantum accent)
+    const thirdMaterial = new THREE.LineBasicMaterial({
+      color: FIRST_OBSERVATION_FEEDBACK.TERTIARY_COLOR,
+      transparent: true,
+      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
+    });
+    const thirdRing = new THREE.LineLoop(innerGeometry, thirdMaterial);
+    thirdRing.scale.set(
+      FIRST_OBSERVATION_FEEDBACK.THIRD_START_RADIUS,
+      FIRST_OBSERVATION_FEEDBACK.THIRD_START_RADIUS,
+      1
+    );
+    thirdRing.position.set(x, y, 2);
+    thirdRing.visible = false;
+
+    this.group.add(innerRing);
+    this.group.add(outerRing);
+    this.group.add(thirdRing);
+
+    this.activeAnimations.push({
+      x,
+      y,
+      startTime: performance.now(),
+      innerRing,
+      outerRing,
+      thirdRing,
+      isFirstObservation: true,
+    });
+  }
+
+  /**
    * Update all active animations.
    */
   update(_time: number): void {
@@ -142,8 +230,11 @@ export class FeedbackOverlay {
       const anim = this.activeAnimations[i]!;
       const elapsed = (now - anim.startTime) / 1000;
 
+      // Use different timing constants for first observation vs regular
+      const config = anim.isFirstObservation ? FIRST_OBSERVATION_FEEDBACK : OBSERVATION_FEEDBACK;
+
       // Check if animation is complete
-      if (elapsed >= OBSERVATION_FEEDBACK.DURATION) {
+      if (elapsed >= config.DURATION) {
         completedIndices.push(i);
         continue;
       }
@@ -153,21 +244,42 @@ export class FeedbackOverlay {
         anim.innerRing,
         elapsed,
         0,
-        OBSERVATION_FEEDBACK.INNER_START_RADIUS,
-        OBSERVATION_FEEDBACK.INNER_END_RADIUS
+        config.INNER_START_RADIUS,
+        config.INNER_END_RADIUS,
+        config.DURATION,
+        config.START_ALPHA
       );
 
       // Update outer ring (starts after delay)
-      const outerElapsed = elapsed - OBSERVATION_FEEDBACK.OUTER_DELAY;
+      const outerElapsed = elapsed - config.OUTER_DELAY;
       if (outerElapsed > 0) {
         anim.outerRing.visible = true;
         this.updateRing(
           anim.outerRing,
           outerElapsed,
-          OBSERVATION_FEEDBACK.OUTER_DELAY,
-          OBSERVATION_FEEDBACK.OUTER_START_RADIUS,
-          OBSERVATION_FEEDBACK.OUTER_END_RADIUS
+          config.OUTER_DELAY,
+          config.OUTER_START_RADIUS,
+          config.OUTER_END_RADIUS,
+          config.DURATION,
+          config.START_ALPHA
         );
+      }
+
+      // Update third ring for first observation (starts after third delay)
+      if (anim.isFirstObservation && anim.thirdRing) {
+        const thirdElapsed = elapsed - FIRST_OBSERVATION_FEEDBACK.THIRD_DELAY;
+        if (thirdElapsed > 0) {
+          anim.thirdRing.visible = true;
+          this.updateRing(
+            anim.thirdRing,
+            thirdElapsed,
+            FIRST_OBSERVATION_FEEDBACK.THIRD_DELAY,
+            FIRST_OBSERVATION_FEEDBACK.THIRD_START_RADIUS,
+            FIRST_OBSERVATION_FEEDBACK.THIRD_END_RADIUS,
+            FIRST_OBSERVATION_FEEDBACK.DURATION,
+            FIRST_OBSERVATION_FEEDBACK.START_ALPHA
+          );
+        }
       }
     }
 
@@ -179,10 +291,16 @@ export class FeedbackOverlay {
       // Clean up rings
       this.group.remove(anim.innerRing);
       this.group.remove(anim.outerRing);
+      if (anim.thirdRing) {
+        this.group.remove(anim.thirdRing);
+      }
 
       // Dispose materials (geometries are shared)
       (anim.innerRing.material as THREE.LineBasicMaterial).dispose();
       (anim.outerRing.material as THREE.LineBasicMaterial).dispose();
+      if (anim.thirdRing) {
+        (anim.thirdRing.material as THREE.LineBasicMaterial).dispose();
+      }
 
       this.activeAnimations.splice(index, 1);
     }
@@ -196,9 +314,11 @@ export class FeedbackOverlay {
     elapsed: number,
     delay: number,
     startRadius: number,
-    endRadius: number
+    endRadius: number,
+    duration: number = OBSERVATION_FEEDBACK.DURATION,
+    startAlpha: number = OBSERVATION_FEEDBACK.START_ALPHA
   ): void {
-    const adjustedDuration = OBSERVATION_FEEDBACK.DURATION - delay;
+    const adjustedDuration = duration - delay;
     const progress = Math.min(1, elapsed / adjustedDuration);
 
     // Ease out cubic for smooth deceleration
@@ -209,7 +329,7 @@ export class FeedbackOverlay {
     ring.scale.set(radius, radius, 1);
 
     // Fade out alpha
-    const alpha = OBSERVATION_FEEDBACK.START_ALPHA * Math.pow(1 - progress, 1.5);
+    const alpha = startAlpha * Math.pow(1 - progress, 1.5);
     (ring.material as THREE.LineBasicMaterial).opacity = alpha;
   }
 
@@ -235,6 +355,9 @@ export class FeedbackOverlay {
     for (const anim of this.activeAnimations) {
       (anim.innerRing.material as THREE.LineBasicMaterial).dispose();
       (anim.outerRing.material as THREE.LineBasicMaterial).dispose();
+      if (anim.thirdRing) {
+        (anim.thirdRing.material as THREE.LineBasicMaterial).dispose();
+      }
     }
 
     // Dispose cached geometries

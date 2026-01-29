@@ -54,6 +54,13 @@ interface PlantRenderState {
 }
 
 /**
+ * Cached keyframe meshes for a plant variant.
+ * Key format: "variantId-keyframeIndex"
+ * Value: Array of Line/LineLoop objects that can be cloned
+ */
+type KeyframeMeshCache = Map<string, THREE.Object3D[]>;
+
+/**
  * Renders vector-mode plant variants using Three.js Line primitives.
  * Uses material pooling to reduce allocations.
  */
@@ -69,6 +76,9 @@ export class VectorPlantOverlay {
 
   /** Pool of circle geometries keyed by segment count for reuse */
   private circleGeometryPool: Map<string, THREE.BufferGeometry> = new Map();
+
+  /** Cache of meshes for static keyframes (non-transitioning) */
+  private keyframeMeshCache: KeyframeMeshCache = new Map();
 
   constructor() {
     this.group = new THREE.Group();
@@ -202,15 +212,62 @@ export class VectorPlantOverlay {
   }
 
   /**
-   * Update a plant's mesh group with the current keyframe visuals.
-   * Uses pooled materials to reduce allocations.
+   * Get cache key for a static keyframe.
    */
-  private updatePlantGroup(
+  private getKeyframeCacheKey(
+    variantId: string,
+    keyframeIndex: number,
+    strokeColor: string
+  ): string {
+    return `${variantId}-${keyframeIndex}-${strokeColor}`;
+  }
+
+  /**
+   * Clone cached meshes for a keyframe into a plant group.
+   * Returns true if cache hit, false if cache miss.
+   */
+  private tryUseCachedMeshes(
     plantGroup: THREE.Group,
+    cacheKey: string,
     plant: Plant,
-    keyframe: VectorKeyframe | InterpolatedVectorKeyframe
-  ): void {
-    // Clear existing children - dispose geometry but NOT materials (they're pooled)
+    scale: number
+  ): boolean {
+    const cachedMeshes = this.keyframeMeshCache.get(cacheKey);
+    if (!cachedMeshes) return false;
+
+    // Clear existing children
+    this.clearPlantGroup(plantGroup);
+
+    // Clone cached meshes into the group
+    for (const mesh of cachedMeshes) {
+      const cloned = mesh.clone();
+      plantGroup.add(cloned);
+    }
+
+    // Position the plant group
+    plantGroup.position.set(plant.position.x, plant.position.y, VECTOR_PLANT_CONFIG.Z_POSITION);
+    plantGroup.scale.set(scale, scale, 1);
+
+    return true;
+  }
+
+  /**
+   * Store meshes in cache for future reuse.
+   * Only caches static (non-transitioning) keyframes.
+   */
+  private cacheMeshes(cacheKey: string, plantGroup: THREE.Group): void {
+    // Clone meshes for caching (don't use the originals)
+    const meshesToCache: THREE.Object3D[] = [];
+    for (const child of plantGroup.children) {
+      meshesToCache.push(child.clone());
+    }
+    this.keyframeMeshCache.set(cacheKey, meshesToCache);
+  }
+
+  /**
+   * Clear all children from a plant group, disposing geometry.
+   */
+  private clearPlantGroup(plantGroup: THREE.Group): void {
     while (plantGroup.children.length > 0) {
       const child = plantGroup.children[0];
       if (child) {
@@ -221,11 +278,66 @@ export class VectorPlantOverlay {
         }
       }
     }
+  }
 
-    // Get draw fractions if this is an interpolated keyframe
-    const drawFractions = isInterpolatedVectorKeyframe(keyframe)
-      ? keyframe.drawFractions
+  /**
+   * Update a plant's mesh group with the current keyframe visuals.
+   * Uses pooled materials and keyframe mesh caching to reduce allocations.
+   */
+  private updatePlantGroup(
+    plantGroup: THREE.Group,
+    plant: Plant,
+    keyframe: VectorKeyframe | InterpolatedVectorKeyframe
+  ): void {
+    const isTransitioning = isInterpolatedVectorKeyframe(keyframe);
+    const scale = keyframe.scale ?? 1.0;
+
+    // For static keyframes, try to use cached meshes
+    if (!isTransitioning) {
+      // Get lifecycle state for keyframe index
+      const variant = this.getVariant(plant.variantId);
+      if (variant?.vectorKeyframes) {
+        const keyframeIndex = variant.vectorKeyframes.findIndex(
+          (vk) => vk.primitives === keyframe.primitives
+        );
+        if (keyframeIndex >= 0) {
+          const cacheKey = this.getKeyframeCacheKey(
+            plant.variantId,
+            keyframeIndex,
+            keyframe.strokeColor
+          );
+
+          // Try to use cache
+          if (this.tryUseCachedMeshes(plantGroup, cacheKey, plant, scale)) {
+            return; // Cache hit - we're done
+          }
+
+          // Cache miss - build meshes and cache them
+          this.buildPlantMeshes(plantGroup, plant, keyframe, undefined);
+          this.cacheMeshes(cacheKey, plantGroup);
+          return;
+        }
+      }
+    }
+
+    // Transitioning or couldn't cache - build meshes normally
+    const drawFractions = isTransitioning
+      ? (keyframe as InterpolatedVectorKeyframe).drawFractions
       : undefined;
+    this.buildPlantMeshes(plantGroup, plant, keyframe, drawFractions);
+  }
+
+  /**
+   * Build meshes for a plant from primitives.
+   */
+  private buildPlantMeshes(
+    plantGroup: THREE.Group,
+    plant: Plant,
+    keyframe: VectorKeyframe | InterpolatedVectorKeyframe,
+    drawFractions: number[] | undefined
+  ): void {
+    // Clear existing children
+    this.clearPlantGroup(plantGroup);
 
     // Generate geometry for each primitive
     for (let i = 0; i < keyframe.primitives.length; i++) {
@@ -624,6 +736,16 @@ export class VectorPlantOverlay {
     }
     this.plantMeshes.clear();
     this.plantRenderStates.clear();
+
+    // Dispose cached keyframe meshes
+    for (const cachedMeshes of this.keyframeMeshCache.values()) {
+      for (const mesh of cachedMeshes) {
+        if (mesh instanceof THREE.Line || mesh instanceof THREE.LineLoop) {
+          mesh.geometry.dispose();
+        }
+      }
+    }
+    this.keyframeMeshCache.clear();
 
     // Dispose pooled materials
     for (const material of this.materialPool.values()) {

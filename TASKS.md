@@ -1,6 +1,6 @@
 # Quantum Garden - Task List
 
-_Last updated: 2026-01-29 (synthesis - qubit count parameterization)_
+_Last updated: 2026-01-29 (synthesis - opacity bug fix)_
 
 ## Project Status
 
@@ -18,7 +18,7 @@ The garden now features **server-side evolution** - plants germinate whether any
 
 ---
 
-## Active Tasks (6 Remaining)
+## Active Tasks (5 Remaining)
 
 ### Bugs & Performance
 
@@ -41,7 +41,6 @@ No active tasks.
 
 | #   | Task                                                  | Priority | File                 |
 | --- | ----------------------------------------------------- | -------- | -------------------- |
-| 78  | Review opacity-from-consistency logic                 | P3       | `observation.ts`     |
 | 79  | Consider probability-weighted superposition rendering | P3       | `plant-instancer.ts` |
 
 ### Polish
@@ -100,6 +99,21 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Opacity Bug Fix for Collapsed Plants (#78)
+
+- Fixed bug where quantum-measured opacity was never applied to rendering
+- **Problem**: `plant-instancer.ts` always used `GLYPH.COLLAPSED_OPACITY` (1.0) for collapsed plants
+  - `traits.opacity` was correctly calculated (0.7-1.0 based on measurement consistency)
+  - But the rendering code ignored it, showing all collapsed plants at full opacity
+- **Solution**: Updated `getPlantRenderData()` to apply `plant.traits.opacity` for collapsed plants
+  - Superposed plants still use `GLYPH.SUPERPOSED_OPACITY` (0.3)
+  - Collapsed plants now reflect quantum measurement consistency
+- **Visual Effect**:
+  - High consistency (repeated measurements) = full opacity (1.0)
+  - Low consistency (varied measurements) = slightly transparent (0.7-0.9)
+  - Adds subtle depth variation based on quantum uncertainty
+- All 268 tests passing (60 shared + 208 web)
 
 ### 2026-01-29 - Qubit Count Parameterization for Growth Rate (#77)
 

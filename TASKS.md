@@ -54,7 +54,6 @@ No active tasks.
 | 97  | Add plant highlight pulsing in debug mode           | P3       | `debug-overlay.ts`              |
 | 98  | Improve context panel animation                     | P3       | `observation-context-panel.tsx` |
 | 102 | Plan sound effects system                           | P3       | -                               |
-| 104 | Add "scrub to now" quick button                     | P3       | `time-travel-scrubber.tsx`      |
 
 ### Testing & Documentation
 
@@ -106,6 +105,20 @@ No active tasks.
 ---
 
 ## Completed Work
+
+### 2026-01-29 - Jump to Now Button for Time-Travel Scrubber (#104)
+
+- Added "⏭ Now" button to time-travel scrubber header
+- Provides quick jump to current moment when scrubbed back in history
+- Button behavior:
+  - Stops playback if currently playing
+  - Sets current time to `now`
+  - Calls `onScrubToTime(now)` to sync with parent component
+  - Disabled when already at current time (playheadProgress >= 0.999)
+- Compact styling (`px-3 py-2`) matching adjacent Play/Pause button
+- Same disabled/enabled state styling as Play button
+- Tooltip "Jump to current time" for discoverability
+- All 268 tests passing (60 shared + 208 web) - 1 flaky performance test
 
 ### 2026-01-29 - Playback Speed Control for Time-Travel Scrubber (#103)
 

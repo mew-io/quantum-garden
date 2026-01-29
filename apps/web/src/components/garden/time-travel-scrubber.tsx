@@ -281,6 +281,27 @@ export function TimeTravelScrubber({
               {isPlaying ? "⏸ Pause" : "▶ Play"}
             </button>
 
+            {/* Jump to Now */}
+            <button
+              onClick={() => {
+                setIsPlaying(false);
+                setCurrentTime(now);
+                onScrubToTime(now);
+              }}
+              disabled={playheadProgress >= 0.999}
+              className={`
+                px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                ${
+                  playheadProgress >= 0.999
+                    ? "bg-white/5 text-white/30 cursor-not-allowed"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }
+              `}
+              title="Jump to current time"
+            >
+              ⏭ Now
+            </button>
+
             {/* Exit Timeline */}
             <button
               onClick={() => {

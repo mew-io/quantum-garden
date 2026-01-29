@@ -70,7 +70,19 @@ const EVOLUTION = {
   COOLDOWN_MULTIPLIER: 0.3, // 30% normal chance near recent germinations
 };
 
-type GerminationCallback = (plantId: string) => Promise<void>;
+/**
+ * Context passed to the germination callback.
+ */
+export interface GerminationContext {
+  /** Whether this germination is part of a wave event */
+  isWave: boolean;
+  /** For wave events: 1-indexed position in the wave (e.g., 1 of 3) */
+  waveIndex?: number;
+  /** For wave events: total number of plants in the wave */
+  waveTotal?: number;
+}
+
+type GerminationCallback = (plantId: string, context: GerminationContext) => Promise<void>;
 
 /**
  * Manages the slow evolution of the garden over time.
@@ -408,8 +420,10 @@ export class GardenEvolutionSystem {
     // Process selected plants
     let germinationsThisCheck = 0;
 
+    // First pass: determine which plants will germinate
+    const plantsToGerminate: Plant[] = [];
     for (const plant of plantsToProcess) {
-      if (germinationsThisCheck >= maxGerminations) break;
+      if (plantsToGerminate.length >= maxGerminations) break;
 
       const dormantSince = this.plantAges.get(plant.id);
       if (!dormantSince) continue;
@@ -417,25 +431,44 @@ export class GardenEvolutionSystem {
       const probability = this.getGerminationProbability(plant, plants, dormantSince, now);
 
       if (Math.random() < probability) {
-        try {
-          await this.onGerminate(plant.id);
-          this.plantAges.delete(plant.id); // No longer tracking dormancy
-          this.recentGerminations.set(plant.id, now); // Track for cooldown
-          germinationsThisCheck++;
+        plantsToGerminate.push(plant);
+      }
+    }
 
-          // Log for debugging
-          const waveIndicator = isWave ? " (wave)" : "";
-          const guaranteedIndicator = probability >= 1.0 ? " (guaranteed)" : "";
-          debugLogger.evolution.info(`Plant germinated${waveIndicator}${guaranteedIndicator}`, {
-            plantId: plant.id.slice(0, 8),
-            probability: probability.toFixed(2),
-          });
-        } catch (error) {
-          debugLogger.evolution.error("Failed to germinate plant", {
-            plantId: plant.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
+    // Second pass: germinate with wave context
+    const waveTotal = isWave ? plantsToGerminate.length : undefined;
+
+    for (let i = 0; i < plantsToGerminate.length; i++) {
+      const plant = plantsToGerminate[i]!;
+      const dormantSince = this.plantAges.get(plant.id);
+      const probability = dormantSince
+        ? this.getGerminationProbability(plant, plants, dormantSince, now)
+        : 0;
+
+      try {
+        const context: GerminationContext = {
+          isWave,
+          waveIndex: isWave ? i + 1 : undefined,
+          waveTotal,
+        };
+
+        await this.onGerminate(plant.id, context);
+        this.plantAges.delete(plant.id); // No longer tracking dormancy
+        this.recentGerminations.set(plant.id, now); // Track for cooldown
+        germinationsThisCheck++;
+
+        // Log for debugging
+        const waveIndicator = isWave ? ` (wave ${i + 1}/${waveTotal})` : "";
+        const guaranteedIndicator = probability >= 1.0 ? " (guaranteed)" : "";
+        debugLogger.evolution.info(`Plant germinated${waveIndicator}${guaranteedIndicator}`, {
+          plantId: plant.id.slice(0, 8),
+          probability: probability.toFixed(2),
+        });
+      } catch (error) {
+        debugLogger.evolution.error("Failed to germinate plant", {
+          plantId: plant.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 

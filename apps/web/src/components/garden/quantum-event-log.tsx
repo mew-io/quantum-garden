@@ -191,32 +191,15 @@ export function QuantumEventLog() {
     return () => container.removeEventListener("scroll", checkScroll);
   }, []);
 
-  // Auto-scroll to bottom and select latest event when new events arrive
+  // Auto-scroll to bottom when new events arrive (but don't auto-select/open modal)
   useEffect(() => {
     if (filteredEvents.length > 0) {
       // Auto-scroll if at bottom
       if (wasAtBottomRef.current && scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
       }
-      // Auto-select the latest event if nothing is selected or selection is stale
-      const latestEvent = filteredEvents[filteredEvents.length - 1];
-      if (latestEvent && !selectedEventId) {
-        setSelectedEventId(latestEvent.id);
-      }
     }
-  }, [filteredEvents, selectedEventId, setSelectedEventId]);
-
-  // When a new event arrives, auto-select it
-  const prevEventCountRef = useRef(eventLog.length);
-  useEffect(() => {
-    if (eventLog.length > prevEventCountRef.current && eventLog.length > 0) {
-      const latestEvent = eventLog[eventLog.length - 1];
-      if (latestEvent) {
-        setSelectedEventId(latestEvent.id);
-      }
-    }
-    prevEventCountRef.current = eventLog.length;
-  }, [eventLog, setSelectedEventId]);
+  }, [filteredEvents]);
 
   // Handle event selection
   const handleEventClick = useCallback(

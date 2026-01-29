@@ -143,8 +143,13 @@ describe("GardenEvolutionSystem", () => {
       // Manually trigger check
       await system.triggerCheck();
 
-      // Callback should have been called with plant ID
-      expect(callback).toHaveBeenCalledWith("plant-1");
+      // Callback should have been called with plant ID and context
+      expect(callback).toHaveBeenCalledWith(
+        "plant-1",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
     });
 
     it("should not trigger callback when system is stopped", async () => {
@@ -290,7 +295,12 @@ describe("GardenEvolutionSystem", () => {
       await system.triggerCheck();
 
       // Should germinate (guaranteed germination after 20 min, not clustered)
-      expect(callback).toHaveBeenCalledWith("dormant");
+      expect(callback).toHaveBeenCalledWith(
+        "dormant",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
     });
   });
 
@@ -498,7 +508,12 @@ describe("GardenEvolutionSystem", () => {
 
       // First check - plant1 should germinate (0.01 < 0.15)
       await system.triggerCheck();
-      expect(callback).toHaveBeenCalledWith("plant1");
+      expect(callback).toHaveBeenCalledWith(
+        "plant1",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
 
       // Reset for next check
       callback.mockClear();
@@ -541,12 +556,22 @@ describe("GardenEvolutionSystem", () => {
 
       // First check - plant1 germinates
       await system.triggerCheck();
-      expect(callback).toHaveBeenCalledWith("plant1");
+      expect(callback).toHaveBeenCalledWith(
+        "plant1",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
       callback.mockClear();
 
       // Second check - plant2 should germinate normally (no cooldown)
       await system.triggerCheck();
-      expect(callback).toHaveBeenCalledWith("plant2");
+      expect(callback).toHaveBeenCalledWith(
+        "plant2",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
 
       vi.spyOn(Math, "random").mockRestore();
     });
@@ -574,7 +599,12 @@ describe("GardenEvolutionSystem", () => {
 
       // First check - plant1 germinates
       await system.triggerCheck();
-      expect(callback).toHaveBeenCalledWith("plant1");
+      expect(callback).toHaveBeenCalledWith(
+        "plant1",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
       callback.mockClear();
 
       // Advance time past cooldown duration (2 minutes)
@@ -582,7 +612,12 @@ describe("GardenEvolutionSystem", () => {
 
       // Now plant2 should be able to germinate (cooldown expired)
       await system.triggerCheck();
-      expect(callback).toHaveBeenCalledWith("plant2");
+      expect(callback).toHaveBeenCalledWith(
+        "plant2",
+        expect.objectContaining({
+          isWave: false,
+        })
+      );
 
       vi.spyOn(Math, "random").mockRestore();
     });

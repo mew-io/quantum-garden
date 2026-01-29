@@ -13,14 +13,17 @@
  */
 
 import { useEffect, useRef } from "react";
-import type { GardenEvolutionSystem } from "@/components/garden/garden-evolution";
+import type {
+  GardenEvolutionSystem,
+  GerminationContext,
+} from "@/components/garden/garden-evolution";
 import { createGardenEvolutionSystem } from "@/components/garden/garden-evolution";
 import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
 
 interface UseEvolutionSystemOptions {
   /** Callback to trigger plant germination */
-  triggerGermination: (plantId: string) => Promise<void>;
+  triggerGermination: (plantId: string, context: GerminationContext) => Promise<void>;
 }
 
 interface EvolutionSystemState {
@@ -53,9 +56,13 @@ export function useEvolutionSystem({
     systemRef.current = system;
 
     // Set the germination callback
-    system.setGerminationCallback(async (plantId: string) => {
-      debugLogger.evolution.debug(`Germination triggered for plant ${plantId.slice(0, 8)}`);
-      await triggerGermination(plantId);
+    system.setGerminationCallback(async (plantId: string, context: GerminationContext) => {
+      debugLogger.evolution.debug(`Germination triggered for plant ${plantId.slice(0, 8)}`, {
+        isWave: context.isWave,
+        waveIndex: context.waveIndex,
+        waveTotal: context.waveTotal,
+      });
+      await triggerGermination(plantId, context);
     });
 
     // Start the system

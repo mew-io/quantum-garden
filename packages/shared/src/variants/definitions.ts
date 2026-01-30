@@ -53,6 +53,9 @@ import {
   vectorPolygon,
   vectorStar,
   vectorDiamond,
+  vectorArc,
+  vectorBezier,
+  vectorSpiral,
   vectorConcentricCircles,
   vectorRadialLines,
   vectorFlowerOfLife,
@@ -4243,10 +4246,37 @@ const auroraWisp: PlantVariant = {
       name: "shimmer",
       duration: 18,
       primitives: [
-        // Soft flowing ribbons
-        vectorLine(VECTOR_CENTER - 16, VECTOR_CENTER + 12, VECTOR_CENTER - 8, VECTOR_CENTER - 8),
-        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 8, VECTOR_CENTER + 4, VECTOR_CENTER + 4),
-        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER + 4, VECTOR_CENTER + 14, VECTOR_CENTER - 10),
+        // Soft flowing bezier ribbons (organic curves)
+        vectorBezier(
+          VECTOR_CENTER - 16,
+          VECTOR_CENTER + 12, // start
+          VECTOR_CENTER - 14,
+          VECTOR_CENTER, // control 1
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER - 4, // control 2
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER - 8 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER - 8, // start
+          VECTOR_CENTER - 2,
+          VECTOR_CENTER + 2, // control 1
+          VECTOR_CENTER + 2,
+          VECTOR_CENTER + 6, // control 2
+          VECTOR_CENTER + 4,
+          VECTOR_CENTER + 4 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 4,
+          VECTOR_CENTER + 4, // start
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER, // control 1
+          VECTOR_CENTER + 12,
+          VECTOR_CENTER - 6, // control 2
+          VECTOR_CENTER + 14,
+          VECTOR_CENTER - 10 // end
+        ),
         // Ethereal glow points
         vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 2, 5),
@@ -4263,11 +4293,47 @@ const auroraWisp: PlantVariant = {
       name: "flow",
       duration: 22,
       primitives: [
-        // Flowing wave ribbons
-        vectorLine(VECTOR_CENTER - 20, VECTOR_CENTER + 10, VECTOR_CENTER - 10, VECTOR_CENTER - 10),
-        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 10, VECTOR_CENTER + 2, VECTOR_CENTER + 6),
-        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER + 6, VECTOR_CENTER + 16, VECTOR_CENTER - 12),
-        vectorLine(VECTOR_CENTER + 16, VECTOR_CENTER - 12, VECTOR_CENTER + 22, VECTOR_CENTER - 8),
+        // Flowing wave bezier ribbons
+        vectorBezier(
+          VECTOR_CENTER - 20,
+          VECTOR_CENTER + 10, // start
+          VECTOR_CENTER - 18,
+          VECTOR_CENTER - 2, // control 1
+          VECTOR_CENTER - 12,
+          VECTOR_CENTER - 8, // control 2
+          VECTOR_CENTER - 10,
+          VECTOR_CENTER - 10 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 10,
+          VECTOR_CENTER - 10, // start
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER, // control 1
+          VECTOR_CENTER,
+          VECTOR_CENTER + 8, // control 2
+          VECTOR_CENTER + 2,
+          VECTOR_CENTER + 6 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 2,
+          VECTOR_CENTER + 6, // start
+          VECTOR_CENTER + 6,
+          VECTOR_CENTER, // control 1
+          VECTOR_CENTER + 12,
+          VECTOR_CENTER - 8, // control 2
+          VECTOR_CENTER + 16,
+          VECTOR_CENTER - 12 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 16,
+          VECTOR_CENTER - 12, // start
+          VECTOR_CENTER + 18,
+          VECTOR_CENTER - 10, // control 1
+          VECTOR_CENTER + 20,
+          VECTOR_CENTER - 8, // control 2
+          VECTOR_CENTER + 22,
+          VECTOR_CENTER - 8 // end
+        ),
         // Wave crests
         vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER, 5),
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 4, 6),
@@ -4285,11 +4351,47 @@ const auroraWisp: PlantVariant = {
       name: "dance",
       duration: 30,
       primitives: [
-        // Dancing ribbons in full flow
-        vectorLine(VECTOR_CENTER - 24, VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER - 14),
-        vectorLine(VECTOR_CENTER - 12, VECTOR_CENTER - 14, VECTOR_CENTER, VECTOR_CENTER + 8),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER + 14, VECTOR_CENTER - 16),
-        vectorLine(VECTOR_CENTER + 14, VECTOR_CENTER - 16, VECTOR_CENTER + 26, VECTOR_CENTER - 6),
+        // Dancing bezier ribbons in full flow
+        vectorBezier(
+          VECTOR_CENTER - 24,
+          VECTOR_CENTER + 8, // start
+          VECTOR_CENTER - 20,
+          VECTOR_CENTER - 4, // control 1
+          VECTOR_CENTER - 16,
+          VECTOR_CENTER - 12, // control 2
+          VECTOR_CENTER - 12,
+          VECTOR_CENTER - 14 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 12,
+          VECTOR_CENTER - 14, // start
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER - 2, // control 1
+          VECTOR_CENTER - 2,
+          VECTOR_CENTER + 6, // control 2
+          VECTOR_CENTER,
+          VECTOR_CENTER + 8 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER,
+          VECTOR_CENTER + 8, // start
+          VECTOR_CENTER + 4,
+          VECTOR_CENTER, // control 1
+          VECTOR_CENTER + 10,
+          VECTOR_CENTER - 10, // control 2
+          VECTOR_CENTER + 14,
+          VECTOR_CENTER - 16 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 14,
+          VECTOR_CENTER - 16, // start
+          VECTOR_CENTER + 18,
+          VECTOR_CENTER - 12, // control 1
+          VECTOR_CENTER + 22,
+          VECTOR_CENTER - 8, // control 2
+          VECTOR_CENTER + 26,
+          VECTOR_CENTER - 6 // end
+        ),
         // Brilliant aurora nodes
         vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 2, 6),
         vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 4, 7),
@@ -4611,10 +4713,19 @@ const dreamVine: PlantVariant = {
       name: "tendril",
       duration: 20,
       primitives: [
-        // Initial tendril curl
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER, VECTOR_CENTER + 4),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER - 6, VECTOR_CENTER - 6),
-        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 10),
+        // Initial tendril curl using bezier for organic flow
+        vectorBezier(
+          VECTOR_CENTER,
+          VECTOR_CENTER + 14, // start
+          VECTOR_CENTER - 4,
+          VECTOR_CENTER + 8, // control 1
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER, // control 2
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER - 6 // end
+        ),
+        // Curling arc at the tip
+        vectorArc(VECTOR_CENTER - 3, VECTOR_CENTER - 8, 6, 90, 270),
         // Curl tips
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 10, 3),
         vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 6, 2),
@@ -4630,11 +4741,39 @@ const dreamVine: PlantVariant = {
       name: "weaving",
       duration: 25,
       primitives: [
-        // Weaving vine path
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 4, VECTOR_CENTER + 8),
-        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER + 8, VECTOR_CENTER + 6, VECTOR_CENTER),
-        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER - 8, VECTOR_CENTER - 10),
-        vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER - 10, VECTOR_CENTER + 4, VECTOR_CENTER - 16),
+        // Weaving vine path with flowing beziers
+        vectorBezier(
+          VECTOR_CENTER,
+          VECTOR_CENTER + 16, // start
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER + 12, // control 1
+          VECTOR_CENTER - 2,
+          VECTOR_CENTER + 4, // control 2
+          VECTOR_CENTER - 4,
+          VECTOR_CENTER + 8 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 4,
+          VECTOR_CENTER + 8, // start
+          VECTOR_CENTER + 2,
+          VECTOR_CENTER + 4, // control 1
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER + 2, // control 2
+          VECTOR_CENTER + 6,
+          VECTOR_CENTER // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 6,
+          VECTOR_CENTER, // start
+          VECTOR_CENTER,
+          VECTOR_CENTER - 4, // control 1
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER - 8, // control 2
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER - 10 // end
+        ),
+        // Curling arc tendril
+        vectorArc(VECTOR_CENTER + 2, VECTOR_CENTER - 14, 6, 0, 180),
         // Leaf nodes
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER + 8, 3),
         vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER, 4),
@@ -4652,15 +4791,61 @@ const dreamVine: PlantVariant = {
       name: "cascade",
       duration: 35,
       primitives: [
-        // Full cascading vine
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 18, VECTOR_CENTER - 6, VECTOR_CENTER + 10),
-        vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 10, VECTOR_CENTER + 8, VECTOR_CENTER + 2),
-        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER + 2, VECTOR_CENTER - 10, VECTOR_CENTER - 8),
-        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER + 6, VECTOR_CENTER - 16),
-        vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 16, VECTOR_CENTER - 4, VECTOR_CENTER - 22),
-        // Secondary tendrils
-        vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER + 2, VECTOR_CENTER + 16, VECTOR_CENTER + 6),
-        vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER - 18, VECTOR_CENTER - 6),
+        // Full cascading vine with flowing bezier curves
+        vectorBezier(
+          VECTOR_CENTER,
+          VECTOR_CENTER + 18, // start
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER + 14, // control 1
+          VECTOR_CENTER - 4,
+          VECTOR_CENTER + 8, // control 2
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER + 10 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 6,
+          VECTOR_CENTER + 10, // start
+          VECTOR_CENTER + 4,
+          VECTOR_CENTER + 6, // control 1
+          VECTOR_CENTER + 10,
+          VECTOR_CENTER + 4, // control 2
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER + 2 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER + 2, // start
+          VECTOR_CENTER,
+          VECTOR_CENTER - 2, // control 1
+          VECTOR_CENTER - 8,
+          VECTOR_CENTER - 6, // control 2
+          VECTOR_CENTER - 10,
+          VECTOR_CENTER - 8 // end
+        ),
+        vectorBezier(
+          VECTOR_CENTER - 10,
+          VECTOR_CENTER - 8, // start
+          VECTOR_CENTER,
+          VECTOR_CENTER - 12, // control 1
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER - 14, // control 2
+          VECTOR_CENTER + 6,
+          VECTOR_CENTER - 16 // end
+        ),
+        // Curling arcs at branch tips
+        vectorArc(VECTOR_CENTER - 6, VECTOR_CENTER - 20, 5, 45, 225),
+        vectorArc(VECTOR_CENTER + 14, VECTOR_CENTER + 4, 4, 270, 90),
+        // Secondary bezier tendrils
+        vectorBezier(
+          VECTOR_CENTER + 8,
+          VECTOR_CENTER + 2, // start
+          VECTOR_CENTER + 12,
+          VECTOR_CENTER + 4, // control 1
+          VECTOR_CENTER + 14,
+          VECTOR_CENTER + 6, // control 2
+          VECTOR_CENTER + 16,
+          VECTOR_CENTER + 6 // end
+        ),
         // Dream flower nodes
         vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER + 10, 4),
         vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER + 2, 5),
@@ -4668,7 +4853,6 @@ const dreamVine: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 16, 5),
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 22, 4),
         vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 6, 3),
-        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 6, 3),
       ],
       strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.85,
@@ -4745,9 +4929,9 @@ const cosmicLotus: PlantVariant = {
       name: "transcendent",
       duration: 65,
       primitives: [
-        // Transcendent center
+        // Transcendent center with mesmerizing spiral
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 2, 10, 2.5, 0),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
-        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
         vectorStar(VECTOR_CENTER, VECTOR_CENTER, 12, 6, 12),
         // Full flower of life
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 14, 7),
@@ -6104,12 +6288,12 @@ const kaleidoscopeStarVector: PlantVariant = {
 
 /**
  * Vortex Spiral (Vector) - Smooth vector version
- * Concentric circles creating spiral illusion with purple tones
+ * True spirals creating mesmerizing vortex patterns with purple tones
  */
 const vortexSpiralVector: PlantVariant = {
   id: "vortex-spiral-vector",
   name: "Vortex Spiral (Vector)",
-  description: "Swirling vortex patterns with smooth vector circles",
+  description: "Swirling vortex patterns with hypnotic true spirals",
   rarity: 0.07,
   requiresObservationToGerminate: true,
   renderMode: "vector",
@@ -6121,11 +6305,12 @@ const vortexSpiralVector: PlantVariant = {
       name: "calm",
       duration: 12,
       primitives: [
-        // Concentric circles - calm state
-        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [4, 10, 16]),
-        // Subtle spiral arms
-        vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 8),
-        vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 8),
+        // Calm center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
+        // Gentle single spiral arm emerging
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 1, 0),
+        // Secondary spiral offset
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 6, 14, 0.8, 180),
       ],
       strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
@@ -6137,13 +6322,16 @@ const vortexSpiralVector: PlantVariant = {
       name: "spin",
       duration: 8,
       primitives: [
-        // More circles - spinning up
-        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [3, 8, 14, 20]),
-        // Spiral arms extending
-        vectorLine(VECTOR_CENTER + 3, VECTOR_CENTER, VECTOR_CENTER + 20, VECTOR_CENTER - 12),
-        vectorLine(VECTOR_CENTER - 3, VECTOR_CENTER, VECTOR_CENTER - 20, VECTOR_CENTER + 12),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 3, VECTOR_CENTER + 12, VECTOR_CENTER + 20),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 3, VECTOR_CENTER - 12, VECTOR_CENTER - 20),
+        // Spinning center
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
+        // Two interleaved spirals expanding
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 4, 20, 1.5, 0),
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 4, 18, 1.5, 180),
+        // Third spiral for depth
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 5, 16, 1.2, 90),
+        // Spiral tips as energy nodes
+        vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 8, 3),
+        vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 8, 3),
       ],
       strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.75,
@@ -6155,15 +6343,19 @@ const vortexSpiralVector: PlantVariant = {
       name: "whirl",
       duration: 6,
       primitives: [
-        // Dense circles - whirling
-        ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [2, 6, 11, 17, 24]),
-        // Full spiral arms
-        vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 24, VECTOR_CENTER - 14),
-        vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER, VECTOR_CENTER - 24, VECTOR_CENTER + 14),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER + 14, VECTOR_CENTER + 24),
-        vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER - 14, VECTOR_CENTER - 24),
-        // Core star
-        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 4, 6, 3, 0),
+        // Intense core
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 2),
+        vectorStar(VECTOR_CENTER, VECTOR_CENTER, 4, 5, 2, 0),
+        // Triple spiral vortex at full intensity
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 3, 24, 2, 0),
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 3, 22, 2, 120),
+        vectorSpiral(VECTOR_CENTER, VECTOR_CENTER, 3, 20, 2, 240),
+        // Outer energy ring
+        vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 26),
+        // Whirling energy nodes
+        vectorCircle(VECTOR_CENTER + 22, VECTOR_CENTER - 10, 3),
+        vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 20, 3),
+        vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 14, 3),
       ],
       strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.9,

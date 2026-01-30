@@ -12,6 +12,9 @@ import type {
   VectorPolygon,
   VectorStar,
   VectorDiamond,
+  VectorArc,
+  VectorBezier,
+  VectorSpiral,
 } from "../variants/types";
 
 /** Standard coordinate space size (matches PATTERN_SIZE) */
@@ -222,4 +225,145 @@ export function vectorFlowerOfLife(
   }
 
   return circles;
+}
+
+// =============================================================================
+// NEW PRIMITIVES: Arc, Bezier, Spiral
+// =============================================================================
+
+/**
+ * Create an arc primitive (partial circle)
+ * @param cx - Center X coordinate
+ * @param cy - Center Y coordinate
+ * @param radius - Arc radius
+ * @param startAngle - Start angle in degrees (0 = right, 90 = down)
+ * @param endAngle - End angle in degrees
+ * @param fill - Whether to fill as a wedge (default false)
+ */
+export function vectorArc(
+  cx: number,
+  cy: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  fill: boolean = false
+): VectorArc {
+  return { type: "arc", cx, cy, radius, startAngle, endAngle, fill };
+}
+
+/**
+ * Create a cubic bezier curve primitive
+ * @param x1 - Start point X
+ * @param y1 - Start point Y
+ * @param cx1 - First control point X
+ * @param cy1 - First control point Y
+ * @param cx2 - Second control point X
+ * @param cy2 - Second control point Y
+ * @param x2 - End point X
+ * @param y2 - End point Y
+ */
+export function vectorBezier(
+  x1: number,
+  y1: number,
+  cx1: number,
+  cy1: number,
+  cx2: number,
+  cy2: number,
+  x2: number,
+  y2: number
+): VectorBezier {
+  return { type: "bezier", x1, y1, cx1, cy1, cx2, cy2, x2, y2 };
+}
+
+/**
+ * Create a spiral primitive (Archimedean spiral)
+ * @param cx - Center X coordinate
+ * @param cy - Center Y coordinate
+ * @param startRadius - Inner radius
+ * @param endRadius - Outer radius
+ * @param turns - Number of complete rotations
+ * @param startAngle - Starting angle in degrees (default 0)
+ */
+export function vectorSpiral(
+  cx: number,
+  cy: number,
+  startRadius: number,
+  endRadius: number,
+  turns: number,
+  startAngle: number = 0
+): VectorSpiral {
+  return { type: "spiral", cx, cy, startRadius, endRadius, turns, startAngle };
+}
+
+/**
+ * Create a flowing wave using multiple bezier curves
+ * Great for organic, aurora-like shapes
+ */
+export function vectorFlowingWave(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+  amplitude: number,
+  segments: number = 2
+): VectorPrimitive[] {
+  const beziers: VectorBezier[] = [];
+  const dx = (endX - startX) / segments;
+  const dy = (endY - startY) / segments;
+
+  for (let i = 0; i < segments; i++) {
+    const sx = startX + i * dx;
+    const sy = startY + i * dy;
+    const ex = startX + (i + 1) * dx;
+    const ey = startY + (i + 1) * dy;
+
+    // Alternate wave direction
+    const direction = i % 2 === 0 ? 1 : -1;
+    const perpX = (-dy / Math.sqrt(dx * dx + dy * dy)) * amplitude * direction;
+    const perpY = (dx / Math.sqrt(dx * dx + dy * dy)) * amplitude * direction;
+
+    beziers.push(
+      vectorBezier(
+        sx,
+        sy,
+        sx + dx * 0.3 + perpX,
+        sy + dy * 0.3 + perpY,
+        ex - dx * 0.3 + perpX,
+        ey - dy * 0.3 + perpY,
+        ex,
+        ey
+      )
+    );
+  }
+
+  return beziers;
+}
+
+/**
+ * Create concentric arcs (like nested crescents)
+ */
+export function vectorConcentricArcs(
+  cx: number,
+  cy: number,
+  radii: number[],
+  startAngle: number,
+  endAngle: number
+): VectorPrimitive[] {
+  return radii.map((radius) => vectorArc(cx, cy, radius, startAngle, endAngle));
+}
+
+/**
+ * Create a double spiral (two interleaved spirals)
+ */
+export function vectorDoubleSpiral(
+  cx: number,
+  cy: number,
+  startRadius: number,
+  endRadius: number,
+  turns: number
+): VectorPrimitive[] {
+  return [
+    vectorSpiral(cx, cy, startRadius, endRadius, turns, 0),
+    vectorSpiral(cx, cy, startRadius, endRadius, turns, 180),
+  ];
 }

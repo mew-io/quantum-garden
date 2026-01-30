@@ -247,7 +247,10 @@ export type VectorPrimitive =
   | VectorLine
   | VectorPolygon
   | VectorStar
-  | VectorDiamond;
+  | VectorDiamond
+  | VectorArc
+  | VectorBezier
+  | VectorSpiral;
 
 export interface VectorCircle {
   type: "circle";
@@ -299,6 +302,71 @@ export interface VectorDiamond {
   height: number;
   /** Whether this shape should be filled (default true for diamonds) */
   fill?: boolean;
+}
+
+/**
+ * Arc primitive - curved line segment.
+ * Useful for creating flowing, organic shapes.
+ * Can be filled to create wedge/pie slice shapes.
+ */
+export interface VectorArc {
+  type: "arc";
+  /** Center X coordinate */
+  cx: number;
+  /** Center Y coordinate */
+  cy: number;
+  /** Radius of the arc */
+  radius: number;
+  /** Start angle in degrees (0 = right, 90 = down) */
+  startAngle: number;
+  /** End angle in degrees */
+  endAngle: number;
+  /** Whether this shape should be filled as a wedge (default false for arcs) */
+  fill?: boolean;
+}
+
+/**
+ * Bezier curve primitive - smooth curve defined by control points.
+ * Creates elegant, flowing lines perfect for organic plant shapes.
+ */
+export interface VectorBezier {
+  type: "bezier";
+  /** Start point X */
+  x1: number;
+  /** Start point Y */
+  y1: number;
+  /** First control point X */
+  cx1: number;
+  /** First control point Y */
+  cy1: number;
+  /** Second control point X */
+  cx2: number;
+  /** Second control point Y */
+  cy2: number;
+  /** End point X */
+  x2: number;
+  /** End point Y */
+  y2: number;
+}
+
+/**
+ * Spiral primitive - expanding or contracting spiral.
+ * Creates mesmerizing, natural patterns.
+ */
+export interface VectorSpiral {
+  type: "spiral";
+  /** Center X coordinate */
+  cx: number;
+  /** Center Y coordinate */
+  cy: number;
+  /** Starting radius (inner) */
+  startRadius: number;
+  /** Ending radius (outer) */
+  endRadius: number;
+  /** Number of full rotations */
+  turns: number;
+  /** Starting angle in degrees (default: 0) */
+  startAngle?: number;
 }
 
 /**

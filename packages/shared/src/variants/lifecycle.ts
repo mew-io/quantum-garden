@@ -870,6 +870,50 @@ function rotatePrimitive(
       const rotated = rotatePoint(p.cx, p.cy);
       return { type: "diamond", cx: rotated.x, cy: rotated.y, width: p.width, height: p.height };
     }
+    case "arc": {
+      const rotated = rotatePoint(p.cx, p.cy);
+      // Convert rotation angle to degrees for arc angles
+      const angleDeg = Math.atan2(sinA, cosA) * (180 / Math.PI);
+      return {
+        type: "arc",
+        cx: rotated.x,
+        cy: rotated.y,
+        radius: p.radius,
+        startAngle: p.startAngle + angleDeg,
+        endAngle: p.endAngle + angleDeg,
+      };
+    }
+    case "bezier": {
+      const start = rotatePoint(p.x1, p.y1);
+      const c1 = rotatePoint(p.cx1, p.cy1);
+      const c2 = rotatePoint(p.cx2, p.cy2);
+      const end = rotatePoint(p.x2, p.y2);
+      return {
+        type: "bezier",
+        x1: start.x,
+        y1: start.y,
+        cx1: c1.x,
+        cy1: c1.y,
+        cx2: c2.x,
+        cy2: c2.y,
+        x2: end.x,
+        y2: end.y,
+      };
+    }
+    case "spiral": {
+      const rotated = rotatePoint(p.cx, p.cy);
+      // Convert rotation angle to degrees for spiral start angle
+      const angleDeg = Math.atan2(sinA, cosA) * (180 / Math.PI);
+      return {
+        type: "spiral",
+        cx: rotated.x,
+        cy: rotated.y,
+        startRadius: p.startRadius,
+        endRadius: p.endRadius,
+        turns: p.turns,
+        startAngle: (p.startAngle ?? 0) + angleDeg,
+      };
+    }
     default:
       return p;
   }
@@ -934,6 +978,43 @@ function interpolateSinglePrimitive(
         cy: lerp(from.cy, to.cy, t),
         width: lerp(from.width, to.width, t),
         height: lerp(from.height, to.height, t),
+      };
+
+    case "arc":
+      if (to.type !== "arc") return from;
+      return {
+        type: "arc",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        radius: lerp(from.radius, to.radius, t),
+        startAngle: lerp(from.startAngle, to.startAngle, t),
+        endAngle: lerp(from.endAngle, to.endAngle, t),
+      };
+
+    case "bezier":
+      if (to.type !== "bezier") return from;
+      return {
+        type: "bezier",
+        x1: lerp(from.x1, to.x1, t),
+        y1: lerp(from.y1, to.y1, t),
+        cx1: lerp(from.cx1, to.cx1, t),
+        cy1: lerp(from.cy1, to.cy1, t),
+        cx2: lerp(from.cx2, to.cx2, t),
+        cy2: lerp(from.cy2, to.cy2, t),
+        x2: lerp(from.x2, to.x2, t),
+        y2: lerp(from.y2, to.y2, t),
+      };
+
+    case "spiral":
+      if (to.type !== "spiral") return from;
+      return {
+        type: "spiral",
+        cx: lerp(from.cx, to.cx, t),
+        cy: lerp(from.cy, to.cy, t),
+        startRadius: lerp(from.startRadius, to.startRadius, t),
+        endRadius: lerp(from.endRadius, to.endRadius, t),
+        turns: lerp(from.turns, to.turns, t),
+        startAngle: lerp(from.startAngle ?? 0, to.startAngle ?? 0, t),
       };
 
     default:

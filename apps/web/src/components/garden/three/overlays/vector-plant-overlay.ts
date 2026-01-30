@@ -23,6 +23,10 @@ import {
 const VECTOR_PLANT_CONFIG = {
   /** Number of segments for circle approximation */
   CIRCLE_SEGMENTS: 64,
+  /** Number of segments per turn for spiral approximation */
+  SPIRAL_SEGMENTS_PER_TURN: 32,
+  /** Number of segments for bezier curve approximation */
+  BEZIER_SEGMENTS: 24,
   /** Base size in world units (plants are 64x64 coordinate space) */
   BASE_SIZE: 64,
   /** Z position for vector plants (above pixel plants) */
@@ -393,8 +397,15 @@ export class VectorPlantOverlay {
         const drawFraction = drawFractions?.[i] ?? 1;
         if (drawFraction <= 0) continue;
 
-        // Check if this primitive should be filled (default true for closed shapes, false for lines)
-        const shouldFill = primitive.type !== "line" && primitive.fill !== false;
+        // Check if this primitive should be filled (default true for closed shapes, false for open paths)
+        // Open paths: line, bezier, spiral - never fill
+        // Closed shapes: circle, polygon, star, diamond - fill by default
+        // Arc: fill only if explicitly set to true
+        const isOpenPath =
+          primitive.type === "line" || primitive.type === "bezier" || primitive.type === "spiral";
+        const hasExplicitFill = "fill" in primitive && primitive.fill === true;
+        const hasExplicitNoFill = "fill" in primitive && primitive.fill === false;
+        const shouldFill = !isOpenPath && (hasExplicitFill || !hasExplicitNoFill);
         if (!shouldFill) continue;
 
         // Create fill material with adjusted opacity for draw fraction
@@ -418,7 +429,12 @@ export class VectorPlantOverlay {
       if (drawFraction <= 0) continue;
 
       // Get outline material - use charcoal outline color for filled shapes, stroke color for unfilled
-      const useOutlineColor = fillColor && primitive.type !== "line" && primitive.fill !== false;
+      const isFilledShape =
+        primitive.type !== "line" &&
+        primitive.type !== "bezier" &&
+        primitive.type !== "spiral" &&
+        !("fill" in primitive && primitive.fill === false);
+      const useOutlineColor = fillColor && isFilledShape;
       const lineColor = useOutlineColor ? outlineColor : keyframe.strokeColor;
       const opacity = keyframe.strokeOpacity * Math.min(1, drawFraction * 2);
       const material = this.getPooledMaterial(lineColor, opacity);
@@ -473,8 +489,19 @@ export class VectorPlantOverlay {
           primitive.height,
           material
         );
+      case "arc":
+        return this.createArcFill(
+          primitive.cx,
+          primitive.cy,
+          primitive.radius,
+          primitive.startAngle,
+          primitive.endAngle,
+          material
+        );
       case "line":
-        return null; // Lines don't have fills
+      case "bezier":
+      case "spiral":
+        return null; // Lines, beziers, and spirals don't have fills (open paths)
       default:
         return null;
     }
@@ -645,6 +672,40 @@ export class VectorPlantOverlay {
           primitive.height,
           material
         );
+      case "arc":
+        return this.createArc(
+          primitive.cx,
+          primitive.cy,
+          primitive.radius,
+          primitive.startAngle,
+          primitive.endAngle,
+          material,
+          drawFraction
+        );
+      case "bezier":
+        return this.createBezier(
+          primitive.x1,
+          primitive.y1,
+          primitive.cx1,
+          primitive.cy1,
+          primitive.cx2,
+          primitive.cy2,
+          primitive.x2,
+          primitive.y2,
+          material,
+          drawFraction
+        );
+      case "spiral":
+        return this.createSpiral(
+          primitive.cx,
+          primitive.cy,
+          primitive.startRadius,
+          primitive.endRadius,
+          primitive.turns,
+          primitive.startAngle ?? 0,
+          material,
+          drawFraction
+        );
       default:
         return null;
     }
@@ -802,6 +863,175 @@ export class VectorPlantOverlay {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
     return new THREE.LineLoop(geometry, material);
+  }
+
+  /**
+   * Create an arc (partial circle) Line.
+   *
+   * @param startAngle - Start angle in degrees
+   * @param endAngle - End angle in degrees
+   * @param drawFraction - How much of the arc to draw (0-1)
+   */
+  private createArc(
+    cx: number,
+    cy: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
+  ): THREE.Line {
+    const vertices: number[] = [];
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+    const totalAngle = endRad - startRad;
+
+    // Calculate segments based on arc length
+    const segments = Math.max(
+      8,
+      Math.ceil((Math.abs(totalAngle) / (Math.PI * 2)) * VECTOR_PLANT_CONFIG.CIRCLE_SEGMENTS)
+    );
+    const segmentsToDraw = Math.ceil(segments * Math.max(0, Math.min(1, drawFraction)));
+
+    for (let i = 0; i <= segmentsToDraw; i++) {
+      const t = i / segments;
+      const angle = startRad + totalAngle * t;
+      const x = cx - 32 + Math.cos(angle) * radius;
+      const y = cy - 32 + Math.sin(angle) * radius;
+      vertices.push(x, -y, 0);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    return new THREE.Line(geometry, material);
+  }
+
+  /**
+   * Create a filled arc (wedge/pie slice) mesh.
+   */
+  private createArcFill(
+    cx: number,
+    cy: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh {
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+    const totalAngle = endRad - startRad;
+
+    const segments = Math.max(
+      8,
+      Math.ceil((Math.abs(totalAngle) / (Math.PI * 2)) * VECTOR_PLANT_CONFIG.CIRCLE_SEGMENTS)
+    );
+
+    const shape = new THREE.Shape();
+    // Start at center for wedge shape
+    shape.moveTo(0, 0);
+
+    // Draw arc points
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const angle = startRad + totalAngle * t;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      shape.lineTo(x, -y);
+    }
+
+    // Close back to center
+    shape.closePath();
+
+    const geometry = new THREE.ShapeGeometry(shape);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(cx - 32, -(cy - 32), 0);
+    return mesh;
+  }
+
+  /**
+   * Create a cubic bezier curve Line.
+   *
+   * @param x1, y1 - Start point
+   * @param cx1, cy1 - First control point
+   * @param cx2, cy2 - Second control point
+   * @param x2, y2 - End point
+   * @param drawFraction - How much of the curve to draw (0-1)
+   */
+  private createBezier(
+    x1: number,
+    y1: number,
+    cx1: number,
+    cy1: number,
+    cx2: number,
+    cy2: number,
+    x2: number,
+    y2: number,
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
+  ): THREE.Line {
+    const vertices: number[] = [];
+    const segments = VECTOR_PLANT_CONFIG.BEZIER_SEGMENTS;
+    const segmentsToDraw = Math.ceil(segments * Math.max(0, Math.min(1, drawFraction)));
+
+    for (let i = 0; i <= segmentsToDraw; i++) {
+      const t = i / segments;
+
+      // Cubic bezier formula: B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3
+      const oneMinusT = 1 - t;
+      const oneMinusT2 = oneMinusT * oneMinusT;
+      const oneMinusT3 = oneMinusT2 * oneMinusT;
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      const x = oneMinusT3 * x1 + 3 * oneMinusT2 * t * cx1 + 3 * oneMinusT * t2 * cx2 + t3 * x2;
+      const y = oneMinusT3 * y1 + 3 * oneMinusT2 * t * cy1 + 3 * oneMinusT * t2 * cy2 + t3 * y2;
+
+      vertices.push(x - 32, -(y - 32), 0);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    return new THREE.Line(geometry, material);
+  }
+
+  /**
+   * Create a spiral Line (Archimedean spiral).
+   *
+   * @param startRadius - Radius at the start of the spiral
+   * @param endRadius - Radius at the end of the spiral
+   * @param turns - Number of complete rotations
+   * @param startAngle - Starting angle in degrees
+   * @param drawFraction - How much of the spiral to draw (0-1)
+   */
+  private createSpiral(
+    cx: number,
+    cy: number,
+    startRadius: number,
+    endRadius: number,
+    turns: number,
+    startAngle: number,
+    material: THREE.LineBasicMaterial,
+    drawFraction: number = 1
+  ): THREE.Line {
+    const vertices: number[] = [];
+    const startRad = (startAngle * Math.PI) / 180;
+    const totalAngle = turns * Math.PI * 2;
+    const segments = Math.ceil(turns * VECTOR_PLANT_CONFIG.SPIRAL_SEGMENTS_PER_TURN);
+    const segmentsToDraw = Math.ceil(segments * Math.max(0, Math.min(1, drawFraction)));
+
+    for (let i = 0; i <= segmentsToDraw; i++) {
+      const t = i / segments;
+      const angle = startRad + totalAngle * t;
+      const radius = startRadius + (endRadius - startRadius) * t;
+
+      const x = cx - 32 + Math.cos(angle) * radius;
+      const y = cy - 32 + Math.sin(angle) * radius;
+      vertices.push(x, -y, 0);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    return new THREE.Line(geometry, material);
   }
 
   /**

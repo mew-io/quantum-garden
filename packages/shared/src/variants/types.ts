@@ -311,8 +311,9 @@ export type EasingType = "linear" | "easeInOut" | "brushStroke";
  * - 'progressive': Lines draw/undraw sequentially (like brush strokes)
  * - 'morph': Vertices travel to new positions
  * - 'fade': Simple crossfade (default behavior)
+ * - 'rotate': Primitives rotate around center (good for geometric/kaleidoscope patterns)
  */
-export type TransitionStrategy = "progressive" | "morph" | "fade";
+export type TransitionStrategy = "progressive" | "morph" | "fade" | "rotate";
 
 /**
  * Hints for how to transition into this keyframe.
@@ -323,6 +324,9 @@ export interface VectorTransitionHint {
 
   /** Easing function for the transition */
   easing?: EasingType;
+
+  /** Number of full rotations for 'rotate' strategy (default: 1) */
+  rotations?: number;
 }
 
 /**

@@ -9,6 +9,7 @@ import { useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
+import { hapticSuccess } from "@/utils/haptics";
 import type { GerminationContext } from "@/components/garden/garden-evolution";
 
 /**
@@ -66,6 +67,9 @@ export function useEvolution() {
 
       // Update last germination time
       setLastGerminationTime(Date.now());
+
+      // Haptic feedback for germination celebration
+      hapticSuccess();
 
       // Log germination
       debugLogger.evolution.info(`Plant germinated: ${result.variantId}`, {

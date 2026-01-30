@@ -17,6 +17,7 @@ import { ReticleOverlay } from "./reticle-overlay";
 import { EntanglementOverlay } from "./entanglement-overlay";
 import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
+import { GerminationOverlay } from "./germination-overlay";
 import { VectorPlantOverlay } from "./vector-plant-overlay";
 import { DebugOverlay } from "./debug-overlay";
 
@@ -32,6 +33,7 @@ export class OverlayManager {
   public entanglement: EntanglementOverlay;
   public dwell: DwellOverlay;
   public feedback: FeedbackOverlay;
+  public germination: GerminationOverlay;
   public vectorPlants: VectorPlantOverlay;
   public debug: DebugOverlay;
 
@@ -46,6 +48,7 @@ export class OverlayManager {
     this.entanglement = new EntanglementOverlay();
     this.dwell = new DwellOverlay();
     this.feedback = new FeedbackOverlay();
+    this.germination = new GerminationOverlay();
     this.vectorPlants = new VectorPlantOverlay();
     this.debug = new DebugOverlay();
 
@@ -54,6 +57,7 @@ export class OverlayManager {
     this.overlayScene.add(this.entanglement.getObject());
     this.overlayScene.add(this.dwell.getObject());
     this.overlayScene.add(this.feedback.getObject());
+    this.overlayScene.add(this.germination.getObject());
     this.overlayScene.add(this.vectorPlants.getObject());
     this.overlayScene.add(this.debug.getObject());
   }
@@ -77,6 +81,10 @@ export class OverlayManager {
 
     if (this.feedback.hasActiveAnimations()) {
       this.feedback.update(time);
+    }
+
+    if (this.germination.hasActiveAnimations()) {
+      this.germination.update(time);
     }
 
     if (this.vectorPlants.hasActiveAnimations()) {
@@ -125,6 +133,7 @@ export class OverlayManager {
     this.entanglement.dispose();
     this.dwell.dispose();
     this.feedback.dispose();
+    this.germination.dispose();
     this.vectorPlants.dispose();
     this.debug.dispose();
   }

@@ -26,6 +26,7 @@ import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
 import { debugLogger } from "@/lib/debug-logger";
 import { isFirstObservation } from "@/lib/first-observation";
+import { audioManager } from "@/lib/audio/audio-manager";
 
 /**
  * Get the primary color from a plant's palette for celebration feedback.
@@ -65,6 +66,37 @@ function getPlantPrimaryColor(plant: Plant): string | undefined {
   // For dormant plants, just use the first palette color
   const palette = getEffectivePalette(keyframe, variant, plant.colorVariationName ?? null);
   return palette[0];
+}
+
+/**
+ * Convert a hex color string to HSL hue (0-360).
+ * Used to map plant colors to audio frequencies.
+ */
+function hexToHue(hex: string): number {
+  // Remove # if present
+  const clean = hex.replace("#", "");
+  const num = parseInt(clean, 16);
+
+  const r = ((num >> 16) & 0xff) / 255;
+  const g = ((num >> 8) & 0xff) / 255;
+  const b = (num & 0xff) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+
+  if (delta === 0) return 0; // Gray, no hue
+
+  let h = 0;
+  if (max === r) {
+    h = ((g - b) / delta + (g < b ? 6 : 0)) / 6;
+  } else if (max === g) {
+    h = ((b - r) / delta + 2) / 6;
+  } else {
+    h = ((r - g) / delta + 4) / 6;
+  }
+
+  return h * 360;
 }
 
 /**
@@ -193,9 +225,24 @@ export function GardenScene() {
             );
           }
 
+          // Calculate audio panning from plant position
+          const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
+
+          // Extract hue from color for observation tone (default 120 = green)
+          const hue = primaryColor ? hexToHue(primaryColor) : 120;
+
+          // Play observation sound (enhanced for first observation)
+          if (isFirst) {
+            audioManager.playEffect("firstObservation", { pan, hue });
+          } else {
+            audioManager.playEffect("observation", { pan, hue });
+          }
+
           // Trigger entanglement pulse if plant is entangled
           if (plant.entanglementGroupId) {
             overlayManager.entanglement.triggerPulse(plant.entanglementGroupId);
+            // Play entanglement harmony sound
+            audioManager.playEffect("entanglement", { pan });
           }
 
           // Haptic feedback
@@ -215,10 +262,39 @@ export function GardenScene() {
         observationSystem.updatePlants(state.plants);
         // Mark that we synced this frame to avoid redundant sync in updateCallback
         storeSyncedThisFrameRef.current = true;
+
+        // Detect germinations and trigger particle effects + audio
+        for (const plant of state.plants) {
+          const prevPlant = prevState.plants.find((p) => p.id === plant.id);
+          // Check if this plant just germinated (had no germinatedAt, now has one)
+          if (plant.germinatedAt && (!prevPlant || !prevPlant.germinatedAt)) {
+            const accentColor = getPlantPrimaryColor(plant);
+            overlayManager.germination.triggerGermination(
+              plant.position.x,
+              plant.position.y,
+              accentColor
+            );
+
+            // Play germination chime with spatial panning based on plant position
+            const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
+            audioManager.playEffect("germination", { pan });
+          }
+        }
       }
       // Update debug overlay when active region changes
       if (state.activeRegion !== prevState.activeRegion) {
         overlayManager.debug.setActiveRegion(state.activeRegion);
+      }
+
+      // Handle camera micro-transitions on dwell state changes
+      if (state.dwellTarget !== prevState.dwellTarget) {
+        if (state.dwellTarget !== null) {
+          // Starting to dwell on a plant - subtle zoom in
+          sceneManager.onDwellStart();
+        } else {
+          // Stopped dwelling - return to normal zoom
+          sceneManager.onDwellEnd();
+        }
       }
     });
 

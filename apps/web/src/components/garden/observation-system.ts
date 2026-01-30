@@ -22,6 +22,7 @@ import type {
 import { CANVAS } from "@quantum-garden/shared";
 import { useGardenStore } from "@/stores/garden-store";
 import { SpatialGrid } from "./spatial-grid";
+import { hapticLight } from "@/utils/haptics";
 
 interface Vector2 {
   x: number;
@@ -194,6 +195,9 @@ export class ObservationSystem {
       this.dwellTimer = 0;
       useGardenStore.getState().setDwellTarget(plant.id);
       useGardenStore.getState().setDwellProgress(0);
+
+      // Subtle haptic feedback when dwell starts
+      hapticLight();
     }
 
     // Accumulate dwell time

@@ -17,18 +17,18 @@ const ENTANGLEMENT = {
   LINE_COLOR: 0xc4b5fd, // Lighter purple for better visibility
   LINE_WIDTH: 2,
   LINE_ALPHA: 0.5, // Increased from 0.3 for more prominent lines
-  PULSE_ALPHA: 0.9,
+  PULSE_ALPHA: 1.0, // Full opacity for better bloom
   PULSE_DURATION: 2.0,
   DASH_SIZE: 6, // Tighter dash pattern for more solid appearance
   GAP_SIZE: 3,
   // Wave particle settings
-  WAVE_COLOR: 0xc4b5fd, // Match line color for cohesive look
+  WAVE_COLOR: 0xe8ddff, // Brighter purple for better bloom visibility
   WAVE_SIZE: 10, // Increased from 6 for better visibility
   WAVE_DURATION: 0.6, // How long the wave takes to travel
-  WAVE_ALPHA: 0.95,
+  WAVE_ALPHA: 1.0, // Full opacity for maximum bloom effect
   // Glow effect settings
   WAVE_GLOW_SIZE: 20, // Larger, softer glow behind wave
-  WAVE_GLOW_ALPHA: 0.4,
+  WAVE_GLOW_ALPHA: 0.5,
 };
 
 interface EntanglementGroup {

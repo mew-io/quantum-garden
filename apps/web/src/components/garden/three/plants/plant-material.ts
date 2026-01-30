@@ -139,6 +139,23 @@ const fragmentShader = /* glsl */ `
   varying float v_shimmerPhase;
   varying float v_lifecycleProgress;
 
+  // RGB to HSV conversion
+  vec3 rgb2hsv(vec3 c) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  }
+
+  // HSV to RGB conversion
+  vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+  }
+
   // Sample pattern with offset (for ghost effect)
   float samplePatternOffset(vec2 uv, vec2 offset) {
     vec2 offsetUV = uv + offset * v_uvBounds.zw;
@@ -174,6 +191,15 @@ const fragmentShader = /* glsl */ `
 
     // Enhanced superposition visualization
     if (v_visualState < 0.5) {
+      // Iridescent hue shift for all superposition modes
+      // Creates a subtle rainbow shimmer effect on quantum-uncertain plants
+      vec3 hsv = rgb2hsv(color);
+      float hueShift = sin(u_time * 0.5 + v_shimmerPhase) * 0.06; // ±6% hue rotation
+      hsv.x = fract(hsv.x + hueShift); // Wrap hue around 0-1
+      // Slightly boost saturation for more visible iridescence
+      hsv.y = min(1.0, hsv.y * 1.15);
+      color = hsv2rgb(hsv);
+
       if (u_superpositionMode == 1) {
         // MODE 1: Flickering - rapid opacity oscillation
         // Multiple frequency shimmer creates unstable, flickering appearance

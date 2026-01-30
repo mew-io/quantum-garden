@@ -6,6 +6,10 @@
  */
 
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { CANVAS } from "@quantum-garden/shared";
 
 export interface SceneManagerConfig {
@@ -13,7 +17,28 @@ export interface SceneManagerConfig {
   width?: number;
   height?: number;
   backgroundColor?: string;
+  enableBloom?: boolean;
 }
+
+/** Bloom effect configuration */
+const BLOOM_CONFIG = {
+  /** Bloom intensity (0-3 typical range) */
+  STRENGTH: 0.4,
+  /** Size of bloom radius in pixels */
+  RADIUS: 0.6,
+  /** Brightness threshold for bloom to kick in (0-1) */
+  THRESHOLD: 0.7,
+};
+
+/** Camera zoom configuration for micro-transitions */
+const CAMERA_CONFIG = {
+  /** Default zoom level */
+  DEFAULT_ZOOM: 1.0,
+  /** Zoom level during observation dwell */
+  DWELL_ZOOM: 1.03,
+  /** Smoothing factor for zoom transitions (0-1, lower = smoother) */
+  ZOOM_SMOOTHING: 0.08,
+};
 
 /**
  * Performance metrics for the render loop.
@@ -43,6 +68,11 @@ export class SceneManager {
   public camera: THREE.OrthographicCamera;
   public renderer: THREE.WebGLRenderer;
 
+  // Post-processing
+  private composer: EffectComposer | null = null;
+  private bloomPass: UnrealBloomPass | null = null;
+  private bloomEnabled: boolean = false;
+
   private container: HTMLElement;
   private animationId: number | null = null;
   private updateCallbacks: Set<(deltaTime: number) => void> = new Set();
@@ -58,6 +88,10 @@ export class SceneManager {
     drawCalls: 0,
     triangles: 0,
   };
+
+  // Camera zoom state for micro-transitions
+  private targetZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
+  private currentZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
 
   constructor(config: SceneManagerConfig) {
     this.container = config.container;
@@ -97,8 +131,41 @@ export class SceneManager {
     // Append canvas to container
     this.container.appendChild(this.renderer.domElement);
 
+    // Set up post-processing bloom if enabled
+    this.bloomEnabled = config.enableBloom ?? true;
+    if (this.bloomEnabled) {
+      this.setupBloom(width, height);
+    }
+
     // Handle resize
     window.addEventListener("resize", this.handleResize);
+  }
+
+  /**
+   * Set up post-processing bloom effect.
+   * Creates a subtle glow on bright elements like celebration rings and particles.
+   */
+  private setupBloom(width: number, height: number): void {
+    // Create the effect composer
+    this.composer = new EffectComposer(this.renderer);
+
+    // Render pass - renders the scene normally
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    // Bloom pass - adds glow to bright areas
+    const resolution = new THREE.Vector2(width, height);
+    this.bloomPass = new UnrealBloomPass(
+      resolution,
+      BLOOM_CONFIG.STRENGTH,
+      BLOOM_CONFIG.RADIUS,
+      BLOOM_CONFIG.THRESHOLD
+    );
+    this.composer.addPass(this.bloomPass);
+
+    // Output pass - handles color space conversion for final output
+    const outputPass = new OutputPass();
+    this.composer.addPass(outputPass);
   }
 
   /**
@@ -170,8 +237,15 @@ export class SceneManager {
       callback(deltaTime);
     }
 
-    // Render main scene
-    this.renderer.render(this.scene, this.camera);
+    // Update camera zoom with smooth interpolation
+    this.updateCameraZoom();
+
+    // Render main scene (with bloom if enabled)
+    if (this.composer && this.bloomEnabled) {
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
 
     // Update performance metrics after render
     this.updatePerformanceMetrics();
@@ -222,6 +296,14 @@ export class SceneManager {
 
     // Update renderer size
     this.renderer.setSize(width, height);
+
+    // Update bloom composer if enabled
+    if (this.composer) {
+      this.composer.setSize(width, height);
+    }
+    if (this.bloomPass) {
+      this.bloomPass.resolution.set(width, height);
+    }
   };
 
   /**
@@ -242,6 +324,78 @@ export class SceneManager {
   }
 
   /**
+   * Enable or disable bloom effect.
+   */
+  setBloomEnabled(enabled: boolean): void {
+    this.bloomEnabled = enabled;
+  }
+
+  /**
+   * Get whether bloom is currently enabled.
+   */
+  isBloomEnabled(): boolean {
+    return this.bloomEnabled;
+  }
+
+  /**
+   * Adjust bloom intensity (0-2 typical range).
+   */
+  setBloomStrength(strength: number): void {
+    if (this.bloomPass) {
+      this.bloomPass.strength = strength;
+    }
+  }
+
+  /**
+   * Update camera zoom with smooth interpolation.
+   */
+  private updateCameraZoom(): void {
+    // Skip if zoom is already at target
+    if (Math.abs(this.currentZoom - this.targetZoom) < 0.001) {
+      this.currentZoom = this.targetZoom;
+      return;
+    }
+
+    // Smoothly interpolate toward target
+    this.currentZoom += (this.targetZoom - this.currentZoom) * CAMERA_CONFIG.ZOOM_SMOOTHING;
+
+    // Apply zoom to camera
+    this.camera.zoom = this.currentZoom;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Trigger subtle zoom in for observation dwell.
+   * Call when cursor starts dwelling on an observable plant.
+   */
+  onDwellStart(): void {
+    this.targetZoom = CAMERA_CONFIG.DWELL_ZOOM;
+  }
+
+  /**
+   * Reset zoom to normal after dwell ends.
+   * Call when cursor moves off plant or observation completes.
+   */
+  onDwellEnd(): void {
+    this.targetZoom = CAMERA_CONFIG.DEFAULT_ZOOM;
+  }
+
+  /**
+   * Set a custom target zoom level.
+   * @param zoom - Target zoom (1.0 = normal, >1 = zoomed in, <1 = zoomed out)
+   */
+  setTargetZoom(zoom: number): void {
+    this.targetZoom = Math.max(0.5, Math.min(2.0, zoom));
+  }
+
+  /**
+   * Get current zoom level.
+   */
+  getZoom(): number {
+    return this.currentZoom;
+  }
+
+  /**
    * Clean up resources.
    */
   destroy(): void {
@@ -251,6 +405,11 @@ export class SceneManager {
     // Remove canvas from DOM
     if (this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+
+    // Dispose of post-processing resources
+    if (this.composer) {
+      this.composer.dispose();
     }
 
     // Dispose of Three.js resources

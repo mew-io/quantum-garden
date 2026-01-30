@@ -25,11 +25,29 @@ export type ControlMode = "autonomous" | "touch";
 /**
  * Renders and controls the autonomous reticle.
  */
+/** Glow ring visual constants */
+const GLOW_RING = {
+  INNER_RADIUS: 18,
+  OUTER_RADIUS: 25,
+  SEGMENTS: 32,
+  BASE_OPACITY: 0.15,
+  ACTIVE_OPACITY: 0.4,
+  PULSE_SPEED: 3, // Hz
+  DEFAULT_COLOR: 0x888888,
+};
+
+/**
+ * Renders and controls the autonomous reticle.
+ */
 export class ReticleOverlay {
   private group: THREE.Group;
   private lineMaterial: THREE.LineBasicMaterial;
   private lineGeometry: THREE.BufferGeometry;
   private lines: THREE.LineSegments;
+
+  // Glow ring (soft halo behind cross)
+  private glowRing: THREE.Mesh;
+  private glowMaterial: THREE.MeshBasicMaterial;
 
   // Motion state
   private position: Position;
@@ -37,6 +55,10 @@ export class ReticleOverlay {
   private state: ReticleState;
   private stateTimer: number;
   private controlMode: ControlMode;
+
+  // Glow state
+  private isOverPlant: boolean = false;
+  private glowColor: number = GLOW_RING.DEFAULT_COLOR;
 
   // Configuration
   private readonly size: number;
@@ -67,6 +89,22 @@ export class ReticleOverlay {
     // Create line segments
     this.lines = new THREE.LineSegments(this.lineGeometry, this.lineMaterial);
     this.group.add(this.lines);
+
+    // Create glow ring (soft halo behind the cross)
+    const glowGeometry = new THREE.RingGeometry(
+      GLOW_RING.INNER_RADIUS,
+      GLOW_RING.OUTER_RADIUS,
+      GLOW_RING.SEGMENTS
+    );
+    this.glowMaterial = new THREE.MeshBasicMaterial({
+      color: GLOW_RING.DEFAULT_COLOR,
+      transparent: true,
+      opacity: GLOW_RING.BASE_OPACITY,
+      side: THREE.DoubleSide,
+    });
+    this.glowRing = new THREE.Mesh(glowGeometry, this.glowMaterial);
+    this.glowRing.position.z = 0.5; // Behind the cross lines (z=1)
+    this.group.add(this.glowRing);
 
     // Initialize position at center
     this.position = {
@@ -113,16 +151,23 @@ export class ReticleOverlay {
 
     this.lineGeometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
     this.lineGeometry.attributes.position!.needsUpdate = true;
+
+    // Update glow ring position
+    if (this.glowRing) {
+      this.glowRing.position.x = x;
+      this.glowRing.position.y = y;
+    }
   }
 
   /**
    * Update the reticle each frame.
    */
-  update(_time: number, deltaTime: number): void {
+  update(time: number, deltaTime: number): void {
     // In touch mode, position is set externally
     if (this.controlMode === "touch") {
       this.updateCrossGeometry(this.position.x, this.position.y);
       this.syncToStore();
+      this.updateGlowEffect(time);
       return;
     }
 
@@ -146,6 +191,34 @@ export class ReticleOverlay {
     // Update geometry and store
     this.updateCrossGeometry(this.position.x, this.position.y);
     this.syncToStore();
+
+    // Update glow effect
+    this.updateGlowEffect(time);
+  }
+
+  /**
+   * Update the glow ring effect based on state.
+   */
+  private updateGlowEffect(time: number): void {
+    // Check if we're over a plant (dwellTarget is set when hovering over observable plant)
+    const dwellTarget = useGardenStore.getState().dwellTarget;
+    this.isOverPlant = dwellTarget !== null;
+
+    // Calculate target opacity with pulsing when over a plant
+    let targetOpacity = GLOW_RING.BASE_OPACITY;
+    if (this.isOverPlant) {
+      // Pulse between base and active opacity
+      const pulse = (Math.sin(time * GLOW_RING.PULSE_SPEED * Math.PI * 2) + 1) / 2;
+      targetOpacity =
+        GLOW_RING.BASE_OPACITY + pulse * (GLOW_RING.ACTIVE_OPACITY - GLOW_RING.BASE_OPACITY);
+    }
+
+    // Smoothly interpolate current opacity toward target
+    const currentOpacity = this.glowMaterial.opacity;
+    this.glowMaterial.opacity = currentOpacity + (targetOpacity - currentOpacity) * 0.1;
+
+    // Update glow color
+    this.glowMaterial.color.setHex(this.glowColor);
   }
 
   /**
@@ -267,6 +340,20 @@ export class ReticleOverlay {
   }
 
   /**
+   * Set the glow ring color (e.g., to match nearby plant palette).
+   */
+  setGlowColor(color: number): void {
+    this.glowColor = color;
+  }
+
+  /**
+   * Reset glow color to default.
+   */
+  resetGlowColor(): void {
+    this.glowColor = GLOW_RING.DEFAULT_COLOR;
+  }
+
+  /**
    * Get the Three.js object for adding to scene.
    */
   getObject(): THREE.Object3D {
@@ -279,5 +366,7 @@ export class ReticleOverlay {
   dispose(): void {
     this.lineGeometry.dispose();
     this.lineMaterial.dispose();
+    this.glowRing.geometry.dispose();
+    this.glowMaterial.dispose();
   }
 }

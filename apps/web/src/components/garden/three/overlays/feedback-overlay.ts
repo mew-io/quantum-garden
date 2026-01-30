@@ -17,8 +17,9 @@ const OBSERVATION_FEEDBACK = {
   OUTER_DELAY: 0.1,
   PRIMARY_COLOR: 0x4ecdc4,
   SECONDARY_COLOR: 0xffffff,
-  START_ALPHA: 0.9,
+  START_ALPHA: 1.0, // Full opacity to maximize bloom trigger
   SEGMENTS: 48,
+  LINE_WIDTH: 2.5, // Slightly thicker for better bloom
 };
 
 /** Enhanced constants for first observation celebration */

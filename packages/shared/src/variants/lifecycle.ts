@@ -683,6 +683,12 @@ function interpolateVectorPrimitivesWithHint(
     return interpolateProgressive(from, to, easedT);
   }
 
+  if (strategy === "rotate") {
+    // Rotate primitives around center during transition
+    const rotations = hint?.rotations ?? 1;
+    return interpolateRotate(from, to, easedT, rotations);
+  }
+
   if (strategy === "morph" || canInterpolateDirect(from, to)) {
     // Direct interpolation with full draw fractions
     const primitives = from.map((fromP, i) => {
@@ -776,6 +782,97 @@ function interpolateProgressive(
 
   // Return the target primitives with draw fractions
   return { primitives: to, drawFractions };
+}
+
+/**
+ * Rotate interpolation - rotates all primitives around center.
+ *
+ * Good for geometric/kaleidoscope patterns where the visual effect
+ * is a spinning transformation between keyframes.
+ *
+ * @param from - Starting primitives
+ * @param to - Ending primitives
+ * @param t - Eased interpolation factor (0-1)
+ * @param rotations - Number of full rotations (default: 1)
+ * @returns Rotated primitives with full draw fractions
+ */
+function interpolateRotate(
+  from: VectorPrimitive[],
+  to: VectorPrimitive[],
+  t: number,
+  rotations: number = 1
+): { primitives: VectorPrimitive[]; drawFractions: number[] } {
+  // Calculate rotation angle (in radians)
+  const angle = t * Math.PI * 2 * rotations;
+  const cosA = Math.cos(angle);
+  const sinA = Math.sin(angle);
+
+  // Use 'from' primitives in first half, 'to' in second half
+  // This allows different primitive counts between keyframes
+  const basePrimitives = t < 0.5 ? from : to;
+
+  // Rotate each primitive around the center (0.5, 0.5 in normalized space)
+  const center = 0.5;
+  const primitives = basePrimitives.map((p) => rotatePrimitive(p, center, center, cosA, sinA));
+
+  return {
+    primitives,
+    drawFractions: primitives.map(() => 1),
+  };
+}
+
+/**
+ * Rotate a single primitive around a center point.
+ */
+function rotatePrimitive(
+  p: VectorPrimitive,
+  cx: number,
+  cy: number,
+  cosA: number,
+  sinA: number
+): VectorPrimitive {
+  const rotatePoint = (x: number, y: number): { x: number; y: number } => {
+    const dx = x - cx;
+    const dy = y - cy;
+    return {
+      x: cx + dx * cosA - dy * sinA,
+      y: cy + dx * sinA + dy * cosA,
+    };
+  };
+
+  switch (p.type) {
+    case "circle": {
+      const rotated = rotatePoint(p.cx, p.cy);
+      return { type: "circle", cx: rotated.x, cy: rotated.y, radius: p.radius };
+    }
+    case "line": {
+      const p1 = rotatePoint(p.x1, p.y1);
+      const p2 = rotatePoint(p.x2, p.y2);
+      return { type: "line", x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
+    }
+    case "polygon": {
+      // VectorPolygon is defined by center, sides, and radius - just rotate center
+      const rotated = rotatePoint(p.cx, p.cy);
+      return { type: "polygon", cx: rotated.x, cy: rotated.y, sides: p.sides, radius: p.radius };
+    }
+    case "star": {
+      const rotated = rotatePoint(p.cx, p.cy);
+      return {
+        type: "star",
+        cx: rotated.x,
+        cy: rotated.y,
+        outerRadius: p.outerRadius,
+        innerRadius: p.innerRadius,
+        points: p.points,
+      };
+    }
+    case "diamond": {
+      const rotated = rotatePoint(p.cx, p.cy);
+      return { type: "diamond", cx: rotated.x, cy: rotated.y, width: p.width, height: p.height };
+    }
+    default:
+      return p;
+  }
 }
 
 /**

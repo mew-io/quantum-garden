@@ -8,6 +8,7 @@
  */
 
 import { Howl, Howler } from "howler";
+import { webAudioGenerator } from "./web-audio-generator";
 
 /** Sound effect names available for playback */
 export type SoundEffect =
@@ -86,6 +87,11 @@ class AudioManager {
     // Unlock audio context (required by some browsers)
     Howler.autoUnlock = true;
 
+    // Initialize Web Audio generator for procedural sounds
+    webAudioGenerator.init();
+    webAudioGenerator.setEnabled(this._isEnabled);
+    webAudioGenerator.setVolume(this._volume);
+
     // Load ambient loop if available
     if (AMBIENT.READY) {
       this.loadAmbientLoop();
@@ -95,8 +101,14 @@ class AudioManager {
     this.notifyListeners();
 
     // Auto-start ambient if sound is enabled
-    if (this._isEnabled && AMBIENT.READY) {
-      this.playAmbient();
+    if (this._isEnabled) {
+      // Start procedural ambient drone
+      webAudioGenerator.startAmbient();
+
+      // Also start file-based ambient if available
+      if (AMBIENT.READY) {
+        this.playAmbient();
+      }
     }
   }
 
@@ -183,6 +195,7 @@ class AudioManager {
 
     this._isEnabled = enabled;
     Howler.volume(enabled ? this._volume : 0);
+    webAudioGenerator.setEnabled(enabled);
     this.savePreferences();
     this.notifyListeners();
 
@@ -191,9 +204,11 @@ class AudioManager {
       this.init();
     } else if (enabled && this._isInitialized) {
       // Start ambient when enabled
+      webAudioGenerator.startAmbient();
       this.playAmbient();
     } else if (!enabled) {
       // Stop ambient when disabled
+      webAudioGenerator.stopAmbient();
       this.stopAmbient();
     }
   }
@@ -215,6 +230,7 @@ class AudioManager {
     this._volume = clamped;
     if (this._isEnabled) {
       Howler.volume(clamped);
+      webAudioGenerator.setVolume(clamped);
       this.updateAmbientVolume();
     }
     this.savePreferences();
@@ -226,14 +242,35 @@ class AudioManager {
    * No-op if sound is disabled or not initialized.
    *
    * @param effect - The effect to play
-   * @param options - Optional playback options
+   * @param options - Optional playback options (pan: -1 to 1, hue: 0-360 for observation)
    */
-  playEffect(effect: SoundEffect, _options?: { pan?: number }): void {
+  playEffect(effect: SoundEffect, options?: { pan?: number; hue?: number }): void {
     if (!this._isEnabled || !this._isInitialized) return;
 
-    // TODO: Implement in Phase 3 when effect sprites are added
-    // For now, log for debugging
-    console.debug(`[Audio] Would play effect: ${effect}`);
+    const pan = options?.pan ?? 0;
+
+    switch (effect) {
+      case "germination":
+      case "waveChime":
+        webAudioGenerator.playGerminationChime(pan);
+        break;
+
+      case "observation":
+      case "firstObservation":
+        // Map plant palette hue to sound (default to green hue if not provided)
+        webAudioGenerator.playObservationTone(options?.hue ?? 120, pan);
+        break;
+
+      case "entanglement":
+        webAudioGenerator.playEntanglementHarmony(pan);
+        break;
+
+      case "panelOpen":
+      case "panelClose":
+        // UI sounds - use a subtle observation tone
+        webAudioGenerator.playObservationTone(200, 0);
+        break;
+    }
   }
 
   /**
@@ -320,6 +357,7 @@ class AudioManager {
    */
   dispose(): void {
     this.stopAmbient();
+    webAudioGenerator.dispose();
 
     if (this.ambientLoop) {
       this.ambientLoop.unload();

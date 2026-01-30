@@ -119,7 +119,13 @@ export class OverlayManager {
     const renderer = this.sceneManager.renderer;
     const camera = this.sceneManager.camera;
 
-    // Don't clear - render on top of existing content
+    // Reset render target to canvas (in case EffectComposer left it on a framebuffer)
+    renderer.setRenderTarget(null);
+
+    // Clear only the depth buffer so overlay renders on top of main scene
+    renderer.clearDepth();
+
+    // Don't clear color - render on top of existing content
     renderer.autoClear = false;
     renderer.render(this.overlayScene, camera);
     renderer.autoClear = true;

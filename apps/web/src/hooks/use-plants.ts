@@ -5,8 +5,19 @@
  */
 
 import { useEffect, useRef } from "react";
+import type { Plant } from "@quantum-garden/shared";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
+
+/**
+ * Compute a hash of plant data for change detection.
+ * Only considers fields that affect visual rendering.
+ */
+function computePlantsHash(plants: Plant[]): string {
+  return plants
+    .map((p) => `${p.id}:${p.visualState}:${p.germinatedAt?.getTime() ?? "null"}:${p.observed}`)
+    .join("|");
+}
 
 /**
  * Fetch plants from the server and load them into the garden store.
@@ -19,6 +30,7 @@ export function usePlants() {
   const setPlants = useGardenStore((state) => state.setPlants);
   const addNotification = useGardenStore((state) => state.addNotification);
   const hasShownErrorRef = useRef(false);
+  const lastPlantsHashRef = useRef<string>("");
 
   const {
     data: plants,
@@ -33,10 +45,14 @@ export function usePlants() {
     retryDelay: 1000,
   });
 
-  // Sync plants to store when data changes
+  // Sync plants to store when data ACTUALLY changes (not just reference)
   useEffect(() => {
     if (plants) {
-      setPlants(plants);
+      const hash = computePlantsHash(plants);
+      if (hash !== lastPlantsHashRef.current) {
+        lastPlantsHashRef.current = hash;
+        setPlants(plants);
+      }
       // Reset error state on successful load
       hasShownErrorRef.current = false;
     }

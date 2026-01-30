@@ -81,6 +81,7 @@ export class VectorPlantOverlay {
   private plantMeshes: Map<string, THREE.Group> = new Map();
   private plantRenderStates: Map<string, PlantRenderState> = new Map();
   private plants: Plant[] = [];
+  private lastPlantsRef: Plant[] | null = null; // For reference comparison to skip redundant setPlants calls
   private variantCache: Map<string, PlantVariant> = new Map();
 
   /** Pool of line materials keyed by "color-opacity" string for reuse */
@@ -143,8 +144,15 @@ export class VectorPlantOverlay {
 
   /**
    * Set the plants to render. Filters to only vector-mode plants.
+   * Uses reference comparison to avoid unnecessary rebuilds when called every frame.
    */
   setPlants(plants: Plant[]): void {
+    // Quick reference check - if same array, skip processing
+    if (plants === this.lastPlantsRef) {
+      return;
+    }
+    this.lastPlantsRef = plants;
+
     this.plants = plants.filter((plant) => {
       const variant = this.getVariant(plant.variantId);
       return variant?.renderMode === "vector";
@@ -176,7 +184,9 @@ export class VectorPlantOverlay {
       seenPlantIds.add(plant.id);
 
       const variant = this.getVariant(plant.variantId);
-      if (!variant?.vectorKeyframes?.length) continue;
+      if (!variant?.vectorKeyframes?.length) {
+        continue;
+      }
 
       // Get or create mesh group for this plant
       let plantGroup = this.plantMeshes.get(plant.id);
@@ -189,7 +199,9 @@ export class VectorPlantOverlay {
 
       // Get current keyframe
       const keyframe = this.getCurrentKeyframe(plant, variant);
-      if (!keyframe) continue;
+      if (!keyframe) {
+        continue;
+      }
 
       // Update plant visuals
       this.updatePlantGroup(plantGroup, plant, keyframe);

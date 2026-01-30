@@ -4,12 +4,14 @@ import { useEffect, useRef, useMemo } from "react";
 import {
   GLYPH_PATTERNS,
   COLOR_PALETTES,
+  CANVAS,
   type GlyphPattern,
   type ColorPalette,
 } from "@quantum-garden/shared";
 import { useSandboxStore } from "@/stores/sandbox-store";
 
 const BACKGROUND_COLORS = {
+  garden: CANVAS.BACKGROUND_COLOR,
   white: "#ffffff",
   dark: "#1a1a1a",
   checkerboard: "#e0e0e0",

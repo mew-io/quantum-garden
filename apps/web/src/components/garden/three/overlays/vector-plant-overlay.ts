@@ -31,6 +31,14 @@ const VECTOR_PLANT_CONFIG = {
   DEFAULT_COLOR: 0x707070,
   /** Default opacity */
   DEFAULT_OPACITY: 0.8,
+  /** Default charcoal outline color */
+  DEFAULT_OUTLINE_COLOR: "#2A2A2A",
+  /** Default outline width */
+  DEFAULT_OUTLINE_WIDTH: 2,
+  /** Default fill opacity */
+  DEFAULT_FILL_OPACITY: 0.8,
+  /** Z offset between fill and outline (outline slightly above) */
+  OUTLINE_Z_OFFSET: 0.1,
 };
 
 /**
@@ -71,8 +79,11 @@ export class VectorPlantOverlay {
   private plants: Plant[] = [];
   private variantCache: Map<string, PlantVariant> = new Map();
 
-  /** Pool of materials keyed by "color-opacity" string for reuse */
+  /** Pool of line materials keyed by "color-opacity" string for reuse */
   private materialPool: Map<string, THREE.LineBasicMaterial> = new Map();
+
+  /** Pool of fill materials keyed by "color-opacity" string for reuse */
+  private fillMaterialPool: Map<string, THREE.MeshBasicMaterial> = new Map();
 
   /** Pool of circle geometries keyed by segment count for reuse */
   private circleGeometryPool: Map<string, THREE.BufferGeometry> = new Map();
@@ -86,7 +97,7 @@ export class VectorPlantOverlay {
   }
 
   /**
-   * Get or create a pooled material with the given color and opacity.
+   * Get or create a pooled line material with the given color and opacity.
    */
   private getPooledMaterial(color: string, opacity: number): THREE.LineBasicMaterial {
     // Round opacity to 2 decimal places to increase cache hits
@@ -101,6 +112,27 @@ export class VectorPlantOverlay {
         opacity: roundedOpacity,
       });
       this.materialPool.set(key, material);
+    }
+    return material;
+  }
+
+  /**
+   * Get or create a pooled fill material with the given color and opacity.
+   */
+  private getPooledFillMaterial(color: string, opacity: number): THREE.MeshBasicMaterial {
+    // Round opacity to 2 decimal places to increase cache hits
+    const roundedOpacity = Math.round(opacity * 100) / 100;
+    const key = `fill-${color}-${roundedOpacity}`;
+
+    let material = this.fillMaterialPool.get(key);
+    if (!material) {
+      material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(color),
+        transparent: true,
+        opacity: roundedOpacity,
+        side: THREE.DoubleSide,
+      });
+      this.fillMaterialPool.set(key, material);
     }
     return material;
   }
@@ -272,7 +304,11 @@ export class VectorPlantOverlay {
       const child = plantGroup.children[0];
       if (child) {
         plantGroup.remove(child);
-        if (child instanceof THREE.Line || child instanceof THREE.LineLoop) {
+        if (
+          child instanceof THREE.Line ||
+          child instanceof THREE.LineLoop ||
+          child instanceof THREE.Mesh
+        ) {
           child.geometry.dispose();
           // Note: materials are pooled, so we don't dispose them here
         }
@@ -329,6 +365,7 @@ export class VectorPlantOverlay {
 
   /**
    * Build meshes for a plant from primitives.
+   * Now supports fills and charcoal outlines for the new art style.
    */
   private buildPlantMeshes(
     plantGroup: THREE.Group,
@@ -339,22 +376,56 @@ export class VectorPlantOverlay {
     // Clear existing children
     this.clearPlantGroup(plantGroup);
 
-    // Generate geometry for each primitive
+    // Get fill and outline colors from keyframe or use defaults
+    const fillColor = keyframe.fillColor;
+    const fillOpacity = keyframe.fillOpacity ?? VECTOR_PLANT_CONFIG.DEFAULT_FILL_OPACITY;
+    const outlineColor = keyframe.outlineColor ?? VECTOR_PLANT_CONFIG.DEFAULT_OUTLINE_COLOR;
+    // Note: strokeWidth is preserved for future use but not applied currently
+    // (THREE.LineBasicMaterial linewidth is not consistently supported in WebGL)
+    const _strokeWidth = keyframe.strokeWidth ?? VECTOR_PLANT_CONFIG.DEFAULT_OUTLINE_WIDTH;
+
+    // First pass: render fills for fillable shapes
+    if (fillColor) {
+      for (let i = 0; i < keyframe.primitives.length; i++) {
+        const primitive = keyframe.primitives[i];
+        if (!primitive) continue;
+
+        const drawFraction = drawFractions?.[i] ?? 1;
+        if (drawFraction <= 0) continue;
+
+        // Check if this primitive should be filled (default true for closed shapes, false for lines)
+        const shouldFill = primitive.type !== "line" && primitive.fill !== false;
+        if (!shouldFill) continue;
+
+        // Create fill material with adjusted opacity for draw fraction
+        const opacity = fillOpacity * Math.min(1, drawFraction * 2);
+        const fillMaterial = this.getPooledFillMaterial(fillColor, opacity);
+
+        const fillMesh = this.createPrimitiveFill(primitive, fillMaterial);
+        if (fillMesh) {
+          fillMesh.position.z = 0; // Fills at base z
+          plantGroup.add(fillMesh);
+        }
+      }
+    }
+
+    // Second pass: render outlines (charcoal strokes)
     for (let i = 0; i < keyframe.primitives.length; i++) {
       const primitive = keyframe.primitives[i];
       if (!primitive) continue;
 
       const drawFraction = drawFractions?.[i] ?? 1;
-
-      // Skip primitives that are fully hidden
       if (drawFraction <= 0) continue;
 
-      // Get pooled material - adjust opacity for partially drawn primitives
-      const opacity = keyframe.strokeOpacity * Math.min(1, drawFraction * 2); // Fade in during first half of draw
-      const material = this.getPooledMaterial(keyframe.strokeColor, opacity);
+      // Get outline material - use charcoal outline color for filled shapes, stroke color for unfilled
+      const useOutlineColor = fillColor && primitive.type !== "line" && primitive.fill !== false;
+      const lineColor = useOutlineColor ? outlineColor : keyframe.strokeColor;
+      const opacity = keyframe.strokeOpacity * Math.min(1, drawFraction * 2);
+      const material = this.getPooledMaterial(lineColor, opacity);
 
       const lineObject = this.createPrimitiveGeometry(primitive, material, drawFraction);
       if (lineObject) {
+        lineObject.position.z = VECTOR_PLANT_CONFIG.OUTLINE_Z_OFFSET; // Outlines slightly above fills
         plantGroup.add(lineObject);
       }
     }
@@ -363,6 +434,158 @@ export class VectorPlantOverlay {
     const scale = keyframe.scale ?? 1.0;
     plantGroup.position.set(plant.position.x, plant.position.y, VECTOR_PLANT_CONFIG.Z_POSITION);
     plantGroup.scale.set(scale, scale, 1);
+  }
+
+  /**
+   * Create a filled mesh for a primitive (circle, polygon, star, diamond).
+   */
+  private createPrimitiveFill(
+    primitive: VectorPrimitive,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh | null {
+    switch (primitive.type) {
+      case "circle":
+        return this.createCircleFill(primitive.cx, primitive.cy, primitive.radius, material);
+      case "polygon":
+        return this.createPolygonFill(
+          primitive.cx,
+          primitive.cy,
+          primitive.sides,
+          primitive.radius,
+          primitive.rotation ?? 0,
+          material
+        );
+      case "star":
+        return this.createStarFill(
+          primitive.cx,
+          primitive.cy,
+          primitive.points,
+          primitive.outerRadius,
+          primitive.innerRadius,
+          primitive.rotation ?? 0,
+          material
+        );
+      case "diamond":
+        return this.createDiamondFill(
+          primitive.cx,
+          primitive.cy,
+          primitive.width,
+          primitive.height,
+          material
+        );
+      case "line":
+        return null; // Lines don't have fills
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Create a filled circle mesh.
+   */
+  private createCircleFill(
+    cx: number,
+    cy: number,
+    radius: number,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh {
+    const geometry = new THREE.CircleGeometry(radius, VECTOR_PLANT_CONFIG.CIRCLE_SEGMENTS);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(cx - 32, -(cy - 32), 0);
+    return mesh;
+  }
+
+  /**
+   * Create a filled polygon mesh.
+   */
+  private createPolygonFill(
+    cx: number,
+    cy: number,
+    sides: number,
+    radius: number,
+    rotation: number,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh {
+    const shape = new THREE.Shape();
+    const rotRad = (rotation * Math.PI) / 180;
+
+    for (let i = 0; i <= sides; i++) {
+      const angle = (i / sides) * Math.PI * 2 + rotRad;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (i === 0) {
+        shape.moveTo(x, -y);
+      } else {
+        shape.lineTo(x, -y);
+      }
+    }
+    shape.closePath();
+
+    const geometry = new THREE.ShapeGeometry(shape);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(cx - 32, -(cy - 32), 0);
+    return mesh;
+  }
+
+  /**
+   * Create a filled star mesh.
+   */
+  private createStarFill(
+    cx: number,
+    cy: number,
+    points: number,
+    outerRadius: number,
+    innerRadius: number,
+    rotation: number,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh {
+    const shape = new THREE.Shape();
+    const rotRad = (rotation * Math.PI) / 180;
+    const totalPoints = points * 2;
+
+    for (let i = 0; i <= totalPoints; i++) {
+      const angle = (i / totalPoints) * Math.PI * 2 + rotRad;
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (i === 0) {
+        shape.moveTo(x, -y);
+      } else {
+        shape.lineTo(x, -y);
+      }
+    }
+    shape.closePath();
+
+    const geometry = new THREE.ShapeGeometry(shape);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(cx - 32, -(cy - 32), 0);
+    return mesh;
+  }
+
+  /**
+   * Create a filled diamond mesh.
+   */
+  private createDiamondFill(
+    cx: number,
+    cy: number,
+    width: number,
+    height: number,
+    material: THREE.MeshBasicMaterial
+  ): THREE.Mesh {
+    const halfW = width / 2;
+    const halfH = height / 2;
+
+    const shape = new THREE.Shape();
+    shape.moveTo(0, halfH); // Top
+    shape.lineTo(halfW, 0); // Right
+    shape.lineTo(0, -halfH); // Bottom
+    shape.lineTo(-halfW, 0); // Left
+    shape.closePath();
+
+    const geometry = new THREE.ShapeGeometry(shape);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(cx - 32, -(cy - 32), 0);
+    return mesh;
   }
 
   /**
@@ -587,7 +810,11 @@ export class VectorPlantOverlay {
    */
   private disposeMeshGroup(group: THREE.Group): void {
     for (const child of group.children) {
-      if (child instanceof THREE.Line || child instanceof THREE.LineLoop) {
+      if (
+        child instanceof THREE.Line ||
+        child instanceof THREE.LineLoop ||
+        child instanceof THREE.Mesh
+      ) {
         child.geometry.dispose();
         // Materials are pooled, so we don't dispose them here
       }
@@ -740,18 +967,28 @@ export class VectorPlantOverlay {
     // Dispose cached keyframe meshes
     for (const cachedMeshes of this.keyframeMeshCache.values()) {
       for (const mesh of cachedMeshes) {
-        if (mesh instanceof THREE.Line || mesh instanceof THREE.LineLoop) {
+        if (
+          mesh instanceof THREE.Line ||
+          mesh instanceof THREE.LineLoop ||
+          mesh instanceof THREE.Mesh
+        ) {
           mesh.geometry.dispose();
         }
       }
     }
     this.keyframeMeshCache.clear();
 
-    // Dispose pooled materials
+    // Dispose pooled line materials
     for (const material of this.materialPool.values()) {
       material.dispose();
     }
     this.materialPool.clear();
+
+    // Dispose pooled fill materials
+    for (const material of this.fillMaterialPool.values()) {
+      material.dispose();
+    }
+    this.fillMaterialPool.clear();
 
     // Dispose pooled geometries
     for (const geometry of this.circleGeometryPool.values()) {

@@ -2,6 +2,7 @@
 
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import {
+  CANVAS,
   isVectorVariant,
   getEffectiveKeyframes,
   type VectorKeyframe,
@@ -81,11 +82,14 @@ export function VariantTimeline() {
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4">
+    <div
+      className="rounded-lg p-4 border border-gray-200"
+      style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
+    >
       {/* Timeline header */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-400 font-medium">Timeline</span>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-600 font-medium">Timeline</span>
+        <span className="text-xs text-gray-600">
           {currentTime.toFixed(1)}s / {totalDuration.toFixed(1)}s
         </span>
       </div>
@@ -121,7 +125,7 @@ export function VariantTimeline() {
                 }}
                 className={`
                   relative flex flex-col items-center justify-center gap-1 py-2
-                  border-r border-gray-800 last:border-r-0
+                  border-r border-gray-300 last:border-r-0
                   transition-all duration-150
                   ${isSelected ? "ring-2 ring-blue-500 ring-inset z-10" : ""}
                   ${isCurrent && isPlaying ? "ring-2 ring-green-500 ring-inset" : ""}
@@ -135,7 +139,7 @@ export function VariantTimeline() {
                 title={`${kf.name} (${kf.duration}s)`}
               >
                 {/* Mini sprite preview */}
-                <div className="bg-gray-950 rounded p-1">
+                <div className="rounded p-1" style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}>
                   {isVector && vectorKf ? (
                     <VectorMiniGlyph keyframe={vectorKf} size={40} />
                   ) : pixelKf ? (
@@ -145,10 +149,10 @@ export function VariantTimeline() {
 
                 {/* Keyframe name and duration */}
                 <div className="flex flex-col items-center">
-                  <span className="text-[10px] font-medium text-white truncate px-1 max-w-full">
+                  <span className="text-[10px] font-medium text-gray-800 truncate px-1 max-w-full">
                     {kf.name}
                   </span>
-                  <span className="text-[9px] text-gray-500">{kf.duration}s</span>
+                  <span className="text-[9px] text-gray-600">{kf.duration}s</span>
                 </div>
 
                 {/* Color preview bar */}
@@ -163,17 +167,17 @@ export function VariantTimeline() {
 
         {/* Playhead */}
         <div
-          className="absolute top-0 w-0.5 h-full bg-white shadow-lg pointer-events-none transition-all duration-100"
+          className="absolute top-0 w-0.5 h-full bg-gray-800 shadow-lg pointer-events-none transition-all duration-100"
           style={{ left: `${playheadPosition}%` }}
         >
           {/* Playhead handle */}
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-800 rounded-full" />
         </div>
       </div>
 
       {/* Loop indicator */}
       {variant.loop && (
-        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+        <div className="mt-2 flex items-center gap-1 text-xs text-gray-600">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -188,7 +192,7 @@ export function VariantTimeline() {
 
       {/* Tween indicator */}
       {variant.tweenBetweenKeyframes && (
-        <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+        <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

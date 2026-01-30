@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useVariantSandboxStore, type Background } from "@/stores/variant-sandbox-store";
 import {
+  CANVAS,
   computeLifecycleState,
   getEffectivePalette,
   getActiveVisual,
@@ -19,6 +20,7 @@ import {
 } from "@quantum-garden/shared";
 
 const BACKGROUND_COLORS: Record<Background, string> = {
+  garden: CANVAS.BACKGROUND_COLOR,
   white: "#ffffff",
   dark: "#1a1a1a",
   checkerboard: "#e0e0e0",
@@ -362,8 +364,8 @@ export function VariantPreview() {
   if (!variant) {
     return (
       <div
-        className="flex items-center justify-center bg-gray-800 rounded-lg"
-        style={{ width: canvasSize, height: canvasSize }}
+        className="flex items-center justify-center rounded-lg"
+        style={{ width: canvasSize, height: canvasSize, backgroundColor: CANVAS.BACKGROUND_COLOR }}
       >
         <span className="text-gray-500">No variant selected</span>
       </div>

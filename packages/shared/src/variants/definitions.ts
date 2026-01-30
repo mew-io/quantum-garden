@@ -2118,8 +2118,10 @@ const simpleBloom: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#D0E8D0", // Sage
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.6,
       scale: 0.7,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2140,8 +2142,10 @@ const simpleBloom: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 6, VECTOR_CENTER + 4),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER + 6, VECTOR_CENTER + 4),
       ],
-      strokeColor: "#C0E0E0", // Mint
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.7,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2164,8 +2168,10 @@ const simpleBloom: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER - 8, VECTOR_CENTER + 4),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 8, VECTOR_CENTER + 4),
       ],
-      strokeColor: "#D0E8D0", // Sage at full
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 1.0,
+      fillColor: "#A8D8A8", // Sage fill at full bloom
+      fillOpacity: 0.85,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2183,8 +2189,10 @@ const simpleBloom: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#E8E8F0", // Canvas - neutral
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#D8D8E8", // Canvas fill - fading
+      fillOpacity: 0.4,
       scale: 0.9,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2217,8 +2225,10 @@ const quantumTulip: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 8, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 6, 3),
       ],
-      strokeColor: "#E8E8F0", // Canvas - potential
-      strokeOpacity: 0.5,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#D8D8E8", // Canvas fill - potential
+      fillOpacity: 0.5,
       scale: 0.6,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2234,8 +2244,10 @@ const quantumTulip: PlantVariant = {
         // Leaf
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER - 6, VECTOR_CENTER + 10),
       ],
-      strokeColor: "#C0E0E0", // Mint
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.6,
       scale: 0.8,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2256,8 +2268,10 @@ const quantumTulip: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 8, VECTOR_CENTER + 12),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 7, VECTOR_CENTER + 14),
       ],
-      strokeColor: "#F0D0E0", // Blossom (overridden by colorVariations)
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 1.0,
+      fillColor: "#E8A8C8", // Blossom fill (can be overridden by colorVariations)
+      fillOpacity: 0.85,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2273,8 +2287,10 @@ const quantumTulip: PlantVariant = {
         // Drooping stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 2, VECTOR_CENTER + 2, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#E8E8F0", // Fading
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#D8D8E8", // Fading fill
+      fillOpacity: 0.3,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2335,8 +2351,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#E8F0D0", // Soft yellow-green
+      strokeColor: "#2A2A2A",
       strokeOpacity: 0.5,
+      fillColor: "#E8B888", // Peach bud
+      fillOpacity: 0.4,
       scale: 0.6,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2356,8 +2374,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#F8F0D0", // Warming yellow
+      strokeColor: "#2A2A2A",
       strokeOpacity: 0.7,
+      fillColor: "#E8B888", // Warming peach
+      fillOpacity: 0.5,
       scale: 0.8,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2381,8 +2401,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 20),
       ],
-      strokeColor: "#F8F0E0", // Bright daisy white
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.9,
+      fillColor: "#E8B888", // Bright peach center
+      fillOpacity: 0.6,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2408,8 +2430,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 20),
       ],
-      strokeColor: "#FFFFF8", // Bright white sparkle
+      strokeColor: "#2A2A2A",
       strokeOpacity: 1.0,
+      fillColor: "#90B8E8", // Sky blue sparkle
+      fillOpacity: 0.6,
       scale: 1.05,
       transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
@@ -2433,8 +2457,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 20),
       ],
-      strokeColor: "#F8F0E0", // Back to normal
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.9,
+      fillColor: "#E8B888", // Back to peach
+      fillOpacity: 0.6,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2454,8 +2480,10 @@ const dewdropDaisy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#F0F0E8", // Fading to neutral
+      strokeColor: "#2A2A2A",
       strokeOpacity: 0.5,
+      fillColor: "#D8D0C8", // Faded neutral
+      fillOpacity: 0.4,
       scale: 0.85,
       transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
@@ -2495,8 +2523,10 @@ const midnightPoppy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#8B2252", // Deep burgundy
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.4,
       scale: 0.75,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2516,8 +2546,10 @@ const midnightPoppy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#9B3060", // Deepening red-purple
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.5,
       scale: 0.9,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2540,8 +2572,10 @@ const midnightPoppy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 20),
       ],
-      strokeColor: "#C03878", // Rich dramatic deep red
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.65,
       scale: 1.1,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2561,8 +2595,10 @@ const midnightPoppy: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#9B3060", // Returning to deep tones
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.5,
       scale: 0.95,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2609,8 +2645,10 @@ const bellCluster: PlantVariant = {
         vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 10, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
       ],
-      strokeColor: "#D8C8E0", // Soft lilac
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 0.7,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2633,8 +2671,10 @@ const bellCluster: PlantVariant = {
         vectorLine(VECTOR_CENTER + 8, VECTOR_CENTER - 12, VECTOR_CENTER + 10, VECTOR_CENTER - 2),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
       ],
-      strokeColor: "#E0D0E8", // Brightening
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.45,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2658,8 +2698,10 @@ const bellCluster: PlantVariant = {
         vectorLine(VECTOR_CENTER + 10, VECTOR_CENTER - 14, VECTOR_CENTER + 12, VECTOR_CENTER - 2),
         vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER, 3),
       ],
-      strokeColor: "#E8D8F0", // More vibrant
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 0.95,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2685,8 +2727,10 @@ const bellCluster: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 2, 5),
         vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 4, 6),
       ],
-      strokeColor: "#F0E0F8", // Full bloom lilac
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.2,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2709,8 +2753,10 @@ const bellCluster: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 4),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 4, 4),
       ],
-      strokeColor: "#E8E0F0", // Fading
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 1.0,
       transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
@@ -2751,8 +2797,10 @@ const softMoss: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER + 5, 2),
         vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER + 4, 1.5),
       ],
-      strokeColor: "#C8D8C0", // Muted olive green
-      strokeOpacity: 0.3,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.6,
+      fillColor: "#A8D8A8", // Sage green
+      fillOpacity: 0.4,
       scale: 0.3,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2774,8 +2822,10 @@ const softMoss: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER + 2, 2),
         vectorCircle(VECTOR_CENTER + 11, VECTOR_CENTER - 1, 2),
       ],
-      strokeColor: "#D0E0C8", // Lighter olive
-      strokeOpacity: 0.5,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.7,
+      fillColor: "#88D0D0", // Mint
+      fillOpacity: 0.5,
       scale: 0.4,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2815,8 +2865,10 @@ const pebblePatch: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 1, VECTOR_CENTER + 10, 1.5),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 7, 2),
       ],
-      strokeColor: "#D8D8D0", // Warm gray
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.6,
+      fillColor: "#D8D0C8", // Warm stone
+      fillOpacity: 0.5,
       scale: 0.35,
     },
   ],
@@ -2857,8 +2909,10 @@ const meadowTuft: PlantVariant = {
         // Base cluster
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 4),
       ],
-      strokeColor: "#B8D8B0", // Soft green
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage green (for base cluster)
+      fillOpacity: 0.6,
       scale: 0.6,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2875,8 +2929,10 @@ const meadowTuft: PlantVariant = {
         // Base cluster
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 14, 4),
       ],
-      strokeColor: "#C8E0C0", // Soft green
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage green
+      fillOpacity: 0.6,
       scale: 0.6,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2914,8 +2970,10 @@ const whisperReed: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 21, 1.5),
         vectorCircle(VECTOR_CENTER + 2, VECTOR_CENTER - 19, 1.5),
       ],
-      strokeColor: "#C0D0C0", // Pale green-gray
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.7,
+      fillColor: "#C8E0C0", // Light sage
+      fillOpacity: 0.5,
       scale: 0.75,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2932,8 +2990,10 @@ const whisperReed: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 21, 1.5),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 19, 1.5),
       ],
-      strokeColor: "#D0DCD0", // Pale green-gray
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.7,
+      fillColor: "#C8E0C0", // Light sage
+      fillOpacity: 0.5,
       scale: 0.75,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -2974,8 +3034,10 @@ const cloudBush: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 4, 6),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 6, 5),
       ],
-      strokeColor: "#A8C8A8", // Soft sage green
+      strokeColor: "#2A2A2A",
       strokeOpacity: 0.6,
+      fillColor: "#A8D8A8", // Sage green
+      fillOpacity: 0.5,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -2994,8 +3056,10 @@ const cloudBush: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER, 5),
         vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER, 5),
       ],
-      strokeColor: "#98C098", // Richer green
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.7,
+      fillColor: "#88D0D0", // Mint
+      fillOpacity: 0.6,
       scale: 1.2,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3013,8 +3077,10 @@ const cloudBush: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 13, VECTOR_CENTER, 4),
         vectorCircle(VECTOR_CENTER + 13, VECTOR_CENTER, 4),
       ],
-      strokeColor: "#98C098",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.75,
+      fillColor: "#88D0D0", // Mint
+      fillOpacity: 0.6,
       scale: 1.15,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3032,8 +3098,10 @@ const cloudBush: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 15, VECTOR_CENTER + 1, 6),
         vectorCircle(VECTOR_CENTER + 15, VECTOR_CENTER + 1, 6),
       ],
-      strokeColor: "#98C098",
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.8,
+      fillColor: "#90B8E8", // Sky blue
+      fillOpacity: 0.5,
       scale: 1.25,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3058,8 +3126,10 @@ const cloudBush: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 2, VECTOR_CENTER + 6, 1.5),
         vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER + 7, 1.5),
       ],
-      strokeColor: "#90B890", // Green with berry hint
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.9,
+      fillColor: "#E89090", // Coral for berries
+      fillOpacity: 0.6,
       scale: 1.3,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3099,8 +3169,10 @@ const berryThicket: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 2, 3),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER, 3),
       ],
-      strokeColor: "#708870", // Dark green
-      strokeOpacity: 0.5,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.6,
+      fillColor: "#A8D8A8", // Sage green
+      fillOpacity: 0.4,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3125,8 +3197,10 @@ const berryThicket: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER - 12, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 4),
       ],
-      strokeColor: "#688868", // Richer green
+      strokeColor: "#2A2A2A",
       strokeOpacity: 0.7,
+      fillColor: "#A8D8A8", // Sage green
+      fillOpacity: 0.5,
       scale: 1.2,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3152,8 +3226,10 @@ const berryThicket: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 6, 2),
         vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 4, 2),
       ],
-      strokeColor: "#608060", // Green with berry hints
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.8,
+      fillColor: "#E89090", // Coral for berries
+      fillOpacity: 0.5,
       scale: 1.3,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3187,8 +3263,10 @@ const berryThicket: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 14, 2),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 14, 2),
       ],
-      strokeColor: "#587858", // Deep green with vibrant berries
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A",
+      strokeOpacity: 0.9,
+      fillColor: "#E89090", // Vibrant coral berries
+      fillOpacity: 0.7,
       scale: 1.4,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3226,8 +3304,10 @@ const saplingHope: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 6, 3),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 6, 3),
       ],
-      strokeColor: "#C0E0B0", // Fresh spring green
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.3,
       scale: 0.6,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3245,8 +3325,10 @@ const saplingHope: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 10, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 12, 3),
       ],
-      strokeColor: "#B0D8A0", // Brightening green
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.6,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.4,
       scale: 0.9,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3269,8 +3351,10 @@ const saplingHope: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 14, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 16, 4),
       ],
-      strokeColor: "#A0D090", // Healthy green
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.5,
       scale: 1.2,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3298,8 +3382,10 @@ const saplingHope: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 20, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 22, 5),
       ],
-      strokeColor: "#90C880", // Rich verdant green
-      strokeOpacity: 0.95,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.55,
       scale: 1.5,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3331,8 +3417,10 @@ const saplingHope: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 18, 5),
         vectorCircle(VECTOR_CENTER + 6, VECTOR_CENTER - 18, 5),
       ],
-      strokeColor: "#80B870", // Deep forest green
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.6,
       scale: 1.8,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3369,8 +3457,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER - 6, VECTOR_CENTER + 2),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER + 6, VECTOR_CENTER + 2),
       ],
-      strokeColor: "#B8D0A0", // Pale willow green
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.3,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3391,8 +3481,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER - 2, VECTOR_CENTER + 8),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 12, VECTOR_CENTER + 2, VECTOR_CENTER + 8),
       ],
-      strokeColor: "#A8C898", // Silvery green
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.4,
       scale: 1.5,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3416,8 +3508,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER - 20, VECTOR_CENTER + 6, VECTOR_CENTER + 12),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 18, VECTOR_CENTER, VECTOR_CENTER + 14),
       ],
-      strokeColor: "#98C088", // Full willow green
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.5,
       scale: 2.0,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3441,8 +3535,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER - 20, VECTOR_CENTER - 4, VECTOR_CENTER + 14),
         vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER - 18, VECTOR_CENTER - 8, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#A0C890", // Lighter during movement
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.55,
       scale: 2.3,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3466,8 +3562,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 22, VECTOR_CENTER + 12, VECTOR_CENTER + 12),
         vectorLine(VECTOR_CENTER + 2, VECTOR_CENTER - 18, VECTOR_CENTER + 8, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#A0C890", // Lighter during movement
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.55,
       scale: 2.3,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3491,8 +3589,10 @@ const weepingWillow: PlantVariant = {
         vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER - 24, VECTOR_CENTER + 8, VECTOR_CENTER + 16),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 22, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#98C088", // Full color
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.6,
       scale: 2.5,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3537,8 +3637,10 @@ const pulsingOrb: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER + 16, 2),
         vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 16, 2),
       ],
-      strokeColor: "#C0D8F0", // Sky - morning light (dimmed)
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.3,
       scale: 0.9,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3565,8 +3667,10 @@ const pulsingOrb: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 28, VECTOR_CENTER, 2),
         vectorCircle(VECTOR_CENTER + 28, VECTOR_CENTER, 2),
       ],
-      strokeColor: "#D0E0F0", // Sky - morning light (bright)
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.6,
       scale: 1.1,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3609,8 +3713,10 @@ const fractalBloom: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER - 10, VECTOR_CENTER + 6),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER + 6),
       ],
-      strokeColor: "#E0C0F0", // Lavender
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 0.7,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3636,8 +3742,10 @@ const fractalBloom: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 20, VECTOR_CENTER + 4, 3),
         vectorCircle(VECTOR_CENTER + 20, VECTOR_CENTER + 4, 3),
       ],
-      strokeColor: "#D0B0E8", // Brightening purple
-      strokeOpacity: 0.75,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.45,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3673,8 +3781,10 @@ const fractalBloom: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER - 30, 2),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 30, 2),
       ],
-      strokeColor: "#C8A8E0", // Full vibrant purple
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3711,8 +3821,10 @@ const phoenixFlame: PlantVariant = {
         vectorLine(VECTOR_CENTER - 6, VECTOR_CENTER + 6, VECTOR_CENTER - 8, VECTOR_CENTER - 4),
         vectorLine(VECTOR_CENTER + 6, VECTOR_CENTER + 6, VECTOR_CENTER + 8, VECTOR_CENTER - 4),
       ],
-      strokeColor: "#F0A850", // Warm ember orange
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.55,
+      fillColor: "#E8B888", // Peach fill (ember)
+      fillOpacity: 0.4,
       scale: 0.75,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3735,8 +3847,10 @@ const phoenixFlame: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 10, 3),
         vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 10, 3),
       ],
-      strokeColor: "#F89840", // Brightening flame
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#E89090", // Coral fill (flame)
+      fillOpacity: 0.5,
       scale: 0.95,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3767,8 +3881,10 @@ const phoenixFlame: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER - 16, 3),
         vectorCircle(VECTOR_CENTER + 22, VECTOR_CENTER - 16, 3),
       ],
-      strokeColor: "#F88830", // Full radiant flame
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#E89090", // Coral fill (full blaze)
+      fillOpacity: 0.65,
       scale: 1.1,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3800,8 +3916,10 @@ const crystalCluster: PlantVariant = {
         vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 6, 10),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
       ],
-      strokeColor: "#B0D8F0", // Ice blue
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.45,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.35,
       scale: 0.6,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3817,8 +3935,10 @@ const crystalCluster: PlantVariant = {
         vectorDiamond(VECTOR_CENTER + 8, VECTOR_CENTER + 6, 4, 7),
         vectorDiamond(VECTOR_CENTER - 4, VECTOR_CENTER - 10, 4, 6),
       ],
-      strokeColor: "#A0D0E8", // Brightening
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.45,
       scale: 0.75,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3841,8 +3961,10 @@ const crystalCluster: PlantVariant = {
         vectorLine(VECTOR_CENTER - 14, VECTOR_CENTER + 6, VECTOR_CENTER - 14, VECTOR_CENTER - 2),
         vectorLine(VECTOR_CENTER + 12, VECTOR_CENTER + 8, VECTOR_CENTER + 12, VECTOR_CENTER + 2),
       ],
-      strokeColor: "#90C8E0", // Full crystal
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.55,
       scale: 0.9,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -3885,8 +4007,10 @@ const kaleidoscopeStar: PlantVariant = {
         vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 22, 4, 6),
         vectorDiamond(VECTOR_CENTER - 22, VECTOR_CENTER, 4, 6),
       ],
-      strokeColor: "#F0C0D0", // Rainbow pastel
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 1.1,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3908,8 +4032,10 @@ const kaleidoscopeStar: PlantVariant = {
         vectorDiamond(VECTOR_CENTER + 16, VECTOR_CENTER + 16, 4, 6),
         vectorDiamond(VECTOR_CENTER - 16, VECTOR_CENTER + 16, 4, 6),
       ],
-      strokeColor: "#E0D0F0", // Shifted pastel
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.15,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3946,8 +4072,10 @@ const vortexSpiral: PlantVariant = {
         vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER + 4, VECTOR_CENTER - 14, VECTOR_CENTER + 14),
         vectorLine(VECTOR_CENTER - 2, VECTOR_CENTER - 4, VECTOR_CENTER - 12, VECTOR_CENTER - 16),
       ],
-      strokeColor: "#9080C0", // Deep blue-purple
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.55,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.4,
       scale: 0.85,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3967,8 +4095,10 @@ const vortexSpiral: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER + 16, 3),
         vectorCircle(VECTOR_CENTER - 14, VECTOR_CENTER - 20, 3),
       ],
-      strokeColor: "#A090D0", // Vibrant purple
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.5,
       scale: 1.0,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -3990,8 +4120,10 @@ const vortexSpiral: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 24, 4),
         vectorStar(VECTOR_CENTER, VECTOR_CENTER, 8, 4, 6),
       ],
-      strokeColor: "#B0A0E0", // Bright radiant
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.6,
       scale: 1.05,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4026,8 +4158,10 @@ const nebulaBloom: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 6, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 10),
       ],
-      strokeColor: "#D0C0E0", // Soft nebula
-      strokeOpacity: 0.3,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.4,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.3,
       scale: 0.8,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4047,8 +4181,10 @@ const nebulaBloom: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 14, VECTOR_CENTER + 8, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 16, 6),
       ],
-      strokeColor: "#C0B0D8", // Brightening
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.6,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.4,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4075,8 +4211,10 @@ const nebulaBloom: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 24, VECTOR_CENTER + 14, 2),
         vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER + 14, 2),
       ],
-      strokeColor: "#B0A0D0", // Full radiant
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.2,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4114,8 +4252,10 @@ const auroraWisp: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 2, 5),
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER - 4, 4),
       ],
-      strokeColor: "#B8E8E0", // Soft cyan-green
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.4,
       scale: 0.85,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4134,8 +4274,10 @@ const auroraWisp: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 2, 5),
         vectorCircle(VECTOR_CENTER + 18, VECTOR_CENTER - 10, 4),
       ],
-      strokeColor: "#A8E0D8", // Brightening
-      strokeOpacity: 0.75,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.5,
       scale: 1.0,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4157,8 +4299,10 @@ const auroraWisp: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 22, VECTOR_CENTER + 6, 3),
         vectorCircle(VECTOR_CENTER + 24, VECTOR_CENTER - 4, 3),
       ],
-      strokeColor: "#98D8D0", // Full brilliance
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.6,
       scale: 1.15,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4193,8 +4337,10 @@ const prismaticFern: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER - 6, VECTOR_CENTER - 10),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 4, VECTOR_CENTER + 6, VECTOR_CENTER - 10),
       ],
-      strokeColor: "#E8D0F0", // Soft pastel
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.4,
       scale: 0.75,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4215,8 +4361,10 @@ const prismaticFern: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 12, VECTOR_CENTER - 18, 3),
         vectorCircle(VECTOR_CENTER + 12, VECTOR_CENTER - 18, 3),
       ],
-      strokeColor: "#D8C0E8", // Vibrant
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.5,
       scale: 0.9,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4245,8 +4393,10 @@ const prismaticFern: PlantVariant = {
         // Rainbow tip
         vectorStar(VECTOR_CENTER, VECTOR_CENTER - 20, 6, 3, 6),
       ],
-      strokeColor: "#C8B0E0", // Full rainbow
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#A8D8A8", // Sage fill
+      fillOpacity: 0.6,
       scale: 1.1,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4282,8 +4432,10 @@ const quantumRose: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#F0C8D8", // Soft rose
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#E89090", // Coral fill (bud)
+      fillOpacity: 0.4,
       scale: 0.7,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4305,8 +4457,10 @@ const quantumRose: PlantVariant = {
         // Stem
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 2, VECTOR_CENTER, VECTOR_CENTER + 18),
       ],
-      strokeColor: "#E8B8D0", // Quantum shimmer
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.45,
       scale: 0.95,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4331,8 +4485,10 @@ const quantumRose: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER - 4, VECTOR_CENTER + 8),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER + 4, VECTOR_CENTER + 12),
       ],
-      strokeColor: "#E0A8C8", // Classical rose
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#E89090", // Coral fill (full bloom)
+      fillOpacity: 0.6,
       scale: 1.1,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4369,8 +4525,10 @@ const starMoss: PlantVariant = {
         vectorLine(VECTOR_CENTER - 10, VECTOR_CENTER - 8, VECTOR_CENTER, VECTOR_CENTER),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 8, VECTOR_CENTER - 6),
       ],
-      strokeColor: "#D0D8F0", // Soft starlight
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.4,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4392,8 +4550,10 @@ const starMoss: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER, VECTOR_CENTER + 14, VECTOR_CENTER + 8),
         vectorLine(VECTOR_CENTER - 8, VECTOR_CENTER + 12, VECTOR_CENTER, VECTOR_CENTER),
       ],
-      strokeColor: "#C0D0E8", // Constellation
-      strokeOpacity: 0.75,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.5,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4420,8 +4580,10 @@ const starMoss: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 16, 2),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 22, 2),
       ],
-      strokeColor: "#B0C8E0", // Dense starfield
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#88D0D0", // Mint fill
+      fillOpacity: 0.6,
       scale: 1.1,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4457,8 +4619,10 @@ const dreamVine: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER - 10, 3),
         vectorCircle(VECTOR_CENTER - 6, VECTOR_CENTER - 6, 2),
       ],
-      strokeColor: "#D8C8E8", // Soft dreamy
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.4,
       scale: 0.8,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4477,8 +4641,10 @@ const dreamVine: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 10, 3),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER - 16, 4),
       ],
-      strokeColor: "#C8B8E0", // Flowing lavender
-      strokeOpacity: 0.75,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 1.0,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4504,8 +4670,10 @@ const dreamVine: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 6, 3),
         vectorCircle(VECTOR_CENTER - 18, VECTOR_CENTER - 6, 3),
       ],
-      strokeColor: "#B8A8D8", // Full ethereal
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.15,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -4539,8 +4707,10 @@ const cosmicLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 4, VECTOR_CENTER, 6),
         vectorCircle(VECTOR_CENTER + 4, VECTOR_CENTER, 6),
       ],
-      strokeColor: "#F0E0C8", // Sacred gold
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 0.75,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4564,8 +4734,10 @@ const cosmicLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 16, VECTOR_CENTER - 9, 4),
         vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER - 9, 4),
       ],
-      strokeColor: "#E8D8B8", // Brightening
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.65,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.45,
       scale: 0.95,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4594,8 +4766,10 @@ const cosmicLotus: PlantVariant = {
         // Cosmic radiance
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 28),
       ],
-      strokeColor: "#E0D0B0", // Full cosmic
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.55,
       scale: 1.2,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4726,6 +4900,8 @@ const sumiSpirit: PlantVariant = {
       ],
       strokeColor: "#1E3A5F", // Deep indigo
       strokeOpacity: 0.6,
+      fillColor: "#90B8E8", // Sky fill - subtle ink wash
+      fillOpacity: 0.15,
       scale: 0.8,
       transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
@@ -4740,6 +4916,8 @@ const sumiSpirit: PlantVariant = {
       ],
       strokeColor: "#3A5A8F", // Mid indigo-blue
       strokeOpacity: 0.75,
+      fillColor: "#90B8E8", // Sky fill - ink wash
+      fillOpacity: 0.2,
       scale: 0.9,
       transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
@@ -4756,6 +4934,8 @@ const sumiSpirit: PlantVariant = {
       ],
       strokeColor: "#4A6FA5", // Spirit blue
       strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill - ethereal wash
+      fillOpacity: 0.2,
       scale: 0.95,
       transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
@@ -4773,6 +4953,8 @@ const sumiSpirit: PlantVariant = {
       ],
       strokeColor: "#5A8FC5", // Lighter spirit blue
       strokeOpacity: 0.95,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.25,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
@@ -4792,6 +4974,8 @@ const sumiSpirit: PlantVariant = {
       ],
       strokeColor: "#7A9FC5", // Pale spirit blue
       strokeOpacity: 1.0,
+      fillColor: "#C898E8", // Lavender fill - settled ink wash
+      fillOpacity: 0.3,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "brushStroke" },
     },
@@ -4931,8 +5115,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
       ],
-      strokeColor: "#E8EBE8", // White-jade
-      strokeOpacity: 0.5,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.45,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.3,
       scale: 0.5,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4948,8 +5134,10 @@ const zenLotus: PlantVariant = {
         vectorLine(VECTOR_CENTER - 7, VECTOR_CENTER - 4, VECTOR_CENTER - 12, VECTOR_CENTER - 7),
         vectorLine(VECTOR_CENTER + 7, VECTOR_CENTER - 4, VECTOR_CENTER + 12, VECTOR_CENTER - 7),
       ],
-      strokeColor: "#E8EBE8",
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 0.65,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4968,8 +5156,10 @@ const zenLotus: PlantVariant = {
         vectorLine(VECTOR_CENTER + 9, VECTOR_CENTER + 5, VECTOR_CENTER + 16, VECTOR_CENTER + 9),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 10, VECTOR_CENTER, VECTOR_CENTER + 16),
       ],
-      strokeColor: "#E4E9E6",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.55,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.4,
       scale: 0.75,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -4989,8 +5179,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 16, VECTOR_CENTER + 9, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 18, 4),
       ],
-      strokeColor: "#E0E5E2",
-      strokeOpacity: 0.8,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.45,
       scale: 0.85,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -5013,8 +5205,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 8, VECTOR_CENTER - 20, 3),
         vectorCircle(VECTOR_CENTER + 8, VECTOR_CENTER - 20, 3),
       ],
-      strokeColor: "#DCE2DC",
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 0.92,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -5042,8 +5236,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 19, VECTOR_CENTER + 11, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 22, 4),
       ],
-      strokeColor: "#D8DED8",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.0,
       transitionHint: { strategy: "progressive", easing: "easeInOut" },
     },
@@ -5071,8 +5267,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 21, VECTOR_CENTER + 12, 5),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 24, 5),
       ],
-      strokeColor: "#D8DED8",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.05,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -5097,8 +5295,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER - 19, VECTOR_CENTER - 11, 4),
         vectorCircle(VECTOR_CENTER + 19, VECTOR_CENTER - 11, 4),
       ],
-      strokeColor: "#E0E5E0",
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.75,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.55,
       scale: 0.95,
       transitionHint: { strategy: "morph", easing: "easeInOut" },
     },
@@ -5117,8 +5317,10 @@ const zenLotus: PlantVariant = {
         vectorCircle(VECTOR_CENTER + 10, VECTOR_CENTER + 6, 4),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER + 12, 4),
       ],
-      strokeColor: "#E4E9E4",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.55,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.4,
       scale: 0.8,
       transitionHint: { strategy: "fade", easing: "easeInOut" },
     },
@@ -5234,16 +5436,20 @@ const sacredMandala: PlantVariant = {
       name: "seed",
       duration: 10,
       primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
-      strokeColor: "#909090",
-      strokeOpacity: 0.5,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.4,
       scale: 0.7,
     },
     {
       name: "rings",
       duration: 15,
       primitives: [...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18])],
-      strokeColor: "#808080",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.8,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 0.85,
     },
     {
@@ -5253,8 +5459,10 @@ const sacredMandala: PlantVariant = {
         ...vectorConcentricCircles(VECTOR_CENTER, VECTOR_CENTER, [6, 12, 18, 24]),
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 6, 26),
       ],
-      strokeColor: "#707070",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.6,
       scale: 0.95,
     },
     {
@@ -5269,8 +5477,10 @@ const sacredMandala: PlantVariant = {
         vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 18, 5, 7),
         vectorDiamond(VECTOR_CENTER - 18, VECTOR_CENTER, 5, 7),
       ],
-      strokeColor: "#606060",
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 1.0,
+      fillColor: "#C898E8", // Lavender fill for diamonds
+      fillOpacity: 0.7,
       scale: 1.0,
     },
   ],
@@ -5354,8 +5564,10 @@ const crystalLattice: PlantVariant = {
       name: "diamond",
       duration: 10,
       primitives: [vectorDiamond(VECTOR_CENTER, VECTOR_CENTER, 14, 18)],
-      strokeColor: "#888888",
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.35,
       scale: 0.7,
     },
     {
@@ -5368,8 +5580,10 @@ const crystalLattice: PlantVariant = {
         vectorDiamond(VECTOR_CENTER, VECTOR_CENTER - 10, 8, 12),
         vectorDiamond(VECTOR_CENTER, VECTOR_CENTER + 10, 8, 12),
       ],
-      strokeColor: "#787878",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.45,
       scale: 0.85,
     },
     {
@@ -5387,8 +5601,10 @@ const crystalLattice: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 7, VECTOR_CENTER, VECTOR_CENTER - 7),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 7, VECTOR_CENTER, VECTOR_CENTER + 7),
       ],
-      strokeColor: "#686868",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.75,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.5,
       scale: 0.95,
     },
     {
@@ -5412,8 +5628,10 @@ const crystalLattice: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 6, VECTOR_CENTER, VECTOR_CENTER - 6),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 6, VECTOR_CENTER, VECTOR_CENTER + 6),
       ],
-      strokeColor: "#585858",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.6,
       scale: 1.0,
     },
   ],
@@ -5476,8 +5694,10 @@ const stellarGeometry: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 4, 7),
       ],
-      strokeColor: "#909090",
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#E8B888", // Peach fill
+      fillOpacity: 0.35,
       scale: 0.6,
     },
     {
@@ -5487,8 +5707,10 @@ const stellarGeometry: PlantVariant = {
         vectorStar(VECTOR_CENTER, VECTOR_CENTER, 6, 16, 8, -90),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
       ],
-      strokeColor: "#808080",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#E8B888", // Peach fill
+      fillOpacity: 0.45,
       scale: 0.8,
     },
     {
@@ -5499,8 +5721,10 @@ const stellarGeometry: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 5),
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 18, 26, -90),
       ],
-      strokeColor: "#707070",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.75,
+      fillColor: "#E8B888", // Peach fill
+      fillOpacity: 0.5,
       scale: 0.9,
     },
     {
@@ -5513,8 +5737,10 @@ const stellarGeometry: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 3),
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 12, 24, 28, -90),
       ],
-      strokeColor: "#606060",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#E8B888", // Peach fill
+      fillOpacity: 0.6,
       scale: 1.0,
     },
   ],
@@ -5637,16 +5863,20 @@ const metatronsCube: PlantVariant = {
       name: "circle",
       duration: 10,
       primitives: [vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8)],
-      strokeColor: "#888888",
+      strokeColor: "#2A2A2A", // Charcoal outline
       strokeOpacity: 0.5,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.35,
       scale: 0.7,
     },
     {
       name: "six",
       duration: 15,
       primitives: [...vectorFlowerOfLife(VECTOR_CENTER, VECTOR_CENTER, 8, 1)],
-      strokeColor: "#787878",
-      strokeOpacity: 0.7,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.6,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.45,
       scale: 0.85,
     },
     {
@@ -5659,8 +5889,10 @@ const metatronsCube: PlantVariant = {
         // Hexagon outline
         vectorPolygon(VECTOR_CENTER, VECTOR_CENTER, 6, 8, -90),
       ],
-      strokeColor: "#686868",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.75,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 0.92,
     },
     {
@@ -5675,8 +5907,10 @@ const metatronsCube: PlantVariant = {
         // Radial connections
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 6, 0, 14, -90),
       ],
-      strokeColor: "#585858",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.0,
     },
   ],
@@ -5710,8 +5944,10 @@ const pulsingOrbVector: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 8),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 4),
       ],
-      strokeColor: "#C0D8F0",
-      strokeOpacity: 0.4,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.35,
       scale: 0.9,
     },
     {
@@ -5723,8 +5959,10 @@ const pulsingOrbVector: PlantVariant = {
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 6),
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 2),
       ],
-      strokeColor: "#E8F0F8",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.6,
       scale: 1.1,
     },
   ],
@@ -5755,8 +5993,10 @@ const phoenixFlameVector: PlantVariant = {
         // Small flame tips
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER + 8, 4, 6, 12, -90),
       ],
-      strokeColor: "#F0A850",
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.55,
+      fillColor: "#E8B888", // Peach fill (ember)
+      fillOpacity: 0.4,
       scale: 0.75,
     },
     {
@@ -5772,8 +6012,10 @@ const phoenixFlameVector: PlantVariant = {
         // Flame tips
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER + 6, 6, 8, 16, -90),
       ],
-      strokeColor: "#FCA850",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.5,
       scale: 0.95,
     },
     {
@@ -5793,8 +6035,10 @@ const phoenixFlameVector: PlantVariant = {
         // Inner glow
         vectorStar(VECTOR_CENTER, VECTOR_CENTER - 6, 6, 8, 4, -90),
       ],
-      strokeColor: "#FC9840",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.85,
+      fillColor: "#E89090", // Coral fill
+      fillOpacity: 0.65,
       scale: 1.1,
     },
   ],
@@ -5828,8 +6072,10 @@ const kaleidoscopeStarVector: PlantVariant = {
         // Outer ring
         vectorCircle(VECTOR_CENTER, VECTOR_CENTER, 24),
       ],
-      strokeColor: "#F0C0D0",
-      strokeOpacity: 0.9,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.7,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.5,
       scale: 1.1,
     },
     {
@@ -5847,8 +6093,10 @@ const kaleidoscopeStarVector: PlantVariant = {
         // Radial accents
         ...vectorRadialLines(VECTOR_CENTER, VECTOR_CENTER, 8, 22, 26, 0),
       ],
-      strokeColor: "#D0E0F0",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#C898E8", // Lavender fill
+      fillOpacity: 0.6,
       scale: 1.15,
     },
   ],
@@ -5879,8 +6127,10 @@ const vortexSpiralVector: PlantVariant = {
         vectorLine(VECTOR_CENTER + 4, VECTOR_CENTER, VECTOR_CENTER + 16, VECTOR_CENTER - 8),
         vectorLine(VECTOR_CENTER - 4, VECTOR_CENTER, VECTOR_CENTER - 16, VECTOR_CENTER + 8),
       ],
-      strokeColor: "#9080C0",
-      strokeOpacity: 0.6,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.5,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.35,
       scale: 0.85,
     },
     {
@@ -5895,8 +6145,10 @@ const vortexSpiralVector: PlantVariant = {
         vectorLine(VECTOR_CENTER, VECTOR_CENTER + 3, VECTOR_CENTER + 12, VECTOR_CENTER + 20),
         vectorLine(VECTOR_CENTER, VECTOR_CENTER - 3, VECTOR_CENTER - 12, VECTOR_CENTER - 20),
       ],
-      strokeColor: "#A090D0",
-      strokeOpacity: 0.85,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.75,
+      fillColor: "#90B8E8", // Sky fill
+      fillOpacity: 0.5,
       scale: 1.0,
     },
     {
@@ -5913,8 +6165,10 @@ const vortexSpiralVector: PlantVariant = {
         // Core star
         vectorStar(VECTOR_CENTER, VECTOR_CENTER, 4, 6, 3, 0),
       ],
-      strokeColor: "#C0B0F0",
-      strokeOpacity: 1.0,
+      strokeColor: "#2A2A2A", // Charcoal outline
+      strokeOpacity: 0.9,
+      fillColor: "#C898E8", // Lavender fill for whirl intensity
+      fillOpacity: 0.6,
       scale: 1.05,
     },
   ],

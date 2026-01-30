@@ -30,7 +30,14 @@ body {
 }
 
 body {
-  background-color: #ffffff;
+  /* Subtle radial gradient for depth - lighter center, darker edges
+     Center color matches CANVAS.BACKGROUND_COLOR (#F5F0E8) from constants.ts */
+  background: radial-gradient(
+    ellipse at center,
+    #F8F5EE 0%,
+    #F5F0E8 50%,
+    #EDE8DE 100%
+  );
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

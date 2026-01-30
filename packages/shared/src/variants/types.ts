@@ -254,6 +254,8 @@ export interface VectorCircle {
   cx: number;
   cy: number;
   radius: number;
+  /** Whether this shape should be filled (default true for circles) */
+  fill?: boolean;
 }
 
 export interface VectorLine {
@@ -272,6 +274,8 @@ export interface VectorPolygon {
   radius: number;
   /** Rotation in degrees */
   rotation?: number;
+  /** Whether this shape should be filled (default true for polygons) */
+  fill?: boolean;
 }
 
 export interface VectorStar {
@@ -283,6 +287,8 @@ export interface VectorStar {
   innerRadius: number;
   /** Rotation in degrees */
   rotation?: number;
+  /** Whether this shape should be filled (default true for stars) */
+  fill?: boolean;
 }
 
 export interface VectorDiamond {
@@ -291,6 +297,8 @@ export interface VectorDiamond {
   cy: number;
   width: number;
   height: number;
+  /** Whether this shape should be filled (default true for diamonds) */
+  fill?: boolean;
 }
 
 /**
@@ -342,6 +350,20 @@ export interface VectorKeyframe {
 
   /** Optional transition hints for progressive drawing */
   transitionHint?: VectorTransitionHint;
+
+  // === Fill & Outline Properties (for vector art style) ===
+
+  /** Fill color for closed shapes (hex string, e.g., "#E89090") */
+  fillColor?: string;
+
+  /** Fill opacity (0-1, default 0.8) */
+  fillOpacity?: number;
+
+  /** Stroke/outline width in pixels (default 2) */
+  strokeWidth?: number;
+
+  /** Outline color override (hex string, default "#2A2A2A" charcoal) */
+  outlineColor?: string;
 }
 
 /**
@@ -375,6 +397,20 @@ export interface InterpolatedVectorKeyframe {
    * For lines, this controls how much of the line is drawn.
    */
   drawFractions?: number[];
+
+  // === Fill & Outline Properties ===
+
+  /** Interpolated fill color */
+  fillColor?: string;
+
+  /** Interpolated fill opacity */
+  fillOpacity?: number;
+
+  /** Interpolated stroke width */
+  strokeWidth?: number;
+
+  /** Outline color (usually constant) */
+  outlineColor?: string;
 }
 
 /**
@@ -402,4 +438,18 @@ export interface VectorGlyphSnapshot {
 
   /** Lifecycle progress (0.0 = start, 1.0 = complete) */
   progress: number;
+
+  // === Fill & Outline Properties ===
+
+  /** Fill color for closed shapes */
+  fillColor?: string;
+
+  /** Fill opacity */
+  fillOpacity?: number;
+
+  /** Stroke/outline width in pixels */
+  strokeWidth?: number;
+
+  /** Outline color (charcoal by default) */
+  outlineColor?: string;
 }

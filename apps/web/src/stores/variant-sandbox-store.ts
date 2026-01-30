@@ -7,7 +7,7 @@ import {
 } from "@quantum-garden/shared";
 
 export type PlaybackSpeed = 0.5 | 1 | 2 | 5 | 10;
-export type Background = "white" | "dark" | "checkerboard";
+export type Background = "garden" | "white" | "dark" | "checkerboard";
 export type ViewMode = "gallery" | "detail";
 
 interface VariantSandboxState {
@@ -77,7 +77,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
   currentTime: 0,
 
   scale: 2,
-  background: "dark",
+  background: "garden",
   showGrid: false,
 
   isDirty: false,
@@ -189,7 +189,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       playbackSpeed: 1,
       currentTime: 0,
       scale: 2,
-      background: "dark",
+      background: "garden",
       showGrid: false,
     }),
 

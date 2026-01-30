@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { GlyphKeyframe } from "@quantum-garden/shared";
+import { CANVAS, type GlyphKeyframe } from "@quantum-garden/shared";
 
 interface MiniGlyphProps {
   keyframe: GlyphKeyframe;
@@ -56,7 +56,12 @@ export function MiniGlyph({ keyframe, size = 64, className = "" }: MiniGlyphProp
 
   if (!imageDataUrl) {
     // SSR fallback
-    return <div className={`bg-gray-700 ${className}`} style={{ width: size, height: size }} />;
+    return (
+      <div
+        className={className}
+        style={{ width: size, height: size, backgroundColor: CANVAS.BACKGROUND_COLOR }}
+      />
+    );
   }
 
   return (

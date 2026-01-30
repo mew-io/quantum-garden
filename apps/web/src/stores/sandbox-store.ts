@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type Scale = 8 | 16 | 24 | 32;
 export type VisualState = "superposed" | "collapsed";
-export type Background = "white" | "dark" | "checkerboard";
+export type Background = "garden" | "white" | "dark" | "checkerboard";
 
 interface SandboxState {
   // View settings
@@ -29,7 +29,7 @@ export const useSandboxStore = create<SandboxState>((set) => ({
   // View settings
   scale: 16,
   visualState: "collapsed",
-  background: "white",
+  background: "garden",
   showGrid: false,
 
   // Selection
@@ -47,7 +47,7 @@ export const useSandboxStore = create<SandboxState>((set) => ({
     set({
       scale: 16,
       visualState: "collapsed",
-      background: "white",
+      background: "garden",
       showGrid: false,
       selectedPatternIndex: null,
       selectedPaletteIndex: null,

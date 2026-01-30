@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CANVAS,
   PLANT_VARIANTS,
   isVectorVariant,
   getKeyframeCount,
@@ -74,7 +75,10 @@ export function VariantGallery() {
             >
               <div className="flex gap-4">
                 {/* Preview */}
-                <div className="flex-shrink-0 bg-gray-900 rounded-lg p-2">
+                <div
+                  className="flex-shrink-0 rounded-lg p-2"
+                  style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
+                >
                   {previewKeyframe &&
                     (isVector ? (
                       <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={64} />
@@ -153,7 +157,8 @@ export function VariantGallery() {
                 {keyframeStrip.map((kf, i) => (
                   <div
                     key={i}
-                    className="flex-shrink-0 bg-gray-800 rounded overflow-hidden"
+                    className="flex-shrink-0 rounded overflow-hidden"
+                    style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                     title={`${kf.name} (${kf.duration}s)`}
                   >
                     {isVector ? (
@@ -223,7 +228,10 @@ export function VariantGallery() {
                 >
                   {/* Preview */}
                   <td className="py-3 px-4">
-                    <div className="bg-gray-900 rounded-lg p-1.5 inline-block">
+                    <div
+                      className="rounded-lg p-1.5 inline-block"
+                      style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
+                    >
                       {previewKeyframe &&
                         (isVector ? (
                           <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={48} />
@@ -321,7 +329,8 @@ export function VariantGallery() {
                       {keyframeStrip.map((kf, i) => (
                         <div
                           key={i}
-                          className="flex-shrink-0 bg-gray-800 rounded overflow-hidden"
+                          className="flex-shrink-0 rounded overflow-hidden"
+                          style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                           title={`${kf.name} (${kf.duration}s)`}
                         >
                           {isVector ? (

@@ -1,9 +1,10 @@
 "use client";
 
-import type { GlyphPattern, ColorPalette } from "@quantum-garden/shared";
+import { CANVAS, type GlyphPattern, type ColorPalette } from "@quantum-garden/shared";
 import type { VisualState, Background } from "@/stores/sandbox-store";
 
 const BACKGROUND_COLORS: Record<Background, string> = {
+  garden: CANVAS.BACKGROUND_COLOR,
   white: "#FFFFFF",
   dark: "#1a1a1a",
   checkerboard: "#E0E0E0",

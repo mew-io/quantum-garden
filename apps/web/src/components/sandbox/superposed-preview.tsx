@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import {
+  CANVAS,
   PLANT_VARIANTS,
   computeLifecycleState,
   getEffectivePalette,
@@ -44,8 +45,8 @@ export function SuperposedPreview() {
     canvas.style.height = `${CANVAS_SIZE}px`;
     ctx.scale(dpr, dpr);
 
-    // Draw background
-    ctx.fillStyle = "#1a1a1a";
+    // Draw background (garden color to match actual display)
+    ctx.fillStyle = CANVAS.BACKGROUND_COLOR;
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     const currentTime = currentTimeRef.current;

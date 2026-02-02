@@ -6,10 +6,9 @@ import { useAudio } from "@/lib/audio";
 
 /**
  * Check if debug mode is enabled via environment variable.
- * In production, debug features are hidden by default.
+ * Set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
  */
-const isDebugEnabled =
-  process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false" && process.env.NODE_ENV !== "production";
+const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 
 /**
  * Toolbar - Persistent control bar for the Quantum Garden.

@@ -31,11 +31,10 @@ function formatRelativeTime(timestamp: number | null): string {
 
 /**
  * Check if debug mode is enabled via environment variable.
- * In production, set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
- * Defaults to true in development for convenience.
+ * Set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
+ * Defaults to true (debug toggle always available).
  */
-const isDebugEnabled =
-  process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false" && process.env.NODE_ENV !== "production";
+const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 
 interface DebugPanelProps {
   isOpen?: boolean;

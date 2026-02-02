@@ -16,6 +16,7 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 .env*.local
 
 # Python
@@ -84,3 +85,4 @@ apps/quantum/src/data/variants.json
 *.key
 secrets/
 credentials/
+.vercel

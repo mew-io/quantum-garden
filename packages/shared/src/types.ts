@@ -356,7 +356,12 @@ export interface JobStatsResponse {
 /**
  * Types of quantum events tracked in the event log.
  */
-export type QuantumEventType = "observation" | "germination" | "entanglement" | "wave_germination";
+export type QuantumEventType =
+  | "observation"
+  | "germination"
+  | "entanglement"
+  | "wave_germination"
+  | "death";
 
 /**
  * Circuit types for educational content mapping.

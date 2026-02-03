@@ -39,6 +39,11 @@ const EVENT_CONFIG: Record<
     color: "text-blue-400",
     label: "Wave",
   },
+  death: {
+    icon: <SkullIcon />,
+    color: "text-gray-400",
+    label: "Death",
+  },
 };
 
 /**
@@ -371,6 +376,23 @@ function WaveIcon() {
       <path d="M2 12c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
       <path d="M2 6c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
       <path d="M2 18c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
+    </svg>
+  );
+}
+
+function SkullIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M12 3a8 8 0 0 0-8 8v4a2 2 0 0 0 2 2h1v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v2h2v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v2h1a2 2 0 0 0 2-2v-4a8 8 0 0 0-8-8z" />
+      <circle cx="9" cy="10" r="1" />
+      <circle cx="15" cy="10" r="1" />
     </svg>
   );
 }

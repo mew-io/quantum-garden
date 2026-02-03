@@ -20,6 +20,7 @@ function transformPlant(plant: PrismaPlant): Plant {
     updatedAt: plant.updatedAt,
     variantId: plant.variantId,
     germinatedAt: plant.germinatedAt,
+    diedAt: plant.diedAt,
     lifecycleModifier: plant.lifecycleModifier,
     colorVariationName: plant.colorVariationName,
   };
@@ -32,10 +33,11 @@ function transformPlant(plant: PrismaPlant): Plant {
  */
 export const plantsRouter = router({
   /**
-   * Get all plants in the garden.
+   * Get all plants in the garden (excludes dead plants).
    */
   list: publicProcedure.query(async ({ ctx }) => {
     const plants = await ctx.db.plant.findMany({
+      where: { diedAt: null },
       orderBy: { createdAt: "asc" },
     });
     return plants.map(transformPlant);
@@ -56,23 +58,29 @@ export const plantsRouter = router({
   }),
 
   /**
-   * Get plants by entanglement group.
+   * Get plants by entanglement group (excludes dead plants).
    */
   getByEntanglementGroup: publicProcedure
     .input(z.object({ groupId: z.string() }))
     .query(async ({ ctx, input }) => {
       const plants = await ctx.db.plant.findMany({
-        where: { entanglementGroupId: input.groupId },
+        where: {
+          entanglementGroupId: input.groupId,
+          diedAt: null,
+        },
       });
       return plants.map(transformPlant);
     }),
 
   /**
-   * Get unobserved plants.
+   * Get unobserved plants (excludes dead plants).
    */
   getUnobserved: publicProcedure.query(async ({ ctx }) => {
     const plants = await ctx.db.plant.findMany({
-      where: { observed: false },
+      where: {
+        observed: false,
+        diedAt: null,
+      },
     });
     return plants.map(transformPlant);
   }),

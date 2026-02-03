@@ -58,6 +58,19 @@ export const EVOLUTION_CONFIG = {
 
   /** Minimum dormant plants required for wave events */
   WAVE_MIN_DORMANT_COUNT: 5,
+
+  /** Death system configuration */
+  /** Minimum time a plant must be germinated before it can die */
+  MIN_LIFETIME: 300_000, // 5 minutes
+
+  /** Guaranteed death time - plants older than this always die */
+  GUARANTEED_DEATH_TIME: 1_800_000, // 30 minutes
+
+  /** Base probability of death per check (0-1) */
+  DEATH_CHANCE: 0.05, // 5%
+
+  /** Maximum plants that can die in a single check */
+  MAX_DEATHS_PER_CHECK: 2,
 };
 
 type PlantWithPosition = PrismaPlant & { position: { x: number; y: number } };
@@ -74,6 +87,10 @@ export interface EvolutionResult {
   isWave: boolean;
   /** Plant IDs that germinated */
   germinatedIds: string[];
+  /** Number of plants that died */
+  died: number;
+  /** Plant IDs that died */
+  diedIds: string[];
   /** Current evolution version */
   version: number;
 }
@@ -223,6 +240,55 @@ function selectSpatiallyDistributedPlants(
 }
 
 /**
+ * Check if a plant has lived long enough for guaranteed death.
+ */
+function isGuaranteedDeath(germinatedAt: Date, now: number): boolean {
+  const lifetime = now - germinatedAt.getTime();
+  return lifetime >= EVOLUTION_CONFIG.GUARANTEED_DEATH_TIME;
+}
+
+/**
+ * Calculate age-based death bonus (older plants more likely to die).
+ */
+function getDeathAgeMultiplier(germinatedAt: Date, now: number): number {
+  const age = now - germinatedAt.getTime();
+  if (age < EVOLUTION_CONFIG.MIN_LIFETIME * 2) {
+    return 1.0;
+  }
+  const ageRatio = Math.min(age / EVOLUTION_CONFIG.GUARANTEED_DEATH_TIME, 1);
+  return 1.0 + ageRatio * 3.0; // Up to 4x multiplier for old plants
+}
+
+/**
+ * Calculate death probability for a plant.
+ */
+function getDeathProbability(plant: PlantWithPosition, now: number): number {
+  if (!plant.germinatedAt) {
+    return 0; // Dormant plants don't die
+  }
+
+  const germinatedAt = plant.germinatedAt;
+  const lifetime = now - germinatedAt.getTime();
+
+  // Too young to die
+  if (lifetime < EVOLUTION_CONFIG.MIN_LIFETIME) {
+    return 0;
+  }
+
+  // Guaranteed death after maximum lifetime
+  if (isGuaranteedDeath(germinatedAt, now)) {
+    return 1.0;
+  }
+
+  let probability = EVOLUTION_CONFIG.DEATH_CHANCE;
+
+  // Age weighting (older plants more likely to die)
+  probability *= getDeathAgeMultiplier(germinatedAt, now);
+
+  return Math.min(probability, 1.0);
+}
+
+/**
  * Get or create the garden state singleton.
  */
 async function getOrCreateGardenState(db: PrismaClient) {
@@ -272,12 +338,50 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
   });
 
   if (eligiblePlants.length === 0) {
-    const state = await db.gardenState.findUnique({ where: { id: "singleton" } });
+    // Still process deaths even if no plants to germinate
+    const alivePlants = allPlants.filter((p) => p.germinatedAt && !p.diedAt);
+    const plantsToDie: PlantWithPosition[] = [];
+
+    for (const plant of alivePlants) {
+      if (plantsToDie.length >= EVOLUTION_CONFIG.MAX_DEATHS_PER_CHECK) break;
+
+      const probability = getDeathProbability(plant, now);
+      if (Math.random() < probability) {
+        plantsToDie.push(plant);
+      }
+    }
+
+    // Mark plants as dead
+    const deathTime = new Date();
+    const diedIds: string[] = [];
+
+    for (const plant of plantsToDie) {
+      await db.plant.update({
+        where: { id: plant.id },
+        data: { diedAt: deathTime },
+      });
+      diedIds.push(plant.id);
+    }
+
+    // Update evolution version if deaths occurred
+    let state = await db.gardenState.findUnique({ where: { id: "singleton" } });
+    if (plantsToDie.length > 0) {
+      state = await db.gardenState.update({
+        where: { id: "singleton" },
+        data: {
+          lastEvolutionCheck: deathTime,
+          evolutionVersion: { increment: 1 },
+        },
+      });
+    }
+
     return {
       checked: 0,
       germinated: 0,
       isWave: false,
       germinatedIds: [],
+      died: plantsToDie.length,
+      diedIds,
       version: state?.evolutionVersion ?? 0,
     };
   }
@@ -320,6 +424,31 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
     germinatedIds.push(plant.id);
   }
 
+  // Process plant deaths
+  const alivePlants = allPlants.filter((p) => p.germinatedAt && !p.diedAt);
+  const plantsToDie: PlantWithPosition[] = [];
+
+  for (const plant of alivePlants) {
+    if (plantsToDie.length >= EVOLUTION_CONFIG.MAX_DEATHS_PER_CHECK) break;
+
+    const probability = getDeathProbability(plant, now);
+    if (Math.random() < probability) {
+      plantsToDie.push(plant);
+    }
+  }
+
+  // Mark plants as dead
+  const deathTime = new Date();
+  const diedIds: string[] = [];
+
+  for (const plant of plantsToDie) {
+    await db.plant.update({
+      where: { id: plant.id },
+      data: { diedAt: deathTime },
+    });
+    diedIds.push(plant.id);
+  }
+
   // Update garden state
   const updatedState = await db.gardenState.update({
     where: { id: "singleton" },
@@ -334,6 +463,8 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
     germinated: plantsToGerminate.length,
     isWave,
     germinatedIds,
+    died: plantsToDie.length,
+    diedIds,
     version: updatedState.evolutionVersion,
   };
 }
@@ -345,14 +476,17 @@ export async function getEvolutionState(db: PrismaClient) {
   const state = await getOrCreateGardenState(db);
   const plants = await db.plant.findMany();
 
-  const dormantCount = plants.filter((p) => !p.germinatedAt).length;
-  const germinatedCount = plants.filter((p) => p.germinatedAt).length;
+  const alivePlants = plants.filter((p) => !p.diedAt);
+  const dormantCount = alivePlants.filter((p) => !p.germinatedAt).length;
+  const germinatedCount = alivePlants.filter((p) => p.germinatedAt).length;
+  const deadCount = plants.filter((p) => p.diedAt).length;
 
   return {
     version: state.evolutionVersion,
     lastCheck: state.lastEvolutionCheck,
     dormantCount,
     germinatedCount,
-    totalPlants: plants.length,
+    deadCount,
+    totalPlants: alivePlants.length,
   };
 }

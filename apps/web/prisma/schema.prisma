@@ -28,6 +28,7 @@ model Plant {
   // variantId references PlantVariant.id from TypeScript definitions (not a DB relation)
   variantId           String              @default("simple-bloom")
   germinatedAt        DateTime?           // When lifecycle started (null = seed/dormant)
+  diedAt              DateTime?           // When plant died and was removed from visualization
   lifecycleModifier   Float               @default(1.0) // Speed multiplier from quantum growthRate
   colorVariationName  String?             // Selected color variation for multi-color variants
 

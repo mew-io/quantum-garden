@@ -48,6 +48,8 @@ export interface Plant {
   variantId: string;
   /** When the plant's lifecycle started (null = dormant/seed state) */
   germinatedAt?: Date | null;
+  /** When the plant died and was removed from visualization */
+  diedAt?: Date | null;
   /** Speed multiplier for lifecycle progression (from quantum growthRate) */
   lifecycleModifier: number;
   /** Selected color variation for multi-color variants */

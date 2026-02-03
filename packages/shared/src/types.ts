@@ -170,6 +170,31 @@ export interface EntanglementGroup {
   createdAt: Date;
 }
 
+/**
+ * Comparison of correlated and different traits between entangled plants.
+ * Used for educational UI showing what quantum entanglement affects.
+ */
+export interface TraitComparison {
+  /** Traits that are correlated due to quantum entanglement */
+  correlated: {
+    /** Matching color palette */
+    colorPalette: string[];
+    /** Matching growth rate modifier */
+    growthRate: number;
+    /** Matching opacity */
+    opacity: number;
+    /** Matching glyph pattern (visual pattern hash) */
+    glyphPattern: number[][];
+  };
+  /** Traits that differ between entangled plants */
+  different: {
+    /** Plant species/variant ID */
+    variantId: string;
+    /** Color variation name if applicable */
+    colorVariationName?: string | null;
+  };
+}
+
 // =============================================================================
 // Quantum Circuit Types
 // =============================================================================

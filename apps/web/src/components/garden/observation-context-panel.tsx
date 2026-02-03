@@ -44,7 +44,7 @@ const CIRCUIT_EDUCATION: Record<string, CircuitEducation> = {
     name: "Bell Pair",
     concept: "Two qubits become perfectly correlated",
     explanation:
-      "This plant shared a Bell pair with its partner—observing one instantly revealed the other's form through quantum entanglement, regardless of distance.",
+      "This plant shared a Bell pair with its partner—observing one instantly revealed the other's form through quantum entanglement. Both plants now share correlated quantum properties like color palette, growth rate, and opacity, even though they may be different species. In quantum mechanics, entanglement links measurement outcomes, not physical appearance.",
     diagram: [
       "     ┌───┐     ┌─┐",
       "q₀ ──┤ H ├──●──┤M├",

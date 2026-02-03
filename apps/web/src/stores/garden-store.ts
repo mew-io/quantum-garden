@@ -122,6 +122,11 @@ interface GardenState {
   // Performance monitoring
   performanceStats: PerformanceStats | null;
   setPerformanceStats: (stats: PerformanceStats | null) => void;
+
+  // Entanglement detail panel
+  entanglementRevealedGroupId: string | null;
+  setEntanglementRevealed: (groupId: string | null) => void;
+  getPartnerPlants: (groupId: string) => Plant[] | undefined;
 }
 
 export const useGardenStore = create<GardenState>((set) => ({
@@ -222,4 +227,13 @@ export const useGardenStore = create<GardenState>((set) => ({
   // Performance monitoring
   performanceStats: null,
   setPerformanceStats: (stats) => set({ performanceStats: stats }),
+
+  // Entanglement detail panel
+  entanglementRevealedGroupId: null,
+  setEntanglementRevealed: (groupId: string | null) =>
+    set({ entanglementRevealedGroupId: groupId }),
+  getPartnerPlants: (groupId: string): Plant[] => {
+    const state = useGardenStore.getState();
+    return state.plants.filter((plant: Plant) => plant.entanglementGroupId === groupId);
+  },
 }));

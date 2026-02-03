@@ -23,6 +23,7 @@ export function useObservation() {
   const updatePlant = useGardenStore((state) => state.updatePlant);
   const addNotification = useGardenStore((state) => state.addNotification);
   const setObservationContext = useGardenStore((state) => state.setObservationContext);
+  const setEntanglementRevealed = useGardenStore((state) => state.setEntanglementRevealed);
   const addEvent = useGardenStore((state) => state.addEvent);
   const utils = trpc.useUtils();
 
@@ -80,6 +81,11 @@ export function useObservation() {
         utils.plants.list.invalidate();
         // Show entanglement notification
         addNotification("Entangled plants observed", "entanglement");
+
+        // Show entanglement detail panel
+        if (result.entanglementGroupId) {
+          setEntanglementRevealed(result.entanglementGroupId);
+        }
 
         // Add entanglement correlation event to log
         addEvent({

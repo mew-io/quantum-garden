@@ -8,6 +8,7 @@ import { DebugPanel } from "@/components/garden/debug-panel";
 import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
+import { EntanglementDetailPanel } from "@/components/garden/entanglement-detail-panel";
 import { QuantumEventLog } from "@/components/garden/quantum-event-log";
 import { EventDetailModal } from "@/components/garden/event-detail-modal";
 import { Toolbar } from "@/components/garden/toolbar";
@@ -186,6 +187,7 @@ export default function Home() {
         />
         <EvolutionNotifications />
         <ObservationContextPanel />
+        <EntanglementDetailPanel />
         <QuantumEventLog />
         <EventDetailModal />
         <CooldownIndicator />

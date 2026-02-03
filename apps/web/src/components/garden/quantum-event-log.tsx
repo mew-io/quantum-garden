@@ -42,11 +42,12 @@ const EVENT_CONFIG: Record<
 };
 
 /**
- * Format a timestamp as a relative time string.
+ * Format a timestamp as a relative time string with full timestamp for historical events.
  */
 function formatRelativeTime(timestamp: Date): string {
   const now = new Date();
-  const diff = now.getTime() - new Date(timestamp).getTime();
+  const date = new Date(timestamp);
+  const diff = now.getTime() - date.getTime();
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -55,7 +56,15 @@ function formatRelativeTime(timestamp: Date): string {
   if (seconds < 60) return `${seconds}s ago`;
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  return new Date(timestamp).toLocaleDateString();
+
+  // For historical events, show both date and time
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 /**

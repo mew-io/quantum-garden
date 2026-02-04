@@ -90,12 +90,8 @@ export class PlantInstancer {
   private instancePalette0: Float32Array;
   private instancePalette1: Float32Array;
   private instancePalette2: Float32Array;
-  private instancePrevPalette0: Float32Array;
-  private instancePrevPalette1: Float32Array;
-  private instancePrevPalette2: Float32Array;
   private instanceState: Float32Array;
-  private instanceAnimation: Float32Array;
-  private instanceColorTransition: Float32Array;
+  private instanceAnimation: Float32Array; // shimmerPhase, lifecycleProgress, colorTransition
 
   // Plant tracking
   private plantIndexMap: Map<string, number> = new Map();
@@ -129,12 +125,8 @@ export class PlantInstancer {
     this.instancePalette0 = new Float32Array(MAX_INSTANCES * 3);
     this.instancePalette1 = new Float32Array(MAX_INSTANCES * 3);
     this.instancePalette2 = new Float32Array(MAX_INSTANCES * 3);
-    this.instancePrevPalette0 = new Float32Array(MAX_INSTANCES * 3);
-    this.instancePrevPalette1 = new Float32Array(MAX_INSTANCES * 3);
-    this.instancePrevPalette2 = new Float32Array(MAX_INSTANCES * 3);
     this.instanceState = new Float32Array(MAX_INSTANCES * 4);
-    this.instanceAnimation = new Float32Array(MAX_INSTANCES * 2);
-    this.instanceColorTransition = new Float32Array(MAX_INSTANCES); // stores color transition progress (0-1)
+    this.instanceAnimation = new Float32Array(MAX_INSTANCES * 3); // shimmerPhase, lifecycleProgress, colorTransition
 
     // Create InstancedMesh
     this.mesh = new THREE.InstancedMesh(geometry, this.material, MAX_INSTANCES);
@@ -170,28 +162,12 @@ export class PlantInstancer {
       new THREE.InstancedBufferAttribute(this.instancePalette2, 3)
     );
     geometry.setAttribute(
-      "instancePrevPalette0",
-      new THREE.InstancedBufferAttribute(this.instancePrevPalette0, 3)
-    );
-    geometry.setAttribute(
-      "instancePrevPalette1",
-      new THREE.InstancedBufferAttribute(this.instancePrevPalette1, 3)
-    );
-    geometry.setAttribute(
-      "instancePrevPalette2",
-      new THREE.InstancedBufferAttribute(this.instancePrevPalette2, 3)
-    );
-    geometry.setAttribute(
       "instanceState",
       new THREE.InstancedBufferAttribute(this.instanceState, 4)
     );
     geometry.setAttribute(
       "instanceAnimation",
-      new THREE.InstancedBufferAttribute(this.instanceAnimation, 2)
-    );
-    geometry.setAttribute(
-      "instanceColorTransition",
-      new THREE.InstancedBufferAttribute(this.instanceColorTransition, 1)
+      new THREE.InstancedBufferAttribute(this.instanceAnimation, 3) // shimmerPhase, lifecycleProgress, colorTransition
     );
 
     // Initialize instance count
@@ -447,17 +423,8 @@ export class PlantInstancer {
     this.instanceUVBounds[uvBase + 2] = atlasEntry.uvBounds[2];
     this.instanceUVBounds[uvBase + 3] = atlasEntry.uvBounds[3];
 
-    // Handle color transitions
-    if (animState.isColorTransitioning && animState.colorTransitionProgress === 0) {
-      // Starting a new color transition - copy current colors to previous
-      this.copyPaletteToPrevious(index);
-    }
-
     // Set palette colors (convert hex to RGB 0-1 range)
     this.setPaletteColors(index, palette);
-
-    // Set color transition progress
-    this.instanceColorTransition[index] = animState.colorTransitionProgress;
 
     // Set state (opacity, scale, visualState, transitionProgress)
     const stateBase = index * 4;
@@ -478,10 +445,11 @@ export class PlantInstancer {
       lifecycleProgress = lifecycleState.totalProgress;
     }
 
-    // Set animation (shimmerPhase, lifecycleProgress)
-    const animBase = index * 2;
+    // Set animation (shimmerPhase, lifecycleProgress, colorTransition)
+    const animBase = index * 3;
     this.instanceAnimation[animBase] = animState.shimmerPhase;
     this.instanceAnimation[animBase + 1] = lifecycleProgress;
+    this.instanceAnimation[animBase + 2] = animState.colorTransitionProgress;
   }
 
   /**
@@ -602,28 +570,6 @@ export class PlantInstancer {
     this.instancePalette2[p2Base] = color2.r;
     this.instancePalette2[p2Base + 1] = color2.g;
     this.instancePalette2[p2Base + 2] = color2.b;
-  }
-
-  /**
-   * Copy current palette colors to previous palette (for color transitions).
-   */
-  private copyPaletteToPrevious(index: number): void {
-    const pBase = index * 3;
-
-    // Copy palette0 to prevPalette0
-    this.instancePrevPalette0[pBase] = this.instancePalette0[pBase]!;
-    this.instancePrevPalette0[pBase + 1] = this.instancePalette0[pBase + 1]!;
-    this.instancePrevPalette0[pBase + 2] = this.instancePalette0[pBase + 2]!;
-
-    // Copy palette1 to prevPalette1
-    this.instancePrevPalette1[pBase] = this.instancePalette1[pBase]!;
-    this.instancePrevPalette1[pBase + 1] = this.instancePalette1[pBase + 1]!;
-    this.instancePrevPalette1[pBase + 2] = this.instancePalette1[pBase + 2]!;
-
-    // Copy palette2 to prevPalette2
-    this.instancePrevPalette2[pBase] = this.instancePalette2[pBase]!;
-    this.instancePrevPalette2[pBase + 1] = this.instancePalette2[pBase + 1]!;
-    this.instancePrevPalette2[pBase + 2] = this.instancePalette2[pBase + 2]!;
   }
 
   /**
@@ -753,12 +699,8 @@ export class PlantInstancer {
       "instancePalette0",
       "instancePalette1",
       "instancePalette2",
-      "instancePrevPalette0",
-      "instancePrevPalette1",
-      "instancePrevPalette2",
       "instanceState",
       "instanceAnimation",
-      "instanceColorTransition",
     ];
     for (const name of attrs) {
       const attr = geometry.getAttribute(name) as THREE.BufferAttribute;
@@ -783,12 +725,8 @@ export class PlantInstancer {
       { name: "instancePalette0", itemSize: 3 },
       { name: "instancePalette1", itemSize: 3 },
       { name: "instancePalette2", itemSize: 3 },
-      { name: "instancePrevPalette0", itemSize: 3 },
-      { name: "instancePrevPalette1", itemSize: 3 },
-      { name: "instancePrevPalette2", itemSize: 3 },
       { name: "instanceState", itemSize: 4 },
-      { name: "instanceAnimation", itemSize: 2 },
-      { name: "instanceColorTransition", itemSize: 1 },
+      { name: "instanceAnimation", itemSize: 3 },
     ];
 
     for (const { name, itemSize } of attrConfigs) {

@@ -26,12 +26,8 @@ const vertexShader = /* glsl */ `
   attribute vec3 instancePalette0;     // First palette color (RGB)
   attribute vec3 instancePalette1;     // Second palette color (RGB)
   attribute vec3 instancePalette2;     // Third palette color (RGB)
-  attribute vec3 instancePrevPalette0; // Previous palette color 0 (for transitions)
-  attribute vec3 instancePrevPalette1; // Previous palette color 1 (for transitions)
-  attribute vec3 instancePrevPalette2; // Previous palette color 2 (for transitions)
   attribute vec4 instanceState;        // opacity, scale, visualState (0=superposed, 1=collapsed), transitionProgress
-  attribute vec2 instanceAnimation;    // shimmerPhase, lifecycleProgress
-  attribute float instanceColorTransition; // color transition progress (0-1)
+  attribute vec3 instanceAnimation;    // shimmerPhase, lifecycleProgress, colorTransition
 
   // Uniforms
   uniform float u_time;
@@ -43,9 +39,6 @@ const vertexShader = /* glsl */ `
   varying vec3 v_palette0;
   varying vec3 v_palette1;
   varying vec3 v_palette2;
-  varying vec3 v_prevPalette0;
-  varying vec3 v_prevPalette1;
-  varying vec3 v_prevPalette2;
   varying float v_colorTransition;
   varying float v_opacity;
   varying float v_visualState;
@@ -59,10 +52,7 @@ const vertexShader = /* glsl */ `
     v_palette0 = instancePalette0;
     v_palette1 = instancePalette1;
     v_palette2 = instancePalette2;
-    v_prevPalette0 = instancePrevPalette0;
-    v_prevPalette1 = instancePrevPalette1;
-    v_prevPalette2 = instancePrevPalette2;
-    v_colorTransition = instanceColorTransition;
+    v_colorTransition = instanceAnimation.z;
     v_opacity = instanceState.x;
     float baseScale = instanceState.y;
     v_visualState = instanceState.z;
@@ -145,9 +135,6 @@ const fragmentShader = /* glsl */ `
   varying vec3 v_palette0;
   varying vec3 v_palette1;
   varying vec3 v_palette2;
-  varying vec3 v_prevPalette0;
-  varying vec3 v_prevPalette1;
-  varying vec3 v_prevPalette2;
   varying float v_colorTransition;
   varying float v_opacity;
   varying float v_visualState;
@@ -207,21 +194,27 @@ const fragmentShader = /* glsl */ `
       color = mix(v_palette1, v_palette2, (paletteT - 0.5) * 2.0);
     }
 
-    // Apply color transition blending if transitioning
+    // Apply color transition with saturation fade if transitioning
     if (v_colorTransition > 0.0 && v_colorTransition < 1.0) {
-      // Calculate color from previous palette
-      vec3 prevColor;
-      if (paletteT < 0.5) {
-        prevColor = mix(v_prevPalette0, v_prevPalette1, paletteT * 2.0);
-      } else {
-        prevColor = mix(v_prevPalette1, v_prevPalette2, (paletteT - 0.5) * 2.0);
-      }
-
       // Apply smooth easing to transition progress
       float easedTransition = easeInOutCubic(v_colorTransition);
 
-      // Blend between previous and current color
-      color = mix(prevColor, color, easedTransition);
+      // Convert to HSV for saturation control
+      vec3 hsv = rgb2hsv(color);
+
+      // Desaturate in first half (0-0.5), saturate in second half (0.5-1.0)
+      // Creates a smooth fade through desaturated colors
+      float saturationMultiplier;
+      if (easedTransition < 0.5) {
+        // Fade out saturation: 1.0 -> 0.3
+        saturationMultiplier = mix(1.0, 0.3, easedTransition * 2.0);
+      } else {
+        // Fade in saturation: 0.3 -> 1.0
+        saturationMultiplier = mix(0.3, 1.0, (easedTransition - 0.5) * 2.0);
+      }
+
+      hsv.y *= saturationMultiplier;
+      color = hsv2rgb(hsv);
     }
 
     // Calculate final opacity based on visual state

@@ -2785,6 +2785,13 @@ const softMoss: PlantVariant = {
   requiresObservationToGerminate: false, // Grows without observation
   renderMode: "vector",
   tweenBetweenKeyframes: true,
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 180,
+    clusterBonus: 2.5,
+    maxClusterDensity: 6,
+    reseedClusterChance: 0.8,
+  },
   keyframes: [],
   vectorKeyframes: [
     {
@@ -2850,6 +2857,13 @@ const pebblePatch: PlantVariant = {
   requiresObservationToGerminate: false,
   renderMode: "vector",
   tweenBetweenKeyframes: false,
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 120,
+    clusterBonus: 2.0,
+    maxClusterDensity: 8,
+    reseedClusterChance: 0.7,
+  },
   keyframes: [],
   vectorKeyframes: [
     {
@@ -2897,6 +2911,13 @@ const meadowTuft: PlantVariant = {
   renderMode: "vector",
   loop: true,
   tweenBetweenKeyframes: true,
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 150,
+    clusterBonus: 1.5,
+    maxClusterDensity: 4,
+    reseedClusterChance: 0.5,
+  },
   keyframes: [],
   vectorKeyframes: [
     {

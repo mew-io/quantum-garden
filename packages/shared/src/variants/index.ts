@@ -29,6 +29,8 @@ export type {
   VectorTransitionHint,
   EasingType,
   TransitionStrategy,
+  // Clustering behavior
+  ClusteringBehavior,
 } from "./types";
 
 // Lifecycle computation

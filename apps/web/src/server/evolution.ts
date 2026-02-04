@@ -13,6 +13,12 @@
  */
 
 import type { PrismaClient, Plant as PrismaPlant } from "@prisma/client";
+import {
+  getVariantById,
+  PLANT_VARIANTS,
+  type ClusteringBehavior,
+  type PlantVariant,
+} from "@quantum-garden/shared";
 
 /** Evolution timing constants (in milliseconds) */
 export const EVOLUTION_CONFIG = {
@@ -134,6 +140,7 @@ function hasObservedNeighbors(
 
 /**
  * Check if a plant is in a crowded area (clustering prevention).
+ * Used for spread-mode plants only.
  */
 function isInCluster(
   plantPosition: { x: number; y: number },
@@ -144,6 +151,90 @@ function isInCluster(
       p.germinatedAt && getDistance(plantPosition, p.position) <= EVOLUTION_CONFIG.CLUSTERING_RADIUS
   );
   return nearbyGerminated.length >= EVOLUTION_CONFIG.CLUSTERING_THRESHOLD;
+}
+
+/** Default clustering behavior for variants without explicit config */
+const DEFAULT_CLUSTERING_BEHAVIOR: ClusteringBehavior = {
+  mode: "spread",
+  clusterRadius: EVOLUTION_CONFIG.CLUSTERING_RADIUS,
+  clusterBonus: 1.0,
+  maxClusterDensity: 3,
+  reseedClusterChance: 0,
+};
+
+/**
+ * Get clustering behavior for a plant variant.
+ */
+function getClusteringBehavior(variantId: string): ClusteringBehavior {
+  const variant = getVariantById(variantId);
+  if (!variant?.clusteringBehavior) {
+    return DEFAULT_CLUSTERING_BEHAVIOR;
+  }
+  return {
+    ...DEFAULT_CLUSTERING_BEHAVIOR,
+    ...variant.clusteringBehavior,
+  };
+}
+
+/**
+ * Count germinated plants of the same variant within a radius.
+ */
+function countSameTypeNeighbors(
+  plantPosition: { x: number; y: number },
+  variantId: string,
+  allPlants: PlantWithPosition[],
+  radius: number
+): number {
+  return allPlants.filter(
+    (p) =>
+      p.variantId === variantId &&
+      p.germinatedAt &&
+      getDistance(plantPosition, p.position) <= radius
+  ).length;
+}
+
+/**
+ * Evaluate clustering rules for a plant.
+ * Returns { shouldPrevent: boolean, clusterBonus: number }
+ * - For 'spread' mode: prevents germination in dense areas
+ * - For 'cluster' mode: provides bonus near same-type plants
+ */
+function evaluateClusteringRules(
+  plant: PlantWithPosition,
+  allPlants: PlantWithPosition[]
+): { shouldPrevent: boolean; clusterBonus: number } {
+  const behavior = getClusteringBehavior(plant.variantId);
+  const radius = behavior.clusterRadius ?? EVOLUTION_CONFIG.CLUSTERING_RADIUS;
+
+  if (behavior.mode === "cluster") {
+    // Clustering mode: bonus for same-type neighbors, no prevention
+    const sameTypeCount = countSameTypeNeighbors(
+      plant.position,
+      plant.variantId,
+      allPlants,
+      radius
+    );
+
+    // Calculate bonus that scales with neighbor count up to maxClusterDensity
+    const maxDensity = behavior.maxClusterDensity ?? 5;
+    const effectiveCount = Math.min(sameTypeCount, maxDensity);
+    const bonusMultiplier = behavior.clusterBonus ?? 2.0;
+
+    // Bonus scales from 1.0 (no neighbors) to clusterBonus (at max density)
+    const bonus =
+      effectiveCount > 0 ? 1 + (effectiveCount / maxDensity) * (bonusMultiplier - 1) : 1.0;
+
+    return { shouldPrevent: false, clusterBonus: bonus };
+  }
+
+  if (behavior.mode === "neutral") {
+    // Neutral mode: no spatial rules
+    return { shouldPrevent: false, clusterBonus: 1.0 };
+  }
+
+  // Spread mode (default): prevent germination in dense areas
+  const shouldPrevent = isInCluster(plant.position, allPlants);
+  return { shouldPrevent, clusterBonus: 1.0 };
 }
 
 /**
@@ -176,19 +267,24 @@ function getGerminationProbability(
 ): number {
   const dormantSince = plant.createdAt;
 
-  // Guaranteed germination after 15 minutes (takes priority over clustering)
+  // Guaranteed germination after threshold (takes priority over everything)
   if (isGuaranteedGermination(dormantSince, now)) {
     return 1.0;
   }
 
-  // Clustering prevention: 0% chance in crowded areas
-  if (isInCluster(plant.position, allPlants)) {
+  // Evaluate clustering rules (different behavior for cluster vs spread mode)
+  const { shouldPrevent, clusterBonus } = evaluateClusteringRules(plant, allPlants);
+
+  if (shouldPrevent) {
     return 0;
   }
 
   let probability = EVOLUTION_CONFIG.GERMINATION_CHANCE;
 
-  // Proximity bonus near observed plants
+  // Apply clustering bonus (for cluster-mode plants)
+  probability *= clusterBonus;
+
+  // Proximity bonus near observed plants (applies to all plant types)
   if (hasObservedNeighbors(plant.position, allPlants)) {
     probability *= EVOLUTION_CONFIG.PROXIMITY_MULTIPLIER;
   }
@@ -239,6 +335,72 @@ function selectSpatiallyDistributedPlants(
       selected.push(bestCandidate);
     } else {
       break;
+    }
+  }
+
+  return selected;
+}
+
+/**
+ * Select plants for wave germination with mode-aware spatial distribution.
+ * - Cluster-mode plants: grouped together (nearby same-type)
+ * - Spread-mode plants: distributed apart
+ */
+function selectWavePlantsWithClustering(
+  candidates: PlantWithPosition[],
+  count: number
+): PlantWithPosition[] {
+  if (candidates.length <= count) {
+    return candidates;
+  }
+
+  // Separate candidates by clustering mode
+  const clusterCandidates = candidates.filter(
+    (p) => getClusteringBehavior(p.variantId).mode === "cluster"
+  );
+  const spreadCandidates = candidates.filter(
+    (p) => getClusteringBehavior(p.variantId).mode !== "cluster"
+  );
+
+  const selected: PlantWithPosition[] = [];
+
+  // For cluster-mode plants: select groups of same-type plants nearby each other
+  if (clusterCandidates.length > 0) {
+    // Pick a random cluster candidate as seed
+    const seedIndex = Math.floor(Math.random() * clusterCandidates.length);
+    const seed = clusterCandidates[seedIndex]!;
+    selected.push(seed);
+
+    // Add nearby same-type candidates
+    const sameTypeCandidates = clusterCandidates.filter(
+      (c) => c.variantId === seed.variantId && c !== seed
+    );
+    const sorted = sameTypeCandidates.sort(
+      (a, b) => getDistance(seed.position, a.position) - getDistance(seed.position, b.position)
+    );
+
+    // Add up to half the wave count from same-type neighbors
+    const clusterSlots = Math.floor(count / 2);
+    for (const candidate of sorted.slice(0, clusterSlots)) {
+      if (selected.length < count) {
+        selected.push(candidate);
+      }
+    }
+  }
+
+  // Fill remaining slots with spatially distributed spread-mode plants
+  const remainingCount = count - selected.length;
+  if (remainingCount > 0 && spreadCandidates.length > 0) {
+    const distributed = selectSpatiallyDistributedPlants(spreadCandidates, remainingCount);
+    selected.push(...distributed);
+  }
+
+  // If we still need more, add any remaining candidates
+  if (selected.length < count) {
+    const remaining = candidates.filter((c) => !selected.includes(c));
+    for (const candidate of remaining) {
+      if (selected.length >= count) break;
+      selected.push(candidate);
     }
   }
 
@@ -402,9 +564,9 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
       )
     : EVOLUTION_CONFIG.MAX_GERMINATIONS_PER_CHECK;
 
-  // For wave events, select spatially-distributed plants
+  // For wave events, select plants with cluster-aware distribution
   const plantsToProcess = isWave
-    ? selectSpatiallyDistributedPlants(eligiblePlants, maxGerminations)
+    ? selectWavePlantsWithClustering(eligiblePlants, maxGerminations)
     : eligiblePlants;
 
   // Determine which plants will germinate
@@ -461,23 +623,68 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
     const plantsNeeded = EVOLUTION_CONFIG.RESEED_COUNT;
     const canvasWidth = 1200;
     const canvasHeight = 800;
+    const margin = 50;
+
+    // Helper to select variant using rarity weights
+    const selectVariantByRarity = (): PlantVariant => {
+      const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
+      let random = Math.random() * totalWeight;
+
+      for (const variant of PLANT_VARIANTS) {
+        random -= variant.rarity;
+        if (random <= 0) {
+          return variant;
+        }
+      }
+      return PLANT_VARIANTS[0]!;
+    };
 
     for (let i = 0; i < plantsNeeded; i++) {
-      // Create new dormant plants with random positions
-      const position = {
-        x: Math.random() * canvasWidth,
-        y: Math.random() * canvasHeight,
-      };
+      // Select variant using rarity weights
+      const variant = selectVariantByRarity();
+      const variantId = variant.id;
+      const behavior = getClusteringBehavior(variantId);
 
-      // Simple variant selection (could be more sophisticated)
-      const variants = [
-        "simple-bloom",
-        "soft-moss",
-        "meadow-tuft",
-        "quantum-tulip",
-        "nebula-bloom",
-      ];
-      const variantId = variants[Math.floor(Math.random() * variants.length)]!;
+      let position: { x: number; y: number };
+
+      // For cluster-mode plants, try to spawn near existing same-type plants
+      if (behavior.mode === "cluster" && Math.random() < (behavior.reseedClusterChance ?? 0.5)) {
+        const existingSameType = aliveAfterDeaths.filter(
+          (p) => p.variantId === variantId && p.germinatedAt
+        );
+
+        if (existingSameType.length > 0) {
+          // Pick a random existing plant of same type as anchor
+          const anchor = existingSameType[Math.floor(Math.random() * existingSameType.length)]!;
+          const radius = behavior.clusterRadius ?? 150;
+
+          // Spawn within cluster radius with some randomness
+          const angle = Math.random() * Math.PI * 2;
+          const distance = 30 + Math.random() * (radius - 30); // At least 30px away
+          position = {
+            x: Math.max(
+              margin,
+              Math.min(canvasWidth - margin, anchor.positionX + Math.cos(angle) * distance)
+            ),
+            y: Math.max(
+              margin,
+              Math.min(canvasHeight - margin, anchor.positionY + Math.sin(angle) * distance)
+            ),
+          };
+        } else {
+          // No existing same-type, use random position
+          position = {
+            x: margin + Math.random() * (canvasWidth - 2 * margin),
+            y: margin + Math.random() * (canvasHeight - 2 * margin),
+          };
+        }
+      } else {
+        // Spread mode or random: use distributed positioning
+        position = {
+          x: margin + Math.random() * (canvasWidth - 2 * margin),
+          y: margin + Math.random() * (canvasHeight - 2 * margin),
+        };
+      }
 
       await db.plant.create({
         data: {

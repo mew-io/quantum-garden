@@ -119,6 +119,55 @@ export interface PlantVariant {
    * If false (default), stay on last keyframe when lifecycle completes.
    */
   loop?: boolean;
+
+  /**
+   * Clustering behavior configuration.
+   * Controls how this plant type interacts with spatial proximity rules during germination.
+   */
+  clusteringBehavior?: ClusteringBehavior;
+}
+
+/**
+ * Clustering behavior configuration for plant variants.
+ *
+ * Some plants (like moss, pebbles) naturally grow in clusters,
+ * while others (like flowers, trees) spread out.
+ */
+export interface ClusteringBehavior {
+  /**
+   * How this plant type handles spatial proximity.
+   * - 'cluster': Gains germination bonus near same-type plants
+   * - 'spread': Prevented from germinating in dense areas (default)
+   * - 'neutral': No spatial preference
+   */
+  mode: "cluster" | "spread" | "neutral";
+
+  /**
+   * Radius in pixels to check for same-type neighbors.
+   * Default: 150 (same as CLUSTERING_RADIUS)
+   */
+  clusterRadius?: number;
+
+  /**
+   * Germination bonus multiplier when near same-type germinated plants.
+   * E.g., 2.0 = 2x chance when near same-type neighbors.
+   * Only applies when mode is 'cluster'.
+   */
+  clusterBonus?: number;
+
+  /**
+   * Maximum cluster density before clustering bonus stops.
+   * Prevents infinite growth in one spot.
+   * E.g., 6 = stop bonus after 6 neighbors within radius.
+   */
+  maxClusterDensity?: number;
+
+  /**
+   * For auto-reseeding: probability of spawning near existing same-type plant.
+   * 0.0 = always random position, 1.0 = always try to cluster.
+   * Only applies when mode is 'cluster'.
+   */
+  reseedClusterChance?: number;
 }
 
 /**

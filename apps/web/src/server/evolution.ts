@@ -23,13 +23,13 @@ export const EVOLUTION_CONFIG = {
   MIN_DORMANCY: 60_000, // 1 minute
 
   /** Guaranteed germination time - plants dormant this long always germinate */
-  GUARANTEED_GERMINATION_TIME: 900_000, // 15 minutes
+  GUARANTEED_GERMINATION_TIME: 600_000, // 10 minutes (reduced from 15)
 
   /** Base probability of germination per check (0-1) */
-  GERMINATION_CHANCE: 0.15, // 15%
+  GERMINATION_CHANCE: 0.25, // 25% (increased from 15%)
 
   /** Maximum plants that can germinate in a single check (except during waves) */
-  MAX_GERMINATIONS_PER_CHECK: 1,
+  MAX_GERMINATIONS_PER_CHECK: 2, // increased from 1
 
   /** Distance threshold for proximity bonus (pixels) */
   PROXIMITY_RADIUS: 200,
@@ -50,7 +50,7 @@ export const EVOLUTION_CONFIG = {
   MAX_AGE_MULTIPLIER: 2.5,
 
   /** Wave germination probability (0-1) */
-  WAVE_CHANCE: 0.05, // 5% chance per check
+  WAVE_CHANCE: 0.08, // 8% chance per check (increased from 5%)
 
   /** Wave germination count range */
   WAVE_MIN_COUNT: 3,
@@ -61,16 +61,22 @@ export const EVOLUTION_CONFIG = {
 
   /** Death system configuration */
   /** Minimum time a plant must be germinated before it can die */
-  MIN_LIFETIME: 300_000, // 5 minutes
+  MIN_LIFETIME: 1_800_000, // 30 minutes (increased from 5 minutes)
 
   /** Guaranteed death time - plants older than this always die */
-  GUARANTEED_DEATH_TIME: 1_800_000, // 30 minutes
+  GUARANTEED_DEATH_TIME: 7_200_000, // 2 hours (increased from 30 minutes)
 
   /** Base probability of death per check (0-1) */
-  DEATH_CHANCE: 0.05, // 5%
+  DEATH_CHANCE: 0.02, // 2% (reduced from 5%)
 
   /** Maximum plants that can die in a single check */
-  MAX_DEATHS_PER_CHECK: 2,
+  MAX_DEATHS_PER_CHECK: 1, // reduced from 2
+
+  /** Minimum alive plants before auto-reseeding triggers */
+  MIN_POPULATION: 15,
+
+  /** Number of new plants to spawn when auto-reseeding */
+  RESEED_COUNT: 10,
 };
 
 type PlantWithPosition = PrismaPlant & { position: { x: number; y: number } };
@@ -170,14 +176,14 @@ function getGerminationProbability(
 ): number {
   const dormantSince = plant.createdAt;
 
+  // Guaranteed germination after 15 minutes (takes priority over clustering)
+  if (isGuaranteedGermination(dormantSince, now)) {
+    return 1.0;
+  }
+
   // Clustering prevention: 0% chance in crowded areas
   if (isInCluster(plant.position, allPlants)) {
     return 0;
-  }
-
-  // Guaranteed germination after 15 minutes
-  if (isGuaranteedGermination(dormantSince, now)) {
-    return 1.0;
   }
 
   let probability = EVOLUTION_CONFIG.GERMINATION_CHANCE;
@@ -447,6 +453,44 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
       data: { diedAt: deathTime },
     });
     diedIds.push(plant.id);
+  }
+
+  // Auto-reseed if population is too low
+  const aliveAfterDeaths = allPlants.filter((p) => !p.diedAt && !diedIds.includes(p.id));
+  if (aliveAfterDeaths.length < EVOLUTION_CONFIG.MIN_POPULATION) {
+    const plantsNeeded = EVOLUTION_CONFIG.RESEED_COUNT;
+    const canvasWidth = 1200;
+    const canvasHeight = 800;
+
+    for (let i = 0; i < plantsNeeded; i++) {
+      // Create new dormant plants with random positions
+      const position = {
+        x: Math.random() * canvasWidth,
+        y: Math.random() * canvasHeight,
+      };
+
+      // Simple variant selection (could be more sophisticated)
+      const variants = [
+        "simple-bloom",
+        "soft-moss",
+        "meadow-tuft",
+        "quantum-tulip",
+        "nebula-bloom",
+      ];
+      const variantId = variants[Math.floor(Math.random() * variants.length)]!;
+
+      await db.plant.create({
+        data: {
+          positionX: position.x,
+          positionY: position.y,
+          observed: false,
+          visualState: "superposed",
+          quantumCircuitId: "placeholder",
+          variantId,
+          lifecycleModifier: 0.8 + Math.random() * 0.4, // 0.8-1.2 range
+        },
+      });
+    }
   }
 
   // Update garden state

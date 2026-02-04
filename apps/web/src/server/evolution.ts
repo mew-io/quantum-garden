@@ -625,6 +625,21 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
     const canvasHeight = 800;
     const margin = 50;
 
+    // Get or create a quantum record for new plants
+    let quantumRecord = await db.quantumRecord.findFirst();
+    if (!quantumRecord) {
+      quantumRecord = await db.quantumRecord.create({
+        data: {
+          circuitId: "superposition",
+          circuitDefinition: { type: "placeholder", gates: [] },
+          status: "completed",
+          measurements: [0, 1],
+          probabilities: [0.5, 0.5],
+        },
+      });
+    }
+    const quantumCircuitId = quantumRecord.id;
+
     // Helper to select variant using rarity weights
     const selectVariantByRarity = (): PlantVariant => {
       const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
@@ -692,7 +707,7 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
           positionY: position.y,
           observed: false,
           visualState: "superposed",
-          quantumCircuitId: "placeholder",
+          quantumCircuitId,
           variantId,
           lifecycleModifier: 0.8 + Math.random() * 0.4, // 0.8-1.2 range
         },

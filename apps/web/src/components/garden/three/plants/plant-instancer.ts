@@ -66,6 +66,11 @@ interface PlantAnimationState {
   transitionStartTime: number;
   previousVisualState: "superposed" | "collapsed";
   shimmerPhase: number;
+  // Color transition fields
+  isColorTransitioning: boolean;
+  colorTransitionProgress: number;
+  colorTransitionStartTime: number;
+  previousPalette: string[] | null;
 }
 
 /**
@@ -85,8 +90,12 @@ export class PlantInstancer {
   private instancePalette0: Float32Array;
   private instancePalette1: Float32Array;
   private instancePalette2: Float32Array;
+  private instancePrevPalette0: Float32Array;
+  private instancePrevPalette1: Float32Array;
+  private instancePrevPalette2: Float32Array;
   private instanceState: Float32Array;
   private instanceAnimation: Float32Array;
+  private instanceColorTransition: Float32Array;
 
   // Plant tracking
   private plantIndexMap: Map<string, number> = new Map();
@@ -103,6 +112,7 @@ export class PlantInstancer {
 
   // Transition timing
   private static COLLAPSE_DURATION = 1.5; // seconds
+  private static COLOR_TRANSITION_DURATION = 0.8; // seconds
 
   constructor() {
     this.atlas = getTextureAtlas();
@@ -119,8 +129,12 @@ export class PlantInstancer {
     this.instancePalette0 = new Float32Array(MAX_INSTANCES * 3);
     this.instancePalette1 = new Float32Array(MAX_INSTANCES * 3);
     this.instancePalette2 = new Float32Array(MAX_INSTANCES * 3);
+    this.instancePrevPalette0 = new Float32Array(MAX_INSTANCES * 3);
+    this.instancePrevPalette1 = new Float32Array(MAX_INSTANCES * 3);
+    this.instancePrevPalette2 = new Float32Array(MAX_INSTANCES * 3);
     this.instanceState = new Float32Array(MAX_INSTANCES * 4);
     this.instanceAnimation = new Float32Array(MAX_INSTANCES * 2);
+    this.instanceColorTransition = new Float32Array(MAX_INSTANCES); // stores color transition progress (0-1)
 
     // Create InstancedMesh
     this.mesh = new THREE.InstancedMesh(geometry, this.material, MAX_INSTANCES);
@@ -156,12 +170,28 @@ export class PlantInstancer {
       new THREE.InstancedBufferAttribute(this.instancePalette2, 3)
     );
     geometry.setAttribute(
+      "instancePrevPalette0",
+      new THREE.InstancedBufferAttribute(this.instancePrevPalette0, 3)
+    );
+    geometry.setAttribute(
+      "instancePrevPalette1",
+      new THREE.InstancedBufferAttribute(this.instancePrevPalette1, 3)
+    );
+    geometry.setAttribute(
+      "instancePrevPalette2",
+      new THREE.InstancedBufferAttribute(this.instancePrevPalette2, 3)
+    );
+    geometry.setAttribute(
       "instanceState",
       new THREE.InstancedBufferAttribute(this.instanceState, 4)
     );
     geometry.setAttribute(
       "instanceAnimation",
       new THREE.InstancedBufferAttribute(this.instanceAnimation, 2)
+    );
+    geometry.setAttribute(
+      "instanceColorTransition",
+      new THREE.InstancedBufferAttribute(this.instanceColorTransition, 1)
     );
 
     // Initialize instance count
@@ -235,6 +265,10 @@ export class PlantInstancer {
           transitionStartTime: 0,
           previousVisualState: plant.visualState,
           shimmerPhase: this.generateShimmerPhase(plant.id),
+          isColorTransitioning: false,
+          colorTransitionProgress: 0,
+          colorTransitionStartTime: 0,
+          previousPalette: null,
         });
       }
 
@@ -269,6 +303,54 @@ export class PlantInstancer {
         animState.transitionProgress = Math.min(1, elapsed / PlantInstancer.COLLAPSE_DURATION);
         if (animState.transitionProgress >= 1) {
           animState.isTransitioning = false;
+        }
+        this.dirtyInstances.add(instanceIndex);
+      }
+
+      // Detect palette changes and trigger color transitions
+      const variant = getVariantById(plant.variantId);
+      if (variant && plant.germinatedAt) {
+        const plantWithLifecycle = {
+          ...plant,
+          germinatedAt: plant.germinatedAt,
+          colorVariationName: plant.colorVariationName ?? null,
+        };
+        const state = computeLifecycleState(plantWithLifecycle, variant, now);
+        const currentPalette = getEffectivePalette(
+          state.currentKeyframe,
+          variant,
+          plant.colorVariationName ?? null
+        );
+        const currentPaletteKey = currentPalette.join("|");
+        const previousPaletteKey = animState.previousPalette?.join("|");
+
+        if (previousPaletteKey && currentPaletteKey !== previousPaletteKey) {
+          // Palette changed - start color transition
+          if (reducedMotion) {
+            // Instant transition for reduced motion
+            animState.isColorTransitioning = false;
+            animState.colorTransitionProgress = 1;
+          } else {
+            animState.isColorTransitioning = true;
+            animState.colorTransitionProgress = 0;
+            animState.colorTransitionStartTime = time;
+          }
+          this.dirtyInstances.add(instanceIndex);
+        }
+
+        // Store current palette for next comparison
+        animState.previousPalette = currentPalette;
+      }
+
+      // Update color transition progress
+      if (animState.isColorTransitioning) {
+        const elapsed = time - animState.colorTransitionStartTime;
+        animState.colorTransitionProgress = Math.min(
+          1,
+          elapsed / PlantInstancer.COLOR_TRANSITION_DURATION
+        );
+        if (animState.colorTransitionProgress >= 1) {
+          animState.isColorTransitioning = false;
         }
         this.dirtyInstances.add(instanceIndex);
       }
@@ -365,8 +447,17 @@ export class PlantInstancer {
     this.instanceUVBounds[uvBase + 2] = atlasEntry.uvBounds[2];
     this.instanceUVBounds[uvBase + 3] = atlasEntry.uvBounds[3];
 
+    // Handle color transitions
+    if (animState.isColorTransitioning && animState.colorTransitionProgress === 0) {
+      // Starting a new color transition - copy current colors to previous
+      this.copyPaletteToPrevious(index);
+    }
+
     // Set palette colors (convert hex to RGB 0-1 range)
     this.setPaletteColors(index, palette);
+
+    // Set color transition progress
+    this.instanceColorTransition[index] = animState.colorTransitionProgress;
 
     // Set state (opacity, scale, visualState, transitionProgress)
     const stateBase = index * 4;
@@ -514,6 +605,28 @@ export class PlantInstancer {
   }
 
   /**
+   * Copy current palette colors to previous palette (for color transitions).
+   */
+  private copyPaletteToPrevious(index: number): void {
+    const pBase = index * 3;
+
+    // Copy palette0 to prevPalette0
+    this.instancePrevPalette0[pBase] = this.instancePalette0[pBase]!;
+    this.instancePrevPalette0[pBase + 1] = this.instancePalette0[pBase + 1]!;
+    this.instancePrevPalette0[pBase + 2] = this.instancePalette0[pBase + 2]!;
+
+    // Copy palette1 to prevPalette1
+    this.instancePrevPalette1[pBase] = this.instancePalette1[pBase]!;
+    this.instancePrevPalette1[pBase + 1] = this.instancePalette1[pBase + 1]!;
+    this.instancePrevPalette1[pBase + 2] = this.instancePalette1[pBase + 2]!;
+
+    // Copy palette2 to prevPalette2
+    this.instancePrevPalette2[pBase] = this.instancePalette2[pBase]!;
+    this.instancePrevPalette2[pBase + 1] = this.instancePalette2[pBase + 1]!;
+    this.instancePrevPalette2[pBase + 2] = this.instancePalette2[pBase + 2]!;
+  }
+
+  /**
    * Convert hex color to RGB (0-1 range).
    */
   private hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -640,8 +753,12 @@ export class PlantInstancer {
       "instancePalette0",
       "instancePalette1",
       "instancePalette2",
+      "instancePrevPalette0",
+      "instancePrevPalette1",
+      "instancePrevPalette2",
       "instanceState",
       "instanceAnimation",
+      "instanceColorTransition",
     ];
     for (const name of attrs) {
       const attr = geometry.getAttribute(name) as THREE.BufferAttribute;
@@ -666,8 +783,12 @@ export class PlantInstancer {
       { name: "instancePalette0", itemSize: 3 },
       { name: "instancePalette1", itemSize: 3 },
       { name: "instancePalette2", itemSize: 3 },
+      { name: "instancePrevPalette0", itemSize: 3 },
+      { name: "instancePrevPalette1", itemSize: 3 },
+      { name: "instancePrevPalette2", itemSize: 3 },
       { name: "instanceState", itemSize: 4 },
       { name: "instanceAnimation", itemSize: 2 },
+      { name: "instanceColorTransition", itemSize: 1 },
     ];
 
     for (const { name, itemSize } of attrConfigs) {

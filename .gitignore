@@ -74,6 +74,7 @@ temp/
 
 # Generated files
 apps/quantum/src/data/variants.json
+**/next-env.d.ts
 
 # Vercel
 .vercel/

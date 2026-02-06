@@ -457,6 +457,119 @@ function getDeathProbability(plant: PlantWithPosition, now: number): number {
 }
 
 /**
+ * Auto-reseed the garden if the alive population is below the minimum threshold.
+ * Creates new dormant plants with clustering-aware positioning.
+ *
+ * @returns Number of new plants created
+ */
+async function autoReseedIfNeeded(
+  db: PrismaClient,
+  allPlants: PlantWithPosition[],
+  diedIds: string[]
+): Promise<number> {
+  const aliveAfterDeaths = allPlants.filter((p) => !p.diedAt && !diedIds.includes(p.id));
+  if (aliveAfterDeaths.length >= EVOLUTION_CONFIG.MIN_POPULATION) {
+    return 0;
+  }
+
+  const plantsNeeded = EVOLUTION_CONFIG.RESEED_COUNT;
+  const canvasWidth = 1200;
+  const canvasHeight = 800;
+  const margin = 50;
+
+  // Get or create a quantum record for new plants
+  let quantumRecord = await db.quantumRecord.findFirst();
+  if (!quantumRecord) {
+    quantumRecord = await db.quantumRecord.create({
+      data: {
+        circuitId: "superposition",
+        circuitDefinition: { type: "placeholder", gates: [] },
+        status: "completed",
+        measurements: [0, 1],
+        probabilities: [0.5, 0.5],
+      },
+    });
+  }
+  const quantumCircuitId = quantumRecord.id;
+
+  // Helper to select variant using rarity weights
+  const selectVariantByRarity = (): PlantVariant => {
+    const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
+    let random = Math.random() * totalWeight;
+
+    for (const variant of PLANT_VARIANTS) {
+      random -= variant.rarity;
+      if (random <= 0) {
+        return variant;
+      }
+    }
+    return PLANT_VARIANTS[0]!;
+  };
+
+  for (let i = 0; i < plantsNeeded; i++) {
+    // Select variant using rarity weights
+    const variant = selectVariantByRarity();
+    const variantId = variant.id;
+    const behavior = getClusteringBehavior(variantId);
+
+    let position: { x: number; y: number };
+
+    // For cluster-mode plants, try to spawn near existing same-type plants
+    if (behavior.mode === "cluster" && Math.random() < (behavior.reseedClusterChance ?? 0.5)) {
+      const existingSameType = aliveAfterDeaths.filter(
+        (p) => p.variantId === variantId && p.germinatedAt
+      );
+
+      if (existingSameType.length > 0) {
+        // Pick a random existing plant of same type as anchor
+        const anchor = existingSameType[Math.floor(Math.random() * existingSameType.length)]!;
+        const radius = behavior.clusterRadius ?? 150;
+
+        // Spawn within cluster radius with some randomness
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * (radius - 30); // At least 30px away
+        position = {
+          x: Math.max(
+            margin,
+            Math.min(canvasWidth - margin, anchor.positionX + Math.cos(angle) * distance)
+          ),
+          y: Math.max(
+            margin,
+            Math.min(canvasHeight - margin, anchor.positionY + Math.sin(angle) * distance)
+          ),
+        };
+      } else {
+        // No existing same-type, use random position
+        position = {
+          x: margin + Math.random() * (canvasWidth - 2 * margin),
+          y: margin + Math.random() * (canvasHeight - 2 * margin),
+        };
+      }
+    } else {
+      // Spread mode or random: use distributed positioning
+      position = {
+        x: margin + Math.random() * (canvasWidth - 2 * margin),
+        y: margin + Math.random() * (canvasHeight - 2 * margin),
+      };
+    }
+
+    await db.plant.create({
+      data: {
+        positionX: position.x,
+        positionY: position.y,
+        observed: false,
+        visualState: "superposed",
+        quantumCircuitId,
+        variantId,
+        lifecycleModifier: 0.8 + Math.random() * 0.4, // 0.8-1.2 range
+      },
+    });
+  }
+
+  return plantsNeeded;
+}
+
+/**
  * Get or create the garden state singleton.
  */
 async function getOrCreateGardenState(db: PrismaClient) {
@@ -531,7 +644,10 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
       diedIds.push(plant.id);
     }
 
-    // Update evolution version if deaths occurred
+    // Auto-reseed if population is too low
+    await autoReseedIfNeeded(db, allPlants, diedIds);
+
+    // Update evolution version if deaths or reseeds occurred
     let state = await db.gardenState.findUnique({ where: { id: "singleton" } });
     if (plantsToDie.length > 0) {
       state = await db.gardenState.update({
@@ -618,102 +734,7 @@ export async function runEvolutionCheck(db: PrismaClient): Promise<EvolutionResu
   }
 
   // Auto-reseed if population is too low
-  const aliveAfterDeaths = allPlants.filter((p) => !p.diedAt && !diedIds.includes(p.id));
-  if (aliveAfterDeaths.length < EVOLUTION_CONFIG.MIN_POPULATION) {
-    const plantsNeeded = EVOLUTION_CONFIG.RESEED_COUNT;
-    const canvasWidth = 1200;
-    const canvasHeight = 800;
-    const margin = 50;
-
-    // Get or create a quantum record for new plants
-    let quantumRecord = await db.quantumRecord.findFirst();
-    if (!quantumRecord) {
-      quantumRecord = await db.quantumRecord.create({
-        data: {
-          circuitId: "superposition",
-          circuitDefinition: { type: "placeholder", gates: [] },
-          status: "completed",
-          measurements: [0, 1],
-          probabilities: [0.5, 0.5],
-        },
-      });
-    }
-    const quantumCircuitId = quantumRecord.id;
-
-    // Helper to select variant using rarity weights
-    const selectVariantByRarity = (): PlantVariant => {
-      const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
-      let random = Math.random() * totalWeight;
-
-      for (const variant of PLANT_VARIANTS) {
-        random -= variant.rarity;
-        if (random <= 0) {
-          return variant;
-        }
-      }
-      return PLANT_VARIANTS[0]!;
-    };
-
-    for (let i = 0; i < plantsNeeded; i++) {
-      // Select variant using rarity weights
-      const variant = selectVariantByRarity();
-      const variantId = variant.id;
-      const behavior = getClusteringBehavior(variantId);
-
-      let position: { x: number; y: number };
-
-      // For cluster-mode plants, try to spawn near existing same-type plants
-      if (behavior.mode === "cluster" && Math.random() < (behavior.reseedClusterChance ?? 0.5)) {
-        const existingSameType = aliveAfterDeaths.filter(
-          (p) => p.variantId === variantId && p.germinatedAt
-        );
-
-        if (existingSameType.length > 0) {
-          // Pick a random existing plant of same type as anchor
-          const anchor = existingSameType[Math.floor(Math.random() * existingSameType.length)]!;
-          const radius = behavior.clusterRadius ?? 150;
-
-          // Spawn within cluster radius with some randomness
-          const angle = Math.random() * Math.PI * 2;
-          const distance = 30 + Math.random() * (radius - 30); // At least 30px away
-          position = {
-            x: Math.max(
-              margin,
-              Math.min(canvasWidth - margin, anchor.positionX + Math.cos(angle) * distance)
-            ),
-            y: Math.max(
-              margin,
-              Math.min(canvasHeight - margin, anchor.positionY + Math.sin(angle) * distance)
-            ),
-          };
-        } else {
-          // No existing same-type, use random position
-          position = {
-            x: margin + Math.random() * (canvasWidth - 2 * margin),
-            y: margin + Math.random() * (canvasHeight - 2 * margin),
-          };
-        }
-      } else {
-        // Spread mode or random: use distributed positioning
-        position = {
-          x: margin + Math.random() * (canvasWidth - 2 * margin),
-          y: margin + Math.random() * (canvasHeight - 2 * margin),
-        };
-      }
-
-      await db.plant.create({
-        data: {
-          positionX: position.x,
-          positionY: position.y,
-          observed: false,
-          visualState: "superposed",
-          quantumCircuitId,
-          variantId,
-          lifecycleModifier: 0.8 + Math.random() * 0.4, // 0.8-1.2 range
-        },
-      });
-    }
-  }
+  await autoReseedIfNeeded(db, allPlants, diedIds);
 
   // Update garden state
   const updatedState = await db.gardenState.update({

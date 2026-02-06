@@ -15,19 +15,19 @@
  */
 
 import { PrismaClient } from "@prisma/client";
-import { PLANT_VARIANTS, selectColorVariation } from "@quantum-garden/shared";
+import { CANVAS, PLANT_VARIANTS, selectColorVariation } from "@quantum-garden/shared";
 
 const db = new PrismaClient();
 
-// Canvas dimensions (match CANVAS constants)
-const CANVAS_WIDTH = 1200;
-const CANVAS_HEIGHT = 800;
+// Canvas dimensions from shared constants (4K)
+const CANVAS_WIDTH = CANVAS.DEFAULT_WIDTH;
+const CANVAS_HEIGHT = CANVAS.DEFAULT_HEIGHT;
 
 // Seed configuration
 // With 28 variants, use at least 28 plants to ensure all variants can appear
 const NUM_PLANTS = 28;
 const NUM_ENTANGLED_PAIRS = 3; // Number of entangled plant pairs
-const MARGIN = 80; // Keep plants away from edges
+const MARGIN = 250; // Keep plants away from edges (proportional to 4K canvas)
 
 /**
  * Select a variant based on rarity weights.

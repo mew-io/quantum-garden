@@ -345,11 +345,7 @@ export function GardenScene() {
         return;
       }
 
-      const canvas = sceneManager.canvas;
-      const rect = canvas.getBoundingClientRect();
-      const x = (event.clientX - rect.left) * (canvas.width / rect.width / window.devicePixelRatio);
-      const y =
-        (event.clientY - rect.top) * (canvas.height / rect.height / window.devicePixelRatio);
+      const { x, y } = sceneManager.screenToWorld(event.clientX, event.clientY);
 
       // Find plant at click position
       const plants = useGardenStore.getState().plants;

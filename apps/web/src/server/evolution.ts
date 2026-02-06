@@ -14,6 +14,7 @@
 
 import type { PrismaClient, Plant as PrismaPlant } from "@prisma/client";
 import {
+  CANVAS,
   getVariantById,
   PLANT_VARIANTS,
   type ClusteringBehavior,
@@ -473,9 +474,9 @@ async function autoReseedIfNeeded(
   }
 
   const plantsNeeded = EVOLUTION_CONFIG.RESEED_COUNT;
-  const canvasWidth = 1200;
-  const canvasHeight = 800;
-  const margin = 50;
+  const canvasWidth = CANVAS.DEFAULT_WIDTH;
+  const canvasHeight = CANVAS.DEFAULT_HEIGHT;
+  const margin = 150;
 
   // Get or create a quantum record for new plants
   let quantumRecord = await db.quantumRecord.findFirst();

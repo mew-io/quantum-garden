@@ -3,6 +3,10 @@
  *
  * Manages the WebGL renderer, orthographic camera, and scene lifecycle.
  * Uses OrthographicCamera for 2D rendering without perspective distortion.
+ *
+ * The camera frustum is set to the fixed 4K garden world size (3840x2160),
+ * adjusted for viewport aspect ratio. On desktop, the garden is centered
+ * with framing. On mobile, touch panning lets users explore the full garden.
  */
 
 import * as THREE from "three";
@@ -41,6 +45,14 @@ const CAMERA_CONFIG = {
 };
 
 /**
+ * Minimum ratio of viewport pixels to garden pixels before panning is enabled.
+ * Below this threshold, the garden would be too small to read, so we zoom in
+ * and allow panning instead. 0.25 means panning enables when the viewport is
+ * less than 25% of the garden size (e.g., a 375px phone vs 3840px garden).
+ */
+const MIN_READABLE_SCALE = 0.25;
+
+/**
  * Performance metrics for the render loop.
  */
 export interface PerformanceMetrics {
@@ -58,7 +70,9 @@ export interface PerformanceMetrics {
  * Manages the core Three.js scene, camera, and renderer.
  *
  * Provides:
- * - OrthographicCamera configured for 2D pixel-aligned rendering
+ * - OrthographicCamera with fixed garden-world frustum (3840x2160)
+ * - Aspect-ratio-aware centering (letterbox/pillarbox on desktop)
+ * - Touch panning on mobile when garden exceeds viewport
  * - WebGLRenderer with transparency support
  * - Automatic resize handling
  * - Render loop management
@@ -89,41 +103,50 @@ export class SceneManager {
     triangles: 0,
   };
 
-  // Camera zoom state for micro-transitions
+  // Camera zoom state for micro-transitions (dwell zoom)
   private targetZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
   private currentZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
 
+  // Camera panning state (for mobile touch panning)
+  private panOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private baseZoom: number = 1.0;
+  private isPanningEnabled: boolean = false;
+  private touchState: {
+    startPos: { x: number; y: number };
+    startPan: { x: number; y: number };
+  } | null = null;
+
   constructor(config: SceneManagerConfig) {
     this.container = config.container;
-    const width = config.width ?? window.innerWidth;
-    const height = config.height ?? window.innerHeight;
+    const vw = config.width ?? window.innerWidth;
+    const vh = config.height ?? window.innerHeight;
 
     // Create scene
     this.scene = new THREE.Scene();
     const bgColor = config.backgroundColor ?? CANVAS.BACKGROUND_COLOR;
     this.scene.background = new THREE.Color(bgColor);
 
-    // Create orthographic camera for 2D rendering
+    // Create orthographic camera with garden-world frustum
     // Origin at top-left (0,0), positive x to right, positive y down
-    // This matches typical 2D canvas coordinate systems
+    // Actual frustum bounds are set by applyCamera() based on viewport aspect ratio
     this.camera = new THREE.OrthographicCamera(
       0, // left
-      width, // right
+      CANVAS.DEFAULT_WIDTH, // right
       0, // top
-      height, // bottom
+      CANVAS.DEFAULT_HEIGHT, // bottom
       0.1, // near
       1000 // far
     );
     // Position camera looking down at Z=0 plane
     this.camera.position.z = 500;
 
-    // Create renderer
+    // Create renderer — fills the viewport
     this.renderer = new THREE.WebGLRenderer({
       antialias: false, // Pixel art style - no smoothing
       alpha: true,
       powerPreference: "high-performance",
     });
-    this.renderer.setSize(width, height);
+    this.renderer.setSize(vw, vh);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     // Sort objects by renderOrder for proper layering
     this.renderer.sortObjects = true;
@@ -134,11 +157,24 @@ export class SceneManager {
     // Set up post-processing bloom if enabled
     this.bloomEnabled = config.enableBloom ?? true;
     if (this.bloomEnabled) {
-      this.setupBloom(width, height);
+      this.setupBloom(vw, vh);
     }
+
+    // Calculate initial camera layout
+    this.computeLayout(vw, vh);
+    this.applyCamera();
 
     // Handle resize
     window.addEventListener("resize", this.handleResize);
+
+    // Touch panning for mobile
+    this.renderer.domElement.addEventListener("touchstart", this.handleTouchStart, {
+      passive: false,
+    });
+    this.renderer.domElement.addEventListener("touchmove", this.handleTouchMove, {
+      passive: false,
+    });
+    this.renderer.domElement.addEventListener("touchend", this.handleTouchEnd);
   }
 
   /**
@@ -166,6 +202,184 @@ export class SceneManager {
     // Output pass - handles color space conversion for final output
     const outputPass = new OutputPass();
     this.composer.addPass(outputPass);
+  }
+
+  /**
+   * Compute layout parameters based on viewport size.
+   * Determines whether panning is needed and sets base zoom.
+   */
+  private computeLayout(vw: number, vh: number): void {
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+
+    // How many screen pixels per garden pixel at fit-to-screen
+    const fitScale = Math.min(vw / gardenW, vh / gardenH);
+
+    if (fitScale >= MIN_READABLE_SCALE) {
+      // Garden is readable at this viewport size — show it all, no panning
+      this.baseZoom = 1.0;
+      this.isPanningEnabled = false;
+      this.panOffset = { x: 0, y: 0 };
+    } else {
+      // Viewport is too small — zoom in so plants are readable, enable panning
+      // baseZoom > 1 zooms into the garden, showing a portion of it
+      this.baseZoom = MIN_READABLE_SCALE / fitScale;
+      this.isPanningEnabled = true;
+      this.clampPanOffset();
+    }
+  }
+
+  /**
+   * Apply camera frustum based on garden world, viewport aspect ratio, pan, and zoom.
+   *
+   * The frustum is expanded on one axis to match the viewport aspect ratio,
+   * keeping the garden centered. Pan offset shifts the view for mobile panning.
+   */
+  private applyCamera(): void {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+
+    const gardenAspect = gardenW / gardenH;
+    const viewportAspect = vw / vh;
+
+    // Calculate visible world size to fit garden with correct aspect ratio
+    let visibleW: number;
+    let visibleH: number;
+
+    if (viewportAspect > gardenAspect) {
+      // Viewport is wider than garden — expand width (pillarbox)
+      visibleH = gardenH;
+      visibleW = gardenH * viewportAspect;
+    } else {
+      // Viewport is taller than garden — expand height (letterbox)
+      visibleW = gardenW;
+      visibleH = gardenW / viewportAspect;
+    }
+
+    // Center the garden in the visible area
+    const cx = gardenW / 2;
+    const cy = gardenH / 2;
+
+    // Set frustum centered on garden, offset by pan
+    this.camera.left = cx - visibleW / 2 + this.panOffset.x;
+    this.camera.right = cx + visibleW / 2 + this.panOffset.x;
+    this.camera.top = cy - visibleH / 2 + this.panOffset.y;
+    this.camera.bottom = cy + visibleH / 2 + this.panOffset.y;
+
+    // Apply combined zoom: base zoom (for mobile fit) × dwell micro-zoom
+    this.camera.zoom = this.baseZoom * this.currentZoom;
+
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Clamp pan offset so the camera stays within garden bounds.
+   */
+  private clampPanOffset(): void {
+    if (!this.isPanningEnabled) {
+      this.panOffset = { x: 0, y: 0 };
+      return;
+    }
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+    const effectiveZoom = this.baseZoom * this.currentZoom;
+
+    // Visible garden extent at current zoom
+    const gardenAspect = gardenW / gardenH;
+    const viewportAspect = vw / vh;
+
+    let visibleW: number;
+    let visibleH: number;
+    if (viewportAspect > gardenAspect) {
+      visibleH = gardenH;
+      visibleW = gardenH * viewportAspect;
+    } else {
+      visibleW = gardenW;
+      visibleH = gardenW / viewportAspect;
+    }
+
+    // After zoom, the actual visible area is smaller
+    const zoomedW = visibleW / effectiveZoom;
+    const zoomedH = visibleH / effectiveZoom;
+
+    // Maximum pan from center: half of garden minus half of visible
+    const maxPanX = Math.max(0, (gardenW - zoomedW) / 2);
+    const maxPanY = Math.max(0, (gardenH - zoomedH) / 2);
+
+    this.panOffset.x = Math.max(-maxPanX, Math.min(maxPanX, this.panOffset.x));
+    this.panOffset.y = Math.max(-maxPanY, Math.min(maxPanY, this.panOffset.y));
+  }
+
+  // --- Touch panning handlers ---
+
+  private handleTouchStart = (e: TouchEvent): void => {
+    if (!this.isPanningEnabled || e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0]!;
+    this.touchState = {
+      startPos: { x: touch.clientX, y: touch.clientY },
+      startPan: { ...this.panOffset },
+    };
+  };
+
+  private handleTouchMove = (e: TouchEvent): void => {
+    if (!this.touchState || e.touches.length !== 1) return;
+    e.preventDefault();
+
+    const touch = e.touches[0]!;
+    const dx = touch.clientX - this.touchState.startPos.x;
+    const dy = touch.clientY - this.touchState.startPos.y;
+
+    // Convert screen pixels to garden-world units
+    // Screen-to-world scale: how many garden units per screen pixel
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+    const gardenAspect = gardenW / gardenH;
+    const viewportAspect = vw / vh;
+
+    let visibleW: number;
+    if (viewportAspect > gardenAspect) {
+      visibleW = gardenH * viewportAspect;
+    } else {
+      visibleW = gardenW;
+    }
+    const effectiveZoom = this.baseZoom * this.currentZoom;
+    const gardenUnitsPerPixel = visibleW / effectiveZoom / vw;
+
+    // Negative because dragging right should show what's to the left
+    this.panOffset.x = this.touchState.startPan.x - dx * gardenUnitsPerPixel;
+    this.panOffset.y = this.touchState.startPan.y - dy * gardenUnitsPerPixel;
+    this.clampPanOffset();
+    this.applyCamera();
+  };
+
+  private handleTouchEnd = (): void => {
+    this.touchState = null;
+  };
+
+  /**
+   * Convert screen (client) coordinates to garden world coordinates.
+   * Accounts for camera frustum, zoom, and pan offset.
+   */
+  screenToWorld(clientX: number, clientY: number): { x: number; y: number } {
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+
+    // Normalized device coordinates (-1 to 1)
+    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -(((clientY - rect.top) / rect.height) * 2 - 1);
+
+    const vector = new THREE.Vector3(ndcX, ndcY, 0);
+    vector.unproject(this.camera);
+
+    return { x: vector.x, y: vector.y };
   }
 
   /**
@@ -284,26 +498,23 @@ export class SceneManager {
    * Handle window resize.
    */
   private handleResize = (): void => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-    // Update camera frustum
-    this.camera.left = 0;
-    this.camera.right = width;
-    this.camera.top = 0;
-    this.camera.bottom = height;
-    this.camera.updateProjectionMatrix();
-
-    // Update renderer size
-    this.renderer.setSize(width, height);
+    // Update renderer to fill viewport
+    this.renderer.setSize(vw, vh);
 
     // Update bloom composer if enabled
     if (this.composer) {
-      this.composer.setSize(width, height);
+      this.composer.setSize(vw, vh);
     }
     if (this.bloomPass) {
-      this.bloomPass.resolution.set(width, height);
+      this.bloomPass.resolution.set(vw, vh);
     }
+
+    // Recalculate layout and apply camera
+    this.computeLayout(vw, vh);
+    this.applyCamera();
   };
 
   /**
@@ -348,6 +559,7 @@ export class SceneManager {
 
   /**
    * Update camera zoom with smooth interpolation.
+   * Integrates dwell micro-zoom with base zoom via applyCamera().
    */
   private updateCameraZoom(): void {
     // Skip if zoom is already at target
@@ -359,9 +571,8 @@ export class SceneManager {
     // Smoothly interpolate toward target
     this.currentZoom += (this.targetZoom - this.currentZoom) * CAMERA_CONFIG.ZOOM_SMOOTHING;
 
-    // Apply zoom to camera
-    this.camera.zoom = this.currentZoom;
-    this.camera.updateProjectionMatrix();
+    // Apply camera (which combines baseZoom and currentZoom)
+    this.applyCamera();
   }
 
   /**
@@ -401,6 +612,11 @@ export class SceneManager {
   destroy(): void {
     this.stop();
     window.removeEventListener("resize", this.handleResize);
+
+    // Remove touch event listeners
+    this.renderer.domElement.removeEventListener("touchstart", this.handleTouchStart);
+    this.renderer.domElement.removeEventListener("touchmove", this.handleTouchMove);
+    this.renderer.domElement.removeEventListener("touchend", this.handleTouchEnd);
 
     // Remove canvas from DOM
     if (this.renderer.domElement.parentNode) {

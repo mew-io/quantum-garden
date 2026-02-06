@@ -70,14 +70,14 @@ export const GLYPH = {
   COLLAPSED_OPACITY: 1.0,
 } as const;
 
-/** Garden canvas configuration */
+/** Garden canvas configuration (4K resolution for gallery displays) */
 export const CANVAS = {
   /** Background color - light warm cream for contrast with pastel plants */
   BACKGROUND_COLOR: "#F5F0E8",
-  /** Default width */
-  DEFAULT_WIDTH: 1200,
-  /** Default height */
-  DEFAULT_HEIGHT: 800,
+  /** Garden world width (4K UHD) */
+  DEFAULT_WIDTH: 3840,
+  /** Garden world height (4K UHD) */
+  DEFAULT_HEIGHT: 2160,
 } as const;
 
 /** Quantum circuit configuration */

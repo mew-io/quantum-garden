@@ -6,7 +6,8 @@
  *
  * The camera frustum is set to the fixed 4K garden world size (3840x2160),
  * adjusted for viewport aspect ratio. On desktop, the garden is centered
- * with framing. On mobile, touch panning lets users explore the full garden.
+ * with framing. Users can zoom via scroll wheel or pinch, and pan via
+ * touch drag when zoomed in.
  */
 
 import * as THREE from "three";
@@ -44,11 +45,20 @@ const CAMERA_CONFIG = {
   ZOOM_SMOOTHING: 0.08,
 };
 
+/** User-controlled zoom configuration */
+const ZOOM_CONFIG = {
+  /** Minimum effective zoom — shows full garden, can't zoom out further */
+  MIN_EFFECTIVE: 1.0,
+  /** Maximum effective zoom — good detail without pixelation */
+  MAX_EFFECTIVE: 5.0,
+  /** Zoom multiplier per scroll wheel tick */
+  WHEEL_FACTOR: 1.1,
+};
+
 /**
- * Minimum ratio of viewport pixels to garden pixels before panning is enabled.
+ * Minimum ratio of viewport pixels to garden pixels before auto-zoom kicks in.
  * Below this threshold, the garden would be too small to read, so we zoom in
- * and allow panning instead. 0.25 means panning enables when the viewport is
- * less than 25% of the garden size (e.g., a 375px phone vs 3840px garden).
+ * automatically. 0.25 means auto-zoom on viewports < 25% of garden size.
  */
 const MIN_READABLE_SCALE = 0.25;
 
@@ -71,8 +81,9 @@ export interface PerformanceMetrics {
  *
  * Provides:
  * - OrthographicCamera with fixed garden-world frustum (3840x2160)
- * - Aspect-ratio-aware centering (letterbox/pillarbox on desktop)
- * - Touch panning on mobile when garden exceeds viewport
+ * - Aspect-ratio-aware centering (letterbox/pillarbox)
+ * - Scroll wheel zoom (desktop) and pinch-to-zoom (mobile)
+ * - Touch panning when zoomed in
  * - WebGLRenderer with transparency support
  * - Automatic resize handling
  * - Render loop management
@@ -103,17 +114,27 @@ export class SceneManager {
     triangles: 0,
   };
 
-  // Camera zoom state for micro-transitions (dwell zoom)
-  private targetZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
-  private currentZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM;
+  // Camera zoom state
+  // Effective zoom = baseZoom * userZoom * currentZoom (dwell)
+  private targetZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM; // dwell micro-zoom target
+  private currentZoom: number = CAMERA_CONFIG.DEFAULT_ZOOM; // dwell micro-zoom (smoothed)
+  private baseZoom: number = 1.0; // auto-computed from viewport vs garden size
+  private userZoom: number = 1.0; // user-controlled via scroll wheel / pinch
 
-  // Camera panning state (for mobile touch panning)
+  // Camera panning state
   private panOffset: { x: number; y: number } = { x: 0, y: 0 };
-  private baseZoom: number = 1.0;
-  private isPanningEnabled: boolean = false;
+
+  // Touch state for single-finger pan
   private touchState: {
     startPos: { x: number; y: number };
     startPan: { x: number; y: number };
+  } | null = null;
+
+  // Pinch state for two-finger zoom
+  private pinchState: {
+    startDist: number;
+    startUserZoom: number;
+    center: { x: number; y: number };
   } | null = null;
 
   constructor(config: SceneManagerConfig) {
@@ -167,7 +188,10 @@ export class SceneManager {
     // Handle resize
     window.addEventListener("resize", this.handleResize);
 
-    // Touch panning for mobile
+    // Scroll wheel zoom (desktop)
+    this.renderer.domElement.addEventListener("wheel", this.handleWheel, { passive: false });
+
+    // Touch: panning + pinch-to-zoom (mobile)
     this.renderer.domElement.addEventListener("touchstart", this.handleTouchStart, {
       passive: false,
     });
@@ -204,9 +228,33 @@ export class SceneManager {
     this.composer.addPass(outputPass);
   }
 
+  // --- Effective zoom helpers ---
+
+  /** Get the effective zoom level (baseZoom × userZoom, excluding dwell micro-zoom) */
+  private get effectiveUserZoom(): number {
+    return this.baseZoom * this.userZoom;
+  }
+
+  /** Get the full effective zoom including dwell micro-zoom */
+  private get effectiveZoom(): number {
+    return this.baseZoom * this.userZoom * this.currentZoom;
+  }
+
+  /** Whether panning is enabled (zoomed in past full-garden view) */
+  private get isPanningEnabled(): boolean {
+    return this.effectiveUserZoom > 1.001; // small epsilon to avoid float comparison issues
+  }
+
+  /** Clamp userZoom to valid range based on current baseZoom */
+  private clampUserZoom(): void {
+    const minUser = ZOOM_CONFIG.MIN_EFFECTIVE / this.baseZoom;
+    const maxUser = ZOOM_CONFIG.MAX_EFFECTIVE / this.baseZoom;
+    this.userZoom = Math.max(minUser, Math.min(maxUser, this.userZoom));
+  }
+
   /**
    * Compute layout parameters based on viewport size.
-   * Determines whether panning is needed and sets base zoom.
+   * Determines baseZoom and resets userZoom.
    */
   private computeLayout(vw: number, vh: number): void {
     const gardenW = CANVAS.DEFAULT_WIDTH;
@@ -216,24 +264,23 @@ export class SceneManager {
     const fitScale = Math.min(vw / gardenW, vh / gardenH);
 
     if (fitScale >= MIN_READABLE_SCALE) {
-      // Garden is readable at this viewport size — show it all, no panning
+      // Garden is readable at this viewport size
       this.baseZoom = 1.0;
-      this.isPanningEnabled = false;
-      this.panOffset = { x: 0, y: 0 };
     } else {
-      // Viewport is too small — zoom in so plants are readable, enable panning
-      // baseZoom > 1 zooms into the garden, showing a portion of it
+      // Viewport is too small — auto-zoom for readability
       this.baseZoom = MIN_READABLE_SCALE / fitScale;
-      this.isPanningEnabled = true;
-      this.clampPanOffset();
     }
+
+    // Reset user zoom on layout recompute (window resize)
+    this.userZoom = 1.0;
+    this.panOffset = { x: 0, y: 0 };
   }
 
   /**
    * Apply camera frustum based on garden world, viewport aspect ratio, pan, and zoom.
    *
    * The frustum is expanded on one axis to match the viewport aspect ratio,
-   * keeping the garden centered. Pan offset shifts the view for mobile panning.
+   * keeping the garden centered. Pan offset shifts the view when zoomed in.
    */
   private applyCamera(): void {
     const vw = window.innerWidth;
@@ -268,8 +315,8 @@ export class SceneManager {
     this.camera.top = cy - visibleH / 2 + this.panOffset.y;
     this.camera.bottom = cy + visibleH / 2 + this.panOffset.y;
 
-    // Apply combined zoom: base zoom (for mobile fit) × dwell micro-zoom
-    this.camera.zoom = this.baseZoom * this.currentZoom;
+    // Apply combined zoom: baseZoom × userZoom × dwellZoom
+    this.camera.zoom = this.effectiveZoom;
 
     this.camera.updateProjectionMatrix();
   }
@@ -287,7 +334,7 @@ export class SceneManager {
     const vh = window.innerHeight;
     const gardenW = CANVAS.DEFAULT_WIDTH;
     const gardenH = CANVAS.DEFAULT_HEIGHT;
-    const effectiveZoom = this.baseZoom * this.currentZoom;
+    const zoom = this.effectiveZoom;
 
     // Visible garden extent at current zoom
     const gardenAspect = gardenW / gardenH;
@@ -304,8 +351,8 @@ export class SceneManager {
     }
 
     // After zoom, the actual visible area is smaller
-    const zoomedW = visibleW / effectiveZoom;
-    const zoomedH = visibleH / effectiveZoom;
+    const zoomedW = visibleW / zoom;
+    const zoomedH = visibleH / zoom;
 
     // Maximum pan from center: half of garden minus half of visible
     const maxPanX = Math.max(0, (gardenW - zoomedW) / 2);
@@ -315,53 +362,132 @@ export class SceneManager {
     this.panOffset.y = Math.max(-maxPanY, Math.min(maxPanY, this.panOffset.y));
   }
 
-  // --- Touch panning handlers ---
+  /**
+   * Zoom toward a screen point, keeping the world position under that point fixed.
+   */
+  private zoomToward(clientX: number, clientY: number, newUserZoom: number): void {
+    // Get world position under cursor before zoom
+    const worldBefore = this.screenToWorld(clientX, clientY);
+
+    // Apply new zoom
+    this.userZoom = newUserZoom;
+    this.clampUserZoom();
+    this.applyCamera();
+
+    // Get world position under cursor after zoom
+    const worldAfter = this.screenToWorld(clientX, clientY);
+
+    // Adjust pan so the same world point stays under the cursor
+    this.panOffset.x += worldBefore.x - worldAfter.x;
+    this.panOffset.y += worldBefore.y - worldAfter.y;
+    this.clampPanOffset();
+    this.applyCamera();
+  }
+
+  // --- Scroll wheel zoom ---
+
+  private handleWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+
+    const zoomIn = e.deltaY < 0;
+    const factor = zoomIn ? ZOOM_CONFIG.WHEEL_FACTOR : 1 / ZOOM_CONFIG.WHEEL_FACTOR;
+    const newUserZoom = this.userZoom * factor;
+
+    this.zoomToward(e.clientX, e.clientY, newUserZoom);
+  };
+
+  // --- Touch handlers: single-finger pan + two-finger pinch ---
 
   private handleTouchStart = (e: TouchEvent): void => {
-    if (!this.isPanningEnabled || e.touches.length !== 1) return;
     e.preventDefault();
-    const touch = e.touches[0]!;
-    this.touchState = {
-      startPos: { x: touch.clientX, y: touch.clientY },
-      startPan: { ...this.panOffset },
-    };
+
+    if (e.touches.length === 2) {
+      // Start pinch-to-zoom
+      const t0 = e.touches[0]!;
+      const t1 = e.touches[1]!;
+      const dx = t1.clientX - t0.clientX;
+      const dy = t1.clientY - t0.clientY;
+      this.pinchState = {
+        startDist: Math.sqrt(dx * dx + dy * dy),
+        startUserZoom: this.userZoom,
+        center: { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 },
+      };
+      // Cancel any active single-finger pan
+      this.touchState = null;
+    } else if (e.touches.length === 1 && this.isPanningEnabled) {
+      // Start single-finger pan
+      const touch = e.touches[0]!;
+      this.touchState = {
+        startPos: { x: touch.clientX, y: touch.clientY },
+        startPan: { ...this.panOffset },
+      };
+      this.pinchState = null;
+    }
   };
 
   private handleTouchMove = (e: TouchEvent): void => {
-    if (!this.touchState || e.touches.length !== 1) return;
     e.preventDefault();
 
-    const touch = e.touches[0]!;
-    const dx = touch.clientX - this.touchState.startPos.x;
-    const dy = touch.clientY - this.touchState.startPos.y;
+    if (e.touches.length === 2 && this.pinchState) {
+      // Pinch-to-zoom
+      const t0 = e.touches[0]!;
+      const t1 = e.touches[1]!;
+      const dx = t1.clientX - t0.clientX;
+      const dy = t1.clientY - t0.clientY;
+      const currentDist = Math.sqrt(dx * dx + dy * dy);
 
-    // Convert screen pixels to garden-world units
-    // Screen-to-world scale: how many garden units per screen pixel
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const gardenW = CANVAS.DEFAULT_WIDTH;
-    const gardenH = CANVAS.DEFAULT_HEIGHT;
-    const gardenAspect = gardenW / gardenH;
-    const viewportAspect = vw / vh;
+      const scale = currentDist / this.pinchState.startDist;
+      const newUserZoom = this.pinchState.startUserZoom * scale;
 
-    let visibleW: number;
-    if (viewportAspect > gardenAspect) {
-      visibleW = gardenH * viewportAspect;
-    } else {
-      visibleW = gardenW;
+      this.zoomToward(this.pinchState.center.x, this.pinchState.center.y, newUserZoom);
+    } else if (e.touches.length === 1 && this.touchState) {
+      // Single-finger pan
+      const touch = e.touches[0]!;
+      const dx = touch.clientX - this.touchState.startPos.x;
+      const dy = touch.clientY - this.touchState.startPos.y;
+
+      // Convert screen pixels to garden-world units
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const gardenW = CANVAS.DEFAULT_WIDTH;
+      const gardenH = CANVAS.DEFAULT_HEIGHT;
+      const gardenAspect = gardenW / gardenH;
+      const viewportAspect = vw / vh;
+
+      let visibleW: number;
+      if (viewportAspect > gardenAspect) {
+        visibleW = gardenH * viewportAspect;
+      } else {
+        visibleW = gardenW;
+      }
+      const zoom = this.effectiveZoom;
+      const gardenUnitsPerPixel = visibleW / zoom / vw;
+
+      // Negative because dragging right should show what's to the left
+      this.panOffset.x = this.touchState.startPan.x - dx * gardenUnitsPerPixel;
+      this.panOffset.y = this.touchState.startPan.y - dy * gardenUnitsPerPixel;
+      this.clampPanOffset();
+      this.applyCamera();
     }
-    const effectiveZoom = this.baseZoom * this.currentZoom;
-    const gardenUnitsPerPixel = visibleW / effectiveZoom / vw;
-
-    // Negative because dragging right should show what's to the left
-    this.panOffset.x = this.touchState.startPan.x - dx * gardenUnitsPerPixel;
-    this.panOffset.y = this.touchState.startPan.y - dy * gardenUnitsPerPixel;
-    this.clampPanOffset();
-    this.applyCamera();
   };
 
-  private handleTouchEnd = (): void => {
-    this.touchState = null;
+  private handleTouchEnd = (e: TouchEvent): void => {
+    if (e.touches.length === 1 && this.pinchState) {
+      // Transitioning from pinch (2 fingers) to pan (1 finger)
+      // Start a new pan from the remaining finger
+      const touch = e.touches[0]!;
+      this.pinchState = null;
+      if (this.isPanningEnabled) {
+        this.touchState = {
+          startPos: { x: touch.clientX, y: touch.clientY },
+          startPan: { ...this.panOffset },
+        };
+      }
+    } else if (e.touches.length === 0) {
+      // All fingers lifted
+      this.touchState = null;
+      this.pinchState = null;
+    }
   };
 
   /**
@@ -559,7 +685,7 @@ export class SceneManager {
 
   /**
    * Update camera zoom with smooth interpolation.
-   * Integrates dwell micro-zoom with base zoom via applyCamera().
+   * Integrates dwell micro-zoom with base zoom and user zoom via applyCamera().
    */
   private updateCameraZoom(): void {
     // Skip if zoom is already at target
@@ -571,7 +697,7 @@ export class SceneManager {
     // Smoothly interpolate toward target
     this.currentZoom += (this.targetZoom - this.currentZoom) * CAMERA_CONFIG.ZOOM_SMOOTHING;
 
-    // Apply camera (which combines baseZoom and currentZoom)
+    // Apply camera (which combines baseZoom, userZoom, and currentZoom)
     this.applyCamera();
   }
 
@@ -613,7 +739,8 @@ export class SceneManager {
     this.stop();
     window.removeEventListener("resize", this.handleResize);
 
-    // Remove touch event listeners
+    // Remove input event listeners
+    this.renderer.domElement.removeEventListener("wheel", this.handleWheel);
     this.renderer.domElement.removeEventListener("touchstart", this.handleTouchStart);
     this.renderer.domElement.removeEventListener("touchmove", this.handleTouchMove);
     this.renderer.domElement.removeEventListener("touchend", this.handleTouchEnd);

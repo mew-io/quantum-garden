@@ -137,15 +137,20 @@ describe("Performance Tests", () => {
 
     it("should scale linearly with plant count for rebuild", () => {
       const grid = new SpatialGrid(100);
+      const iterations = 50; // Average over many runs to reduce timing noise
 
       // Measure rebuild times for different plant counts
       const measurements: { count: number; time: number }[] = [];
 
       for (const count of [100, 200, 400, 800]) {
         const plants = generateRandomPlants(count, 2000, 2000);
-        const start = performance.now();
+        // Warmup
         grid.rebuild(plants);
-        measurements.push({ count, time: performance.now() - start });
+        const start = performance.now();
+        for (let i = 0; i < iterations; i++) {
+          grid.rebuild(plants);
+        }
+        measurements.push({ count, time: (performance.now() - start) / iterations });
       }
 
       // Time should scale roughly linearly (within 3x for 8x plants)

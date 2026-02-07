@@ -38,14 +38,14 @@ export const EVOLUTION_CONFIG = {
   /** Maximum plants that can germinate in a single check (except during waves) */
   MAX_GERMINATIONS_PER_CHECK: 2, // increased from 1
 
-  /** Distance threshold for proximity bonus (pixels) */
-  PROXIMITY_RADIUS: 200,
+  /** Distance threshold for proximity bonus (pixels, scaled for 4K canvas) */
+  PROXIMITY_RADIUS: 600,
 
   /** Proximity bonus multiplier */
   PROXIMITY_MULTIPLIER: 2.0, // 2x chance near observed plants
 
-  /** Distance threshold for clustering prevention (pixels) */
-  CLUSTERING_RADIUS: 150,
+  /** Distance threshold for clustering prevention (pixels, scaled for 4K canvas) */
+  CLUSTERING_RADIUS: 450,
 
   /** Minimum germinated neighbors to prevent clustering */
   CLUSTERING_THRESHOLD: 3,
@@ -80,10 +80,10 @@ export const EVOLUTION_CONFIG = {
   MAX_DEATHS_PER_CHECK: 1, // reduced from 2
 
   /** Minimum alive plants before auto-reseeding triggers */
-  MIN_POPULATION: 15,
+  MIN_POPULATION: 50,
 
   /** Number of new plants to spawn when auto-reseeding */
-  RESEED_COUNT: 10,
+  RESEED_COUNT: 25,
 };
 
 type PlantWithPosition = PrismaPlant & { position: { x: number; y: number } };
@@ -528,7 +528,7 @@ async function autoReseedIfNeeded(
 
         // Spawn within cluster radius with some randomness
         const angle = Math.random() * Math.PI * 2;
-        const distance = 30 + Math.random() * (radius - 30); // At least 30px away
+        const distance = 90 + Math.random() * (radius - 90); // At least 90px away (scaled for 4K)
         position = {
           x: Math.max(
             margin,

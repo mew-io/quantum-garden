@@ -2787,7 +2787,7 @@ const softMoss: PlantVariant = {
   tweenBetweenKeyframes: true,
   clusteringBehavior: {
     mode: "cluster",
-    clusterRadius: 180,
+    clusterRadius: 540,
     clusterBonus: 2.5,
     maxClusterDensity: 6,
     reseedClusterChance: 0.8,
@@ -2859,7 +2859,7 @@ const pebblePatch: PlantVariant = {
   tweenBetweenKeyframes: false,
   clusteringBehavior: {
     mode: "cluster",
-    clusterRadius: 120,
+    clusterRadius: 360,
     clusterBonus: 2.0,
     maxClusterDensity: 8,
     reseedClusterChance: 0.7,
@@ -2913,7 +2913,7 @@ const meadowTuft: PlantVariant = {
   tweenBetweenKeyframes: true,
   clusteringBehavior: {
     mode: "cluster",
-    clusterRadius: 150,
+    clusterRadius: 450,
     clusterBonus: 1.5,
     maxClusterDensity: 4,
     reseedClusterChance: 0.5,

@@ -24,8 +24,9 @@ const CANVAS_WIDTH = CANVAS.DEFAULT_WIDTH;
 const CANVAS_HEIGHT = CANVAS.DEFAULT_HEIGHT;
 
 // Seed configuration
-// With 28 variants, use at least 28 plants to ensure all variants can appear
-const NUM_PLANTS = 28;
+// 4K canvas (3840×2160) is ~8.6× larger than the original 1200×800.
+// 100 plants provides good initial density; auto-reseed maintains population over time.
+const NUM_PLANTS = 100;
 const NUM_ENTANGLED_PAIRS = 3; // Number of entangled plant pairs
 const MARGIN = 250; // Keep plants away from edges (proportional to 4K canvas)
 

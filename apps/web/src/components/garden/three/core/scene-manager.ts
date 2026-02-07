@@ -137,6 +137,12 @@ export class SceneManager {
     center: { x: number; y: number };
   } | null = null;
 
+  // Mouse drag state for desktop panning
+  private mouseState: {
+    startPos: { x: number; y: number };
+    startPan: { x: number; y: number };
+  } | null = null;
+
   constructor(config: SceneManagerConfig) {
     this.container = config.container;
     const vw = config.width ?? window.innerWidth;
@@ -199,6 +205,11 @@ export class SceneManager {
       passive: false,
     });
     this.renderer.domElement.addEventListener("touchend", this.handleTouchEnd);
+
+    // Mouse: click-drag panning (desktop)
+    this.renderer.domElement.addEventListener("mousedown", this.handleMouseDown);
+    window.addEventListener("mousemove", this.handleMouseMove);
+    window.addEventListener("mouseup", this.handleMouseUp);
   }
 
   /**
@@ -486,6 +497,53 @@ export class SceneManager {
     }
   };
 
+  // --- Mouse handlers: click-drag panning (desktop) ---
+
+  private handleMouseDown = (e: MouseEvent): void => {
+    if (!this.isPanningEnabled) return;
+    // Only start pan on left-click
+    if (e.button !== 0) return;
+
+    this.mouseState = {
+      startPos: { x: e.clientX, y: e.clientY },
+      startPan: { ...this.panOffset },
+    };
+  };
+
+  private handleMouseMove = (e: MouseEvent): void => {
+    if (!this.mouseState) return;
+
+    const dx = e.clientX - this.mouseState.startPos.x;
+    const dy = e.clientY - this.mouseState.startPos.y;
+
+    // Convert screen pixels to garden-world units
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+    const gardenAspect = gardenW / gardenH;
+    const viewportAspect = vw / vh;
+
+    let visibleW: number;
+    if (viewportAspect > gardenAspect) {
+      visibleW = gardenH * viewportAspect;
+    } else {
+      visibleW = gardenW;
+    }
+    const zoom = this.effectiveZoom;
+    const gardenUnitsPerPixel = visibleW / zoom / vw;
+
+    // Negative because dragging right should show what's to the left
+    this.panOffset.x = this.mouseState.startPan.x - dx * gardenUnitsPerPixel;
+    this.panOffset.y = this.mouseState.startPan.y - dy * gardenUnitsPerPixel;
+    this.clampPanOffset();
+    this.applyCamera();
+  };
+
+  private handleMouseUp = (): void => {
+    this.mouseState = null;
+  };
+
   /**
    * Convert screen (client) coordinates to garden world coordinates.
    * Accounts for camera frustum, zoom, and pan offset.
@@ -740,6 +798,9 @@ export class SceneManager {
     this.renderer.domElement.removeEventListener("touchstart", this.handleTouchStart);
     this.renderer.domElement.removeEventListener("touchmove", this.handleTouchMove);
     this.renderer.domElement.removeEventListener("touchend", this.handleTouchEnd);
+    this.renderer.domElement.removeEventListener("mousedown", this.handleMouseDown);
+    window.removeEventListener("mousemove", this.handleMouseMove);
+    window.removeEventListener("mouseup", this.handleMouseUp);
 
     // Remove canvas from DOM
     if (this.renderer.domElement.parentNode) {

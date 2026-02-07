@@ -12,14 +12,14 @@ export const EVOLUTION_CONFIG = {
   /** Base probability of germination per check (0-1) */
   GERMINATION_CHANCE: 0.15,
 
-  /** Distance threshold for proximity bonus (pixels) */
-  PROXIMITY_RADIUS: 200,
+  /** Distance threshold for proximity bonus (pixels, scaled for 4K canvas) */
+  PROXIMITY_RADIUS: 600,
 
   /** Proximity bonus multiplier */
   PROXIMITY_MULTIPLIER: 2.0,
 
-  /** Distance threshold for clustering prevention (pixels) */
-  CLUSTERING_RADIUS: 150,
+  /** Distance threshold for clustering prevention (pixels, scaled for 4K canvas) */
+  CLUSTERING_RADIUS: 450,
 
   /** Minimum germinated neighbors to prevent clustering */
   CLUSTERING_THRESHOLD: 3,

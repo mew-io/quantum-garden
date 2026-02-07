@@ -30,14 +30,14 @@ const EVOLUTION = {
   /** Maximum plants that can germinate in a single check (except during waves) */
   MAX_GERMINATIONS_PER_CHECK: 1,
 
-  /** Distance threshold for proximity bonus (pixels) */
-  PROXIMITY_RADIUS: 200, // Plants within 200px of observed plants get bonus
+  /** Distance threshold for proximity bonus (pixels, scaled for 4K canvas) */
+  PROXIMITY_RADIUS: 600, // Plants within 600px of observed plants get bonus
 
   /** Proximity bonus multiplier */
   PROXIMITY_MULTIPLIER: 2.0, // 2x chance near observed plants
 
-  /** Distance threshold for clustering prevention (pixels) */
-  CLUSTERING_RADIUS: 150, // Skip if 3+ germinated plants within 150px
+  /** Distance threshold for clustering prevention (pixels, scaled for 4K canvas) */
+  CLUSTERING_RADIUS: 450, // Skip if 3+ germinated plants within 450px
 
   /** Minimum germinated neighbors to prevent clustering */
   CLUSTERING_THRESHOLD: 3,
@@ -57,11 +57,11 @@ const EVOLUTION = {
   /** Minimum dormant plants required for wave events */
   WAVE_MIN_DORMANT_COUNT: 5, // Need at least 5 dormant plants for a wave
 
-  /** Minimum distance between wave-selected plants (pixels) */
-  WAVE_MIN_SPACING: 200, // Prefer plants at least 200px apart in waves
+  /** Minimum distance between wave-selected plants (pixels, scaled for 4K canvas) */
+  WAVE_MIN_SPACING: 600, // Prefer plants at least 600px apart in waves
 
-  /** Cooldown radius for recent germinations (pixels) */
-  COOLDOWN_RADIUS: 200, // Plants within 200px of recent germinations have reduced chance
+  /** Cooldown radius for recent germinations (pixels, scaled for 4K canvas) */
+  COOLDOWN_RADIUS: 600, // Plants within 600px of recent germinations have reduced chance
 
   /** Cooldown duration (milliseconds) */
   COOLDOWN_DURATION: 120_000, // 2 minutes

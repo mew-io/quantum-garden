@@ -323,13 +323,9 @@ export class SceneManager {
 
   /**
    * Clamp pan offset so the camera stays within garden bounds.
+   * When fully zoomed out, maxPan naturally reaches 0 — no hard snap needed.
    */
   private clampPanOffset(): void {
-    if (!this.isPanningEnabled) {
-      this.panOffset = { x: 0, y: 0 };
-      return;
-    }
-
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const gardenW = CANVAS.DEFAULT_WIDTH;

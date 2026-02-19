@@ -11,6 +11,7 @@ import { useGardenStore } from "@/stores/garden-store";
 import { debugLogger } from "@/lib/debug-logger";
 import { hapticSuccess } from "@/utils/haptics";
 import type { GerminationContext } from "@/components/garden/garden-evolution";
+import type { CircuitType } from "@quantum-garden/shared";
 
 /**
  * Hook that provides evolution functionality.
@@ -95,6 +96,7 @@ export function useEvolution() {
             timestamp: new Date(),
             plantId: waveGerminationsRef.current[0]!, // Reference first plant
             variantId: result.variantId,
+            circuitId: (result.circuitType ?? "variational") as CircuitType,
             germinationType: "wave",
             waveSize,
           });
@@ -119,6 +121,7 @@ export function useEvolution() {
           timestamp: new Date(),
           plantId: result.id,
           variantId: result.variantId,
+          circuitId: (result.circuitType ?? "variational") as CircuitType,
           germinationType: "normal",
           dormancyDuration,
         });

@@ -37,6 +37,8 @@ export interface Plant {
   observed: boolean;
   observedAt?: Date;
   quantumCircuitId: string;
+  /** Circuit type used to generate this plant's quantum state */
+  circuitType?: string;
   visualState: VisualState;
   entanglementGroupId?: string;
   traits?: ResolvedTraits;

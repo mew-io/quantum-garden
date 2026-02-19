@@ -5,10 +5,9 @@
  * in the garden. Replaces scattered static text with dynamic, data-driven
  * content that communicates the actual quantum mechanics at play.
  *
- * Each explanation has three layers:
+ * Each explanation has two layers:
  * - friendly: Accessible 2-3 sentence explanation for general audience
  * - technical: Quantum mechanics details with measurement data
- * - realWorldConnection: How this maps to real quantum computing applications
  */
 
 import type { QuantumEvent, CircuitType } from "@quantum-garden/shared";
@@ -28,8 +27,6 @@ export interface QuantumExplanation {
   friendly: string;
   /** Quantum mechanics details with specific data */
   technical: string;
-  /** How this maps to real quantum computing */
-  realWorldConnection: string;
 }
 
 // =============================================================================
@@ -241,7 +238,6 @@ function generateObservationExplanation(event: QuantumEvent): QuantumExplanation
     summary: `Wave function collapsed: ${variant} (${circuit.name})`,
     friendly: circuitFriendly,
     technical: technicalParts.join(" "),
-    realWorldConnection: getObservationRealWorld(event.circuitId ?? "variational"),
   };
 }
 
@@ -281,13 +277,6 @@ function generateGerminationExplanation(event: QuantumEvent): QuantumExplanation
       (event.germinationType === "guaranteed"
         ? " This plant reached the guaranteed threshold."
         : ""),
-
-    realWorldConnection:
-      "Quantum tunneling is not just a theoretical curiosity — it is the operating principle " +
-      "behind tunnel diodes, flash memory (where electrons tunnel through oxide barriers), " +
-      "and scanning tunneling microscopes that image individual atoms. In quantum computing, " +
-      "quantum annealing (used by D-Wave systems) exploits tunneling to escape local minima " +
-      "when searching for optimal solutions to combinatorial problems.",
   };
 }
 
@@ -315,15 +304,6 @@ function generateEntanglementExplanation(event: QuantumEvent): QuantumExplanatio
       `Correlated traits: color palette, glyph pattern, growth rate, opacity (determined by shared quantum measurement). ` +
       `Independent traits: species/variant, position (determined classically). ` +
       `This mirrors real entanglement: measurement outcomes are correlated, but the physical systems can otherwise differ.`,
-
-    realWorldConnection:
-      "Quantum entanglement is the foundation of quantum key distribution (QKD) — " +
-      "protocols like BB84 and E91 use entangled pairs to detect eavesdropping, enabling " +
-      "provably secure communication. Entanglement also enables quantum teleportation " +
-      "(transferring a qubit's state using entanglement + classical communication) " +
-      "and superdense coding (sending 2 classical bits using 1 entangled qubit). " +
-      "In quantum computing, entanglement between qubits is what enables exponential " +
-      "parallelism — it is the key resource that separates quantum from classical computation.",
   };
 }
 
@@ -347,14 +327,6 @@ function generateWaveGerminationExplanation(event: QuantumEvent): QuantumExplana
       `3-5 spatially distributed plants are selected to maximize visual spread across the garden. ` +
       `This models quantum phase transitions — abrupt, collective changes in a many-body ` +
       `quantum system's ground state driven by a parameter crossing a critical threshold.`,
-
-    realWorldConnection:
-      "Quantum phase transitions occur in superconductors (where resistance drops to zero " +
-      "below a critical temperature), superfluids, and Bose-Einstein condensates. " +
-      "In quantum computing, understanding phase transitions is critical for quantum error " +
-      "correction, where correlated qubit errors must be anticipated. Quantum annealing " +
-      "deliberately drives phase transitions to find optimal solutions, and topological " +
-      "quantum computing aims to encode information in phase-transition-resistant states.",
   };
 }
 
@@ -385,77 +357,12 @@ function generateDeathExplanation(event: QuantumEvent): QuantumExplanation {
       `density matrix transitions from a pure state (off-diagonal elements present) to a ` +
       `mixed state (off-diagonal elements approach zero). The decoherence time T₂ is the ` +
       `characteristic timescale — after T₂, quantum information is effectively lost to the environment.`,
-
-    realWorldConnection:
-      "Decoherence is the primary obstacle to building practical quantum computers. " +
-      "IonQ's trapped-ion systems achieve coherence times of seconds to minutes by isolating " +
-      "individual ytterbium ions in electromagnetic traps and using laser pulses for gate operations. " +
-      "Superconducting qubit systems (IBM, Google) have shorter coherence times (~100 microseconds) " +
-      "but faster gate speeds. The race to build fault-tolerant quantum computers is fundamentally " +
-      "a race against decoherence — quantum error correction codes like the surface code " +
-      "use many physical qubits to protect one logical qubit from decoherence.",
   };
 }
 
 // =============================================================================
 // Helpers
 // =============================================================================
-
-function getObservationRealWorld(circuitId: CircuitType): string {
-  switch (circuitId) {
-    case "superposition":
-      return (
-        "Superposition is the foundation of all quantum algorithms. " +
-        "Grover's search algorithm puts qubits into superposition to search unsorted databases " +
-        "quadratically faster than any classical algorithm. Shor's factoring algorithm uses " +
-        "superposition to test all possible factors simultaneously. A single qubit in superposition " +
-        "represents 2 states — 50 qubits represent 2⁵⁰ (over 1 quadrillion) states at once, " +
-        "enabling parallelism impossible on classical hardware."
-      );
-    case "bell_pair":
-      return (
-        "Bell pairs are the fundamental building blocks of quantum networks. " +
-        "They enable quantum key distribution (QKD) for theoretically unbreakable encryption — " +
-        "any eavesdropping attempt disturbs the entangled state and is immediately detectable. " +
-        "Bell pairs also enable quantum teleportation (transferring quantum states) and are used " +
-        "to verify that a quantum processor is genuinely quantum through Bell inequality violations, " +
-        "which no classical system can reproduce."
-      );
-    case "ghz_state":
-      return (
-        "GHZ states are used in quantum error correction, quantum secret sharing " +
-        "(splitting a secret among multiple parties so that all must cooperate to reconstruct it), " +
-        "and quantum sensing (achieving measurement precision beyond classical limits). " +
-        "GHZ states demonstrate quantum nonlocality more starkly than Bell pairs — " +
-        "a single measurement can definitively rule out all classical hidden-variable theories, " +
-        "proving that quantum mechanics cannot be explained by any local realistic model."
-      );
-    case "interference":
-      return (
-        "Quantum interference is the mechanism that makes quantum speedups possible. " +
-        "In Grover's search, interference amplifies the probability of correct answers while " +
-        "canceling wrong ones — like tuning a radio to strengthen the right signal and suppress noise. " +
-        "Shor's factoring algorithm uses the quantum Fourier transform — a sophisticated " +
-        "interference pattern — to extract periodicity from quantum states. " +
-        "Without interference, quantum computers would offer no advantage over classical ones."
-      );
-    case "variational":
-      return (
-        "Variational quantum circuits are the most practical near-term quantum algorithms. " +
-        "VQE (Variational Quantum Eigensolver) simulates molecular energy levels for drug discovery " +
-        "and materials science. QAOA (Quantum Approximate Optimization Algorithm) tackles " +
-        "combinatorial optimization problems like logistics routing and portfolio optimization. " +
-        "These hybrid classical-quantum algorithms are specifically designed to work on today's " +
-        "noisy intermediate-scale quantum (NISQ) hardware — they don't need perfect qubits."
-      );
-    default:
-      return (
-        "Quantum circuits are the programs of quantum computers. Each gate manipulates " +
-        "qubits through precise operations — rotations, entanglement, and interference — " +
-        "to solve problems that are intractable for classical computers."
-      );
-  }
-}
 
 /**
  * Format a millisecond duration as a human-readable string.

@@ -5,14 +5,16 @@ import { router, publicProcedure } from "../trpc";
 
 /**
  * Transform a Prisma plant to the shared Plant type.
+ * Optionally accepts the circuit type from an included quantumCircuit relation.
  */
-function transformPlant(plant: PrismaPlant): Plant {
+function transformPlant(plant: PrismaPlant, circuitType?: string): Plant {
   return {
     id: plant.id,
     position: { x: plant.positionX, y: plant.positionY },
     observed: plant.observed,
     observedAt: plant.observedAt ?? undefined,
     quantumCircuitId: plant.quantumCircuitId,
+    circuitType,
     visualState: plant.visualState as VisualState,
     entanglementGroupId: plant.entanglementGroupId ?? undefined,
     traits: plant.traits ? (plant.traits as unknown as ResolvedTraits) : undefined,
@@ -39,8 +41,9 @@ export const plantsRouter = router({
     const plants = await ctx.db.plant.findMany({
       where: { diedAt: null },
       orderBy: { createdAt: "asc" },
+      include: { quantumCircuit: true },
     });
-    return plants.map(transformPlant);
+    return plants.map((p) => transformPlant(p, p.quantumCircuit?.circuitId ?? "variational"));
   }),
 
   /**
@@ -54,7 +57,7 @@ export const plantsRouter = router({
         entanglementGroup: true,
       },
     });
-    return plant ? transformPlant(plant) : null;
+    return plant ? transformPlant(plant, plant.quantumCircuit?.circuitId ?? "variational") : null;
   }),
 
   /**
@@ -68,8 +71,9 @@ export const plantsRouter = router({
           entanglementGroupId: input.groupId,
           diedAt: null,
         },
+        include: { quantumCircuit: true },
       });
-      return plants.map(transformPlant);
+      return plants.map((p) => transformPlant(p, p.quantumCircuit?.circuitId ?? "variational"));
     }),
 
   /**
@@ -81,8 +85,9 @@ export const plantsRouter = router({
         observed: false,
         diedAt: null,
       },
+      include: { quantumCircuit: true },
     });
-    return plants.map(transformPlant);
+    return plants.map((p) => transformPlant(p, p.quantumCircuit?.circuitId ?? "variational"));
   }),
 
   /**
@@ -94,18 +99,21 @@ export const plantsRouter = router({
   germinate: publicProcedure
     .input(z.object({ plantId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Find the plant
+      // Find the plant with its quantum circuit for circuit type info
       const plant = await ctx.db.plant.findUnique({
         where: { id: input.plantId },
+        include: { quantumCircuit: true },
       });
 
       if (!plant) {
         throw new Error(`Plant not found: ${input.plantId}`);
       }
 
+      const circuitType = plant.quantumCircuit?.circuitId ?? "variational";
+
       if (plant.germinatedAt) {
         // Already germinated, return current state
-        return transformPlant(plant);
+        return transformPlant(plant, circuitType);
       }
 
       // Update plant with germination timestamp
@@ -114,6 +122,6 @@ export const plantsRouter = router({
         data: { germinatedAt: new Date() },
       });
 
-      return transformPlant(updatedPlant);
+      return transformPlant(updatedPlant, circuitType);
     }),
 });

@@ -100,6 +100,7 @@ export function useObservation() {
           timestamp: new Date(),
           plantId: result.id,
           variantId: result.variantId,
+          circuitId: result.circuitId as CircuitType,
           entanglementGroupId: result.entanglementGroupId ?? undefined,
           partnerPlantIds: partnerIds.length > 0 ? partnerIds : undefined,
         });

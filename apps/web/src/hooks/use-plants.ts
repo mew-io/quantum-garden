@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import type { Plant } from "@quantum-garden/shared";
+import type { Plant, CircuitType } from "@quantum-garden/shared";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 
@@ -70,6 +70,7 @@ export function usePlants() {
                 timestamp: plant.germinatedAt,
                 plantId: plant.id,
                 variantId: plant.variantId,
+                circuitId: (plant.circuitType ?? "variational") as CircuitType,
                 germinationType: "normal",
                 dormancyDuration,
               });
@@ -87,6 +88,7 @@ export function usePlants() {
                 timestamp: new Date(),
                 plantId: prevPlant.id,
                 variantId: prevPlant.variantId,
+                circuitId: (prevPlant.circuitType ?? "variational") as CircuitType,
                 createdAt: prevPlant.createdAt,
               });
             }

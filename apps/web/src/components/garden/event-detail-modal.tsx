@@ -4,8 +4,7 @@
  * Displays multi-layer educational content about a selected quantum event:
  * - Friendly explanation (always visible)
  * - Technical quantum mechanics details
- * - Real-world quantum computing connections
- * - Circuit diagram for observation events
+ * - Circuit diagram (for any event with a circuit)
  * - Event metadata
  *
  * Includes prev/next navigation between events.
@@ -49,14 +48,22 @@ function getEventTitle(event: QuantumEvent): string {
         : getCircuitInfo("variational");
       return circuit.name;
     }
-    case "germination":
-      return "Quantum Germination";
-    case "entanglement":
-      return "Quantum Entanglement";
-    case "wave_germination":
-      return "Wave Germination";
-    case "death":
-      return "Quantum Decoherence";
+    case "germination": {
+      const gCircuit = event.circuitId ? getCircuitInfo(event.circuitId) : null;
+      return gCircuit ? `Quantum Germination (${gCircuit.name})` : "Quantum Germination";
+    }
+    case "entanglement": {
+      const eCircuit = event.circuitId ? getCircuitInfo(event.circuitId) : null;
+      return eCircuit ? `Quantum Entanglement (${eCircuit.name})` : "Quantum Entanglement";
+    }
+    case "wave_germination": {
+      const wCircuit = event.circuitId ? getCircuitInfo(event.circuitId) : null;
+      return wCircuit ? `Wave Germination (${wCircuit.name})` : "Wave Germination";
+    }
+    case "death": {
+      const dCircuit = event.circuitId ? getCircuitInfo(event.circuitId) : null;
+      return dCircuit ? `Decoherence (${dCircuit.name})` : "Quantum Decoherence";
+    }
     default:
       return "Quantum Event";
   }
@@ -285,11 +292,8 @@ export function EventDetailModal() {
   const title = getEventTitle(selectedEvent);
   const concept = getEventConcept(selectedEvent);
 
-  // Get circuit diagram for observation events
-  const diagram =
-    selectedEvent.type === "observation" && selectedEvent.circuitId
-      ? getCircuitDiagram(selectedEvent.circuitId)
-      : undefined;
+  // Get circuit diagram for any event that has a circuit
+  const diagram = selectedEvent.circuitId ? getCircuitDiagram(selectedEvent.circuitId) : undefined;
 
   return (
     <div
@@ -347,12 +351,6 @@ export function EventDetailModal() {
 
           {/* Quantum Details — technical explanation */}
           <ExplanationSection title="Quantum Details" content={explanation.technical} />
-
-          {/* Real-World Connection */}
-          <ExplanationSection
-            title="In Real Quantum Computing"
-            content={explanation.realWorldConnection}
-          />
 
           {/* Event-specific metadata */}
           <EventDetails event={selectedEvent} />

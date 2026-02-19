@@ -66,12 +66,22 @@ export function isVectorVariant(variant: PlantVariant): boolean {
 }
 
 /**
- * Get the effective keyframes for a variant (pixel or vector).
- * For vector variants, creates compatible keyframe objects from vectorKeyframes.
+ * Check if a variant uses watercolor rendering mode.
+ */
+export function isWatercolorVariant(variant: PlantVariant): boolean {
+  return variant.renderMode === "watercolor";
+}
+
+/**
+ * Get the effective keyframes for a variant (pixel, vector, or watercolor).
+ * For vector/watercolor variants, creates compatible keyframe objects from their configs.
  */
 export function getEffectiveKeyframes(
   variant: PlantVariant
 ): Array<{ name: string; duration: number }> {
+  if (isWatercolorVariant(variant) && variant.watercolorConfig?.keyframes.length) {
+    return variant.watercolorConfig.keyframes;
+  }
   if (isVectorVariant(variant) && variant.vectorKeyframes?.length) {
     return variant.vectorKeyframes.map((vk) => ({
       name: vk.name,
@@ -82,9 +92,12 @@ export function getEffectiveKeyframes(
 }
 
 /**
- * Get the number of keyframes in a variant (pixel or vector).
+ * Get the number of keyframes in a variant (pixel, vector, or watercolor).
  */
 export function getKeyframeCount(variant: PlantVariant): number {
+  if (isWatercolorVariant(variant) && variant.watercolorConfig?.keyframes.length) {
+    return variant.watercolorConfig.keyframes.length;
+  }
   if (isVectorVariant(variant) && variant.vectorKeyframes?.length) {
     return variant.vectorKeyframes.length;
   }
@@ -167,11 +180,11 @@ export function computeLifecycleState(
   const { germinatedAt, lifecycleModifier } = plant;
   const totalDuration = getTotalDuration(variant, lifecycleModifier);
   const effectiveKeyframes = getEffectiveKeyframes(variant);
-  const isVector = isVectorVariant(variant);
+  const usesPlaceholderKeyframes = isVectorVariant(variant) || isWatercolorVariant(variant);
 
   // Helper to get keyframe (real or placeholder)
   const getKeyframe = (index: number): GlyphKeyframe | undefined => {
-    if (isVector) {
+    if (usesPlaceholderKeyframes) {
       const kf = effectiveKeyframes[index];
       return kf ? createPlaceholderKeyframe(kf) : undefined;
     }
@@ -288,14 +301,14 @@ export function computeLifecycleStateFromProgress(
 ): ComputedLifecycleState {
   const clampedProgress = Math.max(0, Math.min(1, progress));
   const effectiveKeyframes = getEffectiveKeyframes(variant);
-  const isVector = isVectorVariant(variant);
+  const usesPlaceholders = isVectorVariant(variant) || isWatercolorVariant(variant);
 
   // Calculate total duration for reference (used for elapsedSeconds/totalDuration)
   const totalDuration = effectiveKeyframes.reduce((sum, kf) => sum + kf.duration, 0);
 
   // Helper to get keyframe (real or placeholder)
   const getKeyframe = (index: number): GlyphKeyframe | undefined => {
-    if (isVector) {
+    if (usesPlaceholders) {
       const kf = effectiveKeyframes[index];
       return kf ? createPlaceholderKeyframe(kf) : undefined;
     }

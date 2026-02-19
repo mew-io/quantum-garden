@@ -7,6 +7,8 @@
  * See docs/variants-and-lifecycle.md for full architecture documentation.
  */
 
+import type { ResolvedTraits } from "../types";
+
 /**
  * A single keyframe in a plant's lifecycle animation.
  *
@@ -76,8 +78,9 @@ export interface PlantVariant {
    * Render mode determines how the plant is displayed.
    * - 'pixel': Traditional 64x64 binary patterns (default)
    * - 'vector': Smooth vector lines using Three.js Line primitives
+   * - 'watercolor': Layered semi-transparent shapes for painterly effect
    */
-  renderMode?: "pixel" | "vector";
+  renderMode?: "pixel" | "vector" | "watercolor";
 
   /**
    * Ordered array of keyframes defining the lifecycle animation.
@@ -93,6 +96,14 @@ export interface PlantVariant {
    * Required when renderMode is 'vector'.
    */
   vectorKeyframes?: VectorKeyframe[];
+
+  /**
+   * Watercolor configuration for watercolor mode variants.
+   * Defines lifecycle keyframes, watercolor effect settings, and a builder
+   * function that produces watercolor elements from quantum traits.
+   * Required when renderMode is 'watercolor'.
+   */
+  watercolorConfig?: WatercolorConfig;
 
   /**
    * Optional color variations for multi-color variants.
@@ -573,4 +584,130 @@ export interface VectorGlyphSnapshot {
 
   /** Outline color (charcoal by default) */
   outlineColor?: string;
+}
+
+// ============================================================================
+// WATERCOLOR RENDERING TYPES
+// ============================================================================
+
+/**
+ * Shape definitions for the watercolor renderer.
+ * Each type maps to a specific Three.js Shape/Geometry builder.
+ * Coordinates are relative to the element's position.
+ */
+export type WatercolorShapeDef =
+  | WatercolorPetal
+  | WatercolorLeaf
+  | WatercolorDisc
+  | WatercolorDot
+  | WatercolorStem;
+
+export interface WatercolorPetal {
+  type: "petal";
+  /** Width of the petal at its widest point */
+  width: number;
+  /** Length from base to tip */
+  length: number;
+  /** Roundness of the petal base (0.2 = pointed, 1.3 = very round) */
+  roundness: number;
+}
+
+export interface WatercolorLeaf {
+  type: "leaf";
+  /** Width of the leaf at its widest point */
+  width: number;
+  /** Length from base to tip */
+  length: number;
+}
+
+export interface WatercolorDisc {
+  type: "disc";
+  /** Radius of the disc */
+  radius: number;
+}
+
+export interface WatercolorDot {
+  type: "dot";
+  /** Radius of the dot */
+  radius: number;
+}
+
+export interface WatercolorStem {
+  type: "stem";
+  /** Control points for the CatmullRom curve [x, y][] */
+  points: [number, number][];
+  /** Thickness of the stem tube */
+  thickness: number;
+}
+
+/**
+ * A positioned element in a watercolor composition.
+ * The watercolor renderer applies the layering effect to each element.
+ */
+export interface WatercolorElement {
+  /** Shape definition */
+  shape: WatercolorShapeDef;
+  /** Position in 64x64 coordinate space */
+  position: { x: number; y: number };
+  /** Rotation in radians */
+  rotation: number;
+  /** Scale factor */
+  scale: number;
+  /** Base color (hex string) */
+  color: string;
+  /** Per-element opacity override (default uses wcEffect.opacity) */
+  opacity?: number;
+  /** Z offset for stacking order within the composition */
+  zOffset?: number;
+}
+
+/**
+ * Parameters controlling the watercolor layering effect.
+ * Applied uniformly to all elements in a composition.
+ */
+export interface WatercolorEffect {
+  /** Number of semi-transparent layers per element (2-5) */
+  layers: number;
+  /** Base opacity for innermost layer (0.1-1.0) */
+  opacity: number;
+  /** Position jitter between layers (0.0-0.3) */
+  spread: number;
+  /** HSL color jitter per layer (0.0-0.2) */
+  colorVariation: number;
+}
+
+/**
+ * Context passed to the watercolor builder function.
+ * Contains all quantum-derived data and lifecycle state needed
+ * to produce the watercolor elements for a plant.
+ */
+export interface WatercolorBuildContext {
+  /** Current keyframe name (e.g., "bud", "bloom", "fade") */
+  keyframeName: string;
+  /** Progress within current keyframe (0-1) */
+  keyframeProgress: number;
+  /** Total lifecycle progress (0-1) */
+  totalProgress: number;
+  /** Quantum-resolved traits (null if superposed/unobserved) */
+  traits: ResolvedTraits | null;
+  /** Deterministic seed derived from plant ID */
+  seed: number;
+  /** Selected color variation name (from quantum measurement) */
+  colorVariationName: string | null;
+  /** Which quantum circuit drove this plant */
+  circuitType: string | null;
+}
+
+/**
+ * Watercolor variant configuration.
+ * Defines lifecycle timing, effect parameters, and the builder function
+ * that translates quantum traits into watercolor elements.
+ */
+export interface WatercolorConfig {
+  /** Lifecycle keyframe definitions (timing only - shapes come from builder) */
+  keyframes: { name: string; duration: number }[];
+  /** Watercolor effect settings */
+  wcEffect: WatercolorEffect;
+  /** Builder function: takes context, returns elements to render */
+  buildElements: (ctx: WatercolorBuildContext) => WatercolorElement[];
 }

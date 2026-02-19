@@ -4,6 +4,7 @@ import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import {
   getEffectivePalette,
   isVectorVariant,
+  isWatercolorVariant,
   getKeyframeCount,
   type GlyphKeyframe,
   type VectorKeyframe,
@@ -29,27 +30,40 @@ export function KeyframePanel() {
   }
 
   const isVector = isVectorVariant(variant);
+  const isWatercolor = isWatercolorVariant(variant);
   const keyframeCount = getKeyframeCount(variant);
 
   // Get keyframe based on variant type
   const pixelKeyframe =
-    !isVector && selectedKeyframeIndex !== null ? variant.keyframes[selectedKeyframeIndex] : null;
+    !isVector && !isWatercolor && selectedKeyframeIndex !== null
+      ? variant.keyframes[selectedKeyframeIndex]
+      : null;
   const vectorKeyframe =
     isVector && selectedKeyframeIndex !== null
       ? variant.vectorKeyframes?.[selectedKeyframeIndex]
       : null;
+  const watercolorKeyframe =
+    isWatercolor && selectedKeyframeIndex !== null
+      ? variant.watercolorConfig?.keyframes[selectedKeyframeIndex]
+      : null;
 
-  const hasKeyframe = pixelKeyframe || vectorKeyframe;
+  const hasKeyframe = pixelKeyframe || vectorKeyframe || watercolorKeyframe;
 
   if (!hasKeyframe) {
     // Get keyframes for the button grid
-    const keyframeButtons = isVector
-      ? (variant.vectorKeyframes?.map((kf, index) => ({
+    const keyframeButtons = isWatercolor
+      ? (variant.watercolorConfig?.keyframes.map((kf, index) => ({
           name: kf.name,
           duration: kf.duration,
           index,
         })) ?? [])
-      : variant.keyframes.map((kf, index) => ({ name: kf.name, duration: kf.duration, index }));
+      : isVector
+        ? (variant.vectorKeyframes?.map((kf, index) => ({
+            name: kf.name,
+            duration: kf.duration,
+            index,
+          })) ?? [])
+        : variant.keyframes.map((kf, index) => ({ name: kf.name, duration: kf.duration, index }));
 
     return (
       <div className="p-4 bg-gray-800 rounded-lg">
@@ -67,6 +81,77 @@ export function KeyframePanel() {
               <span className="text-xs text-gray-400 ml-2">{duration}s</span>
             </button>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Render watercolor keyframe details
+  if (isWatercolor && watercolorKeyframe) {
+    const wcEffect = variant.watercolorConfig?.wcEffect;
+    return (
+      <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-white">{watercolorKeyframe.name}</h3>
+            <span className="text-xs bg-rose-900 text-rose-300 px-1.5 py-0.5 rounded">
+              Watercolor
+            </span>
+          </div>
+          <button onClick={() => selectKeyframe(null)} className="text-gray-400 hover:text-white">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-gray-400 uppercase tracking-wide">Duration</label>
+            <p className="text-white font-mono">{watercolorKeyframe.duration}s</p>
+          </div>
+          {wcEffect && (
+            <>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Layers</label>
+                <p className="text-white font-mono">{wcEffect.layers}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Opacity</label>
+                <p className="text-white font-mono">{wcEffect.opacity}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Spread</label>
+                <p className="text-white font-mono">{wcEffect.spread}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">
+                  Color Variation
+                </label>
+                <p className="text-white font-mono">{wcEffect.colorVariation}</p>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="flex gap-2 pt-2 border-t border-gray-700">
+          <button
+            onClick={() => selectKeyframe(Math.max(0, selectedKeyframeIndex! - 1))}
+            disabled={selectedKeyframeIndex === 0}
+            className="flex-1 px-3 py-1.5 text-sm rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Previous
+          </button>
+          <button
+            onClick={() => selectKeyframe(Math.min(keyframeCount - 1, selectedKeyframeIndex! + 1))}
+            disabled={selectedKeyframeIndex === keyframeCount - 1}
+            className="flex-1 px-3 py-1.5 text-sm rounded bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
         </div>
       </div>
     );

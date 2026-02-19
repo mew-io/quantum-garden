@@ -19,6 +19,7 @@ import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
 import { GerminationOverlay } from "./germination-overlay";
 import { VectorPlantOverlay } from "./vector-plant-overlay";
+import { WatercolorPlantOverlay } from "./watercolor-plant-overlay";
 import { DebugOverlay } from "./debug-overlay";
 
 /**
@@ -35,6 +36,7 @@ export class OverlayManager {
   public feedback: FeedbackOverlay;
   public germination: GerminationOverlay;
   public vectorPlants: VectorPlantOverlay;
+  public watercolorPlants: WatercolorPlantOverlay;
   public debug: DebugOverlay;
 
   constructor(sceneManager: SceneManager) {
@@ -50,6 +52,7 @@ export class OverlayManager {
     this.feedback = new FeedbackOverlay();
     this.germination = new GerminationOverlay();
     this.vectorPlants = new VectorPlantOverlay();
+    this.watercolorPlants = new WatercolorPlantOverlay();
     this.debug = new DebugOverlay();
 
     // Add all overlay meshes to the overlay scene
@@ -59,6 +62,7 @@ export class OverlayManager {
     this.overlayScene.add(this.feedback.getObject());
     this.overlayScene.add(this.germination.getObject());
     this.overlayScene.add(this.vectorPlants.getObject());
+    this.overlayScene.add(this.watercolorPlants.getObject());
     this.overlayScene.add(this.debug.getObject());
   }
 
@@ -91,6 +95,10 @@ export class OverlayManager {
       this.vectorPlants.update(time);
     }
 
+    if (this.watercolorPlants.hasActiveAnimations()) {
+      this.watercolorPlants.update(time);
+    }
+
     if (this.debug.hasActiveAnimations()) {
       this.debug.update(time, deltaTime);
     }
@@ -101,6 +109,7 @@ export class OverlayManager {
    */
   setPlants(plants: Plant[]): void {
     this.vectorPlants.setPlants(plants);
+    this.watercolorPlants.setPlants(plants);
     this.debug.setPlants(plants);
   }
 
@@ -141,6 +150,7 @@ export class OverlayManager {
     this.feedback.dispose();
     this.germination.dispose();
     this.vectorPlants.dispose();
+    this.watercolorPlants.dispose();
     this.debug.dispose();
   }
 }

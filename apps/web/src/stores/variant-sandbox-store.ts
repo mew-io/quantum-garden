@@ -28,6 +28,7 @@ interface VariantSandboxState {
   scale: number;
   background: Background;
   showGrid: boolean;
+  postProcessing: boolean;
 
   // Editing state (for future keyframe editing)
   isDirty: boolean;
@@ -57,6 +58,7 @@ interface VariantSandboxState {
   setScale: (scale: number) => void;
   setBackground: (bg: Background) => void;
   toggleGrid: () => void;
+  togglePostProcessing: () => void;
 
   // Navigation actions
   setViewMode: (mode: ViewMode) => void;
@@ -79,6 +81,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
   scale: 2,
   background: "garden",
   showGrid: false,
+  postProcessing: true,
 
   isDirty: false,
   editedKeyframes: new Map(),
@@ -191,12 +194,14 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       scale: 2,
       background: "garden",
       showGrid: false,
+      postProcessing: true,
     }),
 
   // View actions
   setScale: (scale) => set({ scale }),
   setBackground: (background) => set({ background }),
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+  togglePostProcessing: () => set((state) => ({ postProcessing: !state.postProcessing })),
 
   // Navigation actions
   setViewMode: (mode) => set({ viewMode: mode }),

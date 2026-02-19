@@ -4,6 +4,7 @@ import {
   CANVAS,
   PLANT_VARIANTS,
   isVectorVariant,
+  isWatercolorVariant,
   getKeyframeCount,
   getBaseTotalDuration,
   type VectorKeyframe,
@@ -12,6 +13,7 @@ import {
 import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import { MiniGlyph } from "./mini-glyph";
 import { VectorMiniGlyph } from "./vector-mini-glyph";
+import { WatercolorMiniGlyph } from "./watercolor-mini-glyph";
 import { SuperposedPreview } from "./superposed-preview";
 
 /**
@@ -45,6 +47,7 @@ export function VariantGallery() {
       <div className="md:hidden space-y-4">
         {PLANT_VARIANTS.map((variant) => {
           const isVector = isVectorVariant(variant);
+          const isWatercolor = isWatercolorVariant(variant);
           const keyframeCount = getKeyframeCount(variant);
           const totalDuration = getBaseTotalDuration(variant);
 
@@ -52,12 +55,16 @@ export function VariantGallery() {
           const previewKeyframeIndex = Math.min(Math.floor(keyframeCount / 2), keyframeCount - 1);
           const previewKeyframe = isVector
             ? variant.vectorKeyframes?.[previewKeyframeIndex]
-            : variant.keyframes[previewKeyframeIndex];
+            : !isWatercolor
+              ? variant.keyframes[previewKeyframeIndex]
+              : undefined;
 
           // Get keyframe strip (first 6 keyframes)
-          const keyframeStrip = isVector
-            ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
-            : variant.keyframes.slice(0, 6);
+          const keyframeStrip = isWatercolor
+            ? (variant.watercolorConfig?.keyframes.slice(0, 6) ?? [])
+            : isVector
+              ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
+              : variant.keyframes.slice(0, 6);
 
           // Get transition hint info for tooltip
           const transitionHint = isVector
@@ -79,12 +86,16 @@ export function VariantGallery() {
                   className="flex-shrink-0 rounded-lg p-2"
                   style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                 >
-                  {previewKeyframe &&
+                  {isWatercolor ? (
+                    <WatercolorMiniGlyph variant={variant} size={64} />
+                  ) : (
+                    previewKeyframe &&
                     (isVector ? (
                       <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={64} />
                     ) : (
                       <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={64} />
-                    ))}
+                    ))
+                  )}
                 </div>
 
                 {/* Info */}
@@ -116,6 +127,11 @@ export function VariantGallery() {
                     {isVector && (
                       <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded">
                         Vector
+                      </span>
+                    )}
+                    {isWatercolor && (
+                      <span className="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded">
+                        Watercolor
                       </span>
                     )}
                     {variant.loop && (
@@ -161,7 +177,9 @@ export function VariantGallery() {
                     style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                     title={`${kf.name} (${kf.duration}s)`}
                   >
-                    {isVector ? (
+                    {isWatercolor ? (
+                      <WatercolorMiniGlyph variant={variant} keyframeIndex={i} size={32} />
+                    ) : isVector ? (
                       <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={32} />
                     ) : (
                       <MiniGlyph keyframe={kf as GlyphKeyframe} size={32} />
@@ -198,6 +216,7 @@ export function VariantGallery() {
           <tbody>
             {PLANT_VARIANTS.map((variant) => {
               const isVector = isVectorVariant(variant);
+              const isWatercolor = isWatercolorVariant(variant);
               const keyframeCount = getKeyframeCount(variant);
               const totalDuration = getBaseTotalDuration(variant);
 
@@ -208,17 +227,28 @@ export function VariantGallery() {
               );
               const previewKeyframe = isVector
                 ? variant.vectorKeyframes?.[previewKeyframeIndex]
-                : variant.keyframes[previewKeyframeIndex];
+                : !isWatercolor
+                  ? variant.keyframes[previewKeyframeIndex]
+                  : undefined;
 
               // Get keyframe strip (first 6 keyframes)
-              const keyframeStrip = isVector
-                ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
-                : variant.keyframes.slice(0, 6);
+              const keyframeStrip = isWatercolor
+                ? (variant.watercolorConfig?.keyframes.slice(0, 6) ?? [])
+                : isVector
+                  ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
+                  : variant.keyframes.slice(0, 6);
 
               // Get transition hint for progressive drawing
               const transitionHint = isVector
                 ? variant.vectorKeyframes?.find((kf) => kf.transitionHint)?.transitionHint
                 : null;
+
+              const rendererLabel = isWatercolor ? "Watercolor" : isVector ? "Vector" : "Raster";
+              const rendererClass = isWatercolor
+                ? "bg-rose-100 text-rose-700"
+                : isVector
+                  ? "bg-cyan-100 text-cyan-700"
+                  : "bg-gray-100 text-gray-700";
 
               return (
                 <tr
@@ -232,12 +262,16 @@ export function VariantGallery() {
                       className="rounded-lg p-1.5 inline-block"
                       style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                     >
-                      {previewKeyframe &&
+                      {isWatercolor ? (
+                        <WatercolorMiniGlyph variant={variant} size={48} />
+                      ) : (
+                        previewKeyframe &&
                         (isVector ? (
                           <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={48} />
                         ) : (
                           <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={48} />
-                        ))}
+                        ))
+                      )}
                     </div>
                   </td>
 
@@ -252,11 +286,9 @@ export function VariantGallery() {
                   <td className="py-3 px-4 text-center">
                     <div className="flex items-center justify-center gap-1">
                       <span
-                        className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${
-                          isVector ? "bg-cyan-100 text-cyan-700" : "bg-gray-100 text-gray-700"
-                        }`}
+                        className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${rendererClass}`}
                       >
-                        {isVector ? "Vector" : "Raster"}
+                        {rendererLabel}
                       </span>
                       {transitionHint && (
                         <span
@@ -333,7 +365,9 @@ export function VariantGallery() {
                           style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
                           title={`${kf.name} (${kf.duration}s)`}
                         >
-                          {isVector ? (
+                          {isWatercolor ? (
+                            <WatercolorMiniGlyph variant={variant} keyframeIndex={i} size={28} />
+                          ) : isVector ? (
                             <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={28} />
                           ) : (
                             <MiniGlyph keyframe={kf as GlyphKeyframe} size={28} />

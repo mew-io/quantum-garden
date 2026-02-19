@@ -31,6 +31,17 @@ export type {
   TransitionStrategy,
   // Clustering behavior
   ClusteringBehavior,
+  // Watercolor rendering types
+  WatercolorShapeDef,
+  WatercolorPetal,
+  WatercolorLeaf,
+  WatercolorDisc,
+  WatercolorDot,
+  WatercolorStem,
+  WatercolorElement,
+  WatercolorEffect,
+  WatercolorBuildContext,
+  WatercolorConfig,
 } from "./types";
 
 // Lifecycle computation
@@ -45,8 +56,9 @@ export {
   selectColorVariation,
   getEffectivePalette,
   getKeyframeWithEffectivePalette,
-  // Vector/pixel abstraction helpers
+  // Vector/pixel/watercolor abstraction helpers
   isVectorVariant,
+  isWatercolorVariant,
   getEffectiveKeyframes,
   getKeyframeCount,
   getBaseTotalDuration,

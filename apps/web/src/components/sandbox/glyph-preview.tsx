@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { GlyphPattern, ColorPalette } from "@quantum-garden/shared";
 import type { VisualState, Background } from "@/stores/sandbox-store";
-import { renderGlyph, getGlyphSize } from "./glyph-renderer";
+import { SandboxThreeRenderer } from "./sandbox-three-renderer";
 
 interface GlyphPreviewProps {
   pattern: GlyphPattern;
@@ -18,8 +18,8 @@ interface GlyphPreviewProps {
 }
 
 /**
- * React wrapper for Canvas2D glyph rendering.
- * Manages canvas lifecycle and re-renders on prop changes.
+ * React wrapper for Three.js glyph rendering.
+ * Manages renderer lifecycle and re-renders on prop changes.
  */
 export function GlyphPreview({
   pattern,
@@ -32,36 +32,77 @@ export function GlyphPreview({
   onClick,
   className = "",
 }: GlyphPreviewProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<SandboxThreeRenderer | null>(null);
 
-  const size = getGlyphSize(pattern, scale);
+  const gridSize = pattern.grid.length;
+  const size = gridSize * scale;
 
   // Render when props change
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!containerRef.current) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    // Recreate renderer if container changed or first render
+    if (rendererRef.current) {
+      rendererRef.current.dispose();
+    }
 
-    // Set canvas size with device pixel ratio
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-    ctx.scale(dpr, dpr);
-
-    renderGlyph(ctx, {
-      pattern,
-      palette,
-      scale,
-      visualState,
-      showGrid,
-      background,
-      superposedPatterns,
+    const renderer = new SandboxThreeRenderer({
+      container: containerRef.current,
+      width: size,
+      height: size,
+      enablePostProcessing: false,
     });
-  }, [pattern, palette, scale, visualState, showGrid, background, superposedPatterns, size]);
+
+    const totalInstances =
+      visualState === "superposed" && superposedPatterns
+        ? 1 + superposedPatterns.slice(0, 2).length
+        : 1;
+
+    renderer.setInstanceCount(totalInstances);
+    rendererRef.current = renderer;
+
+    if (visualState === "superposed" && superposedPatterns) {
+      const allPatterns = [pattern, ...superposedPatterns.slice(0, 2)];
+      allPatterns.forEach((p, idx) => {
+        renderer.updateInstance(idx, {
+          pattern: p.grid,
+          patternId: `preview-${p.name}-${palette.name}-${idx}`,
+          palette: palette.colors,
+          opacity: 0.3,
+          scale: 1.0,
+        });
+      });
+    } else {
+      renderer.updateInstance(0, {
+        pattern: pattern.grid,
+        patternId: `preview-${pattern.name}-${palette.name}`,
+        palette: palette.colors,
+        opacity: 1.0,
+        scale: 1.0,
+      });
+    }
+
+    renderer.setBackground(background);
+    renderer.setGrid(showGrid, gridSize);
+    renderer.updateTime(0);
+    renderer.render();
+
+    return () => {
+      renderer.dispose();
+      rendererRef.current = null;
+    };
+  }, [
+    pattern,
+    palette,
+    scale,
+    visualState,
+    showGrid,
+    background,
+    superposedPatterns,
+    size,
+    gridSize,
+  ]);
 
   return (
     <div
@@ -70,7 +111,7 @@ export function GlyphPreview({
       style={{ width: size, height: size }}
       title={`${pattern.name} - ${palette.name}`}
     >
-      <canvas ref={canvasRef} />
+      <div ref={containerRef} style={{ width: size, height: size }} />
     </div>
   );
 }

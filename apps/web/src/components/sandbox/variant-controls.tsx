@@ -26,12 +26,14 @@ export function VariantControls() {
     scale,
     background,
     showGrid,
+    postProcessing,
     togglePlayback,
     setPlaybackSpeed,
     setCurrentTime,
     setScale,
     setBackground,
     toggleGrid,
+    togglePostProcessing,
     goToGallery,
   } = useVariantSandboxStore();
 
@@ -146,6 +148,18 @@ export function VariantControls() {
         }`}
       >
         Grid
+      </button>
+
+      {/* Post FX toggle */}
+      <button
+        onClick={togglePostProcessing}
+        className={`px-4 py-2 text-sm rounded ${
+          postProcessing
+            ? "bg-blue-600 text-white"
+            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+        }`}
+      >
+        Post FX
       </button>
 
       {/* Spacer */}

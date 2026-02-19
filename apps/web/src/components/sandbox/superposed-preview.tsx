@@ -1,69 +1,75 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  CANVAS,
   PLANT_VARIANTS,
   computeLifecycleState,
   getEffectivePalette,
   getActiveVisual,
+  isVectorVariant,
+  isWatercolorVariant,
   type PlantWithLifecycle,
   type InterpolatedKeyframe,
   type GlyphKeyframe,
 } from "@quantum-garden/shared";
+import { SandboxThreeRenderer } from "./sandbox-three-renderer";
 
-const GRID_SIZE = 64;
 const CANVAS_SIZE = 128;
-const MAX_SUPERPOSED_VARIANTS = 10; // Limit for performance
+const MAX_SUPERPOSED_VARIANTS = 10;
 
 /**
  * Compact superposed preview showing variants overlaid.
  * Self-contained with its own animation loop.
- * Shows up to 10 variants to maintain performance.
- * Uses Canvas2D for rendering.
+ * Shows up to 10 pixel variants using Three.js instanced rendering.
  */
 export function SuperposedPreview() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<SandboxThreeRenderer | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const currentTimeRef = useRef<number>(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
+  // Filter to pixel variants only (vector variants not supported in superposed view)
+  const pixelVariants = PLANT_VARIANTS.filter(
+    (v) => !isVectorVariant(v) && !isWatercolorVariant(v)
+  ).slice(0, MAX_SUPERPOSED_VARIANTS);
+  const variantCount = pixelVariants.length;
+  const baseOpacity = 0.7 / variantCount;
+
+  // Initialize Three.js renderer
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const renderer = new SandboxThreeRenderer({
+      container: containerRef.current,
+      width: CANVAS_SIZE,
+      height: CANVAS_SIZE,
+      enablePostProcessing: false,
+    });
+    renderer.setInstanceCount(variantCount);
+    rendererRef.current = renderer;
+
+    return () => {
+      renderer.dispose();
+      rendererRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Render all variants superposed
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas size with device pixel ratio
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = CANVAS_SIZE * dpr;
-    canvas.height = CANVAS_SIZE * dpr;
-    canvas.style.width = `${CANVAS_SIZE}px`;
-    canvas.style.height = `${CANVAS_SIZE}px`;
-    ctx.scale(dpr, dpr);
-
-    // Draw background (garden color to match actual display)
-    ctx.fillStyle = CANVAS.BACKGROUND_COLOR;
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  const renderFrame = () => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
 
     const currentTime = currentTimeRef.current;
 
-    // Limit variants for performance
-    const variantsToRender = PLANT_VARIANTS.slice(0, MAX_SUPERPOSED_VARIANTS);
-    const variantCount = variantsToRender.length;
-    const baseOpacity = 0.7 / variantCount;
+    renderer.setPixelMeshVisible(true);
+    renderer.setVectorGroupVisible(false);
+    renderer.setBackground("garden");
 
-    const pixelScale = CANVAS_SIZE / GRID_SIZE;
-
-    // Type guard
-    const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
-      "t" in v;
-
-    // Render each variant
-    for (const variant of variantsToRender) {
+    for (let i = 0; i < pixelVariants.length; i++) {
+      const variant = pixelVariants[i]!;
       const totalDuration = variant.keyframes.reduce((sum, kf) => sum + kf.duration, 0);
       const variantTime = variant.loop
         ? currentTime % totalDuration
@@ -80,9 +86,8 @@ export function SuperposedPreview() {
       const state = computeLifecycleState(mockPlant, variant, new Date());
       const visual = getActiveVisual(state, variant);
 
-      const pattern = visual.pattern;
-      const effectiveOpacity = visual.opacity ?? 1.0;
-      const effectiveScale = visual.scale ?? 1.0;
+      const isInterpolated = (v: GlyphKeyframe | InterpolatedKeyframe): v is InterpolatedKeyframe =>
+        "t" in v;
 
       let palette: string[];
       if (isInterpolated(visual)) {
@@ -91,41 +96,28 @@ export function SuperposedPreview() {
         palette = getEffectivePalette(visual, variant, null);
       }
 
-      ctx.globalAlpha = effectiveOpacity * (baseOpacity + 0.3);
+      const effectiveOpacity = (visual.opacity ?? 1.0) * (baseOpacity + 0.3);
+      const effectiveScale = visual.scale ?? 1.0;
 
-      const scaledPixelSize = pixelScale * effectiveScale;
-      const offset = (CANVAS_SIZE - GRID_SIZE * scaledPixelSize) / 2;
+      const patternId = `superposed-${variant.id}-${state.keyframeIndex}-${
+        isInterpolated(visual)
+          ? `interp-${Math.round((visual as InterpolatedKeyframe).t * 100)}`
+          : "static"
+      }`;
 
-      for (let y = 0; y < GRID_SIZE; y++) {
-        const row = pattern[y];
-        if (!row) continue;
-        for (let x = 0; x < GRID_SIZE; x++) {
-          const cellValue = row[x];
-          if (cellValue && cellValue > 0) {
-            const distFromCenter = Math.sqrt(
-              Math.pow(x - GRID_SIZE / 2, 2) + Math.pow(y - GRID_SIZE / 2, 2)
-            );
-            const maxDist = Math.sqrt(2) * (GRID_SIZE / 2);
-            const colorIndex = Math.min(
-              palette.length - 1,
-              Math.floor((distFromCenter / maxDist) * palette.length)
-            );
-            const color = palette[colorIndex] || palette[0] || "#888888";
-
-            ctx.fillStyle = color;
-            ctx.fillRect(
-              offset + x * scaledPixelSize,
-              offset + y * scaledPixelSize,
-              scaledPixelSize,
-              scaledPixelSize
-            );
-          }
-        }
-      }
+      renderer.updateInstance(i, {
+        pattern: visual.pattern,
+        patternId,
+        palette,
+        opacity: effectiveOpacity,
+        scale: effectiveScale,
+        lifecycleProgress: state.totalProgress,
+      });
     }
 
-    ctx.globalAlpha = 1.0;
-  }, []);
+    renderer.updateTime(performance.now() / 1000);
+    renderer.render();
+  };
 
   // Animation loop
   useEffect(() => {
@@ -142,11 +134,9 @@ export function SuperposedPreview() {
     const animate = (timestamp: number) => {
       const deltaMs = timestamp - lastTimeRef.current;
       lastTimeRef.current = timestamp;
+      currentTimeRef.current += deltaMs / 1000;
 
-      const deltaSeconds = deltaMs / 1000;
-      currentTimeRef.current += deltaSeconds;
-
-      render();
+      renderFrame();
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
@@ -157,23 +147,24 @@ export function SuperposedPreview() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying, render]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
 
   // Initial render
   useEffect(() => {
-    render();
-  }, [render]);
+    renderFrame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col items-center">
       <div
+        ref={containerRef}
         className="rounded-lg overflow-hidden cursor-pointer"
         style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
         onClick={() => setIsPlaying(!isPlaying)}
         title={isPlaying ? "Click to pause" : "Click to play"}
-      >
-        <canvas ref={canvasRef} />
-      </div>
+      />
       <div className="text-xs text-gray-500 mt-1">
         {Math.min(PLANT_VARIANTS.length, MAX_SUPERPOSED_VARIANTS)} of {PLANT_VARIANTS.length}{" "}
         variants

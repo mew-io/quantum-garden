@@ -208,10 +208,10 @@ export class PlantInstancer {
     const time = performance.now() / 1000;
     const reducedMotion = prefersReducedMotion();
 
-    // Filter out vector-mode plants (they're rendered by VectorPlantOverlay)
+    // Filter out vector/watercolor plants (rendered by their own overlays)
     const pixelPlants = plants.filter((plant) => {
       const variant = getVariantById(plant.variantId);
-      return variant?.renderMode !== "vector";
+      return variant?.renderMode !== "vector" && variant?.renderMode !== "watercolor";
     });
 
     // Track which plants are still active

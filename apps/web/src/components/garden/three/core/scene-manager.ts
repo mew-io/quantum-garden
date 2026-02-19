@@ -15,7 +15,9 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { CANVAS } from "@quantum-garden/shared";
+import { createPaperTexture, PaperGrainShader } from "./paper-texture";
 
 export interface SceneManagerConfig {
   container: HTMLElement;
@@ -97,6 +99,9 @@ export class SceneManager {
   private composer: EffectComposer | null = null;
   private bloomPass: UnrealBloomPass | null = null;
   private bloomEnabled: boolean = false;
+
+  // Paper grain post-processing
+  private paperPass: ShaderPass | null = null;
 
   private container: HTMLElement;
   private animationId: number | null = null;
@@ -181,11 +186,9 @@ export class SceneManager {
     // Append canvas to container
     this.container.appendChild(this.renderer.domElement);
 
-    // Set up post-processing bloom if enabled
+    // Set up post-processing pipeline (bloom + paper grain)
     this.bloomEnabled = config.enableBloom ?? true;
-    if (this.bloomEnabled) {
-      this.setupBloom(vw, vh);
-    }
+    this.setupPostProcessing(vw, vh);
 
     // Calculate initial camera layout
     this.computeLayout(vw, vh);
@@ -213,26 +216,41 @@ export class SceneManager {
   }
 
   /**
-   * Set up post-processing bloom effect.
-   * Creates a subtle glow on bright elements like celebration rings and particles.
+   * Set up the post-processing pipeline.
+   *
+   * Always creates an EffectComposer with:
+   * 1. RenderPass — renders the scene
+   * 2. BloomPass (optional) — glow on bright elements
+   * 3. PaperGrainPass — applies paper texture to background areas
+   * 4. OutputPass — color space conversion
+   *
+   * The paper grain is applied AFTER bloom so it doesn't get washed out.
    */
-  private setupBloom(width: number, height: number): void {
-    // Create the effect composer
+  private setupPostProcessing(width: number, height: number): void {
     this.composer = new EffectComposer(this.renderer);
 
     // Render pass - renders the scene normally
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
 
-    // Bloom pass - adds glow to bright areas
-    const resolution = new THREE.Vector2(width, height);
-    this.bloomPass = new UnrealBloomPass(
-      resolution,
-      BLOOM_CONFIG.STRENGTH,
-      BLOOM_CONFIG.RADIUS,
-      BLOOM_CONFIG.THRESHOLD
-    );
-    this.composer.addPass(this.bloomPass);
+    // Bloom pass - adds glow to bright areas (optional)
+    if (this.bloomEnabled) {
+      const resolution = new THREE.Vector2(width, height);
+      this.bloomPass = new UnrealBloomPass(
+        resolution,
+        BLOOM_CONFIG.STRENGTH,
+        BLOOM_CONFIG.RADIUS,
+        BLOOM_CONFIG.THRESHOLD
+      );
+      this.composer.addPass(this.bloomPass);
+    }
+
+    // Paper grain pass - replaces white background with paper texture
+    const paperTexture = createPaperTexture();
+    this.paperPass = new ShaderPass(PaperGrainShader);
+    this.paperPass.uniforms["tPaper"]!.value = paperTexture;
+    (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
+    this.composer.addPass(this.paperPass);
 
     // Output pass - handles color space conversion for final output
     const outputPass = new OutputPass();
@@ -634,12 +652,8 @@ export class SceneManager {
     // Update camera zoom with smooth interpolation
     this.updateCameraZoom();
 
-    // Render main scene (with bloom if enabled)
-    if (this.composer && this.bloomEnabled) {
-      this.composer.render();
-    } else {
-      this.renderer.render(this.scene, this.camera);
-    }
+    // Render through post-processing pipeline (bloom + paper grain)
+    this.composer!.render();
 
     // Update performance metrics after render
     this.updatePerformanceMetrics();
@@ -684,12 +698,15 @@ export class SceneManager {
     // Update renderer to fill viewport
     this.renderer.setSize(vw, vh);
 
-    // Update bloom composer if enabled
+    // Update post-processing pipeline
     if (this.composer) {
       this.composer.setSize(vw, vh);
     }
     if (this.bloomPass) {
       this.bloomPass.resolution.set(vw, vh);
+    }
+    if (this.paperPass) {
+      (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
     }
 
     // Recalculate layout and apply camera
@@ -719,6 +736,9 @@ export class SceneManager {
    */
   setBloomEnabled(enabled: boolean): void {
     this.bloomEnabled = enabled;
+    if (this.bloomPass) {
+      this.bloomPass.enabled = enabled;
+    }
   }
 
   /**
@@ -810,6 +830,12 @@ export class SceneManager {
     // Dispose of post-processing resources
     if (this.composer) {
       this.composer.dispose();
+    }
+
+    // Dispose of paper grain texture
+    if (this.paperPass) {
+      const tex = this.paperPass.uniforms["tPaper"]!.value as THREE.Texture | null;
+      tex?.dispose();
     }
 
     // Dispose of Three.js resources

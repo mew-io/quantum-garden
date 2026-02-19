@@ -414,6 +414,23 @@ export interface QuantumEvent {
   dormancyDuration?: number;
   /** Number of plants in a wave germination */
   waveSize?: number;
+
+  // Measurement-specific fields (observation events)
+  /** Summary of quantum measurement results */
+  measurementSummary?: {
+    /** Total number of measurement shots */
+    shots: number;
+    /** Most frequently measured bitstring (e.g., "00", "111") */
+    dominantBitstring: string;
+    /** Probability of the dominant outcome (0-1) */
+    dominantProbability: number;
+    /** Number of distinct measurement outcomes observed */
+    distinctOutcomes: number;
+  };
+
+  // Lifecycle-specific fields
+  /** Plant creation timestamp (for computing lifespan in death events) */
+  createdAt?: Date;
 }
 
 // Re-export quantum pool types

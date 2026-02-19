@@ -87,7 +87,7 @@ export function useEvolution() {
         if (context.waveIndex === context.waveTotal) {
           // Last plant in wave - show batched notification and event
           const waveSize = context.waveTotal;
-          addNotification(`${waveSize} plants germinated`, "wave");
+          addNotification(`Quantum wave: ${waveSize} plants germinated in phase`, "wave");
 
           // Add a single wave_germination event
           addEvent({
@@ -105,7 +105,13 @@ export function useEvolution() {
         // Don't show notification for non-final wave germinations
       } else {
         // Normal (non-wave) germination: show individual notification
-        addNotification("A plant has germinated");
+        addNotification("Quantum tunneling: a seed emerged from dormancy");
+
+        // Compute dormancy duration from createdAt → germinatedAt
+        const dormancyDuration =
+          result.germinatedAt && result.createdAt
+            ? new Date(result.germinatedAt).getTime() - new Date(result.createdAt).getTime()
+            : undefined;
 
         // Add germination event to quantum event log
         addEvent({
@@ -114,6 +120,7 @@ export function useEvolution() {
           plantId: result.id,
           variantId: result.variantId,
           germinationType: "normal",
+          dormancyDuration,
         });
       }
     },

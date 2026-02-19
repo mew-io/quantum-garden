@@ -16,99 +16,17 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { useGardenStore } from "@/stores/garden-store";
 import { UI_TIMING } from "@quantum-garden/shared";
+import type { CircuitType } from "@quantum-garden/shared";
+import {
+  getCircuitName,
+  getCircuitConcept,
+  getCircuitDiagram,
+  getCircuitLearnMoreUrl,
+  getCircuitInfo,
+} from "@/lib/quantum-explanations";
 
 /** Animation duration in ms for entry/exit transitions */
 const ANIMATION_DURATION_MS = 350;
-
-/**
- * Educational content for each quantum circuit type.
- */
-interface CircuitEducation {
-  name: string;
-  concept: string;
-  explanation: string;
-  diagram: string[];
-  learnMoreUrl: string;
-}
-
-const CIRCUIT_EDUCATION: Record<string, CircuitEducation> = {
-  superposition: {
-    name: "Superposition",
-    concept: "Quantum state exists in multiple states simultaneously",
-    explanation:
-      "This plant's form was encoded in a quantum superposition—existing as all possible patterns at once until your observation collapsed it to this single reality.",
-    diagram: ["     ┌───┐┌─┐", "q₀ ──┤ H ├┤M├", "     └───┘└─┘"],
-    learnMoreUrl: "/docs/quantum-circuits#superposition",
-  },
-  bell_pair: {
-    name: "Bell Pair",
-    concept: "Two qubits become perfectly correlated",
-    explanation:
-      "This plant shared a Bell pair with its partner—observing one instantly revealed the other's form through quantum entanglement. Both plants now share correlated quantum properties like color palette, growth rate, and opacity, even though they may be different species. In quantum mechanics, entanglement links measurement outcomes, not physical appearance.",
-    diagram: [
-      "     ┌───┐     ┌─┐",
-      "q₀ ──┤ H ├──●──┤M├",
-      "     └───┘  │  └─┘",
-      "          ┌─┴─┐┌─┐",
-      "q₁ ───────┤ X ├┤M├",
-      "          └───┘└─┘",
-    ],
-    learnMoreUrl: "/docs/quantum-circuits#bell-pair",
-  },
-  ghz_state: {
-    name: "GHZ State",
-    concept: "Multi-party entanglement across three or more qubits",
-    explanation:
-      "A Greenberger–Horne–Zeilinger state links multiple plants in a web of quantum correlation—observing any one reveals information about all the others.",
-    diagram: [
-      "     ┌───┐          ┌─┐",
-      "q₀ ──┤ H ├──●───●───┤M├",
-      "     └───┘  │   │   └─┘",
-      "          ┌─┴─┐ │   ┌─┐",
-      "q₁ ───────┤ X ├─┼───┤M├",
-      "          └───┘ │   └─┘",
-      "              ┌─┴─┐ ┌─┐",
-      "q₂ ──────────┤ X ├─┤M├",
-      "              └───┘ └─┘",
-    ],
-    learnMoreUrl: "/docs/quantum-circuits#ghz-state",
-  },
-  interference: {
-    name: "Quantum Interference",
-    concept: "Probability amplitudes combine constructively or destructively",
-    explanation:
-      "This plant's traits emerged from quantum interference—wave-like probability amplitudes that reinforced some outcomes and canceled others, shaping what you now see.",
-    diagram: [
-      "     ┌───┐┌───────┐┌───┐┌─┐",
-      "q₀ ──┤ H ├┤ Rz(θ) ├┤ H ├┤M├",
-      "     └───┘└───────┘└───┘└─┘",
-    ],
-    learnMoreUrl: "/docs/quantum-circuits#interference",
-  },
-  variational: {
-    name: "Variational Circuit",
-    concept: "Parameterized gates create unique quantum states",
-    explanation:
-      "A variational circuit with tunable parameters generated this plant's unique form—like a quantum fingerprint that cannot be exactly replicated.",
-    diagram: [
-      "     ┌────────┐┌────────┐┌─┐",
-      "q₀ ──┤ Ry(θ₀) ├┤ Rz(φ₀) ├┤M├",
-      "     └────────┘└───┬────┘└─┘",
-      "     ┌────────┐┌───┴────┐┌─┐",
-      "q₁ ──┤ Ry(θ₁) ├┤ Rz(φ₁) ├┤M├",
-      "     └────────┘└────────┘└─┘",
-    ],
-    learnMoreUrl: "/docs/quantum-circuits#variational",
-  },
-};
-
-/**
- * Get the appropriate circuit education for a given circuit ID.
- * Falls back to variational if circuit type not found.
- */
-function getCircuitEducation(circuitId: string): CircuitEducation {
-  return CIRCUIT_EDUCATION[circuitId] ?? CIRCUIT_EDUCATION.variational!;
-}
 
 /**
  * Simple ASCII circuit diagram renderer.
@@ -128,6 +46,55 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
 }
 
 /**
+ * Get a brief circuit explanation for the context panel.
+ * Shorter than the full modal explanation — designed for quick reading.
+ */
+function getCircuitExplanation(circuitId: string): string {
+  const id = circuitId as CircuitType;
+  const info = getCircuitInfo(id);
+
+  switch (id) {
+    case "superposition":
+      return (
+        "This plant's form was encoded in a quantum superposition \u2014 " +
+        "existing as all possible patterns at once until your observation " +
+        "collapsed it to this single reality. The Hadamard gate (H) creates " +
+        `an equal probability of measuring |0\u27E9 or |1\u27E9 across ${info.qubits} qubit.`
+      );
+    case "bell_pair":
+      return (
+        "This plant shared a Bell pair with its partner \u2014 observing one instantly " +
+        "revealed the other's form through quantum entanglement. Both plants share " +
+        "correlated quantum properties like color palette, growth rate, and opacity. " +
+        `Circuit: ${info.qubits} qubits entangled via H + CNOT gates.`
+      );
+    case "ghz_state":
+      return (
+        "A Greenberger\u2013Horne\u2013Zeilinger state links multiple plants in a web of " +
+        "quantum correlation \u2014 observing any one reveals information about all the others. " +
+        `Circuit: ${info.qubits} qubits in all-or-nothing entanglement.`
+      );
+    case "interference":
+      return (
+        "This plant's traits emerged from quantum interference \u2014 wave-like probability " +
+        "amplitudes that reinforced some outcomes and canceled others, shaping what you now see. " +
+        `Circuit: ${info.qubits} qubits with phase rotations and cross-entanglement.`
+      );
+    case "variational":
+      return (
+        "A variational circuit with tunable parameters generated this plant's unique form \u2014 " +
+        "like a quantum fingerprint that cannot be exactly replicated. " +
+        `Circuit: ${info.qubits} qubits with 6 layers of parameterized gates.`
+      );
+    default:
+      return (
+        `A ${info.qubits}-qubit ${info.name.toLowerCase()} circuit determined this plant's traits ` +
+        "through quantum measurement."
+      );
+  }
+}
+
+/**
  * Panel content when observation context is active.
  * Supports both entry and exit animations via the isExiting prop.
  */
@@ -142,7 +109,11 @@ function PanelContent({
   onDontShowAgain: () => void;
   isExiting: boolean;
 }) {
-  const education = getCircuitEducation(circuitId);
+  const name = getCircuitName(circuitId as CircuitType);
+  const concept = getCircuitConcept(circuitId as CircuitType);
+  const diagram = getCircuitDiagram(circuitId as CircuitType);
+  const learnMoreUrl = getCircuitLearnMoreUrl(circuitId as CircuitType);
+  const explanation = getCircuitExplanation(circuitId);
 
   // Animation classes based on entry/exit state
   // Use ease-out for entry (decelerating), ease-in for exit (accelerating away)
@@ -163,13 +134,16 @@ function PanelContent({
       {/* Header - appears first */}
       <div
         className={`mb-3 flex items-start justify-between ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
-        style={{ animationDelay: isExiting ? "0ms" : "50ms", animationFillMode: "backwards" }}
+        style={{
+          animationDelay: isExiting ? "0ms" : "50ms",
+          animationFillMode: "backwards",
+        }}
       >
         <div>
           <h3 id="context-title" className="text-sm font-medium text-green-100">
-            {education.name}
+            {name}
           </h3>
-          <p className="mt-0.5 text-xs text-green-100/60">{education.concept}</p>
+          <p className="mt-0.5 text-xs text-green-100/60">{concept}</p>
         </div>
         <button
           onClick={onDismiss}
@@ -200,26 +174,35 @@ function PanelContent({
       {/* Circuit Diagram - appears second */}
       <div
         className={!isExiting ? "animate-in fade-in duration-300" : ""}
-        style={{ animationDelay: isExiting ? "0ms" : "100ms", animationFillMode: "backwards" }}
+        style={{
+          animationDelay: isExiting ? "0ms" : "100ms",
+          animationFillMode: "backwards",
+        }}
       >
-        <CircuitDiagram lines={education.diagram} />
+        <CircuitDiagram lines={diagram} />
       </div>
 
       {/* Explanation - appears third */}
       <p
         className={`mt-3 text-xs leading-relaxed text-green-100/70 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
-        style={{ animationDelay: isExiting ? "0ms" : "150ms", animationFillMode: "backwards" }}
+        style={{
+          animationDelay: isExiting ? "0ms" : "150ms",
+          animationFillMode: "backwards",
+        }}
       >
-        {education.explanation}
+        {explanation}
       </p>
 
       {/* Footer actions - appears last */}
       <div
         className={`mt-4 flex items-center justify-between text-xs ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
-        style={{ animationDelay: isExiting ? "0ms" : "200ms", animationFillMode: "backwards" }}
+        style={{
+          animationDelay: isExiting ? "0ms" : "200ms",
+          animationFillMode: "backwards",
+        }}
       >
         <a
-          href={education.learnMoreUrl}
+          href={learnMoreUrl}
           className="
             text-green-400/80 hover:text-green-400
             transition-colors underline-offset-2 hover:underline

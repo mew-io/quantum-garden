@@ -67,11 +67,12 @@ export function useObservation() {
         entanglementGroupId: result.entangledPartnersUpdated
           ? (result.entanglementGroupId ?? undefined)
           : undefined,
+        measurementSummary: result.measurementSummary ?? undefined,
       });
 
       // Show special notification for first observation
       if (isFirstObservation()) {
-        addNotification("Your first quantum observation!", "germination");
+        addNotification("Wave function collapsed \u2014 your first observation!", "germination");
         markFirstObservationComplete();
       }
 
@@ -80,12 +81,18 @@ export function useObservation() {
         debugLogger.observation.info("Entangled partners also observed");
         utils.plants.list.invalidate();
         // Show entanglement notification
-        addNotification("Entangled plants observed", "entanglement");
+        addNotification("Spooky action at a distance: entangled plants revealed", "entanglement");
 
         // Show entanglement detail panel
         if (result.entanglementGroupId) {
           setEntanglementRevealed(result.entanglementGroupId);
         }
+
+        // Find partner plant IDs from the store
+        const allPlants = useGardenStore.getState().plants;
+        const partnerIds = allPlants
+          .filter((p) => p.entanglementGroupId === result.entanglementGroupId && p.id !== result.id)
+          .map((p) => p.id);
 
         // Add entanglement correlation event to log
         addEvent({
@@ -94,6 +101,7 @@ export function useObservation() {
           plantId: result.id,
           variantId: result.variantId,
           entanglementGroupId: result.entanglementGroupId ?? undefined,
+          partnerPlantIds: partnerIds.length > 0 ? partnerIds : undefined,
         });
       }
     },

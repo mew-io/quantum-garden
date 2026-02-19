@@ -62,12 +62,16 @@ export function usePlants() {
             // Check if plant just germinated (was dormant, now germinated)
             if (prevPlant && !prevPlant.germinatedAt && plant.germinatedAt) {
               // Server-side germination detected - add event to log
+              const dormancyDuration = plant.createdAt
+                ? new Date(plant.germinatedAt).getTime() - new Date(plant.createdAt).getTime()
+                : undefined;
               addEvent({
                 type: "germination",
                 timestamp: plant.germinatedAt,
                 plantId: plant.id,
                 variantId: plant.variantId,
                 germinationType: "normal",
+                dormancyDuration,
               });
             }
           }
@@ -83,6 +87,7 @@ export function usePlants() {
                 timestamp: new Date(),
                 plantId: prevPlant.id,
                 variantId: prevPlant.variantId,
+                createdAt: prevPlant.createdAt,
               });
             }
           }

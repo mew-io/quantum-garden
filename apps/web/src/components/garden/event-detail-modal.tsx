@@ -1,10 +1,12 @@
 /**
  * EventDetailModal - Full-screen modal showing quantum event details
  *
- * Displays educational content about a selected quantum event:
- * - For observations: Circuit diagram and quantum explanation
- * - For germinations: Dormancy info and probability factors
- * - For entanglement: Partner info and correlation explanation
+ * Displays multi-layer educational content about a selected quantum event:
+ * - Friendly explanation (always visible)
+ * - Technical quantum mechanics details
+ * - Real-world quantum computing connections
+ * - Circuit diagram for observation events
+ * - Event metadata
  *
  * Includes prev/next navigation between events.
  */
@@ -13,143 +15,8 @@
 
 import { useCallback, useMemo, useEffect } from "react";
 import { useGardenStore } from "@/stores/garden-store";
-import type { QuantumEvent, CircuitType } from "@quantum-garden/shared";
-
-/**
- * Educational content for each quantum circuit type.
- */
-interface CircuitEducation {
-  name: string;
-  concept: string;
-  explanation: string;
-  diagram: string[];
-}
-
-const CIRCUIT_EDUCATION: Record<CircuitType, CircuitEducation> = {
-  superposition: {
-    name: "Superposition",
-    concept: "Quantum state exists in multiple states simultaneously",
-    explanation:
-      "This plant's form was encoded in a quantum superposition—existing as all possible patterns at once until your observation collapsed it to this single reality. The Hadamard gate (H) creates an equal probability of measuring |0⟩ or |1⟩.",
-    diagram: ["     ┌───┐┌─┐", "q₀ ──┤ H ├┤M├", "     └───┘└─┘"],
-  },
-  bell_pair: {
-    name: "Bell Pair",
-    concept: "Two qubits become perfectly correlated",
-    explanation:
-      "This plant shared a Bell pair with its partner—observing one instantly revealed the other's form through quantum entanglement, regardless of distance. Einstein called this 'spooky action at a distance.'",
-    diagram: [
-      "     ┌───┐     ┌─┐",
-      "q₀ ──┤ H ├──●──┤M├",
-      "     └───┘  │  └─┘",
-      "          ┌─┴─┐┌─┐",
-      "q₁ ───────┤ X ├┤M├",
-      "          └───┘└─┘",
-    ],
-  },
-  ghz_state: {
-    name: "GHZ State",
-    concept: "Multi-party entanglement across three or more qubits",
-    explanation:
-      "A Greenberger–Horne–Zeilinger state links multiple plants in a web of quantum correlation—observing any one reveals information about all the others. This is the basis for quantum error correction.",
-    diagram: [
-      "     ┌───┐          ┌─┐",
-      "q₀ ──┤ H ├──●───●───┤M├",
-      "     └───┘  │   │   └─┘",
-      "          ┌─┴─┐ │   ┌─┐",
-      "q₁ ───────┤ X ├─┼───┤M├",
-      "          └───┘ │   └─┘",
-      "              ┌─┴─┐ ┌─┐",
-      "q₂ ──────────┤ X ├─┤M├",
-      "              └───┘ └─┘",
-    ],
-  },
-  interference: {
-    name: "Quantum Interference",
-    concept: "Probability amplitudes combine constructively or destructively",
-    explanation:
-      "This plant's traits emerged from quantum interference—wave-like probability amplitudes that reinforced some outcomes and canceled others. Like light waves creating bright and dark bands, quantum states combine mathematically.",
-    diagram: [
-      "     ┌───┐┌───────┐┌───┐┌─┐",
-      "q₀ ──┤ H ├┤ Rz(θ) ├┤ H ├┤M├",
-      "     └───┘└───────┘└───┘└─┘",
-    ],
-  },
-  variational: {
-    name: "Variational Circuit",
-    concept: "Parameterized gates create unique quantum states",
-    explanation:
-      "A variational circuit with tunable parameters generated this plant's unique form—like a quantum fingerprint that cannot be exactly replicated. These circuits are the building blocks of quantum machine learning.",
-    diagram: [
-      "     ┌────────┐┌────────┐┌─┐",
-      "q₀ ──┤ Ry(θ₀) ├┤ Rz(φ₀) ├┤M├",
-      "     └────────┘└───┬────┘└─┘",
-      "     ┌────────┐┌───┴────┐┌─┐",
-      "q₁ ──┤ Ry(θ₁) ├┤ Rz(φ₁) ├┤M├",
-      "     └────────┘└────────┘└─┘",
-    ],
-  },
-};
-
-/**
- * Educational content for germination events.
- */
-const GERMINATION_EDUCATION = {
-  name: "Quantum Germination",
-  concept: "Seeds emerge from dormancy through quantum probability",
-  explanation:
-    "Each dormant seed has a probability of germinating based on its quantum state. The garden's evolution system continuously evaluates these probabilities, causing seeds to sprout at seemingly random—but quantum-determined—moments.",
-};
-
-/**
- * Educational content for entanglement events.
- */
-const ENTANGLEMENT_EDUCATION = {
-  name: "Quantum Entanglement",
-  concept: "Correlated measurements across separated systems",
-  explanation:
-    "When you observed one entangled plant, its quantum state collapsed—and instantaneously, its partner's state was determined too. This correlation exists regardless of the distance between plants, demonstrating one of quantum mechanics' most profound features.",
-};
-
-/**
- * Educational content for wave germination events.
- */
-const WAVE_EDUCATION = {
-  name: "Wave Germination",
-  concept: "Coherent quantum state collapse across multiple seeds",
-  explanation:
-    "A wave germination event occurs when multiple dormant seeds share quantum coherence. When conditions align, they germinate together in a synchronized burst—like a quantum phase transition rippling through the garden.",
-};
-
-/**
- * Get the educational content for a specific event.
- */
-function getEventEducation(event: QuantumEvent): {
-  name: string;
-  concept: string;
-  explanation: string;
-  diagram?: string[];
-} {
-  switch (event.type) {
-    case "observation":
-      const circuit = event.circuitId
-        ? CIRCUIT_EDUCATION[event.circuitId]
-        : CIRCUIT_EDUCATION.variational;
-      return circuit;
-    case "germination":
-      return GERMINATION_EDUCATION;
-    case "entanglement":
-      return ENTANGLEMENT_EDUCATION;
-    case "wave_germination":
-      return WAVE_EDUCATION;
-    default:
-      return {
-        name: "Quantum Event",
-        concept: "A quantum phenomenon occurred",
-        explanation: "This event represents a quantum interaction in the garden.",
-      };
-  }
-}
+import type { QuantumEvent } from "@quantum-garden/shared";
+import { generateExplanation, getCircuitInfo, getCircuitDiagram } from "@/lib/quantum-explanations";
 
 /**
  * Get the color class for an event type.
@@ -164,8 +31,58 @@ function getEventColor(type: QuantumEvent["type"]): string {
       return "text-purple-400";
     case "wave_germination":
       return "text-blue-400";
+    case "death":
+      return "text-gray-400";
     default:
       return "text-green-400";
+  }
+}
+
+/**
+ * Get a display title for an event type.
+ */
+function getEventTitle(event: QuantumEvent): string {
+  switch (event.type) {
+    case "observation": {
+      const circuit = event.circuitId
+        ? getCircuitInfo(event.circuitId)
+        : getCircuitInfo("variational");
+      return circuit.name;
+    }
+    case "germination":
+      return "Quantum Germination";
+    case "entanglement":
+      return "Quantum Entanglement";
+    case "wave_germination":
+      return "Wave Germination";
+    case "death":
+      return "Quantum Decoherence";
+    default:
+      return "Quantum Event";
+  }
+}
+
+/**
+ * Get the concept tagline for an event type.
+ */
+function getEventConcept(event: QuantumEvent): string {
+  switch (event.type) {
+    case "observation": {
+      const circuit = event.circuitId
+        ? getCircuitInfo(event.circuitId)
+        : getCircuitInfo("variational");
+      return circuit.concept;
+    }
+    case "germination":
+      return "Seeds emerge from dormancy through quantum probability";
+    case "entanglement":
+      return "Correlated measurements across separated systems";
+    case "wave_germination":
+      return "Coherent quantum state collapse across multiple seeds";
+    case "death":
+      return "Quantum system loses coherence through environmental interaction";
+    default:
+      return "Quantum interaction in the garden";
   }
 }
 
@@ -200,7 +117,21 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
 }
 
 /**
- * Detail section for additional event-specific info.
+ * Section with a subtle heading for visual separation.
+ */
+function ExplanationSection({ title, content }: { title: string; content: string }) {
+  return (
+    <div className="mt-4">
+      <h4 className="text-[10px] font-semibold uppercase tracking-wider text-green-100/40 mb-1.5">
+        {title}
+      </h4>
+      <p className="text-sm leading-relaxed text-green-100/70">{content}</p>
+    </div>
+  );
+}
+
+/**
+ * Detail section for additional event-specific metadata.
  */
 function EventDetails({ event }: { event: QuantumEvent }) {
   const details: { label: string; value: string }[] = [];
@@ -209,13 +140,45 @@ function EventDetails({ event }: { event: QuantumEvent }) {
     details.push({ label: "Variant", value: event.variantId });
   }
   if (event.circuitId) {
-    details.push({ label: "Circuit", value: event.circuitId });
+    const circuit = getCircuitInfo(event.circuitId);
+    details.push({
+      label: "Circuit",
+      value: `${circuit.name} (L${circuit.level}, ${circuit.qubits}q)`,
+    });
   }
   if (event.executionMode) {
-    details.push({ label: "Execution", value: event.executionMode });
+    const modeLabels: Record<string, string> = {
+      mock: "Local Simulation",
+      simulator: "IonQ Simulator",
+      hardware: "IonQ Hardware",
+    };
+    details.push({
+      label: "Execution",
+      value: modeLabels[event.executionMode] ?? event.executionMode,
+    });
+  }
+  if (event.measurementSummary) {
+    const ms = event.measurementSummary;
+    details.push({
+      label: "Shots",
+      value: ms.shots.toString(),
+    });
+    details.push({
+      label: "Dominant Outcome",
+      value: `|${ms.dominantBitstring}\u27E9 (${(ms.dominantProbability * 100).toFixed(1)}%)`,
+    });
   }
   if (event.entanglementGroupId) {
-    details.push({ label: "Entanglement Group", value: event.entanglementGroupId.slice(0, 8) });
+    details.push({
+      label: "Entanglement Group",
+      value: event.entanglementGroupId.slice(0, 8),
+    });
+  }
+  if (event.partnerPlantIds && event.partnerPlantIds.length > 0) {
+    details.push({
+      label: "Partners",
+      value: `${event.partnerPlantIds.length} entangled plant${event.partnerPlantIds.length !== 1 ? "s" : ""}`,
+    });
   }
   if (event.germinationType) {
     details.push({ label: "Germination Type", value: event.germinationType });
@@ -223,8 +186,16 @@ function EventDetails({ event }: { event: QuantumEvent }) {
   if (event.waveSize) {
     details.push({ label: "Wave Size", value: `${event.waveSize} plants` });
   }
-  if (event.resolvedTraits?.colorPalette) {
-    details.push({ label: "Colors", value: event.resolvedTraits.colorPalette.length.toString() });
+  if (event.resolvedTraits) {
+    const t = event.resolvedTraits;
+    details.push({
+      label: "Growth Rate",
+      value: `${t.growthRate.toFixed(2)}x`,
+    });
+    details.push({
+      label: "Opacity",
+      value: `${(t.opacity * 100).toFixed(0)}%`,
+    });
   }
 
   if (details.length === 0) return null;
@@ -309,8 +280,16 @@ export function EventDetailModal() {
     return null;
   }
 
-  const education = getEventEducation(selectedEvent);
+  const explanation = generateExplanation(selectedEvent);
   const colorClass = getEventColor(selectedEvent.type);
+  const title = getEventTitle(selectedEvent);
+  const concept = getEventConcept(selectedEvent);
+
+  // Get circuit diagram for observation events
+  const diagram =
+    selectedEvent.type === "observation" && selectedEvent.circuitId
+      ? getCircuitDiagram(selectedEvent.circuitId)
+      : undefined;
 
   return (
     <div
@@ -327,17 +306,18 @@ export function EventDetailModal() {
           border border-green-500/20 bg-gray-900/95
           shadow-2xl backdrop-blur-md
           animate-in zoom-in-95 duration-200
+          max-h-[85vh] flex flex-col
         "
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-green-500/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-green-500/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className={`${colorClass}`}>
               <EventTypeIcon type={selectedEvent.type} />
             </span>
             <div>
-              <h2 className="text-lg font-medium text-green-100">{education.name}</h2>
+              <h2 className="text-lg font-medium text-green-100">{title}</h2>
               <p className="text-xs text-green-100/50">{formatDate(selectedEvent.timestamp)}</p>
             </div>
           </div>
@@ -354,23 +334,32 @@ export function EventDetailModal() {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-5">
-          {/* Concept */}
-          <p className={`text-sm font-medium ${colorClass}`}>{education.concept}</p>
+        {/* Scrollable Content */}
+        <div className="px-6 py-5 overflow-y-auto flex-1">
+          {/* Concept tagline */}
+          <p className={`text-sm font-medium ${colorClass}`}>{concept}</p>
 
           {/* Circuit diagram for observation events */}
-          {education.diagram && <CircuitDiagram lines={education.diagram} />}
+          {diagram && <CircuitDiagram lines={diagram} />}
 
-          {/* Explanation */}
-          <p className="mt-4 text-sm leading-relaxed text-green-100/70">{education.explanation}</p>
+          {/* What Happened — friendly explanation (always visible) */}
+          <ExplanationSection title="What Happened" content={explanation.friendly} />
 
-          {/* Event-specific details */}
+          {/* Quantum Details — technical explanation */}
+          <ExplanationSection title="Quantum Details" content={explanation.technical} />
+
+          {/* Real-World Connection */}
+          <ExplanationSection
+            title="In Real Quantum Computing"
+            content={explanation.realWorldConnection}
+          />
+
+          {/* Event-specific metadata */}
           <EventDetails event={selectedEvent} />
         </div>
 
         {/* Footer with navigation */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-green-500/10">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-green-500/10 flex-shrink-0">
           <button
             onClick={handlePrev}
             disabled={selectedIndex === 0}
@@ -407,10 +396,10 @@ export function EventDetailModal() {
         </div>
 
         {/* Keyboard hint */}
-        <div className="px-6 pb-4 flex justify-center">
+        <div className="px-6 pb-4 flex justify-center flex-shrink-0">
           <p className="text-[10px] text-green-100/30">
-            Use <kbd className="px-1 py-0.5 bg-black/40 rounded">←</kbd>{" "}
-            <kbd className="px-1 py-0.5 bg-black/40 rounded">→</kbd> to navigate,{" "}
+            Use <kbd className="px-1 py-0.5 bg-black/40 rounded">&larr;</kbd>{" "}
+            <kbd className="px-1 py-0.5 bg-black/40 rounded">&rarr;</kbd> to navigate,{" "}
             <kbd className="px-1 py-0.5 bg-black/40 rounded">Esc</kbd> to close
           </p>
         </div>
@@ -478,6 +467,20 @@ function EventTypeIcon({ type }: { type: QuantumEvent["type"] }) {
           <path d="M2 12c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
           <path d="M2 6c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
           <path d="M2 18c.6-.5 1.5-1 2.5-1s2 1 3 1 2-.5 3-1 2-1 3-1 2 .5 3 1 2 1 3 1 1.9-.5 2.5-1" />
+        </svg>
+      );
+    case "death":
+      return (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4M12 16h.01" />
         </svg>
       );
   }

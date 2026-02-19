@@ -152,6 +152,14 @@ export const observationRouter = router({
       // Resolve traits from pre-computed quantum pool
       let resolvedTraits: ResolvedTraits;
       let executionMode = "mock";
+      let measurementSummary:
+        | {
+            shots: number;
+            dominantBitstring: string;
+            dominantProbability: number;
+            distinctOutcomes: number;
+          }
+        | undefined;
 
       try {
         // Load the quantum pool
@@ -167,6 +175,16 @@ export const observationRouter = router({
         // Use the pre-computed traits
         resolvedTraits = poolResult.traits as ResolvedTraits;
         executionMode = poolResult.executionMode;
+
+        // Extract measurement summary for frontend explanations
+        const probEntries = Object.entries(poolResult.probabilities);
+        const sorted = probEntries.sort((a, b) => b[1] - a[1]);
+        measurementSummary = {
+          shots: poolResult.shots,
+          dominantBitstring: sorted[0]?.[0] ?? "0",
+          dominantProbability: sorted[0]?.[1] ?? 0.5,
+          distinctOutcomes: probEntries.length,
+        };
 
         console.log(
           `[Quantum] Plant ${plant.id} using pool result ${poolResult.index} from ${circuitId} (mode: ${executionMode}, seed: ${plant.entanglementGroupId ? "group" : "plant"})`
@@ -301,6 +319,7 @@ export const observationRouter = router({
         entangledPartnersUpdated: plant.entanglementGroupId ? true : false,
         circuitId: circuitId,
         executionMode: executionMode,
+        measurementSummary: measurementSummary,
       };
     }),
 

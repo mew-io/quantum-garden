@@ -11,6 +11,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useGardenStore } from "@/stores/garden-store";
 import type { QuantumEvent, QuantumEventType } from "@quantum-garden/shared";
+import { generateExplanation } from "@/lib/quantum-explanations";
 
 /**
  * Event type configuration for icons and colors.
@@ -73,21 +74,10 @@ function formatRelativeTime(timestamp: Date): string {
 }
 
 /**
- * Get a brief description for an event.
+ * Get a brief description for an event using centralized explanations.
  */
 function getEventDescription(event: QuantumEvent): string {
-  switch (event.type) {
-    case "observation":
-      return `Observed ${event.variantId || "plant"}`;
-    case "germination":
-      return `${event.variantId || "Plant"} germinated`;
-    case "entanglement":
-      return `Entanglement correlation`;
-    case "wave_germination":
-      return `Wave germination (${event.waveSize || "?"} plants)`;
-    default:
-      return "Quantum event";
-  }
+  return generateExplanation(event).summary;
 }
 
 /**
@@ -167,7 +157,7 @@ export function QuantumEventLog() {
   const { eventLog, selectedEventId, setSelectedEventId, isTimeTravelMode } = useGardenStore();
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<QuantumEventType>>(
-    new Set(["observation", "germination", "entanglement", "wave_germination"])
+    new Set(["observation", "germination", "entanglement", "wave_germination", "death"])
   );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const wasAtBottomRef = useRef(true);

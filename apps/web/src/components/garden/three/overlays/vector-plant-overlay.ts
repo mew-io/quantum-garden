@@ -530,7 +530,7 @@ export class VectorPlantOverlay {
   ): THREE.Mesh {
     const geometry = new THREE.CircleGeometry(radius, VECTOR_PLANT_CONFIG.CIRCLE_SEGMENTS);
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(cx - 32, -(cy - 32), 0);
+    mesh.position.set(cx - 32, cy - 32, 0);
     return mesh;
   }
 
@@ -553,16 +553,16 @@ export class VectorPlantOverlay {
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
       if (i === 0) {
-        shape.moveTo(x, -y);
+        shape.moveTo(x, y);
       } else {
-        shape.lineTo(x, -y);
+        shape.lineTo(x, y);
       }
     }
     shape.closePath();
 
     const geometry = new THREE.ShapeGeometry(shape);
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(cx - 32, -(cy - 32), 0);
+    mesh.position.set(cx - 32, cy - 32, 0);
     return mesh;
   }
 
@@ -588,16 +588,16 @@ export class VectorPlantOverlay {
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
       if (i === 0) {
-        shape.moveTo(x, -y);
+        shape.moveTo(x, y);
       } else {
-        shape.lineTo(x, -y);
+        shape.lineTo(x, y);
       }
     }
     shape.closePath();
 
     const geometry = new THREE.ShapeGeometry(shape);
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(cx - 32, -(cy - 32), 0);
+    mesh.position.set(cx - 32, cy - 32, 0);
     return mesh;
   }
 
@@ -623,7 +623,7 @@ export class VectorPlantOverlay {
 
     const geometry = new THREE.ShapeGeometry(shape);
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(cx - 32, -(cy - 32), 0);
+    mesh.position.set(cx - 32, cy - 32, 0);
     return mesh;
   }
 
@@ -744,7 +744,7 @@ export class VectorPlantOverlay {
       // Offset from center of 64x64 space
       const x = cx - 32 + Math.cos(angle) * radius;
       const y = cy - 32 + Math.sin(angle) * radius;
-      vertices.push(x, -y, 0); // Negate Y for screen coordinates
+      vertices.push(x, y, 0);
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -777,7 +777,7 @@ export class VectorPlantOverlay {
     const actualY2 = y1 + (y2 - y1) * fraction;
 
     // Offset from center of 64x64 space
-    const vertices = [x1 - 32, -(y1 - 32), 0, actualX2 - 32, -(actualY2 - 32), 0];
+    const vertices = [x1 - 32, y1 - 32, 0, actualX2 - 32, actualY2 - 32, 0];
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
@@ -802,7 +802,7 @@ export class VectorPlantOverlay {
       const angle = (i / sides) * Math.PI * 2 + rotRad;
       const x = cx - 32 + Math.cos(angle) * radius;
       const y = cy - 32 + Math.sin(angle) * radius;
-      vertices.push(x, -y, 0);
+      vertices.push(x, y, 0);
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -831,7 +831,7 @@ export class VectorPlantOverlay {
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
       const x = cx - 32 + Math.cos(angle) * radius;
       const y = cy - 32 + Math.sin(angle) * radius;
-      vertices.push(x, -y, 0);
+      vertices.push(x, y, 0);
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -856,19 +856,19 @@ export class VectorPlantOverlay {
 
     const vertices = [
       centerX,
-      -(centerY - halfH),
+      centerY - halfH,
       0, // Top
       centerX + halfW,
-      -centerY,
+      centerY,
       0, // Right
       centerX,
-      -(centerY + halfH),
+      centerY + halfH,
       0, // Bottom
       centerX - halfW,
-      -centerY,
+      centerY,
       0, // Left
       centerX,
-      -(centerY - halfH),
+      centerY - halfH,
       0, // Close loop
     ];
 
@@ -910,7 +910,7 @@ export class VectorPlantOverlay {
       const angle = startRad + totalAngle * t;
       const x = cx - 32 + Math.cos(angle) * radius;
       const y = cy - 32 + Math.sin(angle) * radius;
-      vertices.push(x, -y, 0);
+      vertices.push(x, y, 0);
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -948,7 +948,7 @@ export class VectorPlantOverlay {
       const angle = startRad + totalAngle * t;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
-      shape.lineTo(x, -y);
+      shape.lineTo(x, y);
     }
 
     // Close back to center
@@ -956,7 +956,7 @@ export class VectorPlantOverlay {
 
     const geometry = new THREE.ShapeGeometry(shape);
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(cx - 32, -(cy - 32), 0);
+    mesh.position.set(cx - 32, cy - 32, 0);
     return mesh;
   }
 
@@ -998,7 +998,7 @@ export class VectorPlantOverlay {
       const x = oneMinusT3 * x1 + 3 * oneMinusT2 * t * cx1 + 3 * oneMinusT * t2 * cx2 + t3 * x2;
       const y = oneMinusT3 * y1 + 3 * oneMinusT2 * t * cy1 + 3 * oneMinusT * t2 * cy2 + t3 * y2;
 
-      vertices.push(x - 32, -(y - 32), 0);
+      vertices.push(x - 32, y - 32, 0);
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -1038,7 +1038,7 @@ export class VectorPlantOverlay {
 
       const x = cx - 32 + Math.cos(angle) * radius;
       const y = cy - 32 + Math.sin(angle) * radius;
-      vertices.push(x, -y, 0);
+      vertices.push(x, y, 0);
     }
 
     const geometry = new THREE.BufferGeometry();

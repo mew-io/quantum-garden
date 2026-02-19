@@ -221,8 +221,8 @@ export class TextureAtlas {
       for (let x = 0; x < PATTERN_SIZE; x++) {
         const value = patternRow[x] ?? 0;
         // Store in atlas (single-channel format - 1 byte per pixel)
-        // Y is flipped because texture coordinates go up, pattern coordinates go down
-        const atlasY = startY + (PATTERN_SIZE - 1 - y);
+        // Pattern row y maps directly to atlas row (camera uses y-down coordinates)
+        const atlasY = startY + y;
         const pixelIndex = atlasY * this.currentSize + startX + x;
         // Store filled value (255 = filled, 0 = empty)
         this.data[pixelIndex] = value > 0 ? 255 : 0;

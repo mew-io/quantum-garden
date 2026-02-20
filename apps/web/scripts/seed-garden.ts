@@ -120,19 +120,24 @@ async function checkQuantumService(): Promise<boolean> {
 
 /**
  * Generate a quantum circuit via the quantum service.
- * Returns circuit definition and circuit ID based on variant rarity.
+ * When variantCircuitId is provided it overrides rarity-based selection,
+ * allowing each plant variant to declare its own specific circuit.
  */
 async function generateQuantumCircuit(
   seed: number,
-  rarity: number
+  rarity: number,
+  variantCircuitId?: string
 ): Promise<{ circuitDefinition: string; circuitId: string }> {
   const isAvailable = await checkQuantumService();
+
+  // Resolved circuit ID: prefer variant declaration over rarity-based selection
+  const resolvedCircuitId = variantCircuitId ?? getCircuitIdForRarity(rarity);
 
   if (!isAvailable) {
     // Fall back to placeholder circuit
     return {
       circuitDefinition: createPlaceholderCircuit(seed),
-      circuitId: getCircuitIdForRarity(rarity),
+      circuitId: resolvedCircuitId,
     };
   }
 
@@ -140,7 +145,11 @@ async function generateQuantumCircuit(
     const response = await fetch(`${QUANTUM_SERVICE_URL}/circuits/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ seed, rarity }),
+      body: JSON.stringify({
+        seed,
+        // Pass explicit circuit ID if variant declared one; otherwise use rarity
+        ...(variantCircuitId ? { circuit_id: variantCircuitId } : { rarity }),
+      }),
       signal: AbortSignal.timeout(5000),
     });
 
@@ -157,7 +166,7 @@ async function generateQuantumCircuit(
     console.warn(`  Warning: Circuit generation failed, using placeholder`);
     return {
       circuitDefinition: createPlaceholderCircuit(seed),
-      circuitId: getCircuitIdForRarity(rarity),
+      circuitId: resolvedCircuitId,
     };
   }
 }
@@ -209,8 +218,12 @@ async function main() {
     const position = positions[i]!;
     const seed = Date.now() + i;
 
-    // Generate quantum circuit based on variant rarity
-    const { circuitDefinition, circuitId } = await generateQuantumCircuit(seed, variant.rarity);
+    // Generate quantum circuit — prefer variant's declared circuitId over rarity-based selection
+    const { circuitDefinition, circuitId } = await generateQuantumCircuit(
+      seed,
+      variant.rarity,
+      variant.circuitId
+    );
 
     // Determine if plant should start germinated
     // 50% of plants start germinated for immediate visual interest

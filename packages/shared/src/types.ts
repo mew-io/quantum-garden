@@ -63,16 +63,41 @@ export interface Plant {
  *
  * When a plant is observed, quantum measurement results are mapped
  * to these concrete visual and behavioral properties.
+ *
+ * The type is intentionally open: the index signature allows plant variants
+ * to store custom properties alongside the standard base fields. These extras
+ * come from two sources:
+ *
+ * - **Path A (custom Python circuit):** The circuit's `map_measurements()`
+ *   returns plant-specific properties in `ResolvedTraits.extra` (e.g., a fern
+ *   circuit returns `branchCount`, `asymmetry`, `leafDensity`). These flow
+ *   through the pool and are stored directly here.
+ *
+ * - **Path B (TypeScript mapping):** A variant's `quantumMapping.schema` or
+ *   `quantumMapping.resolve()` derives properties from `quantumSignals` at
+ *   observation time. These are merged in before storage.
+ *
+ * Variant builders access custom properties via `ctx.traits`, cast to their
+ * own interface. Consistency between mapping and builder is the variant
+ * author's responsibility.
  */
 export interface ResolvedTraits {
   /** Pixel pattern for the plant glyph (2D array: 1 = filled, 0 = empty) */
-  glyphPattern: number[][];
+  glyphPattern?: number[][];
   /** Color palette derived from quantum measurement */
-  colorPalette: string[];
+  colorPalette?: string[];
   /** Growth rate modifier (0.5 = slow, 1.0 = normal, 2.0 = fast) */
-  growthRate: number;
+  growthRate?: number;
   /** Opacity of the rendered glyph (0.0 - 1.0) */
-  opacity: number;
+  opacity?: number;
+  /**
+   * Normalized quantum signals computed from the pool result's probability
+   * distribution at observation time. Stored for Path B TypeScript mapping
+   * and educational UI display.
+   */
+  quantumSignals?: import("./quantum/signals").QuantumSignals;
+  /** Custom and extended properties — open to any JSON-serializable value */
+  [key: string]: unknown;
 }
 
 /**

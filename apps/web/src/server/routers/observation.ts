@@ -7,8 +7,61 @@ import {
   getVariantById,
   getEffectivePalette,
   selectFromPool,
+  computeQuantumSignals,
+  resolveQuantumProperties,
 } from "@quantum-garden/shared";
 import { getQuantumPool } from "../../lib/quantum-client";
+
+/**
+ * Resolve which pool to use for a given circuit ID.
+ *
+ * The pre-computed pool only contains the 5 standard circuit types.
+ * Custom Python circuits (e.g. "quantum_fern") fall back to the closest
+ * standard circuit until their own pool entries are generated.
+ */
+const STANDARD_POOL_CIRCUITS = new Set<CircuitType>([
+  "superposition",
+  "bell_pair",
+  "ghz_state",
+  "interference",
+  "variational",
+]);
+const CUSTOM_CIRCUIT_POOL_FALLBACK: Record<string, CircuitType> = {
+  quantum_fern: "interference",
+};
+function getPoolCircuitId(circuitId: string): CircuitType {
+  if (STANDARD_POOL_CIRCUITS.has(circuitId as CircuitType)) {
+    return circuitId as CircuitType;
+  }
+  return CUSTOM_CIRCUIT_POOL_FALLBACK[circuitId] ?? "interference";
+}
+
+/**
+ * Enrich pool-resolved traits with quantum signals and any TypeScript-side mapping.
+ *
+ * Called after selecting a pool result. Computes QuantumSignals from the probability
+ * distribution, then runs the variant's quantumMapping.resolve/schema (Path B) if present.
+ * Python's extra dict is already inside baseTraits — this just layers signals and TS props
+ * on top.
+ */
+function enrichTraits(
+  baseTraits: ResolvedTraits,
+  probabilities: Record<string, number>,
+  variantId: string
+): ResolvedTraits {
+  const numQubits = Object.keys(probabilities)[0]?.length ?? 1;
+  const signals = computeQuantumSignals(
+    probabilities,
+    numQubits,
+    typeof baseTraits.growthRate === "number" ? baseTraits.growthRate : 1,
+    typeof baseTraits.opacity === "number" ? baseTraits.opacity : 0.85
+  );
+  const variant = getVariantById(variantId);
+  const tsProps = variant?.quantumMapping
+    ? resolveQuantumProperties(variant.quantumMapping, signals)
+    : {};
+  return { ...baseTraits, quantumSignals: signals, ...tsProps };
+}
 
 /**
  * Simple seeded pseudo-random number generator.
@@ -169,11 +222,16 @@ export const observationRouter = router({
         // This ensures all plants in the same entanglement group get correlated quantum results.
         // For non-entangled plants, use the individual plant ID.
         const poolSeed = plant.entanglementGroupId ?? plant.id;
-        const circuitPool = pool.pools[circuitId];
+        const poolCircuitId = getPoolCircuitId(circuitId);
+        const circuitPool = pool.pools[poolCircuitId];
         const poolResult = selectFromPool(circuitPool, poolSeed);
 
-        // Use the pre-computed traits
-        resolvedTraits = poolResult.traits as ResolvedTraits;
+        // Enrich pool traits with quantum signals + any TypeScript mapping
+        resolvedTraits = enrichTraits(
+          poolResult.traits as ResolvedTraits,
+          poolResult.probabilities,
+          plant.variantId
+        );
         executionMode = poolResult.executionMode;
 
         // Extract measurement summary for frontend explanations
@@ -195,11 +253,17 @@ export const observationRouter = router({
           `[Quantum] Pool unavailable for plant ${plant.id}, using mock traits:`,
           error instanceof Error ? error.message : error
         );
-        resolvedTraits = generateMockTraits(
+        const mockBase = generateMockTraits(
           circuitDefinition as string,
           plant.variantId,
           plant.colorVariationName
         );
+        // Apply TS mapping with null signals — must return safe defaults
+        const mockVariant = getVariantById(plant.variantId);
+        const mockTsProps = mockVariant?.quantumMapping
+          ? resolveQuantumProperties(mockVariant.quantumMapping, null)
+          : {};
+        resolvedTraits = { ...mockBase, ...mockTsProps };
       }
 
       const updatedPlant = await ctx.db.plant.update({
@@ -251,14 +315,19 @@ export const observationRouter = router({
               // Use the SAME entanglement group ID as the primary plant to get correlated results.
               // This is the key to quantum entanglement: all plants in the group share
               // the same quantum measurement outcome.
-              const partnerCircuitPool = partnerPool.pools[partnerCircuitId];
+              const partnerPoolCircuitId = getPoolCircuitId(partnerCircuitId);
+              const partnerCircuitPool = partnerPool.pools[partnerPoolCircuitId];
               const partnerPoolResult = selectFromPool(
                 partnerCircuitPool,
                 plant.entanglementGroupId!
               );
 
-              // Use the pre-computed traits (same as primary plant for true correlation)
-              correlatedTraits = partnerPoolResult.traits as ResolvedTraits;
+              // Enrich pool traits with quantum signals + any TypeScript mapping
+              correlatedTraits = enrichTraits(
+                partnerPoolResult.traits as ResolvedTraits,
+                partnerPoolResult.probabilities,
+                partner.variantId
+              );
 
               console.log(
                 `[Quantum] Entangled partner ${partner.id} using pool result ${partnerPoolResult.index} from ${partnerCircuitId} (correlated with group ${plant.entanglementGroupId})`
@@ -270,12 +339,17 @@ export const observationRouter = router({
                 `[Quantum] Pool unavailable for partner ${partner.id}, using correlated mock traits:`,
                 error instanceof Error ? error.message : error
               );
-              correlatedTraits = generateMockTraits(
+              const partnerMockBase = generateMockTraits(
                 partnerCircuit as string,
                 partner.variantId,
                 partner.colorVariationName,
                 0 // Same seed as primary plant for correlated traits
               );
+              const partnerVariant = getVariantById(partner.variantId);
+              const partnerMockTsProps = partnerVariant?.quantumMapping
+                ? resolveQuantumProperties(partnerVariant.quantumMapping, null)
+                : {};
+              correlatedTraits = { ...partnerMockBase, ...partnerMockTsProps };
             }
 
             await ctx.db.plant.update({

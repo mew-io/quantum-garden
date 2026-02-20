@@ -229,8 +229,12 @@ function generateObservationExplanation(event: QuantumEvent): QuantumExplanation
   technicalParts.push(`Execution mode: ${event.executionMode ?? "mock"}.`);
 
   if (event.resolvedTraits) {
+    const t = event.resolvedTraits;
+    const growthRate = typeof t.growthRate === "number" ? t.growthRate.toFixed(2) : "—";
+    const opacity = typeof t.opacity === "number" ? (t.opacity * 100).toFixed(0) : "—";
+    const paletteLen = Array.isArray(t.colorPalette) ? t.colorPalette.length : 0;
     technicalParts.push(
-      `Resolved traits — growth rate: ${event.resolvedTraits.growthRate.toFixed(2)}x, opacity: ${(event.resolvedTraits.opacity * 100).toFixed(0)}%, colors: ${event.resolvedTraits.colorPalette.length} in palette.`
+      `Resolved traits — growth rate: ${growthRate}x, opacity: ${opacity}%, colors: ${paletteLen} in palette.`
     );
   }
 

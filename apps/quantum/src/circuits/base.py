@@ -10,7 +10,7 @@ This modular design allows community contributions of new circuit types.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from qiskit import QuantumCircuit  # type: ignore[import-untyped]
@@ -59,21 +59,35 @@ class ResolvedTraits:
     """Visual traits resolved from quantum measurements.
 
     These traits directly control plant rendering in the garden.
+
+    The `extra` dict allows circuits to include plant-specific properties
+    beyond the standard base traits. For example, a flower circuit might
+    include `petalCount`, and a fern circuit might include `branchCount`.
+    These extra fields are merged into the final JSON output and stored
+    in the plant's traits alongside the standard fields.
+
+    Variant builders consume these via `ctx.traits` cast to their own type.
     """
 
     glyph_pattern: list[list[int]]  # 64x64 binary grid
     color_palette: list[str]  # 3 hex colors [primary, secondary, tertiary]
     growth_rate: float  # 0.5 to 2.0 (affects lifecycle speed)
     opacity: float  # 0.7 to 1.0
+    extra: dict[str, Any] = field(default_factory=dict)  # Custom per-circuit properties
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for JSON serialization."""
-        return {
+        """Convert to dictionary for JSON serialization.
+
+        Standard fields come first; extra fields are merged on top.
+        """
+        result: dict[str, Any] = {
             "glyphPattern": self.glyph_pattern,
             "colorPalette": self.color_palette,
             "growthRate": round(self.growth_rate, 2),
             "opacity": round(self.opacity, 2),
         }
+        result.update(self.extra)
+        return result
 
 
 class BaseCircuit(ABC):

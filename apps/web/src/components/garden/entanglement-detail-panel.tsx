@@ -158,7 +158,7 @@ function PanelContent({
           <div className="mb-2 flex items-center justify-between text-xs">
             <span className="text-pink-100/70">Color Palette</span>
             <div className="flex gap-1">
-              {plant1.traits!.colorPalette.slice(0, 4).map((color: string, i: number) => (
+              {(plant1.traits?.colorPalette ?? []).slice(0, 4).map((color: string, i: number) => (
                 <div
                   key={i}
                   className="h-3 w-3 rounded-sm border border-white/20"
@@ -173,14 +173,19 @@ function PanelContent({
           <div className="mb-2 flex items-center justify-between text-xs">
             <span className="text-pink-100/70">Growth Rate</span>
             <span className="font-mono text-pink-100/90">
-              {plant1.traits!.growthRate.toFixed(2)}x
+              {typeof plant1.traits?.growthRate === "number"
+                ? plant1.traits.growthRate.toFixed(2)
+                : "—"}
+              x
             </span>
           </div>
 
           {/* Opacity */}
           <div className="flex items-center justify-between text-xs">
             <span className="text-pink-100/70">Opacity</span>
-            <span className="font-mono text-pink-100/90">{plant1.traits!.opacity.toFixed(2)}</span>
+            <span className="font-mono text-pink-100/90">
+              {typeof plant1.traits?.opacity === "number" ? plant1.traits.opacity.toFixed(2) : "—"}
+            </span>
           </div>
         </div>
       )}

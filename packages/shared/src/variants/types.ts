@@ -8,6 +8,7 @@
  */
 
 import type { ResolvedTraits } from "../types";
+import type { QuantumSignals } from "../quantum/signals";
 
 /**
  * A single keyframe in a plant's lifecycle animation.
@@ -39,6 +40,68 @@ export interface GlyphKeyframe {
    * Examples: rotation, blur, glow, etc.
    */
   [key: string]: unknown;
+}
+
+// ============================================================================
+// QUANTUM PROPERTY MAPPING TYPES
+// ============================================================================
+
+/**
+ * A single declarative mapping from a quantum signal to a named property.
+ *
+ * The signal (always [0, 1]) is optionally curved, then linearly mapped
+ * to the output range. Used in `QuantumPropertySchema` as the easy path
+ * for variants that use generic circuits (Path B).
+ *
+ * Example:
+ *   petalCount: { signal: 'entropy', range: [3, 8], default: 5, round: true }
+ *   → When entropy is 0.72: 3 + 0.72 * (8-3) = 6.6 → floored to 6
+ */
+export interface QuantumPropertyMapping {
+  /** Which normalized quantum signal drives this property */
+  signal: keyof QuantumSignals;
+  /** Output range [min, max] */
+  range: [number, number];
+  /** Default value when quantum signals are unavailable (unobserved plant) */
+  default: number;
+  /** If true, floor the result to an integer (useful for counts) */
+  round?: boolean;
+  /**
+   * Optional easing curve applied before range mapping.
+   * 'easeIn': slow start (t²), 'easeOut': slow end ((1-(1-t)²))
+   */
+  curve?: "linear" | "easeIn" | "easeOut";
+}
+
+/**
+ * Declarative schema for per-variant quantum property mappings.
+ * Each key is a property name; each value describes how to derive it
+ * from a quantum signal.
+ */
+export type QuantumPropertySchema = Record<string, QuantumPropertyMapping>;
+
+/**
+ * Quantum property configuration for a plant variant.
+ *
+ * Supports two modes that can be used individually or combined:
+ *
+ * **Schema (easy path):** Declarative linear mappings from signals to ranges.
+ * Good for simple properties that correlate directly with one signal.
+ *
+ * **Resolve (power-user path):** Full custom function. Receives all signals,
+ * can combine them, apply conditionals, return any data structure needed.
+ * Output overrides schema output for overlapping keys.
+ *
+ * When both are provided, schema runs first, then resolve merges on top.
+ * Called with `null` signals for unobserved plants — must return safe defaults.
+ *
+ * Used for variants with generic circuits (Path B). Variants with custom
+ * Python circuits (Path A) don't need this — their circuit's `map_measurements()`
+ * already returns plant-specific properties in `ResolvedTraits.extra`.
+ */
+export interface QuantumPropertyConfig {
+  schema?: QuantumPropertySchema;
+  resolve?: (signals: QuantumSignals | null) => Record<string, unknown>;
 }
 
 /**
@@ -136,6 +199,24 @@ export interface PlantVariant {
    * Controls how this plant type interacts with spatial proximity rules during germination.
    */
   clusteringBehavior?: ClusteringBehavior;
+
+  /**
+   * Which Python circuit this variant uses. Overrides rarity-based circuit selection
+   * at plant creation time. Use the circuit's registered `id` string.
+   *
+   * Path A variants (custom Python circuit): set this to the circuit's id.
+   * Path B variants (generic circuit + TS mapping): omit or set to a generic circuit id.
+   */
+  circuitId?: string;
+
+  /**
+   * TypeScript-side quantum property mapping (Path B only).
+   *
+   * Derives variant-specific visual properties from `QuantumSignals` at observation time.
+   * Not needed for Path A variants whose Python circuit's `map_measurements()` already
+   * returns plant-specific properties in `ResolvedTraits.extra`.
+   */
+  quantumMapping?: QuantumPropertyConfig;
 }
 
 /**

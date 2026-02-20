@@ -6496,13 +6496,25 @@ function buildWatercolorFlowerElements(ctx: WatercolorBuildContext): WatercolorE
     return (s - 1) / 2147483646;
   };
 
-  // Quantum-derived parameters
+  // Quantum-derived parameters.
+  // Prefer quantumMapping-resolved properties stored in traits (Path B).
+  // Fall back to derivation from growthRate/opacity for backward compatibility
+  // (plants observed before quantumMapping was deployed, or mock mode).
   const growthRate = ctx.traits?.growthRate ?? 1.0;
   const quantumOpacity = ctx.traits?.opacity ?? 0.85;
 
-  const petalCount = Math.floor(3 + ((growthRate - 0.5) / 1.5) * 5); // 3-8
-  const leafCount = Math.max(1, Math.floor(growthRate * 2.5)); // 1-5
-  const stemCurvature = (1 - quantumOpacity) * 1.5; // 0-0.45
+  const petalCount =
+    typeof ctx.traits?.petalCount === "number"
+      ? ctx.traits.petalCount
+      : Math.floor(3 + ((growthRate - 0.5) / 1.5) * 5); // 3-8
+  const leafCount =
+    typeof ctx.traits?.leafCount === "number"
+      ? ctx.traits.leafCount
+      : Math.max(1, Math.floor(growthRate * 2.5)); // 1-5
+  const stemCurvature =
+    typeof ctx.traits?.stemCurvature === "number"
+      ? ctx.traits.stemCurvature
+      : (1 - quantumOpacity) * 1.5; // 0-0.45
 
   // Color selection
   const colorSet =
@@ -6649,6 +6661,19 @@ const watercolorFlower: PlantVariant = {
   requiresObservationToGerminate: true,
   renderMode: "watercolor",
   keyframes: [],
+  // Path B: uses the interference circuit (multi-qubit entanglement)
+  // and maps quantum signals to flower-specific properties at observation time.
+  circuitId: "interference",
+  quantumMapping: {
+    schema: {
+      // Shannon entropy drives petal count: high uncertainty → more petals
+      petalCount: { signal: "entropy", range: [3, 8], default: 5, round: true },
+      // Growth signal drives leaf count: stronger growth → more leaves
+      leafCount: { signal: "growth", range: [1, 5], default: 2, round: true },
+      // High certainty (opacity) → straight stem; low certainty → curved stem
+      stemCurvature: { signal: "certainty", range: [0.45, 0], default: 0.15 },
+    },
+  },
   colorVariations: [
     {
       name: "golden",
@@ -6688,6 +6713,199 @@ const watercolorFlower: PlantVariant = {
   },
 };
 
+// ============================================================================
+// QUANTUM FERN (Path A — reference implementation)
+// ============================================================================
+
+/**
+ * Builder for the quantum fern.
+ *
+ * Reads Path A properties returned by the quantum_fern Python circuit's
+ * map_measurements() directly from ctx.traits:
+ *   - branchCount (3-7): number of primary frond arms
+ *   - asymmetry (0-1): how unevenly the branches are distributed
+ *   - leafDensity (0-1): fraction of branch points that sprout leaflets
+ *
+ * These properties are stored by Python in ResolvedTraits.extra and flow
+ * through the pool into plant.traits. No TypeScript mapping is needed.
+ */
+function buildQuantumFernElements(ctx: WatercolorBuildContext): WatercolorElement[] {
+  const elements: WatercolorElement[] = [];
+
+  // Seeded RNG for per-plant variation
+  let s = ctx.seed & 0x7fffffff;
+  if (s === 0) s = 1;
+  const rng = () => {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+
+  // Path A: read properties from Python circuit's extra dict (via plant.traits)
+  // Fallback values used for unobserved plants (ctx.traits is null)
+  const branchCount = typeof ctx.traits?.branchCount === "number" ? ctx.traits.branchCount : 4;
+  const asymmetry = typeof ctx.traits?.asymmetry === "number" ? ctx.traits.asymmetry : 0.1;
+  const leafDensity = typeof ctx.traits?.leafDensity === "number" ? ctx.traits.leafDensity : 0.5;
+
+  // Lifecycle openness (0=tight bud, 1=fully open)
+  const openness =
+    ctx.keyframeName === "dormant"
+      ? 0
+      : ctx.keyframeName === "sprout"
+        ? ctx.keyframeProgress * 0.3
+        : ctx.keyframeName === "frond"
+          ? 0.3 + ctx.keyframeProgress * 0.6
+          : ctx.keyframeName === "mature"
+            ? 0.9 + ctx.keyframeProgress * 0.1
+            : Math.max(0, 1 - ctx.keyframeProgress); // fade
+
+  if (openness <= 0) return elements;
+
+  // Fern color set
+  const darkGreen = "#2D5A27";
+  const midGreen = "#4A8F3F";
+  const lightGreen = "#8BC34A";
+  const stemColor = "#1E3A1C";
+
+  // Central stem (rachis)
+  const stemBottom = 56;
+  const stemTop = 12;
+  const stemMidX = 32;
+  elements.push({
+    shape: {
+      type: "stem",
+      points: [
+        [stemMidX, stemBottom],
+        [stemMidX + (rng() - 0.5) * 4 * asymmetry, (stemBottom + stemTop) / 2],
+        [stemMidX + (rng() - 0.5) * 6 * asymmetry, stemTop + 6],
+        [stemMidX, stemTop],
+      ],
+      thickness: 0.7 + openness * 0.4,
+    },
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    scale: openness,
+    color: stemColor,
+    opacity: 0.65,
+    zOffset: 0,
+  });
+
+  // Primary branches along the stem
+  for (let i = 0; i < branchCount; i++) {
+    if (openness < (i / branchCount) * 0.6) break; // stagger reveal
+
+    // Position along stem with asymmetry bias
+    const t = (i + 0.5) / branchCount;
+    const y = stemBottom - t * (stemBottom - stemTop);
+    const asymBias = (rng() - 0.5) * asymmetry * 8;
+    const side = i % 2 === 0 ? 1 : -1;
+    const branchAngle = side * (0.5 + rng() * 0.4 + asymmetry * 0.3);
+    const branchLength = (6 + rng() * 6) * openness;
+
+    // Branch stem
+    const bx = stemMidX + asymBias;
+    const endX = bx + Math.sin(branchAngle) * branchLength * side;
+    const endY = y - Math.cos(branchAngle) * branchLength * 0.6;
+
+    elements.push({
+      shape: {
+        type: "stem",
+        points: [
+          [bx, y],
+          [bx + (endX - bx) * 0.5, y + (endY - y) * 0.5],
+          [endX, endY],
+          [endX, endY],
+        ],
+        thickness: 0.4 + openness * 0.2,
+      },
+      position: { x: 0, y: 0 },
+      rotation: 0,
+      scale: 1,
+      color: midGreen,
+      opacity: 0.55,
+      zOffset: 0.5,
+    });
+
+    // Leaflets along each branch (density-controlled)
+    const leafletCount = Math.floor(2 + leafDensity * 4);
+    for (let j = 0; j < leafletCount; j++) {
+      if (rng() > leafDensity + 0.3) continue;
+      const lt = (j + 0.5) / leafletCount;
+      const lx = bx + (endX - bx) * lt;
+      const ly = y + (endY - y) * lt;
+      const leafAngle = branchAngle * side + (rng() - 0.5) * 0.4;
+      const isMain = j < 2;
+
+      elements.push({
+        shape: {
+          type: "leaf",
+          width: isMain ? 2.5 : 1.8,
+          length: isMain ? 5 : 3.5,
+        },
+        position: { x: lx, y: ly },
+        rotation: leafAngle,
+        scale: (0.5 + rng() * 0.5) * openness,
+        color: rng() > 0.5 ? darkGreen : lightGreen,
+        opacity: 0.5 + rng() * 0.25,
+        zOffset: 1.0 + j * 0.1,
+      });
+    }
+  }
+
+  // Fiddlehead tip when young
+  if (openness < 0.5) {
+    elements.push({
+      shape: { type: "disc", radius: 1.2 + (1 - openness) * 1.5 },
+      position: { x: stemMidX, y: stemTop + 2 },
+      rotation: 0,
+      scale: 1 - openness * 1.5,
+      color: midGreen,
+      opacity: 0.4 + (1 - openness) * 0.3,
+      zOffset: 2.0,
+    });
+  }
+
+  return elements;
+}
+
+/**
+ * Quantum Fern — Path A reference implementation.
+ *
+ * Uses the `quantum_fern` Python circuit (3-qubit interference).
+ * The circuit's map_measurements() returns branchCount, asymmetry, and
+ * leafDensity directly in ResolvedTraits.extra — no TypeScript mapping needed.
+ *
+ * Rarity: 0.08 (rare — showcases custom circuit capability)
+ */
+const quantumFern: PlantVariant = {
+  id: "quantum-fern",
+  name: "Quantum Fern",
+  description:
+    "A delicate fern whose branching geometry is directly encoded by a custom quantum interference circuit. Qubit measurements determine branch count, structural symmetry, and leaflet density.",
+  rarity: 0.08,
+  requiresObservationToGerminate: true,
+  renderMode: "watercolor",
+  keyframes: [],
+  // Path A: custom Python circuit returns plant-specific properties in extra dict
+  circuitId: "quantum_fern",
+  // No quantumMapping needed — Python circuit handles everything
+  watercolorConfig: {
+    keyframes: [
+      { name: "dormant", duration: 10 },
+      { name: "sprout", duration: 18 },
+      { name: "frond", duration: 35 },
+      { name: "mature", duration: 50 },
+      { name: "fade", duration: 20 },
+    ],
+    wcEffect: {
+      layers: 3,
+      opacity: 0.45,
+      spread: 0.05,
+      colorVariation: 0.03,
+    },
+    buildElements: buildQuantumFernElements,
+  },
+};
+
 /**
  * All registered plant variants.
  *
@@ -6710,7 +6928,7 @@ const watercolorFlower: PlantVariant = {
  *                   kaleidoscopeStarVector, vortexSpiralVector
  *                   (very rare, colorful smooth vectors with animation loops)
  *
- * Total: 36 variants
+ * Total: 37 variants (36 original + quantum-fern Path A reference)
  * Add new variants here to make them available in the system.
  */
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -6760,6 +6978,8 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   vortexSpiralVector,
   // Watercolor (rare - painterly layered transparency)
   watercolorFlower,
+  // Path A reference: custom quantum circuit drives fern geometry
+  quantumFern,
 ];
 
 /**

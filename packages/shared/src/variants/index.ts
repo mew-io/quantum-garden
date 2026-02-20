@@ -11,6 +11,10 @@
 export type {
   GlyphKeyframe,
   PlantVariant,
+  // Quantum property mapping (Path B)
+  QuantumPropertyMapping,
+  QuantumPropertySchema,
+  QuantumPropertyConfig,
   ColorVariation,
   ComputedLifecycleState,
   PlantWithLifecycle,

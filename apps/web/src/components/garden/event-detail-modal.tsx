@@ -195,14 +195,12 @@ function EventDetails({ event }: { event: QuantumEvent }) {
   }
   if (event.resolvedTraits) {
     const t = event.resolvedTraits;
-    details.push({
-      label: "Growth Rate",
-      value: `${t.growthRate.toFixed(2)}x`,
-    });
-    details.push({
-      label: "Opacity",
-      value: `${(t.opacity * 100).toFixed(0)}%`,
-    });
+    if (typeof t.growthRate === "number") {
+      details.push({ label: "Growth Rate", value: `${t.growthRate.toFixed(2)}x` });
+    }
+    if (typeof t.opacity === "number") {
+      details.push({ label: "Opacity", value: `${(t.opacity * 100).toFixed(0)}%` });
+    }
   }
 
   if (details.length === 0) return null;

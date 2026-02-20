@@ -478,20 +478,32 @@ async function autoReseedIfNeeded(
   const canvasHeight = CANVAS.DEFAULT_HEIGHT;
   const margin = 150;
 
-  // Get or create a quantum record for new plants
-  let quantumRecord = await db.quantumRecord.findFirst();
-  if (!quantumRecord) {
-    quantumRecord = await db.quantumRecord.create({
-      data: {
-        circuitId: "superposition",
-        circuitDefinition: { type: "placeholder", gates: [] },
-        status: "completed",
-        measurements: [0, 1],
-        probabilities: [0.5, 0.5],
-      },
-    });
+  // Cache quantum records by circuitId to avoid redundant DB queries
+  const quantumRecordCache = new Map<string, string>();
+
+  /**
+   * Get or create a quantum record for the given circuit ID.
+   * Reuses an existing record with that circuit ID to avoid creating duplicates.
+   */
+  async function getQuantumRecordId(circuitId: string): Promise<string> {
+    if (quantumRecordCache.has(circuitId)) {
+      return quantumRecordCache.get(circuitId)!;
+    }
+    let record = await db.quantumRecord.findFirst({ where: { circuitId } });
+    if (!record) {
+      record = await db.quantumRecord.create({
+        data: {
+          circuitId,
+          circuitDefinition: { type: "placeholder", gates: [] },
+          status: "completed",
+          measurements: [0, 1],
+          probabilities: [0.5, 0.5],
+        },
+      });
+    }
+    quantumRecordCache.set(circuitId, record.id);
+    return record.id;
   }
-  const quantumCircuitId = quantumRecord.id;
 
   // Helper to select variant using rarity weights
   const selectVariantByRarity = (): PlantVariant => {
@@ -553,6 +565,10 @@ async function autoReseedIfNeeded(
         y: margin + Math.random() * (canvasHeight - 2 * margin),
       };
     }
+
+    // Prefer variant's declared circuitId; fall back to superposition for generic variants
+    const circuitId = variant.circuitId ?? "superposition";
+    const quantumCircuitId = await getQuantumRecordId(circuitId);
 
     await db.plant.create({
       data: {

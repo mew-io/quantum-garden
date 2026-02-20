@@ -191,8 +191,13 @@ interface ComputedLifecycleState {
 ┌─────────────────────────────────────────────────────────────────┐
 │  packages/shared/src/variants/                                  │
 │  ├── types.ts          # TypeScript interfaces                 │
-│  ├── definitions.ts    # Variant definitions (source of truth) │
-│  └── lifecycle.ts      # Computation logic                     │
+│  ├── registry.ts       # Variant registration (source of truth)│
+│  ├── lifecycle.ts      # Computation logic                     │
+│  └── plants/           # One directory per plant variant       │
+│      ├── _TEMPLATE/    # Contributor template                  │
+│      ├── flowers/      # Flower variants                       │
+│      ├── ground-cover/ # Ground cover variants                 │
+│      └── ...           # Other category directories            │
 └─────────────────────────────────────────────────────────────────┘
                               │
               ┌───────────────┴───────────────┐
@@ -368,16 +373,76 @@ Implementation considerations:
 
 ---
 
+## Contributing a New Plant
+
+Each plant variant lives in its own self-contained directory. Adding a new plant requires touching only two files:
+
+### 1. Create the plant file
+
+Copy `packages/shared/src/variants/plants/_TEMPLATE/` to a new directory:
+
+```
+plants/{category}/{your-plant-id}/index.ts
+```
+
+Categories: `ground-cover`, `grasses`, `flowers`, `shrubs`, `trees`, `ethereal`, `geometric`, `ethereal-vector`, `watercolor`
+
+Fill in the template — the file is self-contained and includes all fields documented inline.
+
+### 2. Register the plant
+
+Open `packages/shared/src/variants/registry.ts` and add two lines:
+
+```typescript
+// Add the import with the other plants in its category:
+import { myPlant } from "./plants/flowers/my-plant";
+
+// Add to the PLANT_VARIANTS array in the correct category section:
+export const PLANT_VARIANTS: PlantVariant[] = [
+  // ...existing plants...
+  myPlant, // ← add here
+];
+```
+
+That's it. The plant will automatically appear in the garden at the rarity you set.
+
+### Verify
+
+```bash
+pnpm --filter shared typecheck   # must pass with no errors
+pnpm --filter web test           # must pass with no regressions
+```
+
+---
+
 ## File Structure
 
 ```
 packages/shared/src/
 ├── variants/
-│   ├── index.ts              # Re-exports
+│   ├── index.ts              # Public API re-exports
 │   ├── types.ts              # PlantVariant, GlyphKeyframe interfaces
-│   ├── definitions.ts        # Variant definitions array
-│   └── lifecycle.ts          # computeState, getTotalDuration
-└── types.ts                  # Add lifecycle types to main exports
+│   ├── registry.ts           # Variant registration (import here to add a plant)
+│   ├── lifecycle.ts          # computeState, getTotalDuration
+│   └── plants/               # One directory per plant variant
+│       ├── _TEMPLATE/        # Copy this to add a new plant
+│       │   └── index.ts      # Template with all fields documented
+│       ├── flowers/
+│       │   ├── simple-bloom/index.ts
+│       │   ├── quantum-tulip/index.ts
+│       │   └── ...
+│       ├── ground-cover/
+│       │   ├── soft-moss/index.ts
+│       │   └── pebble-patch/index.ts
+│       ├── grasses/
+│       ├── shrubs/
+│       ├── trees/
+│       ├── ethereal/
+│       ├── geometric/
+│       ├── ethereal-vector/
+│       ├── watercolor/
+│       └── utils/            # Shared plant utilities (e.g. vectorArcSegments)
+└── types.ts                  # Core shared types
 
 apps/web/
 ├── scripts/

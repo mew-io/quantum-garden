@@ -77,4 +77,4 @@ export {
 } from "./lifecycle";
 
 // Variant definitions
-export { PLANT_VARIANTS, getVariantById, getAllVariants } from "./definitions";
+export { PLANT_VARIANTS, getVariantById, getAllVariants } from "./registry";

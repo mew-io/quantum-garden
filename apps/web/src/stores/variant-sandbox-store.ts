@@ -34,6 +34,10 @@ interface VariantSandboxState {
   isDirty: boolean;
   editedKeyframes: Map<string, GlyphKeyframe>; // variantId:keyframeIndex -> edited keyframe
 
+  // Sandbox trait overrides — injected into ctx.traits for watercolor variants
+  // that declare sandboxControls. Keyed by trait name.
+  traitOverrides: Record<string, number>;
+
   // Computed helpers
   getSelectedVariant: () => PlantVariant | null;
   getCurrentKeyframeIndex: () => number;
@@ -44,6 +48,8 @@ interface VariantSandboxState {
   selectVariant: (variantId: string | null) => void;
   selectKeyframe: (index: number | null) => void;
   selectColorVariation: (name: string | null) => void;
+  setTraitOverride: (key: string, value: number) => void;
+  resetTraitOverrides: () => void;
 
   // Playback actions
   play: () => void;
@@ -85,6 +91,8 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
 
   isDirty: false,
   editedKeyframes: new Map(),
+
+  traitOverrides: {},
 
   // Computed helpers
   getSelectedVariant: () => {
@@ -141,6 +149,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       selectedVariantId: variantId,
       selectedKeyframeIndex: null,
       selectedColorVariation: null,
+      traitOverrides: {},
       currentTime: 0,
       isPlaying: false,
     }),
@@ -148,6 +157,11 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
   selectKeyframe: (index) => set({ selectedKeyframeIndex: index }),
 
   selectColorVariation: (name) => set({ selectedColorVariation: name }),
+
+  setTraitOverride: (key, value) =>
+    set((state) => ({ traitOverrides: { ...state.traitOverrides, [key]: value } })),
+
+  resetTraitOverrides: () => set({ traitOverrides: {} }),
 
   // Playback actions
   play: () => set({ isPlaying: true }),
@@ -211,6 +225,7 @@ export const useVariantSandboxStore = create<VariantSandboxState>((set, get) => 
       selectedVariantId: variantId,
       selectedKeyframeIndex: null,
       selectedColorVariation: null,
+      traitOverrides: {},
       currentTime: 0,
       isPlaying: false,
     }),

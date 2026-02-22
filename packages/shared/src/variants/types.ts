@@ -105,6 +105,30 @@ export interface QuantumPropertyConfig {
 }
 
 /**
+ * A single trait control for the sandbox UI.
+ *
+ * When a variant defines `sandboxControls`, the sandbox renders a slider
+ * for each control and passes the values directly into the watercolor
+ * builder's `ctx.traits`, bypassing quantum measurement. Useful for
+ * Path A variants (custom Python circuits) whose traits are normally
+ * only available after quantum observation.
+ */
+export interface SandboxTraitControl {
+  /** Trait key — must match the key in ctx.traits (from circuit's extra dict) */
+  key: string;
+  /** Display label shown above the slider */
+  label: string;
+  /** Minimum slider value */
+  min: number;
+  /** Maximum slider value */
+  max: number;
+  /** Slider step size */
+  step: number;
+  /** Default value when the slider is first shown */
+  default: number;
+}
+
+/**
  * A plant variant defines a "species" with its lifecycle animation.
  *
  * Variants are defined in TypeScript as the single source of truth,
@@ -217,6 +241,16 @@ export interface PlantVariant {
    * returns plant-specific properties in `ResolvedTraits.extra`.
    */
   quantumMapping?: QuantumPropertyConfig;
+
+  /**
+   * Optional sandbox trait controls for the Variant Sandbox UI.
+   *
+   * When defined, the sandbox renders a slider for each control and injects
+   * the values into the watercolor builder's `ctx.traits`, allowing designers
+   * to preview all quantum-driven visual parameters without needing an actual
+   * quantum observation. Primarily useful for Path A watercolor variants.
+   */
+  sandboxControls?: SandboxTraitControl[];
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlantVariant } from "@quantum-garden/shared";
+import type { PlantVariant, SandboxTraitControl } from "@quantum-garden/shared";
 import { VariantControls } from "./variant-controls";
 import { VariantTimeline } from "./variant-timeline";
 import { VariantPreview } from "./variant-preview";
@@ -179,6 +179,11 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
               {variant.colorVariations && variant.colorVariations.length > 0 && (
                 <ColorVariationSelector variant={variant} />
               )}
+
+              {/* Trait Controls (if variant has sandbox controls) */}
+              {variant.sandboxControls && variant.sandboxControls.length > 0 && (
+                <TraitControlsPanel controls={variant.sandboxControls} />
+              )}
             </div>
 
             {/* Right column - Configuration Panel */}
@@ -188,6 +193,60 @@ function DetailView({ variant }: { variant: PlantVariant | null }) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Trait controls panel — renders sliders for each sandboxControl declared on the variant.
+ * Values are injected into ctx.traits when building watercolor elements, allowing
+ * designers to preview all quantum-driven visual parameters without a real observation.
+ */
+function TraitControlsPanel({ controls }: { controls: SandboxTraitControl[] }) {
+  const { traitOverrides, setTraitOverride, resetTraitOverrides } = useVariantSandboxStore();
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-medium text-gray-300">Quantum Trait Controls</h2>
+        <button
+          onClick={resetTraitOverrides}
+          className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-2 py-1 rounded hover:bg-gray-700"
+        >
+          Reset
+        </button>
+      </div>
+      <div className="space-y-4">
+        {controls.map((ctrl) => {
+          const value = traitOverrides[ctrl.key] ?? ctrl.default;
+          const isInteger = ctrl.step >= 1;
+          const displayValue = isInteger ? Math.round(value) : value.toFixed(2);
+
+          return (
+            <div key={ctrl.key}>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs text-gray-400">{ctrl.label}</label>
+                <span className="text-xs font-mono text-gray-300 bg-gray-700 px-1.5 py-0.5 rounded">
+                  {displayValue}
+                </span>
+              </div>
+              <input
+                type="range"
+                min={ctrl.min}
+                max={ctrl.max}
+                step={ctrl.step}
+                value={value}
+                onChange={(e) => setTraitOverride(ctrl.key, parseFloat(e.target.value))}
+                className="w-full h-1.5 appearance-none rounded-full bg-gray-600 accent-blue-500 cursor-pointer"
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-xs text-gray-600">{ctrl.min}</span>
+                <span className="text-xs text-gray-600">{ctrl.max}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

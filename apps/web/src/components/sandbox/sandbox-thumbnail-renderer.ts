@@ -155,7 +155,7 @@ export function renderWatercolorThumbnail(
   r.setWatercolorGroupVisible(true);
   r.setBackground("garden");
 
-  r.updateWatercolorPlant(variant, lifecycleState, colorVariationName, `thumb-${cacheKey}`);
+  r.updateWatercolorPlant(variant, lifecycleState, colorVariationName, null, `thumb-${cacheKey}`);
   r.updateTime(0);
 
   const dataUrl = r.toDataURL();

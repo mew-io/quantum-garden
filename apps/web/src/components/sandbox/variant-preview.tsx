@@ -32,6 +32,7 @@ export function VariantPreview() {
   const {
     getSelectedVariant,
     selectedColorVariation,
+    traitOverrides,
     currentTime,
     isPlaying,
     playbackSpeed,
@@ -93,7 +94,12 @@ export function VariantPreview() {
       renderer.setVectorGroupVisible(false);
       renderer.setWatercolorGroupVisible(true);
 
-      renderer.updateWatercolorPlant(variant, state, selectedColorVariation);
+      // Pass trait overrides when the variant declares sandboxControls
+      const traits =
+        variant.sandboxControls && variant.sandboxControls.length > 0
+          ? (traitOverrides as Record<string, unknown>)
+          : null;
+      renderer.updateWatercolorPlant(variant, state, selectedColorVariation, traits);
     } else if (isVectorVariant(variant)) {
       // Vector variant rendering
       renderer.setPixelMeshVisible(false);
@@ -139,7 +145,7 @@ export function VariantPreview() {
     renderer.setGrid(showGrid);
     renderer.updateTime(performance.now() / 1000);
     renderer.render();
-  }, [variant, currentTime, selectedColorVariation, scale, background, showGrid]);
+  }, [variant, currentTime, selectedColorVariation, traitOverrides, scale, background, showGrid]);
 
   // Animation loop for playback
   useEffect(() => {

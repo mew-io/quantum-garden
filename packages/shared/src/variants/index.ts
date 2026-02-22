@@ -46,6 +46,8 @@ export type {
   WatercolorEffect,
   WatercolorBuildContext,
   WatercolorConfig,
+  // Sandbox
+  SandboxTraitControl,
 } from "./types";
 
 // Lifecycle computation

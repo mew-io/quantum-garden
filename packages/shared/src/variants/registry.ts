@@ -61,6 +61,7 @@ import { vortexSpiralVector } from "./plants/ethereal-vector/vortex-spiral-vecto
 
 // Watercolor
 import { watercolorFlower } from "./plants/watercolor/watercolor-flower";
+import { watercolorFlowerV2 } from "./plants/watercolor/watercolor-flower-v2";
 import { quantumFern } from "./plants/watercolor/quantum-fern";
 
 export const PLANT_VARIANTS: PlantVariant[] = [
@@ -110,6 +111,7 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   vortexSpiralVector,
   // Watercolor (rare - painterly layered transparency)
   watercolorFlower,
+  watercolorFlowerV2,
   quantumFern,
 ];
 

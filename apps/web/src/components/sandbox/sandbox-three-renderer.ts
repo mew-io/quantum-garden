@@ -464,6 +464,7 @@ export class SandboxThreeRenderer {
     variant: PlantVariant,
     lifecycleState: ComputedLifecycleState,
     colorVariationName: string | null,
+    traits: Record<string, unknown> | null = null,
     plantId: string = "preview"
   ): void {
     this.clearWatercolorGroup();
@@ -475,7 +476,7 @@ export class SandboxThreeRenderer {
       keyframeName: lifecycleState.currentKeyframe.name,
       keyframeProgress: lifecycleState.keyframeProgress,
       totalProgress: lifecycleState.totalProgress,
-      traits: null,
+      traits,
       seed: hashString(plantId),
       colorVariationName,
       circuitType: null,

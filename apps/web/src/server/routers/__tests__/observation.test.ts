@@ -94,7 +94,7 @@ describe("observationRouter", () => {
           observed: false,
           visualState: "superposed",
           quantumCircuitId: quantumRecord.id,
-          variantId: "simple-bloom",
+          variantId: "wc-simple-bloom",
           lifecycleModifier: 1.0,
         },
       });
@@ -189,7 +189,7 @@ describe("observationRouter", () => {
           visualState: "collapsed",
           observedAt: new Date(),
           quantumCircuitId: quantumRecord.id,
-          variantId: "simple-bloom",
+          variantId: "wc-simple-bloom",
           lifecycleModifier: 1.0,
         },
       });
@@ -248,7 +248,7 @@ describe("observationRouter", () => {
           observed: false,
           visualState: "superposed",
           quantumCircuitId: quantumRecord1.id,
-          variantId: "simple-bloom",
+          variantId: "wc-simple-bloom",
           lifecycleModifier: 1.0,
         },
       });
@@ -261,7 +261,7 @@ describe("observationRouter", () => {
           observed: false,
           visualState: "superposed",
           quantumCircuitId: quantumRecord2.id,
-          variantId: "simple-bloom",
+          variantId: "wc-simple-bloom",
           lifecycleModifier: 1.0,
         },
       });
@@ -390,7 +390,7 @@ describe("observationRouter", () => {
           visualState: "collapsed",
           observedAt: new Date(),
           quantumCircuitId: quantumRecord.id,
-          variantId: "simple-bloom",
+          variantId: "wc-simple-bloom",
           lifecycleModifier: 1.0,
         },
       });

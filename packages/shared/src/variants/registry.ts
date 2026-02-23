@@ -3,116 +3,118 @@
  *
  * This is the single file to update when adding a new plant variant.
  * Import the variant and add it to the PLANT_VARIANTS array below.
+ *
+ * All variants use the watercolor render mode.
  */
 
 import type { PlantVariant } from "./types";
 
-// Ground Cover
-import { softMoss } from "./plants/ground-cover/soft-moss";
-import { pebblePatch } from "./plants/ground-cover/pebble-patch";
-
-// Grasses
-import { meadowTuft } from "./plants/grasses/meadow-tuft";
-import { whisperReed } from "./plants/grasses/whisper-reed";
-
-// Flowers
-import { simpleBloom } from "./plants/flowers/simple-bloom";
-import { quantumTulip } from "./plants/flowers/quantum-tulip";
-import { dewdropDaisy } from "./plants/flowers/dewdrop-daisy";
-import { midnightPoppy } from "./plants/flowers/midnight-poppy";
-import { bellCluster } from "./plants/flowers/bell-cluster";
-import { zenLotus } from "./plants/flowers/zen-lotus";
-
-// Shrubs
-import { cloudBush } from "./plants/shrubs/cloud-bush";
-import { berryThicket } from "./plants/shrubs/berry-thicket";
-
-// Trees
-import { saplingHope } from "./plants/trees/sapling-hope";
-import { weepingWillow } from "./plants/trees/weeping-willow";
-
-// Ethereal
-import { pulsingOrb } from "./plants/ethereal/pulsing-orb";
-import { fractalBloom } from "./plants/ethereal/fractal-bloom";
-import { phoenixFlame } from "./plants/ethereal/phoenix-flame";
-import { crystalCluster } from "./plants/ethereal/crystal-cluster";
-import { kaleidoscopeStar } from "./plants/ethereal/kaleidoscope-star";
-import { vortexSpiral } from "./plants/ethereal/vortex-spiral";
-import { nebulaBloom } from "./plants/ethereal/nebula-bloom";
-import { auroraWisp } from "./plants/ethereal/aurora-wisp";
-import { prismaticFern } from "./plants/ethereal/prismatic-fern";
-import { quantumRose } from "./plants/ethereal/quantum-rose";
-import { starMoss } from "./plants/ethereal/star-moss";
-import { dreamVine } from "./plants/ethereal/dream-vine";
-import { cosmicLotus } from "./plants/ethereal/cosmic-lotus";
-import { sumiSpirit } from "./plants/ethereal/sumi-spirit";
-
-// Geometric
-import { sacredMandala } from "./plants/geometric/sacred-mandala";
-import { crystalLattice } from "./plants/geometric/crystal-lattice";
-import { stellarGeometry } from "./plants/geometric/stellar-geometry";
-import { metatronsCube } from "./plants/geometric/metatrons-cube";
-
-// Ethereal Vector
-import { pulsingOrbVector } from "./plants/ethereal-vector/pulsing-orb-vector";
-import { phoenixFlameVector } from "./plants/ethereal-vector/phoenix-flame-vector";
-import { kaleidoscopeStarVector } from "./plants/ethereal-vector/kaleidoscope-star-vector";
-import { vortexSpiralVector } from "./plants/ethereal-vector/vortex-spiral-vector";
-
-// Watercolor
+// Watercolor — Original
 import { watercolorFlower } from "./plants/watercolor/watercolor-flower";
 import { watercolorFlowerV2 } from "./plants/watercolor/watercolor-flower-v2";
 import { quantumFern } from "./plants/watercolor/quantum-fern";
+import { wcBellCluster } from "./plants/watercolor/wc-bell-cluster";
+
+// Watercolor — Ground Cover
+import { wcSoftMoss } from "./plants/watercolor/wc-soft-moss";
+import { wcPebblePatch } from "./plants/watercolor/wc-pebble-patch";
+
+// Watercolor — Grasses
+import { wcMeadowTuft } from "./plants/watercolor/wc-meadow-tuft";
+import { wcWhisperReed } from "./plants/watercolor/wc-whisper-reed";
+
+// Watercolor — Flowers
+import { wcSimpleBloom } from "./plants/watercolor/wc-simple-bloom";
+import { wcQuantumTulip } from "./plants/watercolor/wc-quantum-tulip";
+import { wcDewdropDaisy } from "./plants/watercolor/wc-dewdrop-daisy";
+import { wcMidnightPoppy } from "./plants/watercolor/wc-midnight-poppy";
+import { wcZenLotus } from "./plants/watercolor/wc-zen-lotus";
+
+// Watercolor — Shrubs
+import { wcCloudBush } from "./plants/watercolor/wc-cloud-bush";
+import { wcBerryThicket } from "./plants/watercolor/wc-berry-thicket";
+
+// Watercolor — Trees
+import { wcSaplingHope } from "./plants/watercolor/wc-sapling-hope";
+import { wcWeepingWillow } from "./plants/watercolor/wc-weeping-willow";
+
+// Watercolor — Ethereal
+import { wcPulsingOrb } from "./plants/watercolor/wc-pulsing-orb";
+import { wcFractalBloom } from "./plants/watercolor/wc-fractal-bloom";
+import { wcPhoenixFlame } from "./plants/watercolor/wc-phoenix-flame";
+import { wcCrystalCluster } from "./plants/watercolor/wc-crystal-cluster";
+import { wcKaleidoscopeStar } from "./plants/watercolor/wc-kaleidoscope-star";
+import { wcVortexSpiral } from "./plants/watercolor/wc-vortex-spiral";
+import { wcNebulaBloom } from "./plants/watercolor/wc-nebula-bloom";
+import { wcAuroraWisp } from "./plants/watercolor/wc-aurora-wisp";
+import { wcPrismaticFern } from "./plants/watercolor/wc-prismatic-fern";
+import { wcQuantumRose } from "./plants/watercolor/wc-quantum-rose";
+import { wcStarMoss } from "./plants/watercolor/wc-star-moss";
+import { wcDreamVine } from "./plants/watercolor/wc-dream-vine";
+import { wcCosmicLotus } from "./plants/watercolor/wc-cosmic-lotus";
+import { wcSumiSpirit } from "./plants/watercolor/wc-sumi-spirit";
+
+// Watercolor — Geometric
+import { wcSacredMandala } from "./plants/watercolor/wc-sacred-mandala";
+import { wcCrystalLattice } from "./plants/watercolor/wc-crystal-lattice";
+import { wcStellarGeometry } from "./plants/watercolor/wc-stellar-geometry";
+import { wcMetatronsCube } from "./plants/watercolor/wc-metatrons-cube";
+
+// Watercolor — Ethereal Vector
+import { wcPulsingOrbVector } from "./plants/watercolor/wc-pulsing-orb-vector";
+import { wcPhoenixFlameVector } from "./plants/watercolor/wc-phoenix-flame-vector";
+import { wcKaleidoscopeStarVector } from "./plants/watercolor/wc-kaleidoscope-star-vector";
+import { wcVortexSpiralVector } from "./plants/watercolor/wc-vortex-spiral-vector";
 
 export const PLANT_VARIANTS: PlantVariant[] = [
-  // Ground Cover (very common)
-  softMoss,
-  pebblePatch,
-  // Grasses (common)
-  meadowTuft,
-  whisperReed,
-  // Flowers (moderate to uncommon)
-  simpleBloom,
-  quantumTulip,
-  dewdropDaisy,
-  midnightPoppy,
-  bellCluster,
-  zenLotus,
-  // Shrubs (uncommon)
-  cloudBush,
-  berryThicket,
-  // Trees (rare)
-  saplingHope,
-  weepingWillow,
-  // Ethereal (rare - abstract artistic patterns)
-  pulsingOrb,
-  fractalBloom,
-  phoenixFlame,
-  crystalCluster,
-  kaleidoscopeStar,
-  vortexSpiral,
-  nebulaBloom,
-  auroraWisp,
-  prismaticFern,
-  quantumRose,
-  starMoss,
-  dreamVine,
-  cosmicLotus,
-  sumiSpirit,
-  // Geometric (rare - minimalist line-work patterns)
-  sacredMandala,
-  crystalLattice,
-  stellarGeometry,
-  metatronsCube,
-  // Ethereal Vector (very rare - colorful smooth vectors with looping)
-  pulsingOrbVector,
-  phoenixFlameVector,
-  kaleidoscopeStarVector,
-  vortexSpiralVector,
-  // Watercolor (rare - painterly layered transparency)
+  // Original watercolor variants
   watercolorFlower,
   watercolorFlowerV2,
   quantumFern,
+  wcBellCluster,
+  // Ground Cover
+  wcSoftMoss,
+  wcPebblePatch,
+  // Grasses
+  wcMeadowTuft,
+  wcWhisperReed,
+  // Flowers
+  wcSimpleBloom,
+  wcQuantumTulip,
+  wcDewdropDaisy,
+  wcMidnightPoppy,
+  wcZenLotus,
+  // Shrubs
+  wcCloudBush,
+  wcBerryThicket,
+  // Trees
+  wcSaplingHope,
+  wcWeepingWillow,
+  // Ethereal
+  wcPulsingOrb,
+  wcFractalBloom,
+  wcPhoenixFlame,
+  wcCrystalCluster,
+  wcKaleidoscopeStar,
+  wcVortexSpiral,
+  wcNebulaBloom,
+  wcAuroraWisp,
+  wcPrismaticFern,
+  wcQuantumRose,
+  wcStarMoss,
+  wcDreamVine,
+  wcCosmicLotus,
+  wcSumiSpirit,
+  // Geometric
+  wcSacredMandala,
+  wcCrystalLattice,
+  wcStellarGeometry,
+  wcMetatronsCube,
+  // Ethereal Vector
+  wcPulsingOrbVector,
+  wcPhoenixFlameVector,
+  wcKaleidoscopeStarVector,
+  wcVortexSpiralVector,
 ];
 
 export function getVariantById(id: string): PlantVariant | undefined {

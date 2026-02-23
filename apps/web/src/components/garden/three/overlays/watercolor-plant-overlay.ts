@@ -71,7 +71,7 @@ export class WatercolorPlantOverlay {
 
     this.plants = plants.filter((plant) => {
       const variant = this.getVariant(plant.variantId);
-      return isWatercolorVariant(variant!);
+      return variant != null && isWatercolorVariant(variant);
     });
     this.rebuildAll();
   }

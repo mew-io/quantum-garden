@@ -11,6 +11,22 @@
   --inset-right: max(1rem, var(--safe-right));
   --inset-bottom: max(1rem, var(--safe-bottom));
   --inset-left: max(1rem, var(--safe-left));
+  /* Watercolor palette */
+  --wc-cream: #FAF7F2;
+  --wc-warm-white: #F8F5EE;
+  --wc-paper: #F2EDE5;
+  --wc-tan: #E8E1D5;
+  --wc-stone: #C8BEA8;
+  --wc-bark: #7A6E5D;
+  --wc-ink: #3A352E;
+  --wc-ink-soft: #5A544C;
+  --wc-ink-muted: #8A847C;
+  /* Accent colors — muted watercolor hues */
+  --wc-sage: #8EA888;
+  --wc-rose: #C88098;
+  --wc-sky: #88A8C8;
+  --wc-lavender: #9888B8;
+  --wc-amber: #C8A870;
 }
 
 *,
@@ -30,21 +46,37 @@ body {
 }
 
 body {
-  /* Subtle radial gradient for depth - lighter center, darker edges
-     Center color matches CANVAS.BACKGROUND_COLOR (#F5F0E8) from constants.ts */
+  /* Subtle radial gradient for depth — warm watercolor paper
+     Center color matches CANVAS.BACKGROUND_COLOR (#F8F5F0) from constants.ts */
   background: radial-gradient(
     ellipse at center,
-    #F8F5EE 0%,
-    #F5F0E8 50%,
-    #EDE8DE 100%
+    #FDFAF5 0%,
+    #F8F5F0 50%,
+    #F2EDE5 100%
   );
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body), 'Nunito', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Prevent default touch behaviors (zoom, scroll) on mobile */
   touch-action: none;
   /* iOS safe area padding for notched devices - body provides base, components use CSS vars */
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+/* Warm frosted-glass panel style for UI overlays */
+.garden-panel {
+  background: rgba(250, 247, 242, 0.88);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid rgba(200, 190, 175, 0.3);
+  color: #4A453E;
+  box-shadow: 0 2px 12px rgba(120, 110, 95, 0.08);
 }
 
 #garden-canvas {

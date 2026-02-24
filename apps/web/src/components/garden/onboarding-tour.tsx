@@ -196,7 +196,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     >
       {/* Backdrop with cutout for spotlight */}
       <div
-        className="absolute inset-0 bg-black/70 transition-all duration-500"
+        className="absolute inset-0 bg-[#3A352E]/60 transition-all duration-500"
         onClick={handleNext}
       />
 
@@ -209,12 +209,12 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
             top: spotlightPosition.y,
             width: spotlightPosition.width,
             height: spotlightPosition.height,
-            boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.7)",
+            boxShadow: "0 0 0 9999px rgba(58, 53, 46, 0.6)",
             borderRadius: "12px",
           }}
         >
           {/* Pulsing ring around spotlight */}
-          <div className="absolute inset-0 rounded-xl border-2 border-purple-400/50 animate-pulse" />
+          <div className="absolute inset-0 rounded-xl border-2 border-[--wc-bark]/40 animate-pulse" />
         </div>
       )}
 
@@ -226,7 +226,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
         )}`}
         style={getTooltipStyle(step.position, spotlightPosition)}
       >
-        <div className="bg-gray-900/95 backdrop-blur-md rounded-xl border border-purple-500/30 shadow-2xl shadow-purple-500/20 p-6 max-w-sm">
+        <div className="bg-[--wc-cream] backdrop-blur-md rounded-xl border border-[--wc-stone]/30 shadow-2xl p-6 max-w-sm">
           {/* Step indicator */}
           <div className="flex items-center gap-1.5 mb-3">
             {TOUR_STEPS.map((_, idx) => (
@@ -234,26 +234,26 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                 key={idx}
                 className={`h-1 rounded-full transition-all duration-300 ${
                   idx === currentStep
-                    ? "w-4 bg-purple-400"
+                    ? "w-4 bg-[--wc-bark]"
                     : idx < currentStep
-                      ? "w-2 bg-purple-400/50"
-                      : "w-2 bg-gray-600"
+                      ? "w-2 bg-[--wc-bark]/50"
+                      : "w-2 bg-[--wc-stone]/40"
                 }`}
               />
             ))}
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-medium text-gray-100 mb-2">{step.title}</h3>
+          <h3 className="text-lg font-medium text-[--wc-ink] mb-2">{step.title}</h3>
 
           {/* Description */}
-          <p className="text-gray-400 text-sm leading-relaxed mb-4">{step.description}</p>
+          <p className="text-[--wc-ink-soft] text-sm leading-relaxed mb-4">{step.description}</p>
 
           {/* Navigation buttons */}
           <div className="flex items-center justify-between">
             <button
               onClick={handleSkip}
-              className="text-gray-500 text-sm hover:text-gray-300 transition-colors"
+              className="text-[--wc-ink-muted] text-sm hover:text-[--wc-ink-soft] transition-colors"
             >
               Skip tour
             </button>
@@ -262,14 +262,14 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
               {!isFirstStep && (
                 <button
                   onClick={handlePrevious}
-                  className="px-3 py-1.5 text-sm text-gray-300 hover:text-white transition-colors"
+                  className="px-3 py-1.5 text-sm text-[--wc-ink-soft] hover:text-[--wc-ink] transition-colors"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-colors"
+                className="px-4 py-1.5 bg-[--wc-bark] hover:bg-[#6A5E4D] text-white text-sm rounded-lg transition-colors"
               >
                 {isLastStep ? "Finish" : "Next"}
               </button>
@@ -277,7 +277,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
           </div>
 
           {/* Keyboard hint */}
-          <p className="text-gray-600 text-xs mt-3 text-center">
+          <p className="text-[--wc-ink-muted] text-xs mt-3 text-center">
             Use arrow keys to navigate, Esc to skip
           </p>
         </div>

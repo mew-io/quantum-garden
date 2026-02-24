@@ -22,27 +22,27 @@ const EVENT_CONFIG: Record<
 > = {
   observation: {
     icon: <EyeIcon />,
-    color: "text-cyan-400",
+    color: "text-cyan-700",
     label: "Observation",
   },
   germination: {
     icon: <SproutIcon />,
-    color: "text-green-400",
+    color: "text-emerald-700",
     label: "Germination",
   },
   entanglement: {
     icon: <ChainIcon />,
-    color: "text-purple-400",
+    color: "text-purple-700",
     label: "Entanglement",
   },
   wave_germination: {
     icon: <WaveIcon />,
-    color: "text-blue-400",
+    color: "text-blue-700",
     label: "Wave",
   },
   death: {
     icon: <SkullIcon />,
-    color: "text-gray-400",
+    color: "text-[--wc-ink-muted]",
     label: "Death",
   },
 };
@@ -102,15 +102,15 @@ function EventItem({
         text-left transition-colors
         ${
           isSelected
-            ? "bg-green-500/20 border border-green-500/30"
-            : "hover:bg-white/5 border border-transparent"
+            ? "bg-black/8 border border-[--wc-stone]/40"
+            : "hover:bg-black/5 border border-transparent"
         }
       `}
     >
       <span className={config.color}>{config.icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-green-100/90 truncate">{getEventDescription(event)}</p>
-        <p className="text-[10px] text-green-100/40">{formatRelativeTime(event.timestamp)}</p>
+        <p className="text-xs text-[--wc-ink] truncate">{getEventDescription(event)}</p>
+        <p className="text-[10px] text-[--wc-ink-muted]">{formatRelativeTime(event.timestamp)}</p>
       </div>
       <ChevronRightIcon />
     </button>
@@ -139,8 +139,8 @@ function FilterChip({
         transition-colors
         ${
           active
-            ? `${config.color} bg-white/10 border border-current/30`
-            : "text-green-100/40 hover:text-green-100/60 border border-transparent"
+            ? `${config.color} bg-black/8 border border-current/30`
+            : "text-[--wc-ink-muted] hover:text-[--wc-ink-soft] border border-transparent"
         }
       `}
     >
@@ -228,24 +228,23 @@ export function QuantumEventLog() {
     >
       <div
         className={`
-          pointer-events-auto w-[320px] rounded-lg border border-green-500/20
-          bg-black/85 shadow-xl backdrop-blur-md
+          pointer-events-auto w-[320px] rounded-xl garden-panel
           animate-in slide-in-from-left-5 duration-300
           ${isMinimized ? "" : "max-h-[400px]"}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-green-500/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[--wc-stone]/20">
           <div className="flex items-center gap-2">
             <QuantumIcon />
-            <h3 className="text-sm font-medium text-green-100">Quantum Events</h3>
-            <span className="text-[10px] text-green-100/40 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+            <h3 className="text-sm font-medium text-[--wc-ink]">Quantum Events</h3>
+            <span className="text-[10px] text-[--wc-ink-muted] bg-black/8 px-1.5 py-0.5 rounded-full">
               {filteredEvents.length}
             </span>
           </div>
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="text-green-100/40 hover:text-green-100/80 transition-colors p-1"
+            className="text-[--wc-ink-muted] hover:text-[--wc-ink] transition-colors p-1"
             aria-label={isMinimized ? "Expand" : "Minimize"}
           >
             {isMinimized ? <ChevronUpIcon /> : <ChevronDownIcon />}
@@ -255,7 +254,7 @@ export function QuantumEventLog() {
         {!isMinimized && (
           <>
             {/* Filter chips */}
-            <div className="flex items-center gap-1 px-3 py-2 border-b border-green-500/10 overflow-x-auto">
+            <div className="flex items-center gap-1 px-3 py-2 border-b border-[--wc-stone]/20 overflow-x-auto">
               {(Object.keys(EVENT_CONFIG) as QuantumEventType[]).map((type) => (
                 <FilterChip
                   key={type}
@@ -273,16 +272,16 @@ export function QuantumEventLog() {
             >
               {eventLog.length === 0 ? (
                 <div className="text-center py-6 px-4">
-                  <div className="text-green-100/20 mb-3">
+                  <div className="text-[--wc-stone] mb-3">
                     <WaitingIcon />
                   </div>
-                  <p className="text-xs text-green-100/50 mb-1">Awaiting quantum events</p>
-                  <p className="text-[10px] text-green-100/30">
+                  <p className="text-xs text-[--wc-ink-muted] mb-1">Awaiting quantum events</p>
+                  <p className="text-[10px] text-[--wc-stone]">
                     Events will appear here when plants germinate or are observed
                   </p>
                 </div>
               ) : filteredEvents.length === 0 ? (
-                <p className="text-center text-xs text-green-100/40 py-4">
+                <p className="text-center text-xs text-[--wc-ink-muted] py-4">
                   No events match filters
                 </p>
               ) : (
@@ -444,7 +443,7 @@ function ChevronRightIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
-      className="text-green-100/20"
+      className="text-[--wc-stone]"
     >
       <polyline points="9 18 15 12 9 6" />
     </svg>

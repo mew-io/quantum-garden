@@ -68,11 +68,8 @@ export function EvolutionStatusIndicator() {
         fixed z-40
         flex items-center gap-3
         px-3 py-2
-        bg-gray-900/80 backdrop-blur-sm
-        border border-gray-700/50
-        rounded-lg
+        garden-panel rounded-lg
         text-xs
-        shadow-lg
         animate-in fade-in slide-in-from-bottom-2 duration-300
       "
       style={{
@@ -90,29 +87,29 @@ export function EvolutionStatusIndicator() {
             ${evolutionPaused ? "bg-amber-500" : "bg-green-500 animate-pulse"}
           `}
         />
-        <span className={evolutionPaused ? "text-amber-400" : "text-green-400"}>
+        <span className={evolutionPaused ? "text-amber-700" : "text-emerald-700"}>
           {evolutionPaused ? "Paused" : "Evolving"}
         </span>
       </div>
 
       {/* Divider */}
-      <div className="w-px h-4 bg-gray-700" />
+      <div className="w-px h-4 bg-black/10" />
 
       {/* Dormant count */}
       <div className="flex items-center gap-1.5">
-        <SeedIcon className="w-3 h-3 text-gray-500" />
-        <span className="text-gray-400">
+        <SeedIcon className="w-3 h-3 text-[--wc-ink-muted]" />
+        <span className="text-[--wc-ink-soft]">
           {dormantCount} <span className="hidden sm:inline">dormant</span>
         </span>
       </div>
 
       {/* Divider */}
-      <div className="w-px h-4 bg-gray-700" />
+      <div className="w-px h-4 bg-black/10" />
 
       {/* Last germination */}
       <div className="flex items-center gap-1.5">
-        <SproutIcon className="w-3 h-3 text-gray-500" />
-        <span className="text-gray-400">{relativeTime}</span>
+        <SproutIcon className="w-3 h-3 text-[--wc-ink-muted]" />
+        <span className="text-[--wc-ink-soft]">{relativeTime}</span>
       </div>
     </div>
   );

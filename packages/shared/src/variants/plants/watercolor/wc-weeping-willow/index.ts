@@ -277,6 +277,13 @@ export const wcWeepingWillow: PlantVariant = {
       palettes: { bloom: ["#C8B868", "#D8D080", "#7B6B4A"] },
     },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 600,
+    clusterBonus: 1.5,
+    maxClusterDensity: 3,
+    reseedClusterChance: 0.5,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "seed", duration: 5 },

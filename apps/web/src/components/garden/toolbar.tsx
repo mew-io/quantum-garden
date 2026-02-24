@@ -64,19 +64,19 @@ export function Toolbar({
   return (
     <div className="fixed top-[var(--inset-top)] left-[var(--inset-left)] right-4 sm:right-auto z-50 flex flex-col gap-2">
       {/* Main Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 bg-gray-900/90 backdrop-blur-sm rounded-lg border border-gray-700/50 p-2 shadow-xl max-w-full overflow-hidden">
+      <div className="flex flex-wrap items-center gap-2 garden-panel rounded-xl p-2 max-w-full overflow-hidden">
         {/* Status Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-black/5 rounded">
           <span
             className={`w-2 h-2 rounded-full ${plantCount === 0 ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-organic-pulse"}`}
           />
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-[--wc-ink-muted]">
             {plantCount === 0 ? "Loading..." : `${plantCount} plants`}
           </span>
         </div>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-gray-700" />
+        <div className="w-px h-6 bg-black/10" />
 
         {/* Help Button */}
         <ToolbarButton
@@ -130,7 +130,7 @@ export function Toolbar({
       </div>
 
       {/* Garden Status Bar */}
-      <div className="hidden sm:flex items-center gap-3 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-700/50 px-3 py-2 shadow-lg text-xs">
+      <div className="hidden sm:flex items-center gap-3 garden-panel rounded-xl px-3 py-2 text-xs">
         <StatusItem
           icon={<SeedIcon />}
           label="Dormant"
@@ -143,8 +143,8 @@ export function Toolbar({
 
       {/* Keyboard Shortcuts Panel */}
       {showShortcuts && (
-        <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200 max-w-xs">
-          <h3 className="text-gray-200 text-sm font-medium mb-3">Keyboard Shortcuts</h3>
+        <div className="garden-panel rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-200 max-w-xs">
+          <h3 className="text-[--wc-ink] text-sm font-medium mb-3">Keyboard Shortcuts</h3>
 
           {/* General shortcuts */}
           <div className="space-y-2">
@@ -155,8 +155,10 @@ export function Toolbar({
           </div>
 
           {/* Event log navigation */}
-          <div className="mt-4 pt-3 border-t border-gray-700/50">
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Event Navigation</h4>
+          <div className="mt-4 pt-3 border-t border-[--wc-stone]/30">
+            <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+              Event Navigation
+            </h4>
             <div className="space-y-2">
               <ShortcutRow shortcut="←" description="Previous event" />
               <ShortcutRow shortcut="→" description="Next event" />
@@ -164,9 +166,11 @@ export function Toolbar({
           </div>
 
           {/* Interaction hint */}
-          <div className="mt-4 pt-3 border-t border-gray-700/50">
-            <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Observation</h4>
-            <p className="text-gray-500 text-xs leading-relaxed">
+          <div className="mt-4 pt-3 border-t border-[--wc-stone]/30">
+            <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+              Observation
+            </h4>
+            <p className="text-[--wc-ink-muted] text-xs leading-relaxed">
               The reticle drifts across the garden. When it aligns with a plant, observation begins
               automatically.
             </p>
@@ -198,10 +202,10 @@ function ToolbarButton({
   disabled = false,
 }: ToolbarButtonProps) {
   const activeClasses = {
-    green: "bg-green-600/30 text-green-400 border-green-500/50",
-    purple: "bg-purple-600/30 text-purple-400 border-purple-500/50",
-    blue: "bg-blue-600/30 text-blue-400 border-blue-500/50",
-    cyan: "bg-cyan-600/30 text-cyan-400 border-cyan-500/50",
+    green: "bg-emerald-50/60 text-emerald-800 border-emerald-300/40",
+    purple: "bg-purple-50/60 text-purple-800 border-purple-300/40",
+    blue: "bg-blue-50/60 text-blue-800 border-blue-300/40",
+    cyan: "bg-cyan-50/60 text-cyan-800 border-cyan-300/40",
   };
 
   return (
@@ -212,10 +216,10 @@ function ToolbarButton({
         flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all
         ${
           disabled
-            ? "opacity-40 cursor-not-allowed bg-gray-800/30 border-gray-700/30 text-gray-600"
+            ? "opacity-40 cursor-not-allowed bg-black/5 border-black/5 text-[--wc-ink-muted]"
             : active
               ? activeClasses[activeColor]
-              : "bg-gray-800/50 border-gray-700/50 text-gray-300 hover:bg-gray-700/50 hover:text-gray-100"
+              : "bg-black/5 border-black/8 text-[--wc-ink-soft] hover:bg-black/8 hover:text-[--wc-ink]"
         }
       `}
       title={shortcut ? `${label} (${shortcut})` : label}
@@ -223,7 +227,7 @@ function ToolbarButton({
       {icon}
       <span className="hidden min-[400px]:inline text-xs font-medium">{label}</span>
       {shortcut && (
-        <kbd className="hidden sm:inline-block ml-1 px-1 py-0.5 text-[10px] bg-gray-900/50 rounded text-gray-500">
+        <kbd className="hidden sm:inline-block ml-1 px-1 py-0.5 text-[10px] bg-black/8 rounded text-[--wc-bark]">
           {shortcut}
         </kbd>
       )}
@@ -244,16 +248,16 @@ function StatusItem({
   color: "gray" | "green" | "cyan" | "purple";
 }) {
   const colorClasses = {
-    gray: "text-gray-400",
-    green: "text-green-400",
-    cyan: "text-cyan-400",
-    purple: "text-purple-400",
+    gray: "text-[--wc-ink-muted]",
+    green: "text-emerald-700",
+    cyan: "text-cyan-700",
+    purple: "text-purple-700",
   };
 
   return (
     <div className="flex items-center gap-1.5">
       <span className={colorClasses[color]}>{icon}</span>
-      <span className="text-gray-500">{label}:</span>
+      <span className="text-[--wc-ink-muted]">{label}:</span>
       <span className={`font-mono ${colorClasses[color]}`}>{value}</span>
     </div>
   );
@@ -263,8 +267,8 @@ function StatusItem({
 function ShortcutRow({ shortcut, description }: { shortcut: string; description: string }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-gray-400 text-xs">{description}</span>
-      <kbd className="px-2 py-1 bg-gray-800 rounded text-gray-300 text-xs font-mono">
+      <span className="text-[--wc-ink-soft] text-xs">{description}</span>
+      <kbd className="px-2 py-1 bg-[--wc-paper] rounded text-[--wc-ink-soft] text-xs font-mono border border-[--wc-stone]/40">
         {shortcut}
       </kbd>
     </div>

@@ -127,6 +127,13 @@ export const wcCloudBush: PlantVariant = {
     { name: "sage", weight: 1.0, palettes: { full: ["#A8D8A8", "#88D0D0", "#6B9E72"] } },
     { name: "sky", weight: 0.6, palettes: { full: ["#90B8E8", "#A8D0F0", "#6B8EA8"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 480,
+    clusterBonus: 1.5,
+    maxClusterDensity: 4,
+    reseedClusterChance: 0.5,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "base", duration: 25 },

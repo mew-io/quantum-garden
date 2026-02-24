@@ -252,36 +252,36 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const selectedPlant = plants?.find((p: Plant) => p.id === selectedPlantId);
 
   return (
-    <div className="fixed top-[var(--inset-top)] right-[var(--inset-right)] z-50 w-96 max-h-[85vh] overflow-hidden bg-gray-900/95 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-2xl text-sm flex flex-col">
+    <div className="fixed top-[var(--inset-top)] right-[var(--inset-right)] z-50 w-96 max-h-[85vh] overflow-hidden garden-panel rounded-xl text-sm flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 bg-gray-900 px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
-        <h3 className="text-gray-100 font-medium flex items-center gap-2">
+      <div className="sticky top-0 bg-[--wc-cream] px-4 py-3 border-b border-[--wc-stone]/20 flex justify-between items-center">
+        <h3 className="text-[--wc-ink] font-medium flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           Quantum Debug
         </h3>
         <button
           onClick={() => setIsVisible(false)}
-          className="text-gray-500 hover:text-gray-300 text-xs"
+          className="text-[--wc-ink-muted] hover:text-[--wc-ink-soft] text-xs"
         >
           [`] to close
         </button>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-700/50 bg-gray-800/50">
+      <div className="flex border-b border-[--wc-stone]/20 bg-[--wc-paper]/60">
         {(["overview", "logs", "plants"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
               activeTab === tab
-                ? "text-green-400 border-b-2 border-green-400"
-                : "text-gray-400 hover:text-gray-200"
+                ? "text-emerald-700 border-b-2 border-emerald-600"
+                : "text-[--wc-ink-muted] hover:text-[--wc-ink-soft]"
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
             {tab === "logs" && filteredLogs.length > 0 && (
-              <span className="ml-1 text-gray-500">({filteredLogs.length})</span>
+              <span className="ml-1 text-[--wc-ink-muted]">({filteredLogs.length})</span>
             )}
           </button>
         ))}
@@ -294,7 +294,9 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             {/* Performance Metrics */}
             {performanceStats && (
               <section>
-                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Performance</h4>
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                  Performance
+                </h4>
                 <div className="grid grid-cols-4 gap-2">
                   <Stat
                     label="FPS"
@@ -326,7 +328,9 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
             {/* System State Indicators */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">System State</h4>
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                System State
+              </h4>
               <div className="flex flex-wrap gap-2">
                 <StatusBadge
                   label="Evolution"
@@ -360,16 +364,16 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               {/* Evolution Stats from Store */}
               {evolutionStats && (
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  <span className="text-gray-500">
-                    Dormant: <span className="text-yellow-400">{evolutionStats.dormantCount}</span>
+                  <span className="text-[--wc-ink-muted]">
+                    Dormant: <span className="text-yellow-700">{evolutionStats.dormantCount}</span>
                   </span>
-                  <span className="text-gray-500">
-                    Tracked: <span className="text-cyan-400">{evolutionStats.trackedCount}</span>
+                  <span className="text-[--wc-ink-muted]">
+                    Tracked: <span className="text-cyan-700">{evolutionStats.trackedCount}</span>
                   </span>
                   {lastGerminationTime && (
-                    <span className="text-gray-500">
+                    <span className="text-[--wc-ink-muted]">
                       Last germination:{" "}
-                      <span className="text-green-400">
+                      <span className="text-emerald-700">
                         {formatRelativeTime(lastGerminationTime)}
                       </span>
                     </span>
@@ -380,7 +384,9 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
             {/* Garden Overview */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Garden Stats</h4>
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                Garden Stats
+              </h4>
               <div className="grid grid-cols-3 gap-2">
                 <Stat label="Total" value={totalCount} />
                 <Stat label="Germinated" value={germinatedCount} color="green" />
@@ -394,37 +400,39 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             {/* Quantum Service Status */}
             {quantumConfig && (
               <section>
-                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                   Quantum Service
                 </h4>
-                <div className="bg-gray-800/50 rounded p-3 space-y-2">
+                <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-500 text-xs">Execution Mode</span>
+                    <span className="text-[--wc-ink-muted] text-xs">Execution Mode</span>
                     <span
                       className={`text-xs font-mono px-2 py-1 rounded ${
                         quantumConfig.execution_mode === "simulator"
-                          ? "bg-blue-900/50 text-blue-300"
+                          ? "bg-blue-50/60 text-blue-700"
                           : quantumConfig.execution_mode === "hardware"
-                            ? "bg-purple-900/50 text-purple-300"
-                            : "bg-gray-700/50 text-gray-400"
+                            ? "bg-purple-50/60 text-purple-700"
+                            : "bg-black/5 text-[--wc-ink-muted]"
                       }`}
                     >
                       {quantumConfig.execution_mode.toUpperCase()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-gray-500">IonQ API Key</span>
+                    <span className="text-[--wc-ink-muted]">IonQ API Key</span>
                     <span
                       className={
-                        quantumConfig.ionq_api_key_configured ? "text-green-400" : "text-gray-500"
+                        quantumConfig.ionq_api_key_configured
+                          ? "text-emerald-700"
+                          : "text-[--wc-ink-muted]"
                       }
                     >
                       {quantumConfig.ionq_api_key_configured ? "Configured" : "Not Set"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-gray-500">Default Shots</span>
-                    <span className="text-cyan-400">{quantumConfig.default_shots}</span>
+                    <span className="text-[--wc-ink-muted]">Default Shots</span>
+                    <span className="text-cyan-700">{quantumConfig.default_shots}</span>
                   </div>
                 </div>
               </section>
@@ -433,7 +441,9 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             {/* Job Queue Stats */}
             {jobStats && (
               <section>
-                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Quantum Jobs</h4>
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                  Quantum Jobs
+                </h4>
                 <div className="grid grid-cols-2 gap-2">
                   <Stat label="Pending" value={jobStats.pending} />
                   <Stat label="Completed" value={jobStats.completed} color="green" />
@@ -445,18 +455,20 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
             {/* Observation Mode Toggle */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Controls</h4>
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                Controls
+              </h4>
               <div className="space-y-2">
                 <button
                   onClick={requestModeChange}
-                  className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
+                  className="w-full py-2 px-3 bg-[--wc-paper]/60 hover:bg-[--wc-paper] text-[--wc-ink-soft] rounded flex items-center justify-between"
                 >
                   <span className="text-xs">Toggle Observation Mode</span>
                   <span
                     className={`text-xs font-mono px-2 py-1 rounded ${
                       observationMode === "region"
-                        ? "bg-green-900/50 text-green-300"
-                        : "bg-amber-900/50 text-amber-300"
+                        ? "bg-emerald-50/60 text-emerald-700"
+                        : "bg-amber-50/60 text-amber-700"
                     }`}
                   >
                     {observationMode === "region" ? "REGION" : "CLICK"}
@@ -464,14 +476,14 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                 </button>
                 <button
                   onClick={toggleSuperpositionMode}
-                  className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded flex items-center justify-between"
+                  className="w-full py-2 px-3 bg-[--wc-paper]/60 hover:bg-[--wc-paper] text-[--wc-ink-soft] rounded flex items-center justify-between"
                 >
                   <span className="text-xs">Superposition Display</span>
                   <span
                     className={`text-xs font-mono px-2 py-1 rounded ${
                       superpositionMode === 0
-                        ? "bg-purple-900/50 text-purple-300"
-                        : "bg-cyan-900/50 text-cyan-300"
+                        ? "bg-purple-50/60 text-purple-700"
+                        : "bg-cyan-50/60 text-cyan-700"
                     }`}
                   >
                     {superpositionMode === 0 ? "GHOSTS" : "FLICKER"}
@@ -482,16 +494,18 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
             {/* UI Preferences Reset */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">UI Preferences</h4>
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                UI Preferences
+              </h4>
               <UIPreferencesSection />
             </section>
 
             {/* Keyboard Shortcuts */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 Keyboard Shortcuts
               </h4>
-              <div className="bg-gray-800/50 rounded p-3 space-y-1 text-xs">
+              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1 text-xs">
                 <ShortcutRow shortcut="`" description="Toggle debug panel" />
                 <ShortcutRow shortcut="T" description="Toggle time-travel mode" />
               </div>
@@ -503,7 +517,9 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
           <>
             {/* Log Filters */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">Filters</h4>
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                Filters
+              </h4>
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-1">
                   {(
@@ -535,21 +551,23 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             {/* Log Messages */}
             <section>
               <div className="flex justify-between items-center mb-2">
-                <h4 className="text-gray-400 text-xs uppercase tracking-wide">
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide">
                   Messages ({filteredLogs.length})
                 </h4>
                 <button
                   onClick={() => debugLogger.clear()}
-                  className="text-xs text-gray-500 hover:text-gray-300"
+                  className="text-xs text-[--wc-ink-muted] hover:text-[--wc-ink-soft]"
                 >
                   Clear
                 </button>
               </div>
-              <div className="bg-gray-800/50 rounded max-h-96 overflow-auto">
+              <div className="bg-[--wc-paper]/60 rounded max-h-96 overflow-auto">
                 {filteredLogs.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500 text-xs">No log messages</div>
+                  <div className="p-4 text-center text-[--wc-ink-muted] text-xs">
+                    No log messages
+                  </div>
                 ) : (
-                  <div className="divide-y divide-gray-700/30">
+                  <div className="divide-y divide-[--wc-stone]/20">
                     {[...filteredLogs].reverse().map((log) => (
                       <LogEntryRow key={log.id} log={log} />
                     ))}
@@ -565,45 +583,49 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             {/* Selected Plant Details */}
             {selectedPlant && (
               <section>
-                <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                   Selected Plant
                 </h4>
-                <div className="bg-gray-800/50 rounded p-3 space-y-2">
+                <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">ID</span>
-                    <span className="text-gray-300 font-mono text-xs">
+                    <span className="text-[--wc-ink-muted]">ID</span>
+                    <span className="text-[--wc-ink-soft] font-mono text-xs">
                       {selectedPlant.id.slice(0, 8)}...
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Variant</span>
-                    <span className="text-green-400">{selectedPlant.variantId}</span>
+                    <span className="text-[--wc-ink-muted]">Variant</span>
+                    <span className="text-emerald-700">{selectedPlant.variantId}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Position</span>
-                    <span className="text-cyan-400 font-mono text-xs">
+                    <span className="text-[--wc-ink-muted]">Position</span>
+                    <span className="text-cyan-700 font-mono text-xs">
                       ({selectedPlant.position.x.toFixed(0)}, {selectedPlant.position.y.toFixed(0)})
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">State</span>
-                    <span className={selectedPlant.observed ? "text-yellow-400" : "text-blue-400"}>
+                    <span className="text-[--wc-ink-muted]">State</span>
+                    <span className={selectedPlant.observed ? "text-yellow-700" : "text-blue-700"}>
                       {selectedPlant.visualState}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Germinated</span>
+                    <span className="text-[--wc-ink-muted]">Germinated</span>
                     <span
-                      className={selectedPlant.germinatedAt ? "text-green-400" : "text-gray-500"}
+                      className={
+                        selectedPlant.germinatedAt ? "text-emerald-700" : "text-[--wc-ink-muted]"
+                      }
                     >
                       {selectedPlant.germinatedAt ? "Yes" : "No (dormant)"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Entangled</span>
+                    <span className="text-[--wc-ink-muted]">Entangled</span>
                     <span
                       className={
-                        selectedPlant.entanglementGroupId ? "text-purple-400" : "text-gray-500"
+                        selectedPlant.entanglementGroupId
+                          ? "text-purple-700"
+                          : "text-[--wc-ink-muted]"
                       }
                     >
                       {selectedPlant.entanglementGroupId ? "Yes" : "No"}
@@ -611,18 +633,18 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                   </div>
                   {selectedPlant.traits && (
                     <>
-                      <div className="border-t border-gray-700/50 pt-2 mt-2">
-                        <span className="text-gray-400 text-xs">Traits (Resolved)</span>
+                      <div className="border-t border-[--wc-stone]/20 pt-2 mt-2">
+                        <span className="text-[--wc-ink-muted] text-xs">Traits (Resolved)</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Growth Rate</span>
-                        <span className="text-cyan-400">
+                        <span className="text-[--wc-ink-muted]">Growth Rate</span>
+                        <span className="text-cyan-700">
                           {selectedPlant.traits.growthRate?.toFixed(2) ?? "—"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Opacity</span>
-                        <span className="text-cyan-400">
+                        <span className="text-[--wc-ink-muted]">Opacity</span>
+                        <span className="text-cyan-700">
                           {selectedPlant.traits.opacity?.toFixed(2) ?? "—"}
                         </span>
                       </div>
@@ -634,7 +656,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
             {/* Plant List */}
             <section>
-              <h4 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 All Plants ({totalCount})
               </h4>
               <div className="max-h-64 overflow-auto space-y-1">
@@ -652,8 +674,8 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                     }}
                     className={`w-full text-left px-2 py-1.5 rounded text-xs flex justify-between items-center ${
                       plant.id === selectedPlantId
-                        ? "bg-blue-900/50 text-blue-200"
-                        : "hover:bg-gray-800 text-gray-400"
+                        ? "bg-blue-50/60 text-blue-700"
+                        : "hover:bg-[--wc-paper]/60 text-[--wc-ink-muted]"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -662,13 +684,15 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                           plant.observed
                             ? "bg-yellow-400"
                             : plant.germinatedAt
-                              ? "bg-green-400"
-                              : "bg-gray-600"
+                              ? "bg-green-500"
+                              : "bg-[--wc-stone]/40"
                         }`}
                       />
                       <span>{plant.variantId}</span>
                     </div>
-                    <span className="text-gray-600 font-mono">{plant.id.slice(0, 6)}</span>
+                    <span className="text-[--wc-ink-muted]/60 font-mono">
+                      {plant.id.slice(0, 6)}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -678,7 +702,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-gray-700/50 px-4 py-2 bg-gray-800/50">
+      <div className="border-t border-[--wc-stone]/20 px-4 py-2 bg-[--wc-paper]/60">
         <button
           onClick={() => {
             refetchPlants();
@@ -686,7 +710,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             refetchJobStats();
             debugLogger.system.debug("Manual refresh triggered");
           }}
-          className="w-full py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+          className="w-full py-1.5 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
         >
           Refresh All
         </button>
@@ -694,10 +718,10 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
       {/* Observation Mode Change Confirmation Dialog */}
       {showModeConfirm && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mx-4 max-w-xs shadow-xl">
-            <h4 className="text-gray-100 font-medium mb-2">Switch Observation Mode?</h4>
-            <p className="text-gray-400 text-xs mb-4">
+        <div className="absolute inset-0 bg-[#3A352E]/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+          <div className="bg-[--wc-cream] rounded-lg border border-[--wc-stone]/30 p-4 mx-4 max-w-xs shadow-xl">
+            <h4 className="text-[--wc-ink] font-medium mb-2">Switch Observation Mode?</h4>
+            <p className="text-[--wc-ink-soft] text-xs mb-4">
               {observationMode === "region"
                 ? "Switching to Click mode allows direct click observation (debug only)."
                 : "Switching to Region mode enables automatic dwell-based observation."}
@@ -705,13 +729,13 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
             <div className="flex gap-2">
               <button
                 onClick={cancelModeChange}
-                className="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+                className="flex-1 py-2 px-3 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmModeChange}
-                className="flex-1 py-2 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded text-xs"
+                className="flex-1 py-2 px-3 bg-[--wc-bark] hover:bg-[#6A5E4D] text-white rounded text-xs"
               >
                 Switch Mode
               </button>
@@ -757,34 +781,34 @@ function Stat({
   }, [value]);
 
   const colorClass = {
-    white: "text-gray-100",
-    red: "text-red-400",
-    green: "text-green-400",
-    yellow: "text-yellow-400",
-    cyan: "text-cyan-400",
-    purple: "text-purple-400",
+    white: "text-[--wc-ink]",
+    red: "text-red-700",
+    green: "text-emerald-700",
+    yellow: "text-yellow-700",
+    cyan: "text-cyan-700",
+    purple: "text-purple-700",
   }[color];
 
   // Background flash color based on value color (subtle highlight)
   const flashClass = isFlashing
     ? color === "green"
-      ? "bg-green-500/20"
+      ? "bg-emerald-100/40"
       : color === "red"
-        ? "bg-red-500/20"
+        ? "bg-red-100/40"
         : color === "yellow"
-          ? "bg-yellow-500/20"
+          ? "bg-yellow-100/40"
           : color === "cyan"
-            ? "bg-cyan-500/20"
+            ? "bg-cyan-100/40"
             : color === "purple"
-              ? "bg-purple-500/20"
-              : "bg-white/10"
+              ? "bg-purple-100/40"
+              : "bg-black/5"
     : "";
 
   return (
     <div
-      className={`bg-gray-800/50 rounded px-3 py-2 transition-colors duration-300 ${flashClass}`}
+      className={`bg-[--wc-paper]/60 rounded px-3 py-2 transition-colors duration-300 ${flashClass}`}
     >
-      <div className="text-gray-500 text-xs">{label}</div>
+      <div className="text-[--wc-ink-muted] text-xs">{label}</div>
       <div className={`font-mono transition-opacity duration-150 ${colorClass}`}>{value}</div>
     </div>
   );
@@ -812,12 +836,12 @@ function StatusBadge({
   inactiveColor?: "gray" | "amber";
 }) {
   const colorClasses = {
-    green: "bg-green-900/50 text-green-300 border-green-700/50",
-    blue: "bg-blue-900/50 text-blue-300 border-blue-700/50",
-    purple: "bg-purple-900/50 text-purple-300 border-purple-700/50",
-    cyan: "bg-cyan-900/50 text-cyan-300 border-cyan-700/50",
-    amber: "bg-amber-900/50 text-amber-300 border-amber-700/50",
-    gray: "bg-gray-800/50 text-gray-500 border-gray-700/50",
+    green: "bg-emerald-50/60 text-emerald-700 border-emerald-300/40",
+    blue: "bg-blue-50/60 text-blue-700 border-blue-300/40",
+    purple: "bg-purple-50/60 text-purple-700 border-purple-300/40",
+    cyan: "bg-cyan-50/60 text-cyan-700 border-cyan-300/40",
+    amber: "bg-amber-50/60 text-amber-700 border-amber-300/40",
+    gray: "bg-black/5 text-[--wc-ink-muted] border-[--wc-stone]/30",
   };
 
   const className = active ? colorClasses[activeColor] : colorClasses[inactiveColor];
@@ -848,20 +872,22 @@ function UIPreferencesSection() {
 
   if (dismissedCount === 0) {
     return (
-      <div className="bg-gray-800/50 rounded p-3 text-xs text-gray-500">
+      <div className="bg-[--wc-paper]/60 rounded p-3 text-xs text-[--wc-ink-muted]">
         No dismissed UI elements
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-800/50 rounded p-3 space-y-2">
-      <div className="text-xs text-gray-400 mb-2">Dismissed UI elements ({dismissedCount}):</div>
+    <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
+      <div className="text-xs text-[--wc-ink-muted] mb-2">
+        Dismissed UI elements ({dismissedCount}):
+      </div>
       <div className="space-y-1">
         {(Object.keys(UI_PREFERENCE_LABELS) as Array<keyof typeof UI_PREFERENCE_LABELS>).map(
           (key) =>
             preferences[key] && (
-              <div key={key} className="flex items-center gap-2 text-xs text-gray-500">
+              <div key={key} className="flex items-center gap-2 text-xs text-[--wc-ink-muted]">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500/60" />
                 {UI_PREFERENCE_LABELS[key]}
               </div>
@@ -871,19 +897,19 @@ function UIPreferencesSection() {
       {!showConfirm ? (
         <button
           onClick={() => setShowConfirm(true)}
-          className="w-full mt-2 py-1.5 px-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+          className="w-full mt-2 py-1.5 px-3 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
         >
           Reset All Preferences
         </button>
       ) : (
         <div className="mt-2 space-y-2">
-          <p className="text-xs text-amber-400">
+          <p className="text-xs text-amber-700">
             This will restore all dismissed panels and hints.
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setShowConfirm(false)}
-              className="flex-1 py-1.5 px-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs"
+              className="flex-1 py-1.5 px-2 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
             >
               Cancel
             </button>
@@ -903,8 +929,10 @@ function UIPreferencesSection() {
 function ShortcutRow({ shortcut, description }: { shortcut: string; description: string }) {
   return (
     <div className="flex justify-between">
-      <span className="text-gray-500">{description}</span>
-      <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 font-mono">{shortcut}</kbd>
+      <span className="text-[--wc-ink-muted]">{description}</span>
+      <kbd className="bg-[--wc-paper] px-1.5 py-0.5 rounded text-[--wc-ink-soft] font-mono border border-[--wc-stone]/40">
+        {shortcut}
+      </kbd>
     </div>
   );
 }
@@ -924,7 +952,9 @@ function FilterChip({
     <button
       onClick={onClick}
       className={`text-xs px-2 py-1 rounded border transition-colors ${
-        active ? `${color} border-current` : "text-gray-500 border-gray-700 hover:border-gray-600"
+        active
+          ? `${color} border-current`
+          : "text-[--wc-ink-muted] border-[--wc-stone]/30 hover:border-[--wc-stone]/50"
       }`}
     >
       {label}
@@ -934,21 +964,21 @@ function FilterChip({
 
 function getCategoryColor(category: LogCategory): string {
   const colors: Record<LogCategory, string> = {
-    quantum: "text-purple-400",
-    observation: "text-blue-400",
-    evolution: "text-green-400",
-    rendering: "text-yellow-400",
-    system: "text-gray-400",
+    quantum: "text-purple-700",
+    observation: "text-blue-700",
+    evolution: "text-emerald-700",
+    rendering: "text-yellow-700",
+    system: "text-[--wc-ink-muted]",
   };
   return colors[category];
 }
 
 function getLevelColor(level: LogLevel): string {
   const colors: Record<LogLevel, string> = {
-    debug: "text-gray-400",
-    info: "text-blue-400",
-    warn: "text-amber-400",
-    error: "text-red-400",
+    debug: "text-[--wc-ink-muted]",
+    info: "text-blue-700",
+    warn: "text-amber-700",
+    error: "text-red-700",
   };
   return colors[level];
 }
@@ -970,18 +1000,18 @@ function LogEntryRow({
 
   return (
     <div
-      className={`px-3 py-2 text-xs cursor-pointer hover:bg-gray-700/30 ${
-        log.level === "error" ? "bg-red-900/10" : log.level === "warn" ? "bg-amber-900/10" : ""
+      className={`px-3 py-2 text-xs cursor-pointer hover:bg-black/5 ${
+        log.level === "error" ? "bg-red-50/40" : log.level === "warn" ? "bg-amber-50/40" : ""
       }`}
       onClick={() => log.data && setExpanded(!expanded)}
     >
       <div className="flex items-start gap-2">
-        <span className="text-gray-600 font-mono shrink-0">{time}</span>
+        <span className="text-[--wc-ink-muted]/60 font-mono shrink-0">{time}</span>
         <span className={`shrink-0 ${getCategoryColor(log.category)}`}>[{log.category}]</span>
         <span className={getLevelColor(log.level)}>{log.message}</span>
       </div>
       {expanded && log.data !== undefined && (
-        <pre className="mt-2 p-2 bg-gray-900/50 rounded text-gray-400 overflow-x-auto">
+        <pre className="mt-2 p-2 bg-[--wc-paper]/80 rounded text-[--wc-ink-soft] overflow-x-auto">
           {String(JSON.stringify(log.data, null, 2))}
         </pre>
       )}

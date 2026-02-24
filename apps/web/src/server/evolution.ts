@@ -80,10 +80,10 @@ export const EVOLUTION_CONFIG = {
   MAX_DEATHS_PER_CHECK: 1, // reduced from 2
 
   /** Minimum alive plants before auto-reseeding triggers */
-  MIN_POPULATION: 50,
+  MIN_POPULATION: 100,
 
   /** Number of new plants to spawn when auto-reseeding */
-  RESEED_COUNT: 25,
+  RESEED_COUNT: 40,
 };
 
 type PlantWithPosition = PrismaPlant & { position: { x: number; y: number } };

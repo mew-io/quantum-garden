@@ -92,7 +92,7 @@ export function CooldownIndicator() {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="rgba(255, 255, 255, 0.1)"
+            stroke="rgba(122, 110, 93, 0.2)"
             strokeWidth={strokeWidth}
           />
         </svg>
@@ -104,7 +104,7 @@ export function CooldownIndicator() {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="rgba(168, 85, 247, 0.7)" // Purple to match quantum theme
+            stroke="rgba(122, 110, 93, 0.6)" // Warm bark tone to match watercolor theme
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -120,7 +120,7 @@ export function CooldownIndicator() {
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(168, 85, 247, 0.8)"
+            stroke="rgba(122, 110, 93, 0.7)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -131,7 +131,7 @@ export function CooldownIndicator() {
       </div>
 
       {/* Optional label */}
-      <div className="hidden sm:block text-xs text-purple-400/80 font-mono">
+      <div className="hidden sm:block text-xs text-[--wc-bark] font-mono">
         {Math.ceil(progress * COOLDOWN_DURATION)}s
       </div>
     </div>

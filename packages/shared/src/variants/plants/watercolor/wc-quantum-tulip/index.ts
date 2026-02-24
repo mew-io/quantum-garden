@@ -282,6 +282,13 @@ export const wcQuantumTulip: PlantVariant = {
       palettes: { bloom: ["#B888D8", "#8858A8", "#6B8A50"] },
     },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 400,
+    clusterBonus: 2.0,
+    maxClusterDensity: 6,
+    reseedClusterChance: 0.7,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "bud", duration: 12 },

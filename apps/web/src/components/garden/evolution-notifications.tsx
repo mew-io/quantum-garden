@@ -32,17 +32,17 @@ function getNotificationStyles(type: NotificationType): string {
   switch (type) {
     case "wave":
       // Purple theme for wave germinations - special event
-      return "border-purple-500/30 bg-purple-950/90 text-purple-100/90 hover:bg-purple-900/95";
+      return "border-purple-200/40 bg-purple-50/90 text-purple-800 hover:bg-purple-50/95 backdrop-blur-md";
     case "entanglement":
       // Pink theme for entanglement - quantum connection
-      return "border-pink-500/30 bg-pink-950/90 text-pink-100/90 hover:bg-pink-900/95";
+      return "border-rose-200/40 bg-rose-50/90 text-rose-800 hover:bg-rose-50/95 backdrop-blur-md";
     case "error":
       // Amber/red theme for errors
-      return "border-amber-500/30 bg-amber-950/90 text-amber-100/90 hover:bg-amber-900/95";
+      return "border-amber-200/40 bg-amber-50/90 text-amber-800 hover:bg-amber-50/95 backdrop-blur-md";
     case "germination":
     default:
       // Green theme for normal germinations
-      return "border-green-500/20 bg-gray-950/90 text-green-100/90 hover:bg-gray-900/95";
+      return "border-emerald-200/40 bg-[--wc-cream]/90 text-emerald-800 hover:bg-[--wc-cream]/95 backdrop-blur-md";
   }
 }
 
@@ -129,14 +129,14 @@ function NotificationIcon({ type }: { type: NotificationType }) {
 function getProgressBarColor(type: NotificationType): string {
   switch (type) {
     case "wave":
-      return "bg-purple-400/60";
+      return "bg-purple-400/50";
     case "entanglement":
-      return "bg-pink-400/60";
+      return "bg-rose-400/50";
     case "error":
-      return "bg-amber-400/60";
+      return "bg-amber-400/50";
     case "germination":
     default:
-      return "bg-green-400/40";
+      return "bg-emerald-400/40";
   }
 }
 

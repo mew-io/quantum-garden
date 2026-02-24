@@ -135,6 +135,13 @@ export const wcDewdropDaisy: PlantVariant = {
     { name: "classic", weight: 1.0, palettes: { bloom: ["#F8F0E8", "#F0D860", "#8EA888"] } },
     { name: "pink", weight: 0.6, palettes: { bloom: ["#F0D8E0", "#E8A0B0", "#8EA888"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 380,
+    clusterBonus: 2.0,
+    maxClusterDensity: 6,
+    reseedClusterChance: 0.7,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "bud", duration: 12 },

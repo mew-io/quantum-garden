@@ -121,6 +121,13 @@ export const wcWhisperReed: PlantVariant = {
     { name: "marsh", weight: 1.0, palettes: { tall: ["#9AAE8C", "#B8A888", "#8EA888"] } },
     { name: "autumn", weight: 0.6, palettes: { tall: ["#C8B888", "#D8C898", "#A8A078"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 450,
+    clusterBonus: 1.5,
+    maxClusterDensity: 5,
+    reseedClusterChance: 0.6,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "dormant", duration: 8 },

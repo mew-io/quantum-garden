@@ -144,8 +144,8 @@ export default function Home() {
 
         {/* Loading indicator during initial plant fetch */}
         {isPlantsLoading && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-sm text-white rounded-lg text-sm font-mono pointer-events-none z-[100] animate-in fade-in duration-500 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 garden-panel rounded-lg text-sm font-mono pointer-events-none z-[100] animate-in fade-in duration-500 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 bg-[--wc-sage] rounded-full animate-organic-pulse" />
             The garden is awakening...
           </div>
         )}

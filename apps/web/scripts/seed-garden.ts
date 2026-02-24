@@ -25,9 +25,9 @@ const CANVAS_HEIGHT = CANVAS.DEFAULT_HEIGHT;
 
 // Seed configuration
 // 4K canvas (3840×2160) is ~8.6× larger than the original 1200×800.
-// 100 plants provides good initial density; auto-reseed maintains population over time.
-const NUM_PLANTS = 100;
-const NUM_ENTANGLED_PAIRS = 3; // Number of entangled plant pairs
+// 200 plants provides lush initial density with natural clustering.
+const NUM_PLANTS = 200;
+const NUM_ENTANGLED_PAIRS = 5; // Number of entangled plant pairs
 const MARGIN = 250; // Keep plants away from edges (proportional to 4K canvas)
 
 /**
@@ -54,32 +54,126 @@ function selectVariant(): (typeof PLANT_VARIANTS)[number] {
 }
 
 /**
- * Generate a random position within the canvas.
- * Uses a grid-based distribution to avoid overlapping.
+ * Approximate gaussian random using Box-Muller transform.
+ * Returns a value centered at 0 with ~68% within [-1, 1].
  */
-function generatePositions(count: number): { x: number; y: number }[] {
-  const positions: { x: number; y: number }[] = [];
-  const usableWidth = CANVAS_WIDTH - 2 * MARGIN;
-  const usableHeight = CANVAS_HEIGHT - 2 * MARGIN;
+function gaussianRandom(): number {
+  const u1 = Math.random() || 0.0001;
+  const u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
 
-  // Calculate grid dimensions
-  const cols = Math.ceil(Math.sqrt(count * (usableWidth / usableHeight)));
-  const rows = Math.ceil(count / cols);
-  const cellWidth = usableWidth / cols;
-  const cellHeight = usableHeight / rows;
+/**
+ * Clamp a position to stay within the usable canvas area.
+ */
+function clampPosition(x: number, y: number): { x: number; y: number } {
+  return {
+    x: Math.max(MARGIN, Math.min(CANVAS_WIDTH - MARGIN, x)),
+    y: Math.max(MARGIN, Math.min(CANVAS_HEIGHT - MARGIN, y)),
+  };
+}
 
-  for (let i = 0; i < count; i++) {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
+/**
+ * Generate a random anchor point within the usable canvas area.
+ */
+function randomAnchor(): { x: number; y: number } {
+  return {
+    x: MARGIN + Math.random() * (CANVAS_WIDTH - 2 * MARGIN),
+    y: MARGIN + Math.random() * (CANVAS_HEIGHT - 2 * MARGIN),
+  };
+}
 
-    // Center of cell with some random jitter
-    const jitterX = (Math.random() - 0.5) * cellWidth * 0.5;
-    const jitterY = (Math.random() - 0.5) * cellHeight * 0.5;
+/**
+ * Cluster configuration per plant category.
+ * Plants in clustering categories get placed near anchor points;
+ * non-clustering plants are scattered uniformly.
+ */
+const CLUSTER_CONFIG: Record<string, { anchorsPerGroup: number; spread: number }> = {
+  // Tight clusters for ground cover
+  "ground-cover": { anchorsPerGroup: 2, spread: 180 },
+  // Medium clusters for grasses
+  grass: { anchorsPerGroup: 2, spread: 250 },
+  // Flower beds
+  flower: { anchorsPerGroup: 3, spread: 300 },
+  // Shrub thickets
+  shrub: { anchorsPerGroup: 2, spread: 280 },
+  // Tree groves
+  tree: { anchorsPerGroup: 2, spread: 350 },
+};
 
-    positions.push({
-      x: MARGIN + cellWidth * (col + 0.5) + jitterX,
-      y: MARGIN + cellHeight * (row + 0.5) + jitterY,
-    });
+/**
+ * Infer plant category from variant ID for clustering purposes.
+ */
+function inferCategory(variantId: string): string {
+  if (variantId.includes("moss") || variantId.includes("pebble")) return "ground-cover";
+  if (variantId.includes("tuft") || variantId.includes("reed")) return "grass";
+  if (variantId.includes("sapling") || variantId.includes("willow")) return "tree";
+  if (variantId.includes("bush") || variantId.includes("thicket")) return "shrub";
+  if (
+    variantId.includes("bloom") ||
+    variantId.includes("flower") ||
+    variantId.includes("tulip") ||
+    variantId.includes("daisy") ||
+    variantId.includes("poppy") ||
+    variantId.includes("bell") ||
+    variantId.includes("rose") ||
+    variantId.includes("lotus") ||
+    variantId.includes("zen")
+  )
+    return "flower";
+  // Ethereal, geometric, abstract — scatter uniformly
+  return "ethereal";
+}
+
+/**
+ * Generate cluster-aware positions for a list of pre-selected variants.
+ *
+ * Plants in natural categories (trees, flowers, grasses, etc.) are placed
+ * around cluster anchor points to form groves, beds, and meadows.
+ * Ethereal/rare plants are scattered uniformly for visual contrast.
+ */
+function generateClusteredPositions(variants: { id: string }[]): { x: number; y: number }[] {
+  const positions: { x: number; y: number }[] = new Array(variants.length);
+
+  // Group plant indices by category
+  const groups = new Map<string, number[]>();
+  for (let i = 0; i < variants.length; i++) {
+    const category = inferCategory(variants[i]!.id);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category)!.push(i);
+  }
+
+  for (const [category, indices] of groups) {
+    const config = CLUSTER_CONFIG[category];
+
+    if (!config) {
+      // Ethereal / no cluster config — scatter uniformly
+      for (const idx of indices) {
+        positions[idx] = clampPosition(
+          MARGIN + Math.random() * (CANVAS_WIDTH - 2 * MARGIN),
+          MARGIN + Math.random() * (CANVAS_HEIGHT - 2 * MARGIN)
+        );
+      }
+      continue;
+    }
+
+    // Create anchor points for this category
+    const numAnchors = Math.min(config.anchorsPerGroup, Math.ceil(indices.length / 3));
+    const anchors: { x: number; y: number }[] = [];
+    for (let a = 0; a < numAnchors; a++) {
+      anchors.push(randomAnchor());
+    }
+
+    // Distribute plants around anchors with gaussian jitter
+    for (let i = 0; i < indices.length; i++) {
+      const anchor = anchors[i % anchors.length]!;
+      const spread = config.spread;
+      const pos = clampPosition(
+        anchor.x + gaussianRandom() * spread * 0.5,
+        anchor.y + gaussianRandom() * spread * 0.5
+      );
+      positions[indices[i]!] = pos;
+    }
   }
 
   return positions;
@@ -208,13 +302,16 @@ async function main() {
   await db.quantumRecord.deleteMany({});
   await db.observationRegion.deleteMany({});
 
-  // Generate positions
-  const positions = generatePositions(NUM_PLANTS);
+  // Pre-select all variants for cluster-aware positioning
+  const selectedVariants = Array.from({ length: NUM_PLANTS }, () => selectVariant());
 
-  console.log(`Creating ${NUM_PLANTS} plants...`);
+  // Generate cluster-aware positions
+  const positions = generateClusteredPositions(selectedVariants);
+
+  console.log(`Creating ${NUM_PLANTS} plants with cluster-aware positioning...`);
 
   for (let i = 0; i < NUM_PLANTS; i++) {
-    const variant = selectVariant();
+    const variant = selectedVariants[i]!;
     const position = positions[i]!;
     const seed = Date.now() + i;
 
@@ -226,8 +323,8 @@ async function main() {
     );
 
     // Determine if plant should start germinated
-    // 50% of plants start germinated for immediate visual interest
-    const shouldGerminate = Math.random() < 0.5;
+    // 65% of plants start germinated for a lush, active garden
+    const shouldGerminate = Math.random() < 0.65;
     const germinatedAt = shouldGerminate ? new Date() : null;
 
     // Select color variation for multi-color variants

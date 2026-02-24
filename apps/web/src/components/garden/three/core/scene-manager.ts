@@ -30,11 +30,11 @@ export interface SceneManagerConfig {
 /** Bloom effect configuration */
 const BLOOM_CONFIG = {
   /** Bloom intensity (0-3 typical range) */
-  STRENGTH: 0.4,
+  STRENGTH: 0.55,
   /** Size of bloom radius in pixels */
-  RADIUS: 0.6,
+  RADIUS: 0.8,
   /** Brightness threshold for bloom to kick in (0-1) */
-  THRESHOLD: 0.7,
+  THRESHOLD: 0.6,
 };
 
 /** Camera zoom configuration for micro-transitions */
@@ -49,8 +49,8 @@ const CAMERA_CONFIG = {
 
 /** User-controlled zoom configuration */
 const ZOOM_CONFIG = {
-  /** Minimum effective zoom — shows full garden, can't zoom out further */
-  MIN_EFFECTIVE: 1.0,
+  /** Minimum effective zoom — close enough to see plant detail */
+  MIN_EFFECTIVE: 1.5,
   /** Maximum effective zoom — good detail without pixelation */
   MAX_EFFECTIVE: 5.0,
   /** Zoom multiplier per scroll wheel tick */
@@ -62,7 +62,7 @@ const ZOOM_CONFIG = {
  * Below this threshold, the garden would be too small to read, so we zoom in
  * automatically. 0.25 means auto-zoom on viewports < 25% of garden size.
  */
-const MIN_READABLE_SCALE = 0.25;
+const MIN_READABLE_SCALE = 0.45;
 
 /**
  * Performance metrics for the render loop.
@@ -147,6 +147,13 @@ export class SceneManager {
     startPos: { x: number; y: number };
     startPan: { x: number; y: number };
   } | null = null;
+
+  // Intro zoom animation state
+  private introZoomActive: boolean = true;
+  private introZoomStart: number = 0;
+  private readonly INTRO_ZOOM_DURATION = 2000; // ms
+  private readonly INTRO_ZOOM_FROM = 0.85;
+  private readonly INTRO_ZOOM_TO = 1.0;
 
   constructor(config: SceneManagerConfig) {
     this.container = config.container;
@@ -293,11 +300,11 @@ export class SceneManager {
     const fitScale = Math.min(vw / gardenW, vh / gardenH);
 
     if (fitScale >= MIN_READABLE_SCALE) {
-      // Garden is readable at this viewport size
-      this.baseZoom = 1.0;
+      // Garden is readable at this viewport size — start at 1.5x for lush feel
+      this.baseZoom = 1.5;
     } else {
       // Viewport is too small — auto-zoom for readability
-      this.baseZoom = MIN_READABLE_SCALE / fitScale;
+      this.baseZoom = Math.max(1.5, MIN_READABLE_SCALE / fitScale);
     }
 
     // Reset user zoom on layout recompute (window resize)
@@ -586,6 +593,12 @@ export class SceneManager {
   start(): void {
     if (this.animationId !== null) return;
     this.lastTime = performance.now();
+    // Start intro zoom animation
+    if (this.introZoomActive) {
+      this.introZoomStart = performance.now();
+      this.userZoom = this.INTRO_ZOOM_FROM;
+      this.applyCamera();
+    }
     this.animate();
   }
 
@@ -647,6 +660,21 @@ export class SceneManager {
     // Call all update callbacks
     for (const callback of this.updateCallbacks) {
       callback(deltaTime);
+    }
+
+    // Update intro zoom animation ("stepping into the painting" effect)
+    if (this.introZoomActive) {
+      const elapsed = now - this.introZoomStart;
+      if (elapsed >= this.INTRO_ZOOM_DURATION) {
+        this.userZoom = this.INTRO_ZOOM_TO;
+        this.introZoomActive = false;
+      } else {
+        // Ease-out cubic for gentle deceleration
+        const t = elapsed / this.INTRO_ZOOM_DURATION;
+        const eased = 1 - Math.pow(1 - t, 3);
+        this.userZoom = this.INTRO_ZOOM_FROM + (this.INTRO_ZOOM_TO - this.INTRO_ZOOM_FROM) * eased;
+      }
+      this.applyCamera();
     }
 
     // Update camera zoom with smooth interpolation

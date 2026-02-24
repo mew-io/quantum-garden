@@ -231,24 +231,24 @@ export function TimeTravelScrubber({
   return (
     <div className="fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] right-[var(--inset-right)] z-50 pointer-events-auto">
       {/* Timeline */}
-      <div className="bg-gray-900/95 backdrop-blur-md border border-white/10 rounded-t-xl shadow-2xl">
+      <div className="garden-panel rounded-t-xl !shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-black/10">
           <div className="flex items-center gap-3">
             {/* Mode Indicator */}
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-white text-sm font-medium">Historical View</span>
+              <span className="text-[--wc-ink] text-sm font-medium">Historical View</span>
             </div>
             {/* Current Time */}
-            <span className="text-white/50 text-sm">
+            <span className="text-[--wc-ink-muted] text-sm">
               {formatTimeDuration(currentTime.getTime() - timeRange.start)} since creation
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Playback Speed Control */}
-            <div className="flex items-center bg-white/5 rounded-lg p-0.5">
+            <div className="flex items-center bg-black/5 rounded-lg p-0.5">
               {[1, 2, 5, 10, 20].map((speed) => (
                 <button
                   key={speed}
@@ -257,8 +257,8 @@ export function TimeTravelScrubber({
                     px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150
                     ${
                       playbackSpeed === speed
-                        ? "bg-purple-500 text-white scale-105"
-                        : "text-white/60 hover:text-white hover:bg-white/10 active:scale-95"
+                        ? "bg-[--wc-bark] text-white scale-105"
+                        : "text-[--wc-ink-muted] hover:text-[--wc-ink] hover:bg-black/8 active:scale-95"
                     }
                   `}
                 >
@@ -275,8 +275,8 @@ export function TimeTravelScrubber({
                 px-4 py-2 rounded-lg text-sm font-medium transition-colors
                 ${
                   playheadProgress >= 0.999
-                    ? "bg-white/5 text-white/30 cursor-not-allowed"
-                    : "bg-white/10 text-white hover:bg-white/20"
+                    ? "bg-black/5 text-[--wc-ink-muted]/50 cursor-not-allowed"
+                    : "bg-black/8 text-[--wc-ink] hover:bg-black/12"
                 }
               `}
             >
@@ -295,8 +295,8 @@ export function TimeTravelScrubber({
                 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                 ${
                   playheadProgress >= 0.999
-                    ? "bg-white/5 text-white/30 cursor-not-allowed"
-                    : "bg-white/10 text-white hover:bg-white/20"
+                    ? "bg-black/5 text-[--wc-ink-muted]/50 cursor-not-allowed"
+                    : "bg-black/8 text-[--wc-ink] hover:bg-black/12"
                 }
               `}
               title="Jump to current time"
@@ -325,7 +325,7 @@ export function TimeTravelScrubber({
           <div className="relative">
             <div
               ref={timelineRef}
-              className="relative h-14 bg-white/5 rounded-lg cursor-pointer overflow-hidden border border-white/10"
+              className="relative h-14 bg-black/5 rounded-lg cursor-pointer overflow-hidden border border-black/10"
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
@@ -336,23 +336,23 @@ export function TimeTravelScrubber({
 
               {/* Progress Fill */}
               <div
-                className="absolute top-0 left-0 bottom-0 bg-purple-500/20 transition-[width] duration-200 ease-out"
+                className="absolute top-0 left-0 bottom-0 bg-[--wc-bark]/15 transition-[width] duration-200 ease-out"
                 style={{ width: `${playheadProgress * 100}%` }}
               />
 
               {/* Playhead */}
               <div
-                className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
+                className="absolute top-0 bottom-0 w-0.5 bg-[--wc-bark] shadow-lg z-10"
                 style={{ left: `${playheadProgress * 100}%` }}
               >
                 {/* Playhead Handle */}
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rounded-full shadow-lg border-2 border-purple-500" />
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rounded-full shadow-lg border-2 border-[--wc-bark]" />
               </div>
 
               {/* Event Tooltip */}
               {hoveredEvent && (
                 <div
-                  className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 rounded-lg shadow-xl border border-white/20 text-xs whitespace-nowrap pointer-events-none z-20 animate-in fade-in duration-150"
+                  className="absolute bottom-full mb-3 px-3 py-2 bg-[--wc-cream] rounded-lg shadow-xl border border-[--wc-stone]/30 text-xs whitespace-nowrap pointer-events-none z-20 animate-in fade-in duration-150"
                   style={{
                     left: `${hoveredEvent.x}%`,
                     transform: "translateX(-50%)",
@@ -368,11 +368,11 @@ export function TimeTravelScrubber({
                             : "rgb(59, 130, 246)",
                       }}
                     />
-                    <span className="text-white font-medium">
+                    <span className="text-[--wc-ink] font-medium">
                       {hoveredEvent.event.type === "germination" ? "Germination" : "Observation"}
                     </span>
                   </div>
-                  <div className="text-white/60 mt-1">
+                  <div className="text-[--wc-ink-muted] mt-1">
                     {hoveredEvent.event.timestamp.toLocaleString()}
                   </div>
                 </div>
@@ -380,9 +380,9 @@ export function TimeTravelScrubber({
             </div>
 
             {/* Timeline Labels */}
-            <div className="flex justify-between mt-2 px-1 text-white/50 text-xs">
+            <div className="flex justify-between mt-2 px-1 text-[--wc-ink-muted] text-xs">
               <span>Start</span>
-              <span className="text-white/70">
+              <span className="text-[--wc-ink-soft]">
                 {formatTimeDuration(timeRange.duration)} elapsed
               </span>
               <span>Now</span>
@@ -393,13 +393,13 @@ export function TimeTravelScrubber({
           <div className="flex items-center gap-6 mt-3 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-              <span className="text-white/60">Germination</span>
+              <span className="text-[--wc-ink-muted]">Germination</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              <span className="text-white/60">Observation</span>
+              <span className="text-[--wc-ink-muted]">Observation</span>
             </div>
-            <div className="ml-auto text-white/40">{events.length} events</div>
+            <div className="ml-auto text-[--wc-ink-muted]/60">{events.length} events</div>
           </div>
         </div>
       </div>

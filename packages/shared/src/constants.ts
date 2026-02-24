@@ -72,8 +72,8 @@ export const GLYPH = {
 
 /** Garden canvas configuration (4K resolution for gallery displays) */
 export const CANVAS = {
-  /** Background color - light warm cream for contrast with pastel plants */
-  BACKGROUND_COLOR: "#F5F0E8",
+  /** Background color - warm cream watercolor paper */
+  BACKGROUND_COLOR: "#F8F5F0",
   /** Garden world width (4K UHD) */
   DEFAULT_WIDTH: 3840,
   /** Garden world height (4K UHD) */

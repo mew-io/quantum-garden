@@ -23,17 +23,17 @@ import { generateExplanation, getCircuitInfo, getCircuitDiagram } from "@/lib/qu
 function getEventColor(type: QuantumEvent["type"]): string {
   switch (type) {
     case "observation":
-      return "text-cyan-400";
+      return "text-cyan-700";
     case "germination":
-      return "text-green-400";
+      return "text-emerald-700";
     case "entanglement":
-      return "text-purple-400";
+      return "text-purple-700";
     case "wave_germination":
-      return "text-blue-400";
+      return "text-blue-700";
     case "death":
-      return "text-gray-400";
+      return "text-[--wc-ink-muted]";
     default:
-      return "text-green-400";
+      return "text-emerald-700";
   }
 }
 
@@ -113,9 +113,9 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
   return (
     <pre
       className="
-        mt-4 rounded-lg bg-black/60 px-4 py-3
-        font-mono text-xs text-green-300/80
-        overflow-x-auto border border-green-500/10
+        mt-4 rounded-lg bg-[--wc-paper]/80 px-4 py-3
+        font-mono text-xs text-emerald-800/80
+        overflow-x-auto border border-[--wc-stone]/20
       "
     >
       {lines.join("\n")}
@@ -129,10 +129,10 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
 function ExplanationSection({ title, content }: { title: string; content: string }) {
   return (
     <div className="mt-4">
-      <h4 className="text-[10px] font-semibold uppercase tracking-wider text-green-100/40 mb-1.5">
+      <h4 className="text-[10px] font-semibold uppercase tracking-wider text-[--wc-ink-muted] mb-1.5">
         {title}
       </h4>
-      <p className="text-sm leading-relaxed text-green-100/70">{content}</p>
+      <p className="text-sm leading-relaxed text-[--wc-ink-soft]">{content}</p>
     </div>
   );
 }
@@ -208,9 +208,11 @@ function EventDetails({ event }: { event: QuantumEvent }) {
   return (
     <div className="mt-4 grid grid-cols-2 gap-2">
       {details.map((detail) => (
-        <div key={detail.label} className="bg-black/40 rounded px-3 py-2">
-          <p className="text-[10px] text-green-100/40 uppercase tracking-wide">{detail.label}</p>
-          <p className="text-xs text-green-100/80 font-mono">{detail.value}</p>
+        <div key={detail.label} className="bg-[--wc-paper]/60 rounded px-3 py-2">
+          <p className="text-[10px] text-[--wc-ink-muted] uppercase tracking-wide">
+            {detail.label}
+          </p>
+          <p className="text-xs text-[--wc-ink] font-mono">{detail.value}</p>
         </div>
       ))}
     </div>
@@ -297,7 +299,7 @@ export function EventDetailModal() {
     <div
       className="
         fixed inset-0 z-50 flex items-center justify-center
-        bg-black/80 backdrop-blur-sm
+        bg-[#3A352E]/50 backdrop-blur-sm
         animate-in fade-in duration-200
       "
       onClick={handleClose}
@@ -305,7 +307,7 @@ export function EventDetailModal() {
       <div
         className="
           relative w-full max-w-lg mx-4 rounded-xl
-          border border-green-500/20 bg-gray-900/95
+          border border-[--wc-stone]/30 bg-[--wc-cream]
           shadow-2xl backdrop-blur-md
           animate-in zoom-in-95 duration-200
           max-h-[85vh] flex flex-col
@@ -313,21 +315,21 @@ export function EventDetailModal() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-green-500/10 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[--wc-stone]/20 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className={`${colorClass}`}>
               <EventTypeIcon type={selectedEvent.type} />
             </span>
             <div>
-              <h2 className="text-lg font-medium text-green-100">{title}</h2>
-              <p className="text-xs text-green-100/50">{formatDate(selectedEvent.timestamp)}</p>
+              <h2 className="text-lg font-medium text-[--wc-ink]">{title}</h2>
+              <p className="text-xs text-[--wc-ink-muted]">{formatDate(selectedEvent.timestamp)}</p>
             </div>
           </div>
           <button
             onClick={handleClose}
             className="
               rounded p-2
-              text-green-100/40 hover:text-green-100/80
+              text-[--wc-ink-muted] hover:text-[--wc-ink]
               transition-colors
             "
             aria-label="Close"
@@ -355,7 +357,7 @@ export function EventDetailModal() {
         </div>
 
         {/* Footer with navigation */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-green-500/10 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[--wc-stone]/20 flex-shrink-0">
           <button
             onClick={handlePrev}
             disabled={selectedIndex === 0}
@@ -364,14 +366,14 @@ export function EventDetailModal() {
               transition-colors
               ${
                 selectedIndex === 0
-                  ? "text-green-100/20 cursor-not-allowed"
-                  : "text-green-100/60 hover:text-green-100 hover:bg-green-500/10"
+                  ? "text-[--wc-stone] cursor-not-allowed"
+                  : "text-[--wc-ink-soft] hover:text-[--wc-ink] hover:bg-black/5"
               }
             `}
           >
             <ChevronLeftIcon /> Previous
           </button>
-          <span className="text-xs text-green-100/40">
+          <span className="text-xs text-[--wc-ink-muted]">
             {selectedIndex + 1} / {eventLog.length}
           </span>
           <button
@@ -382,8 +384,8 @@ export function EventDetailModal() {
               transition-colors
               ${
                 selectedIndex === eventLog.length - 1
-                  ? "text-green-100/20 cursor-not-allowed"
-                  : "text-green-100/60 hover:text-green-100 hover:bg-green-500/10"
+                  ? "text-[--wc-stone] cursor-not-allowed"
+                  : "text-[--wc-ink-soft] hover:text-[--wc-ink] hover:bg-black/5"
               }
             `}
           >
@@ -393,10 +395,19 @@ export function EventDetailModal() {
 
         {/* Keyboard hint */}
         <div className="px-6 pb-4 flex justify-center flex-shrink-0">
-          <p className="text-[10px] text-green-100/30">
-            Use <kbd className="px-1 py-0.5 bg-black/40 rounded">&larr;</kbd>{" "}
-            <kbd className="px-1 py-0.5 bg-black/40 rounded">&rarr;</kbd> to navigate,{" "}
-            <kbd className="px-1 py-0.5 bg-black/40 rounded">Esc</kbd> to close
+          <p className="text-[10px] text-[--wc-ink-muted]">
+            Use{" "}
+            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+              &larr;
+            </kbd>{" "}
+            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+              &rarr;
+            </kbd>{" "}
+            to navigate,{" "}
+            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+              Esc
+            </kbd>{" "}
+            to close
           </p>
         </div>
       </div>

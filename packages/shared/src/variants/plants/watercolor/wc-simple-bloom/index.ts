@@ -152,6 +152,13 @@ export const wcSimpleBloom: PlantVariant = {
     { name: "blush", weight: 0.8, palettes: { bloom: ["#E8B8C8", "#C88098", "#8EA888"] } },
     { name: "cream", weight: 0.6, palettes: { bloom: ["#F0E8D0", "#D8C8A0", "#8EA888"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 420,
+    clusterBonus: 1.8,
+    maxClusterDensity: 7,
+    reseedClusterChance: 0.6,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "bud", duration: 15 },

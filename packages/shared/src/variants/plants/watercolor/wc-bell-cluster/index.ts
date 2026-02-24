@@ -316,6 +316,13 @@ export const wcBellCluster: PlantVariant = {
       palettes: { bloom: ["#E8C0D0", "#D0A0B8", "#8EA888"] },
     },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 350,
+    clusterBonus: 2.0,
+    maxClusterDensity: 5,
+    reseedClusterChance: 0.7,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "dormant", duration: 8 },

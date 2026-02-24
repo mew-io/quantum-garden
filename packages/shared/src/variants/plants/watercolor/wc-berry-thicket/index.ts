@@ -150,6 +150,13 @@ export const wcBerryThicket: PlantVariant = {
     { name: "bramble", weight: 1.0, palettes: { full: ["#8B7355", "#6B8E5A", "#C8553D"] } },
     { name: "autumn", weight: 0.6, palettes: { full: ["#A0724B", "#C87830", "#8B4513"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 400,
+    clusterBonus: 2.0,
+    maxClusterDensity: 5,
+    reseedClusterChance: 0.6,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "dormant", duration: 5 },

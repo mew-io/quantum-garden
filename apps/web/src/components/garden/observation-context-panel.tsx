@@ -35,9 +35,9 @@ function CircuitDiagram({ lines }: { lines: string[] }) {
   return (
     <pre
       className="
-        mt-3 rounded bg-black/40 px-3 py-2
-        font-mono text-xs text-green-300/80
-        overflow-x-auto
+        mt-3 rounded bg-[--wc-paper]/80 px-3 py-2
+        font-mono text-xs text-emerald-800/80
+        overflow-x-auto border border-[--wc-stone]/20
       "
     >
       {lines.join("\n")}
@@ -124,8 +124,8 @@ function PanelContent({
   return (
     <div
       className={`
-        w-[320px] rounded-lg border border-green-500/20
-        bg-black/85 p-4 shadow-xl backdrop-blur-md
+        w-[320px] rounded-xl garden-panel
+        p-4
         ${animationClasses}
       `}
       role="dialog"
@@ -140,16 +140,16 @@ function PanelContent({
         }}
       >
         <div>
-          <h3 id="context-title" className="text-sm font-medium text-green-100">
+          <h3 id="context-title" className="text-sm font-medium text-[--wc-ink]">
             {name}
           </h3>
-          <p className="mt-0.5 text-xs text-green-100/60">{concept}</p>
+          <p className="mt-0.5 text-xs text-[--wc-ink-muted]">{concept}</p>
         </div>
         <button
           onClick={onDismiss}
           className="
             -mr-1 -mt-1 rounded p-1
-            text-green-100/40 hover:text-green-100/80
+            text-[--wc-ink-muted] hover:text-[--wc-ink]
             transition-colors
           "
           aria-label="Dismiss"
@@ -184,7 +184,7 @@ function PanelContent({
 
       {/* Explanation - appears third */}
       <p
-        className={`mt-3 text-xs leading-relaxed text-green-100/70 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+        className={`mt-3 text-xs leading-relaxed text-[--wc-ink-soft] ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
         style={{
           animationDelay: isExiting ? "0ms" : "150ms",
           animationFillMode: "backwards",
@@ -204,7 +204,7 @@ function PanelContent({
         <a
           href={learnMoreUrl}
           className="
-            text-green-400/80 hover:text-green-400
+            text-emerald-700 hover:text-emerald-800
             transition-colors underline-offset-2 hover:underline
           "
         >
@@ -213,7 +213,7 @@ function PanelContent({
         <button
           onClick={onDontShowAgain}
           className="
-            text-green-100/40 hover:text-green-100/60
+            text-[--wc-ink-muted] hover:text-[--wc-ink-soft]
             transition-colors
           "
         >

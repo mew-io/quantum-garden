@@ -171,6 +171,13 @@ export const wcSaplingHope: PlantVariant = {
     { name: "spring", weight: 1.0, palettes: { full: ["#7CB97C", "#A8D8A8", "#6B5B3A"] } },
     { name: "autumn", weight: 0.6, palettes: { full: ["#D4A04A", "#C8A848", "#7B6B4A"] } },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 500,
+    clusterBonus: 1.5,
+    maxClusterDensity: 4,
+    reseedClusterChance: 0.6,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "seed", duration: 8 },

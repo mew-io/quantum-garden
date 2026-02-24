@@ -259,6 +259,13 @@ export const wcMidnightPoppy: PlantVariant = {
       palettes: { open: ["#E86030", "#3A1A10", "#5A7A50"] },
     },
   ],
+  clusteringBehavior: {
+    mode: "cluster",
+    clusterRadius: 380,
+    clusterBonus: 1.8,
+    maxClusterDensity: 5,
+    reseedClusterChance: 0.6,
+  },
   watercolorConfig: {
     keyframes: [
       { name: "closed", duration: 15 },

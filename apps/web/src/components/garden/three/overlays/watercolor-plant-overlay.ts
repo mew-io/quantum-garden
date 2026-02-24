@@ -177,8 +177,9 @@ export class WatercolorPlantOverlay {
       plantGroup.add(elementGroup);
     }
 
-    // Position the plant
+    // Position and scale the plant — 1.4x for painterly presence
     plantGroup.position.set(plant.position.x, plant.position.y, WATERCOLOR_Z_POSITION);
+    plantGroup.scale.set(1.4, 1.4, 1);
   }
 
   private clearPlantGroup(group: THREE.Group): void {

@@ -51,13 +51,13 @@ function PanelContent({
     return (
       <div
         className={`
-          w-[320px] rounded-lg border border-pink-500/20
-          bg-black/85 p-4 shadow-xl backdrop-blur-md
+          w-[320px] rounded-xl garden-panel
+          p-4
           ${animationClasses}
         `}
       >
         <div className="flex items-center justify-center py-8">
-          <div className="text-sm text-pink-100/60">Loading entanglement data...</div>
+          <div className="text-sm text-[--wc-ink-muted]">Loading entanglement data...</div>
         </div>
       </div>
     );
@@ -82,8 +82,8 @@ function PanelContent({
   return (
     <div
       className={`
-        w-[320px] rounded-lg border border-pink-500/20
-        bg-black/85 p-4 shadow-xl backdrop-blur-md
+        w-[320px] rounded-xl garden-panel
+        p-4
         ${animationClasses}
       `}
       role="dialog"
@@ -95,16 +95,16 @@ function PanelContent({
         style={{ animationDelay: isExiting ? "0ms" : "50ms", animationFillMode: "backwards" }}
       >
         <div>
-          <h3 id="entanglement-title" className="text-sm font-medium text-pink-100">
+          <h3 id="entanglement-title" className="text-sm font-medium text-[--wc-ink]">
             Quantum Entanglement Revealed
           </h3>
-          <p className="mt-0.5 text-xs text-pink-100/60">Correlated quantum states</p>
+          <p className="mt-0.5 text-xs text-[--wc-ink-muted]">Correlated quantum states</p>
         </div>
         <button
           onClick={onDismiss}
           className="
             -mr-1 -mt-1 rounded p-1
-            text-pink-100/40 hover:text-pink-100/80
+            text-[--wc-ink-muted] hover:text-[--wc-ink]
             transition-colors
           "
           aria-label="Dismiss"
@@ -132,16 +132,16 @@ function PanelContent({
         style={{ animationDelay: isExiting ? "0ms" : "100ms", animationFillMode: "backwards" }}
       >
         <div className="flex-1 text-center">
-          <div className="text-xs font-medium text-pink-100/90">{variant1?.name ?? "Unknown"}</div>
+          <div className="text-xs font-medium text-[--wc-ink]">{variant1?.name ?? "Unknown"}</div>
           {plant1.colorVariationName && (
-            <div className="text-xs text-pink-100/50">({plant1.colorVariationName})</div>
+            <div className="text-xs text-[--wc-ink-muted]">({plant1.colorVariationName})</div>
           )}
         </div>
-        <div className="mx-2 text-pink-400">↔</div>
+        <div className="mx-2 text-rose-600">↔</div>
         <div className="flex-1 text-center">
-          <div className="text-xs font-medium text-pink-100/90">{variant2?.name ?? "Unknown"}</div>
+          <div className="text-xs font-medium text-[--wc-ink]">{variant2?.name ?? "Unknown"}</div>
           {plant2.colorVariationName && (
-            <div className="text-xs text-pink-100/50">({plant2.colorVariationName})</div>
+            <div className="text-xs text-[--wc-ink-muted]">({plant2.colorVariationName})</div>
           )}
         </div>
       </div>
@@ -149,19 +149,19 @@ function PanelContent({
       {/* Correlated Traits */}
       {hasTraits && (
         <div
-          className={`mb-3 rounded bg-pink-950/40 p-3 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+          className={`mb-3 rounded bg-rose-50/60 border border-rose-200/30 p-3 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
           style={{ animationDelay: isExiting ? "0ms" : "150ms", animationFillMode: "backwards" }}
         >
-          <div className="mb-2 text-xs font-medium text-green-400">✓ Correlated Traits</div>
+          <div className="mb-2 text-xs font-medium text-emerald-700">✓ Correlated Traits</div>
 
           {/* Color Palette */}
           <div className="mb-2 flex items-center justify-between text-xs">
-            <span className="text-pink-100/70">Color Palette</span>
+            <span className="text-[--wc-ink-soft]">Color Palette</span>
             <div className="flex gap-1">
               {(plant1.traits?.colorPalette ?? []).slice(0, 4).map((color: string, i: number) => (
                 <div
                   key={i}
-                  className="h-3 w-3 rounded-sm border border-white/20"
+                  className="h-3 w-3 rounded-sm border border-[--wc-stone]/30"
                   style={{ backgroundColor: color }}
                   title={color}
                 />
@@ -171,8 +171,8 @@ function PanelContent({
 
           {/* Growth Rate */}
           <div className="mb-2 flex items-center justify-between text-xs">
-            <span className="text-pink-100/70">Growth Rate</span>
-            <span className="font-mono text-pink-100/90">
+            <span className="text-[--wc-ink-soft]">Growth Rate</span>
+            <span className="font-mono text-[--wc-ink]">
               {typeof plant1.traits?.growthRate === "number"
                 ? plant1.traits.growthRate.toFixed(2)
                 : "—"}
@@ -182,8 +182,8 @@ function PanelContent({
 
           {/* Opacity */}
           <div className="flex items-center justify-between text-xs">
-            <span className="text-pink-100/70">Opacity</span>
-            <span className="font-mono text-pink-100/90">
+            <span className="text-[--wc-ink-soft]">Opacity</span>
+            <span className="font-mono text-[--wc-ink]">
               {typeof plant1.traits?.opacity === "number" ? plant1.traits.opacity.toFixed(2) : "—"}
             </span>
           </div>
@@ -193,15 +193,15 @@ function PanelContent({
       {/* Different Traits */}
       {!sameVariant && (
         <div
-          className={`mb-3 rounded bg-black/40 p-3 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+          className={`mb-3 rounded bg-[--wc-paper]/60 p-3 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
           style={{ animationDelay: isExiting ? "0ms" : "200ms", animationFillMode: "backwards" }}
         >
-          <div className="mb-2 text-xs font-medium text-pink-100/60">• Different Traits</div>
+          <div className="mb-2 text-xs font-medium text-[--wc-ink-muted]">• Different Traits</div>
 
           {/* Species */}
           <div className="flex items-center justify-between text-xs">
-            <span className="text-pink-100/50">Species</span>
-            <span className="text-pink-100/70">
+            <span className="text-[--wc-ink-muted]">Species</span>
+            <span className="text-[--wc-ink-soft]">
               {variant1?.name ?? plant1.variantId} vs {variant2?.name ?? plant2.variantId}
             </span>
           </div>
@@ -210,7 +210,7 @@ function PanelContent({
 
       {/* Educational Note */}
       <p
-        className={`text-xs leading-relaxed text-pink-100/70 ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
+        className={`text-xs leading-relaxed text-[--wc-ink-soft] ${!isExiting ? "animate-in fade-in duration-300" : ""}`}
         style={{ animationDelay: isExiting ? "0ms" : "250ms", animationFillMode: "backwards" }}
       >
         In quantum mechanics, entanglement links measurement outcomes, not physical appearance.

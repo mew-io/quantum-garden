@@ -16,21 +16,21 @@ const PAPER_CONFIG = {
   /** Texture tile size in pixels (power of 2 for GPU efficiency) */
   TILE_SIZE: 512,
   /** Fine grain noise intensity (per-pixel fiber texture) */
-  FINE_GRAIN_INTENSITY: 0.09,
+  FINE_GRAIN_INTENSITY: 0.04,
   /** Medium grain noise intensity (tonal variation like paper thickness) */
-  MEDIUM_GRAIN_INTENSITY: 0.07,
+  MEDIUM_GRAIN_INTENSITY: 0.03,
   /** Fiber streak intensity (directional fiber quality) */
-  FIBER_INTENSITY: 0.04,
+  FIBER_INTENSITY: 0.02,
   /** Medium noise sampling scale (pixels between samples) */
-  MEDIUM_SCALE: 4,
+  MEDIUM_SCALE: 6,
   /** Fiber noise horizontal stretch factor */
   FIBER_STRETCH_X: 3,
   /** Fiber noise vertical compression factor */
   FIBER_STRETCH_Y: 0.5,
-  /** Base color RGB — target warm cream for the paper (#E8E1D5) */
-  BASE_R: 232,
-  BASE_G: 225,
-  BASE_B: 213,
+  /** Base color RGB — warm cream watercolor paper (#F0EAE0) */
+  BASE_R: 240,
+  BASE_G: 234,
+  BASE_B: 224,
   /** Warm color shift applied to fiber streaks (adds parchment warmth) */
   FIBER_WARM_R: 4,
   FIBER_WARM_G: 1,

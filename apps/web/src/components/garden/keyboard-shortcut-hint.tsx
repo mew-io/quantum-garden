@@ -69,8 +69,7 @@ export function KeyboardShortcutHint() {
       className={`
         fixed top-[calc(var(--inset-top)+5rem)] left-1/2 -translate-x-1/2 z-40
         flex items-center gap-3 px-4 py-3
-        bg-gray-900/95 backdrop-blur-md rounded-lg border border-purple-500/30
-        shadow-lg shadow-purple-500/10
+        garden-panel rounded-lg
         cursor-pointer select-none
         transition-all duration-300 ease-out
         ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
@@ -79,7 +78,7 @@ export function KeyboardShortcutHint() {
       aria-live="polite"
     >
       {/* Keyboard icon */}
-      <div className="text-purple-400">
+      <div className="text-[--wc-bark]">
         <svg
           width="20"
           height="20"
@@ -95,15 +94,15 @@ export function KeyboardShortcutHint() {
 
       {/* Message */}
       <div className="text-sm">
-        <span className="text-gray-300">Press </span>
-        <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-purple-300 font-mono text-xs mx-1">
+        <span className="text-[--wc-ink-soft]">Press </span>
+        <kbd className="px-1.5 py-0.5 bg-[--wc-paper] rounded text-[--wc-ink] font-mono text-xs mx-1 border border-[--wc-stone]/40">
           ?
         </kbd>
-        <span className="text-gray-300"> for keyboard shortcuts</span>
+        <span className="text-[--wc-ink-soft]"> for keyboard shortcuts</span>
       </div>
 
       {/* Dismiss hint */}
-      <span className="text-gray-500 text-xs ml-2">click to dismiss</span>
+      <span className="text-[--wc-ink-muted] text-xs ml-2">click to dismiss</span>
     </div>
   );
 }

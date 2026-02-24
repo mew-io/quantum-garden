@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Soil/ground -->
+  <ellipse cx="16" cy="28" rx="8" ry="2" fill="#C8BEA8" opacity="0.5"/>
+  <!-- Stem -->
+  <path d="M16 28 C16 22 15 18 16 14" stroke="#8EA888" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- Left leaf -->
+  <path d="M16 18 C12 16 9 13 10 10 C13 11 15 14 16 18Z" fill="#8EA888" opacity="0.7"/>
+  <!-- Right leaf -->
+  <path d="M16 14 C19 11 22 9 23 7 C21 10 19 13 16 14Z" fill="#A8D8A8" opacity="0.6"/>
+  <!-- Quantum dot -->
+  <circle cx="16" cy="10" r="2" fill="#88A8C8" opacity="0.5"/>
+</svg>

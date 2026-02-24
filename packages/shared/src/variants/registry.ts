@@ -29,6 +29,9 @@ import { wcQuantumTulip } from "./plants/watercolor/wc-quantum-tulip";
 import { wcDewdropDaisy } from "./plants/watercolor/wc-dewdrop-daisy";
 import { wcMidnightPoppy } from "./plants/watercolor/wc-midnight-poppy";
 import { wcZenLotus } from "./plants/watercolor/wc-zen-lotus";
+import { wcWildflowerSpray } from "./plants/watercolor/wc-wildflower-spray";
+import { wcHydrangeaPuff } from "./plants/watercolor/wc-hydrangea-puff";
+import { wcFoxgloveSpire } from "./plants/watercolor/wc-foxglove-spire";
 
 // Watercolor — Shrubs
 import { wcCloudBush } from "./plants/watercolor/wc-cloud-bush";
@@ -84,6 +87,9 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   wcDewdropDaisy,
   wcMidnightPoppy,
   wcZenLotus,
+  wcWildflowerSpray,
+  wcHydrangeaPuff,
+  wcFoxgloveSpire,
   // Shrubs
   wcCloudBush,
   wcBerryThicket,

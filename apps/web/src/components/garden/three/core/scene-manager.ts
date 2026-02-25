@@ -186,7 +186,7 @@ export class SceneManager {
       powerPreference: "high-performance",
     });
     this.renderer.setSize(vw, vh);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     // Sort objects by renderOrder for proper layering
     this.renderer.sortObjects = true;
 
@@ -242,7 +242,7 @@ export class SceneManager {
 
     // Bloom pass - adds glow to bright areas (optional)
     if (this.bloomEnabled) {
-      const resolution = new THREE.Vector2(width, height);
+      const resolution = new THREE.Vector2(Math.floor(width / 2), Math.floor(height / 2));
       this.bloomPass = new UnrealBloomPass(
         resolution,
         BLOOM_CONFIG.STRENGTH,
@@ -731,7 +731,7 @@ export class SceneManager {
       this.composer.setSize(vw, vh);
     }
     if (this.bloomPass) {
-      this.bloomPass.resolution.set(vw, vh);
+      this.bloomPass.resolution.set(Math.floor(vw / 2), Math.floor(vh / 2));
     }
     if (this.paperPass) {
       (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);

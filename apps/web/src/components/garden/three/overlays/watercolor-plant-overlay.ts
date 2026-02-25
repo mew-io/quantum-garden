@@ -56,6 +56,9 @@ export class WatercolorPlantOverlay {
   private lastPlantsRef: Plant[] | null = null;
   private variantCache: Map<string, PlantVariant> = new Map();
   private materialPool: Map<string, THREE.MeshBasicMaterial> = new Map();
+  private needsUpdate: boolean = false;
+  private lastLifecycleCheckTime: number = 0;
+  private static LIFECYCLE_CHECK_INTERVAL = 1.0; // seconds
 
   constructor() {
     this.group = new THREE.Group();
@@ -73,6 +76,7 @@ export class WatercolorPlantOverlay {
       const variant = this.getVariant(plant.variantId);
       return variant != null && isWatercolorVariant(variant);
     });
+    this.needsUpdate = true;
     this.rebuildAll();
   }
 
@@ -212,7 +216,15 @@ export class WatercolorPlantOverlay {
    * Update the overlay each frame.
    * Only rebuilds plants whose visual state has changed.
    */
-  update(_time: number): void {
+  update(time: number): void {
+    // Periodically re-check for lifecycle progression (keyframe changes)
+    if (time - this.lastLifecycleCheckTime >= WatercolorPlantOverlay.LIFECYCLE_CHECK_INTERVAL) {
+      this.lastLifecycleCheckTime = time;
+      this.needsUpdate = true;
+    }
+
+    if (!this.needsUpdate) return;
+
     const seenIds = new Set<string>();
 
     for (const plant of this.plants) {
@@ -287,10 +299,16 @@ export class WatercolorPlantOverlay {
         this.plantRenderStates.delete(id);
       }
     }
+
+    this.needsUpdate = false;
   }
 
   hasActiveAnimations(): boolean {
-    return this.plants.length > 0;
+    if (this.plants.length === 0) return false;
+    if (this.needsUpdate) return true;
+    // Periodic lifecycle check — update() handles the timing
+    const now = performance.now() / 1000;
+    return now - this.lastLifecycleCheckTime >= WatercolorPlantOverlay.LIFECYCLE_CHECK_INTERVAL;
   }
 
   getObject(): THREE.Object3D {

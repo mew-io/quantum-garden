@@ -82,6 +82,9 @@ export class VectorPlantOverlay {
   private plantRenderStates: Map<string, PlantRenderState> = new Map();
   private plants: Plant[] = [];
   private lastPlantsRef: Plant[] | null = null; // For reference comparison to skip redundant setPlants calls
+  private needsUpdate: boolean = false;
+  private lastLifecycleCheckTime: number = 0;
+  private static LIFECYCLE_CHECK_INTERVAL = 1.0; // seconds
   private variantCache: Map<string, PlantVariant> = new Map();
 
   /** Pool of line materials keyed by "color-opacity" string for reuse */
@@ -157,6 +160,7 @@ export class VectorPlantOverlay {
       const variant = this.getVariant(plant.variantId);
       return variant?.renderMode === "vector";
     });
+    this.needsUpdate = true;
     this.rebuildGeometry();
   }
 
@@ -1067,9 +1071,18 @@ export class VectorPlantOverlay {
    * Update the overlay each frame.
    * Only rebuilds geometry for plants whose visual state has changed.
    */
-  update(_time: number): void {
+  update(time: number): void {
+    // Periodically re-check for lifecycle progression (keyframe changes)
+    if (time - this.lastLifecycleCheckTime >= VectorPlantOverlay.LIFECYCLE_CHECK_INTERVAL) {
+      this.lastLifecycleCheckTime = time;
+      this.needsUpdate = true;
+    }
+
+    if (!this.needsUpdate) return;
+
     // Incrementally update only plants that need it
     this.updateChangedPlants();
+    this.needsUpdate = false;
   }
 
   /**
@@ -1186,7 +1199,11 @@ export class VectorPlantOverlay {
    * Returns true when there are vector plants to render.
    */
   hasActiveAnimations(): boolean {
-    return this.plants.length > 0;
+    if (this.plants.length === 0) return false;
+    if (this.needsUpdate) return true;
+    // Periodic lifecycle check — update() handles the timing
+    const now = performance.now() / 1000;
+    return now - this.lastLifecycleCheckTime >= VectorPlantOverlay.LIFECYCLE_CHECK_INTERVAL;
   }
 
   /**

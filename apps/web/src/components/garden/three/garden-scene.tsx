@@ -123,9 +123,6 @@ export function GardenScene() {
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
   observationCallbackRef.current = triggerObservation;
 
-  // Track if store subscription already synced this frame to avoid redundant work
-  const storeSyncedThisFrameRef = useRef(false);
-
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -260,8 +257,6 @@ export function GardenScene() {
         plantInstancer.syncPlants(convertToRenderable(state.plants));
         overlayManager.setPlants(state.plants);
         observationSystem.updatePlants(state.plants);
-        // Mark that we synced this frame to avoid redundant sync in updateCallback
-        storeSyncedThisFrameRef.current = true;
 
         // Detect germinations and trigger particle effects + audio
         for (const plant of state.plants) {
@@ -309,16 +304,9 @@ export function GardenScene() {
 
       plantInstancer.updateTime(time);
 
-      // Re-sync to update transition animations
-      // This is needed because transitions are time-based, not state-based
-      // Skip if store subscription already synced this frame to avoid redundant work
-      const currentPlants = useGardenStore.getState().plants;
-      if (!storeSyncedThisFrameRef.current) {
-        plantInstancer.syncPlants(convertToRenderable(currentPlants));
-        overlayManager.setPlants(currentPlants);
-      }
-      // Reset the flag for next frame
-      storeSyncedThisFrameRef.current = false;
+      // Update only actively transitioning plants (collapse/color animations).
+      // Full syncPlants() is called by the store subscription when state changes.
+      plantInstancer.updateTransitions();
 
       // Update overlays (time-based animations still need updating even after sync)
       overlayManager.update(time, deltaTime);

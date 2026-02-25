@@ -371,6 +371,57 @@ export class PlantInstancer {
   }
 
   /**
+   * Update only actively transitioning plants (collapse + color transitions).
+   * Much cheaper than a full syncPlants() — only touches plants with active animations.
+   * Called every frame from the render loop; full syncPlants() is only called on state changes.
+   */
+  updateTransitions(): void {
+    const time = performance.now() / 1000;
+    let anyDirty = false;
+
+    for (const [plantId, animState] of this.animationStates) {
+      if (!animState.isTransitioning && !animState.isColorTransitioning) continue;
+
+      const index = this.plantIndexMap.get(plantId);
+      if (index === undefined) continue;
+
+      // Update collapse transition progress
+      if (animState.isTransitioning) {
+        const elapsed = time - animState.transitionStartTime;
+        animState.transitionProgress = Math.min(1, elapsed / PlantInstancer.COLLAPSE_DURATION);
+        if (animState.transitionProgress >= 1) {
+          animState.isTransitioning = false;
+        }
+        // Write updated transitionProgress to buffer
+        this.instanceState[index * 4 + 3] = animState.transitionProgress;
+        this.dirtyInstances.add(index);
+        anyDirty = true;
+      }
+
+      // Update color transition progress
+      if (animState.isColorTransitioning) {
+        const elapsed = time - animState.colorTransitionStartTime;
+        animState.colorTransitionProgress = Math.min(
+          1,
+          elapsed / PlantInstancer.COLOR_TRANSITION_DURATION
+        );
+        if (animState.colorTransitionProgress >= 1) {
+          animState.isColorTransitioning = false;
+        }
+        // Write updated colorTransitionProgress to buffer
+        this.instanceAnimation[index * 3 + 2] = animState.colorTransitionProgress;
+        this.dirtyInstances.add(index);
+        anyDirty = true;
+      }
+    }
+
+    if (anyDirty) {
+      this.markAttributesNeedUpdate();
+      this.dirtyInstances.clear();
+    }
+  }
+
+  /**
    * Update the animation time uniform.
    */
   updateTime(time: number): void {

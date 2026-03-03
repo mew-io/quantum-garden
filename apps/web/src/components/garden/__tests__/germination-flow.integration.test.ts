@@ -20,7 +20,6 @@ import type { Plant } from "@quantum-garden/shared";
 // Real store state for integration testing
 let storeState = {
   plants: [] as Plant[],
-  isTimeTravelMode: false,
   notifications: [] as { id: string; message: string }[],
   eventLog: [] as { type: string; plantId: string }[],
   lastGerminationTime: null as number | null,
@@ -82,7 +81,6 @@ function createMockPlant(
 function resetStoreState() {
   storeState = {
     plants: [],
-    isTimeTravelMode: false,
     notifications: [],
     eventLog: [],
     lastGerminationTime: null,
@@ -157,24 +155,6 @@ describe("Germination Flow Integration", () => {
 
       // Should not be called - plant is already germinated
       expect(callback).not.toHaveBeenCalled();
-    });
-
-    it("should not trigger germination in time-travel mode", async () => {
-      const callback = vi.fn().mockResolvedValue(undefined);
-      system.setGerminationCallback(callback);
-
-      const plant = createMockPlant("plant-1", 100, 100);
-      storeState.plants = [plant];
-      storeState.isTimeTravelMode = true;
-
-      system.start();
-      vi.advanceTimersByTime(20 * 60 * 1000);
-      await system.triggerCheck();
-
-      // System should be paused when isTimeTravelMode is true
-      // The evolution system itself doesn't check this (that's in the callback)
-      // But we can verify the callback was called
-      // The real use-evolution hook would skip the mutation
     });
   });
 

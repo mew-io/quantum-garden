@@ -86,12 +86,6 @@ interface GardenState {
   isInCooldown: boolean;
   setIsInCooldown: (inCooldown: boolean) => void;
 
-  // Time-travel mode
-  isTimeTravelMode: boolean;
-  timeTravelTimestamp: Date | null;
-  setTimeTravelMode: (enabled: boolean) => void;
-  setTimeTravelTimestamp: (timestamp: Date | null) => void;
-
   // Evolution notifications
   notifications: EvolutionNotification[];
   addNotification: (message: string, type?: NotificationType) => void;
@@ -160,16 +154,6 @@ export const useGardenStore = create<GardenState>((set) => ({
   // System
   isInCooldown: false,
   setIsInCooldown: (inCooldown) => set({ isInCooldown: inCooldown }),
-
-  // Time-travel
-  isTimeTravelMode: false,
-  timeTravelTimestamp: null,
-  setTimeTravelMode: (enabled) =>
-    set({
-      isTimeTravelMode: enabled,
-      timeTravelTimestamp: enabled ? null : null, // Reset timestamp when disabled
-    }),
-  setTimeTravelTimestamp: (timestamp) => set({ timeTravelTimestamp: timestamp }),
 
   // Evolution notifications (max 3 visible at once)
   notifications: [],

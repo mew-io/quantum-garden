@@ -154,7 +154,7 @@ function FilterChip({
  * Main QuantumEventLog panel component.
  */
 export function QuantumEventLog() {
-  const { eventLog, selectedEventId, setSelectedEventId, isTimeTravelMode } = useGardenStore();
+  const { eventLog, selectedEventId, setSelectedEventId } = useGardenStore();
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<QuantumEventType>>(
     new Set(["observation", "germination", "entanglement", "wave_germination", "death"])
@@ -213,10 +213,7 @@ export function QuantumEventLog() {
     [setSelectedEventId]
   );
 
-  // Adjust bottom position when timeline is visible
-  const bottomOffset = isTimeTravelMode
-    ? "calc(var(--inset-bottom) + 180px)"
-    : "var(--inset-bottom)";
+  const bottomOffset = "var(--inset-bottom)";
 
   return (
     <div

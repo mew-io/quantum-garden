@@ -20,8 +20,6 @@ function resetStore() {
     dwellTarget: null,
     dwellProgress: 0,
     isInCooldown: false,
-    isTimeTravelMode: false,
-    timeTravelTimestamp: null,
     notifications: [],
     observationContext: null,
     evolutionPaused: true,
@@ -135,44 +133,6 @@ describe("Garden Store", () => {
 
         expect(useGardenStore.getState().lastGerminationTime).toBeNull();
       });
-    });
-  });
-
-  describe("time-travel mode", () => {
-    it("should start with time-travel mode disabled", () => {
-      const state = useGardenStore.getState();
-      expect(state.isTimeTravelMode).toBe(false);
-      expect(state.timeTravelTimestamp).toBeNull();
-    });
-
-    it("should enable time-travel mode", () => {
-      const { setTimeTravelMode } = useGardenStore.getState();
-
-      setTimeTravelMode(true);
-
-      const state = useGardenStore.getState();
-      expect(state.isTimeTravelMode).toBe(true);
-    });
-
-    it("should disable time-travel mode and reset timestamp", () => {
-      const { setTimeTravelMode, setTimeTravelTimestamp } = useGardenStore.getState();
-
-      setTimeTravelMode(true);
-      setTimeTravelTimestamp(new Date());
-      setTimeTravelMode(false);
-
-      const state = useGardenStore.getState();
-      expect(state.isTimeTravelMode).toBe(false);
-      expect(state.timeTravelTimestamp).toBeNull();
-    });
-
-    it("should set time-travel timestamp", () => {
-      const { setTimeTravelTimestamp } = useGardenStore.getState();
-      const timestamp = new Date("2026-01-15T12:00:00Z");
-
-      setTimeTravelTimestamp(timestamp);
-
-      expect(useGardenStore.getState().timeTravelTimestamp).toEqual(timestamp);
     });
   });
 

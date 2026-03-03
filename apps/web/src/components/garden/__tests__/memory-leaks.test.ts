@@ -20,7 +20,6 @@ import type { Plant } from "@quantum-garden/shared";
 // Mock the garden store
 const mockStoreState = {
   plants: [] as Plant[],
-  isTimeTravelMode: false,
 };
 
 vi.mock("@/stores/garden-store", () => ({
@@ -74,7 +73,6 @@ function createMockPlant(
  */
 function resetMockState() {
   mockStoreState.plants = [];
-  mockStoreState.isTimeTravelMode = false;
 }
 
 describe("Memory Leak Tests", () => {

@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { GardenScene } from "@/components/garden/three";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { InfoOverlay } from "@/components/garden/info-overlay";
 import { DebugPanel } from "@/components/garden/debug-panel";
-import { TimeTravelScrubber } from "@/components/garden/time-travel-scrubber";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { EntanglementDetailPanel } from "@/components/garden/entanglement-detail-panel";
@@ -16,77 +15,16 @@ import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
 import { OnboardingTour } from "@/components/garden/onboarding-tour";
-import { useGardenStore } from "@/stores/garden-store";
-import { useHistoricalEvents } from "@/hooks/use-historical-events";
 import { trpc } from "@/lib/trpc/client";
 
 export default function Home() {
-  const { isTimeTravelMode, setTimeTravelMode, setTimeTravelTimestamp, setPlants } =
-    useGardenStore();
-  const [gardenCreatedAt, setGardenCreatedAt] = useState<Date | null>(null);
-
   // Panel visibility states
   const [isDebugOpen, setIsDebugOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [isTourActive, setIsTourActive] = useState(false);
 
   // Fetch earliest plant creation time to determine garden age
-  const { data: plants, isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
-
-  // Calculate garden creation time from earliest plant
-  useEffect(() => {
-    if (!plants) {
-      // Still loading - don't change state
-      return;
-    }
-    if (plants.length === 0) {
-      // No plants - clear garden created time
-      setGardenCreatedAt(null);
-      return;
-    }
-    // Find earliest plant creation time
-    const earliest = plants.reduce(
-      (min, p) => (new Date(p.createdAt) < new Date(min.createdAt) ? p : min),
-      plants[0]! // Safe because we checked length > 0
-    );
-    setGardenCreatedAt(new Date(earliest.createdAt));
-  }, [plants]);
-
-  // Load historical events into the Quantum Events panel
-  useHistoricalEvents({ gardenCreatedAt });
-
-  // Query for historical state
-  const [historicalTimestamp, setHistoricalTimestamp] = useState<Date | null>(null);
-  const { data: historicalPlants } = trpc.garden.getStateAtTime.useQuery(
-    { timestamp: historicalTimestamp! },
-    {
-      enabled: isTimeTravelMode && historicalTimestamp !== null,
-    }
-  );
-
-  // Update plants when scrubbing through time
-  useEffect(() => {
-    if (isTimeTravelMode && historicalPlants) {
-      setPlants(historicalPlants);
-    }
-  }, [isTimeTravelMode, historicalPlants, setPlants]);
-
-  // Handle scrubbing to a specific timestamp
-  const handleScrubToTime = useCallback(
-    (timestamp: Date) => {
-      setHistoricalTimestamp(timestamp);
-      setTimeTravelTimestamp(timestamp);
-    },
-    [setTimeTravelTimestamp]
-  );
-
-  // Handle returning to live view
-  const handleReturnToLive = useCallback(() => {
-    setTimeTravelMode(false);
-    setHistoricalTimestamp(null);
-    setTimeTravelTimestamp(null);
-    // Plants will be refreshed by the live query in usePlants hook
-  }, [setTimeTravelMode, setTimeTravelTimestamp]);
+  const { isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -94,16 +32,6 @@ export default function Home() {
       // Only trigger if not typing in an input field
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
-      }
-
-      // T - Toggle time-travel mode
-      if (e.key === "t" || e.key === "T") {
-        if (gardenCreatedAt) {
-          setTimeTravelMode(!isTimeTravelMode);
-          if (isTimeTravelMode) {
-            handleReturnToLive();
-          }
-        }
       }
 
       // Backtick - Toggle debug panel
@@ -135,7 +63,7 @@ export default function Home() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTimeTravelMode, setTimeTravelMode, gardenCreatedAt, handleReturnToLive]);
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -164,7 +92,6 @@ export default function Home() {
               return newValue;
             });
           }}
-          isTimeTravelAvailable={!!gardenCreatedAt}
           onShowHelp={() => setShowHelp(true)}
         />
 
@@ -194,14 +121,6 @@ export default function Home() {
         <EvolutionPausedIndicator />
         <KeyboardShortcutHint />
         <OnboardingTour isActive={isTourActive} onComplete={() => setIsTourActive(false)} />
-        {gardenCreatedAt && (
-          <TimeTravelScrubber
-            isActive={isTimeTravelMode}
-            onScrubToTime={handleScrubToTime}
-            onReturnToLive={handleReturnToLive}
-            gardenCreatedAt={gardenCreatedAt}
-          />
-        )}
       </main>
     </ErrorBoundary>
   );

@@ -15,13 +15,7 @@ interface TourStep {
   /** Description text */
   description: string;
   /** CSS selector or position hint for highlighting */
-  target?:
-    | "toolbar"
-    | "canvas"
-    | "timeline-button"
-    | "sound-button"
-    | "help-button"
-    | "debug-button";
+  target?: "toolbar" | "canvas" | "sound-button" | "help-button" | "debug-button";
   /** Position of the tooltip relative to the spotlight */
   position: "top" | "bottom" | "left" | "right" | "center";
 }
@@ -66,14 +60,6 @@ const TOUR_STEPS: TourStep[] = [
     description:
       "Access controls and information here. The garden stats show how many plants are germinated and observed.",
     target: "toolbar",
-    position: "bottom",
-  },
-  {
-    id: "timeline",
-    title: "Time Travel",
-    description:
-      "Press T or click the Timeline button to scrub through the garden's history. Watch past germinations and observations unfold.",
-    target: "timeline-button",
     position: "bottom",
   },
   {
@@ -311,14 +297,6 @@ function getSpotlightPosition(
         y: window.innerHeight * 0.2,
         width: window.innerWidth * 0.6,
         height: window.innerHeight * 0.5,
-      };
-    case "timeline-button":
-      // Timeline button in toolbar (approximate)
-      return {
-        x: 16,
-        y: 16,
-        width: 100,
-        height: 48,
       };
     case "sound-button":
       // Sound button (approximate position)

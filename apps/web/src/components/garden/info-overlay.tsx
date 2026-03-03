@@ -127,21 +127,6 @@ export function InfoOverlay({ forceShow = false, onDismiss, onStartTour }: InfoO
           </p>
         </div>
 
-        {/* Time-travel feature explanation */}
-        <div className="bg-purple-50/60 border border-purple-200/40 rounded-lg p-4 mb-6">
-          <p className="text-purple-700 text-xs uppercase tracking-wide mb-2 font-medium">
-            Time Travel
-          </p>
-          <p className="text-[--wc-ink-soft] text-sm">
-            Press{" "}
-            <kbd className="px-1.5 py-0.5 bg-[--wc-paper] text-purple-700 rounded text-xs font-mono mx-0.5 border border-[--wc-stone]/40">
-              T
-            </kbd>{" "}
-            to open the timeline and watch the garden&apos;s history unfold. Scrub through past
-            germinations and observations, or let it play back automatically.
-          </p>
-        </div>
-
         {/* Keyboard shortcuts - desktop only */}
         {!isTouch && (
           <div className="mb-6">

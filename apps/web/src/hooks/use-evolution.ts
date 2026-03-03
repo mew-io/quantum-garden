@@ -46,19 +46,12 @@ export function useEvolution() {
    * Trigger germination for a dormant plant.
    *
    * Called by the GardenEvolutionSystem when a plant should germinate.
-   * Skipped if in time-travel mode (read-only historical view).
    *
    * @param plantId - The plant to germinate
    * @param context - Wave context (if part of a wave germination event)
    */
   const triggerGermination = useCallback(
     async (plantId: string, context: GerminationContext): Promise<void> => {
-      // Skip germination if in time-travel mode
-      const { isTimeTravelMode } = useGardenStore.getState();
-      if (isTimeTravelMode) {
-        return;
-      }
-
       const result = await mutationRef.current.mutateAsync({ plantId });
 
       // Update plant in local store to reflect germinated state

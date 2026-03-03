@@ -30,13 +30,9 @@ vi.mock("@/components/garden/garden-evolution", () => ({
   })),
 }));
 
-// Mock the garden store with state tracking
-let mockIsTimeTravelMode = false;
-
 vi.mock("@/stores/garden-store", () => ({
   useGardenStore: vi.fn((selector) => {
     const state = {
-      isTimeTravelMode: mockIsTimeTravelMode,
       setEvolutionPaused: mockSetEvolutionPaused,
       setEvolutionStats: mockSetEvolutionStats,
     };
@@ -65,7 +61,6 @@ describe("useEvolutionSystem", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
-    mockIsTimeTravelMode = false;
   });
 
   afterEach(() => {
@@ -134,30 +129,6 @@ describe("useEvolutionSystem", () => {
       });
     });
 
-    it("should pause system when entering time-travel mode", () => {
-      const system = createGardenEvolutionSystem();
-
-      // Simulate time-travel mode activation
-      mockIsTimeTravelMode = true;
-      system.stop();
-      mockSetEvolutionPaused(true);
-
-      expect(mockStop).toHaveBeenCalled();
-      expect(mockSetEvolutionPaused).toHaveBeenCalledWith(true);
-    });
-
-    it("should resume system when exiting time-travel mode", () => {
-      const system = createGardenEvolutionSystem();
-
-      // Simulate time-travel mode deactivation
-      mockIsTimeTravelMode = false;
-      system.start();
-      mockSetEvolutionPaused(false);
-
-      expect(mockStart).toHaveBeenCalled();
-      expect(mockSetEvolutionPaused).toHaveBeenCalledWith(false);
-    });
-
     it("should destroy system on unmount", () => {
       const system = createGardenEvolutionSystem();
 
@@ -212,18 +183,6 @@ describe("useEvolutionSystem", () => {
   });
 
   describe("return value", () => {
-    it("should return isRunning based on time-travel mode", () => {
-      // When not in time-travel mode and system exists
-      mockIsTimeTravelMode = false;
-      const isRunning = !mockIsTimeTravelMode;
-      expect(isRunning).toBe(true);
-
-      // When in time-travel mode
-      mockIsTimeTravelMode = true;
-      const isRunningPaused = !mockIsTimeTravelMode;
-      expect(isRunningPaused).toBe(false);
-    });
-
     it("should return stats from system", () => {
       // Reset mock to default value for this test
       mockGetStats.mockReturnValue({ dormantCount: 5, trackedCount: 5 });
@@ -240,35 +199,6 @@ describe("useEvolutionSystem", () => {
   });
 
   describe("edge cases", () => {
-    it("should handle rapid time-travel mode toggles", () => {
-      // Clear mocks to get fresh counts
-      mockStart.mockClear();
-      mockStop.mockClear();
-
-      const system = createGardenEvolutionSystem();
-
-      // Initial start
-      system.start();
-
-      // Toggle on
-      mockIsTimeTravelMode = true;
-      system.stop();
-      mockSetEvolutionPaused(true);
-
-      // Toggle off quickly
-      mockIsTimeTravelMode = false;
-      system.start();
-      mockSetEvolutionPaused(false);
-
-      // Toggle on again
-      mockIsTimeTravelMode = true;
-      system.stop();
-      mockSetEvolutionPaused(true);
-
-      expect(mockStop).toHaveBeenCalledTimes(2);
-      expect(mockStart).toHaveBeenCalledTimes(2); // Initial + resume
-    });
-
     it("should handle germination callback errors without crashing", async () => {
       const system = createGardenEvolutionSystem();
       const failingCallback = vi.fn().mockRejectedValue(new Error("API Error"));

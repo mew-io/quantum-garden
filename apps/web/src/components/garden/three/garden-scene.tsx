@@ -312,11 +312,7 @@ export function GardenScene() {
       overlayManager.update(time, deltaTime);
 
       // Update observation system (region-based observation)
-      // Skip if in time-travel mode (read-only historical view)
-      const { isTimeTravelMode } = useGardenStore.getState();
-      if (!isTimeTravelMode) {
-        observationSystem.update(deltaTime);
-      }
+      observationSystem.update(deltaTime);
     };
     sceneManager.addUpdateCallback(updateCallback);
 

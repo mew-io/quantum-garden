@@ -23,17 +23,11 @@ const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 interface ToolbarProps {
   isDebugOpen: boolean;
   onDebugToggle: () => void;
-  isTimeTravelAvailable: boolean;
   onShowHelp: () => void;
 }
 
-export function Toolbar({
-  isDebugOpen,
-  onDebugToggle,
-  isTimeTravelAvailable,
-  onShowHelp,
-}: ToolbarProps) {
-  const { isTimeTravelMode, setTimeTravelMode, plants } = useGardenStore();
+export function Toolbar({ isDebugOpen, onDebugToggle, onShowHelp }: ToolbarProps) {
+  const { plants } = useGardenStore();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const { isEnabled: isSoundEnabled, toggleEnabled: toggleSound, init: initAudio } = useAudio();
 
@@ -53,13 +47,6 @@ export function Toolbar({
     }),
     [plants]
   );
-
-  // Toggle time travel
-  const handleTimeTravelToggle = () => {
-    if (isTimeTravelAvailable) {
-      setTimeTravelMode(!isTimeTravelMode);
-    }
-  };
 
   return (
     <div className="fixed top-[var(--inset-top)] left-[var(--inset-left)] right-4 sm:right-auto z-50 flex flex-col gap-2">
@@ -108,17 +95,6 @@ export function Toolbar({
           />
         )}
 
-        {/* Time Travel Button */}
-        <ToolbarButton
-          icon={<ClockIcon />}
-          label="Timeline"
-          shortcut="T"
-          onClick={handleTimeTravelToggle}
-          active={isTimeTravelMode}
-          activeColor="purple"
-          disabled={!isTimeTravelAvailable}
-        />
-
         {/* Keyboard Shortcuts Button */}
         <ToolbarButton
           icon={<KeyboardIcon />}
@@ -149,7 +125,6 @@ export function Toolbar({
           {/* General shortcuts */}
           <div className="space-y-2">
             <ShortcutRow shortcut="?" description="Show help" />
-            <ShortcutRow shortcut="T" description="Toggle timeline" />
             <ShortcutRow shortcut="`" description="Toggle debug panel" />
             <ShortcutRow shortcut="Esc" description="Close panels" />
           </div>
@@ -306,22 +281,6 @@ function BugIcon() {
       <path d="M8 2l1.88 1.88M14.12 3.88L16 2M9 7.13v-1a3.003 3.003 0 116 0v1" />
       <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6z" />
       <path d="M12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H3M6 17l-3 1M17.47 9c1.93-.2 3.53-1.9 3.53-4M18 13h3M18 17l3 1" />
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }

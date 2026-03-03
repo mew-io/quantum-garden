@@ -5,7 +5,6 @@
  * automatically germinates dormant plants over time. The system:
  *
  * - Starts automatically on component mount
- * - Pauses during time-travel mode
  * - Syncs stats to the garden store every 5 seconds
  * - Cleans up on unmount
  *
@@ -52,7 +51,6 @@ interface UseEvolutionSystemOptions {
 interface EvolutionSystemState {
   /**
    * Whether the evolution system is currently running.
-   * False during time-travel mode or when system is paused.
    */
   isRunning: boolean;
   /**
@@ -67,7 +65,7 @@ interface EvolutionSystemState {
  * Hook that manages the GardenEvolutionSystem lifecycle.
  *
  * Creates the system on mount, connects the germination callback,
- * pauses during time-travel mode, and cleans up on unmount.
+ * and cleans up on unmount.
  *
  * @param options - Configuration options including the germination callback
  * @returns Current state of the evolution system
@@ -95,15 +93,12 @@ interface EvolutionSystemState {
  * 2. Connects the provided germination callback
  * 3. Starts the periodic evolution checks (every 15 seconds)
  * 4. Syncs evolution stats to the Zustand store (every 5 seconds)
- * 5. Pauses when entering time-travel mode
- * 6. Resumes when exiting time-travel mode
- * 7. Destroys the system and clears intervals on unmount
+ * 5. Destroys the system and clears intervals on unmount
  */
 export function useEvolutionSystem({
   triggerGermination,
 }: UseEvolutionSystemOptions): EvolutionSystemState {
   const systemRef = useRef<GardenEvolutionSystem | null>(null);
-  const isTimeTravelMode = useGardenStore((state) => state.isTimeTravelMode);
   const setEvolutionPaused = useGardenStore((state) => state.setEvolutionPaused);
   const setEvolutionStats = useGardenStore((state) => state.setEvolutionStats);
 
@@ -154,24 +149,8 @@ export function useEvolutionSystem({
     };
   }, [triggerGermination, setEvolutionPaused, setEvolutionStats]);
 
-  // Handle time-travel mode changes (pause/resume)
-  useEffect(() => {
-    const system = systemRef.current;
-    if (!system) return;
-
-    if (isTimeTravelMode) {
-      debugLogger.evolution.info("Pausing evolution (time-travel mode active)");
-      system.stop();
-      setEvolutionPaused(true);
-    } else {
-      debugLogger.evolution.info("Resuming evolution (time-travel mode inactive)");
-      system.start();
-      setEvolutionPaused(false);
-    }
-  }, [isTimeTravelMode, setEvolutionPaused]);
-
   return {
-    isRunning: !isTimeTravelMode && systemRef.current !== null,
+    isRunning: systemRef.current !== null,
     stats: systemRef.current?.getStats() ?? null,
   };
 }

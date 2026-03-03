@@ -85,7 +85,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
   // Get garden store state
   const {
-    isTimeTravelMode,
     evolutionPaused,
     evolutionStats,
     lastGerminationTime,
@@ -339,12 +338,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                   inactiveText="Paused"
                 />
                 <StatusBadge
-                  label="Time Travel"
-                  active={isTimeTravelMode}
-                  activeColor="purple"
-                  inactiveText="Off"
-                />
-                <StatusBadge
                   label="Observation"
                   active={observationMode === "region"}
                   activeColor="blue"
@@ -507,7 +500,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </h4>
               <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1 text-xs">
                 <ShortcutRow shortcut="`" description="Toggle debug panel" />
-                <ShortcutRow shortcut="T" description="Toggle time-travel mode" />
               </div>
             </section>
           </>

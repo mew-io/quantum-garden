@@ -19,8 +19,7 @@ The debug panel has three tabs:
 #### Overview Tab
 
 - **System State**: Shows current mode indicators
-  - Evolution: Active/Paused (paused during time-travel)
-  - Time Travel: On/Off
+  - Evolution: Active/Paused
   - Observation: Region/Click mode
   - Context Panel: Visible when showing quantum circuit info
 
@@ -123,10 +122,9 @@ function MyComponent() {
 
 ## Keyboard Shortcuts
 
-| Key     | Action                  |
-| ------- | ----------------------- |
-| `` ` `` | Toggle debug panel      |
-| `T`     | Toggle time-travel mode |
+| Key     | Action             |
+| ------- | ------------------ |
+| `` ` `` | Toggle debug panel |
 
 ---
 
@@ -173,13 +171,6 @@ Toggle via the debug panel under "Controls".
 2. Verify execution mode is "SIMULATOR" or "HARDWARE" (not "MOCK" if expecting real quantum)
 3. Look for quantum errors in Logs tab (purple/quantum category)
 4. Check that quantum pool file exists: `apps/web/public/quantum-pool.json`
-
-### Time-Travel Problems
-
-1. Press `T` to toggle time-travel mode
-2. Check "Time Travel" indicator in System State
-3. Verify "Evolution" shows "Paused" during time-travel
-4. Check for historical data in the database
 
 ### Entanglement Not Working
 
@@ -229,8 +220,6 @@ QUANTUM_DEBUG=true
 Access these via browser DevTools Network tab or React Query Devtools:
 
 - `plants.list` - All plants with current state
-- `garden.getStateAtTime` - Historical plant states
-- `garden.getEvolutionTimeline` - Event timeline
 - `quantum.getConfig` - Quantum service configuration
 - `quantum.getJobStats` - Job queue statistics
 - `observation.getActiveRegion` - Current observation region
@@ -270,12 +259,7 @@ Access these via browser DevTools Network tab or React Query Devtools:
    - [ ] Smart germination rules work (proximity, clustering)
    - [ ] Lifecycle animations visible
 
-3. **Time-Travel**
-   - [ ] Scrubber shows historical states
-   - [ ] Event markers appear for germinations/observations
-   - [ ] "Return to Live" restores current state
-
-4. **Debug Panel**
+3. **Debug Panel**
    - [ ] All stats update correctly
    - [ ] Logs appear in real-time
    - [ ] Filters work as expected

@@ -16,7 +16,7 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ## Project Status
 
-**Current Phase**: Implementing user-facing quantum simulation experience
+**Current Phase**: Complete — the garden is live and self-sustaining
 
 ### What's Working ✓
 
@@ -30,10 +30,6 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 - Enhanced observation feedback: plant-colored celebration rings and entanglement wave particles
 - Entanglement visualization (correlated trait reveals with quantum correlation waves)
 - Mobile-responsive with touch controls
-- Time-travel system: scrub through garden evolution history (press T key)
-  - View historical plant states at any point in time
-  - Event markers show germinations and observations
-  - Auto-play mode to watch garden evolve at 10x speed
 - Post-observation context panel: educational quantum circuit explanations
   - ASCII circuit diagrams for superposition, Bell pair, GHZ state, interference, variational
   - Calm, dismissible UI with "Don't show again" option
@@ -44,8 +40,7 @@ The experience is calm, contemplative, and slow. It encourages reflection on the
 
 ### Coming Soon 🎯
 
-- Performance optimizations for large gardens
-- Sound effects (optional audio feedback) - Phase 1-2 complete, pending audio files
+- Sound effects (optional audio feedback) — infrastructure complete, pending audio files
 
 ---
 
@@ -300,5 +295,3 @@ See [docs/context/](docs/context/) for the original RFP and project proposal.
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
-
-# quantum-garden

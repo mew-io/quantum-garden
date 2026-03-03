@@ -127,7 +127,7 @@ uv run pytest
 - Keep components focused and small
 - Use Zustand for shared state
 - Avoid prop drilling—use stores or context
-- PixiJS rendering happens in dedicated components
+- Three.js rendering happens in dedicated components
 
 ### API
 

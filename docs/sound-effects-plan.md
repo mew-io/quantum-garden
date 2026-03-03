@@ -81,11 +81,10 @@ Sounds that acknowledge user observations.
 
 Subtle sounds for interface interactions.
 
-| Event             | Sound             | Description                                 |
-| ----------------- | ----------------- | ------------------------------------------- |
-| Panel open/close  | Soft click        | Confirmation for debug panel, context panel |
-| Time-travel scrub | Scrubbing texture | Subtle texture while dragging timeline      |
-| Button hover      | Micro-tone        | Very subtle (optional, may omit)            |
+| Event            | Sound      | Description                                 |
+| ---------------- | ---------- | ------------------------------------------- |
+| Panel open/close | Soft click | Confirmation for debug panel, context panel |
+| Button hover     | Micro-tone | Very subtle (optional, may omit)            |
 
 **Characteristics:**
 
@@ -268,7 +267,6 @@ async function initializeAudio() {
 | First observation | Special | `use-observation.ts` with first-obs check          |
 | Entanglement      | Chord   | `use-observation.ts` when partners updated         |
 | Panel toggle      | Click   | `debug-panel.tsx`, `observation-context-panel.tsx` |
-| Time-travel       | Scrub   | `time-travel-scrubber.tsx` on drag                 |
 
 ### React Hook Usage
 

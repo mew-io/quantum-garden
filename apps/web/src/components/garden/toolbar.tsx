@@ -15,8 +15,8 @@ const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
  *
  * Provides visible buttons for:
  * - Debug panel toggle (hidden in production)
- * - Time-travel toggle
  * - Help/info toggle
+ * - Sound toggle
  * - Status indicator showing garden activity
  */
 

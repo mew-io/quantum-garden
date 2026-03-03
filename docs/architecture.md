@@ -111,7 +111,6 @@ Plants germinate automatically through the `GardenEvolutionSystem`:
    - 30% chance during cooldown (2 min after nearby germination)
    - 100% guaranteed after 15 minutes dormancy
 3. Wave events (5% chance): 3-5 plants germinate together
-4. System pauses during time-travel mode
 
 ### Observation Flow
 

@@ -12,7 +12,6 @@ import { QuantumEventLog } from "@/components/garden/quantum-event-log";
 import { EventDetailModal } from "@/components/garden/event-detail-modal";
 import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
-import { EvolutionPausedIndicator } from "@/components/garden/evolution-paused-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
 import { OnboardingTour } from "@/components/garden/onboarding-tour";
 import { trpc } from "@/lib/trpc/client";
@@ -118,7 +117,6 @@ export default function Home() {
         <QuantumEventLog />
         <EventDetailModal />
         <CooldownIndicator />
-        <EvolutionPausedIndicator />
         <KeyboardShortcutHint />
         <OnboardingTour isActive={isTourActive} onComplete={() => setIsTourActive(false)} />
       </main>

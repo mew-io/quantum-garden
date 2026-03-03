@@ -62,14 +62,17 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   // Use external control if provided, otherwise internal state
   // Debug disabled check happens at render time, not before hooks
   const isVisible = isDebugEnabled && (isOpen !== undefined ? isOpen : internalVisible);
-  const setIsVisible = (value: boolean | ((prev: boolean) => boolean)) => {
-    const newValue = typeof value === "function" ? value(isVisible) : value;
-    if (onToggle) {
-      onToggle(newValue);
-    } else {
-      setInternalVisible(newValue);
-    }
-  };
+  const setIsVisible = useCallback(
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      const newValue = typeof value === "function" ? value(isVisible) : value;
+      if (onToggle) {
+        onToggle(newValue);
+      } else {
+        setInternalVisible(newValue);
+      }
+    },
+    [isVisible, onToggle]
+  );
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
   const [showModeConfirm, setShowModeConfirm] = useState(false);
@@ -147,7 +150,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, setIsVisible]);
 
   // Sync debug overlay visibility when isVisible changes from external control (toolbar button)
   useEffect(() => {

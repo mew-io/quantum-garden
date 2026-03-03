@@ -21,8 +21,30 @@ export const metadata: Metadata = {
   title: "Quantum Garden",
   description:
     "A slow-evolving generative environment where plants exist in quantum superposition until observed.",
+  metadataBase: new URL("https://quantum-garden.com"),
   icons: {
     icon: "/favicon.svg",
+  },
+  openGraph: {
+    title: "Quantum Garden",
+    description:
+      "A slow-evolving generative environment where plants exist in quantum superposition until observed.",
+    type: "website",
+    siteName: "Quantum Garden",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Quantum Garden — watercolor plants on a paper-textured canvas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quantum Garden",
+    description:
+      "A slow-evolving generative environment where plants exist in quantum superposition until observed.",
   },
 };
 

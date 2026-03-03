@@ -7,6 +7,7 @@ import {
   isWatercolorVariant,
   getKeyframeCount,
   getBaseTotalDuration,
+  type PlantVariant,
   type VectorKeyframe,
   type GlyphKeyframe,
 } from "@quantum-garden/shared";
@@ -14,379 +15,139 @@ import { useVariantSandboxStore } from "@/stores/variant-sandbox-store";
 import { MiniGlyph } from "./mini-glyph";
 import { VectorMiniGlyph } from "./vector-mini-glyph";
 import { WatercolorMiniGlyph } from "./watercolor-mini-glyph";
-import { SuperposedPreview } from "./superposed-preview";
 
 /**
- * Gallery view showing all available variants.
- * - Mobile: Full-featured card layout
- * - Desktop: Table layout with superposed preview in header
- * Click a variant to open its detail view.
+ * Gallery view showing all available variants in a responsive card grid.
+ * Click a variant card to open its detail view.
  */
 export function VariantGallery() {
   const { openVariantDetail } = useVariantSandboxStore();
 
   return (
     <div className="p-6">
-      {/* Gallery header with superposed preview */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            All Variants ({PLANT_VARIANTS.length})
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Click a variant to view its details and lifecycle animation
-          </p>
-        </div>
-        {/* Superposed preview - tablet and desktop */}
-        <div className="hidden md:block flex-shrink-0">
-          <SuperposedPreview />
-        </div>
+      {/* Gallery header */}
+      <div className="mb-6">
+        <h2 className="text-xl text-[--wc-ink]">
+          All Variants
+          <span className="text-[--wc-ink-muted] text-base ml-2">({PLANT_VARIANTS.length})</span>
+        </h2>
+        <p className="text-sm text-[--wc-ink-muted] mt-1">
+          Click a variant to view its details and lifecycle animation
+        </p>
       </div>
 
-      {/* Mobile: Full-featured card layout */}
-      <div className="md:hidden space-y-4">
-        {PLANT_VARIANTS.map((variant) => {
-          const isVector = isVectorVariant(variant);
-          const isWatercolor = isWatercolorVariant(variant);
-          const keyframeCount = getKeyframeCount(variant);
-          const totalDuration = getBaseTotalDuration(variant);
-
-          // Get preview keyframe (middle keyframe)
-          const previewKeyframeIndex = Math.min(Math.floor(keyframeCount / 2), keyframeCount - 1);
-          const previewKeyframe = isVector
-            ? variant.vectorKeyframes?.[previewKeyframeIndex]
-            : !isWatercolor
-              ? variant.keyframes[previewKeyframeIndex]
-              : undefined;
-
-          // Get keyframe strip (first 6 keyframes)
-          const keyframeStrip = isWatercolor
-            ? (variant.watercolorConfig?.keyframes.slice(0, 6) ?? [])
-            : isVector
-              ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
-              : variant.keyframes.slice(0, 6);
-
-          // Get transition hint info for tooltip
-          const transitionHint = isVector
-            ? variant.vectorKeyframes?.find((kf) => kf.transitionHint)?.transitionHint
-            : null;
-          const transitionInfo = transitionHint
-            ? `Strategy: ${transitionHint.strategy}${transitionHint.easing ? `, Easing: ${transitionHint.easing}` : ""}`
-            : null;
-
-          return (
-            <button
-              key={variant.id}
-              onClick={() => openVariantDetail(variant.id)}
-              className="w-full group bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-400 hover:shadow-md transition-all text-left"
-            >
-              <div className="flex gap-4">
-                {/* Preview */}
-                <div
-                  className="flex-shrink-0 rounded-lg p-2"
-                  style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
-                >
-                  {isWatercolor ? (
-                    <WatercolorMiniGlyph variant={variant} size={64} />
-                  ) : (
-                    previewKeyframe &&
-                    (isVector ? (
-                      <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={64} />
-                    ) : (
-                      <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={64} />
-                    ))
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 group-hover:text-blue-600">
-                    {variant.name}
-                  </h3>
-                  {variant.description && (
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{variant.description}</p>
-                  )}
-
-                  {/* Stats row */}
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      {keyframeCount} keyframes
-                    </span>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      {totalDuration}s
-                    </span>
-                    {variant.rarity < 1.0 && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
-                        {(variant.rarity * 100).toFixed(0)}% rarity
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {isVector && (
-                      <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded">
-                        Vector
-                      </span>
-                    )}
-                    {isWatercolor && (
-                      <span className="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded">
-                        Watercolor
-                      </span>
-                    )}
-                    {variant.loop && (
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                        Loops
-                      </span>
-                    )}
-                    {variant.tweenBetweenKeyframes && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                        Tweens
-                      </span>
-                    )}
-                    {isVector &&
-                      variant.vectorKeyframes?.some((kf) => kf.transitionHint) &&
-                      transitionInfo && (
-                        <span
-                          className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"
-                          title={transitionInfo}
-                        >
-                          Progressive
-                        </span>
-                      )}
-                    {variant.colorVariations && variant.colorVariations.length > 0 && (
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                        {variant.colorVariations.length} colors
-                      </span>
-                    )}
-                    {variant.requiresObservationToGerminate && (
-                      <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
-                        Observation
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Keyframe strip (limit to 6 for performance) */}
-              <div className="mt-4 flex gap-1">
-                {keyframeStrip.map((kf, i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 rounded overflow-hidden"
-                    style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
-                    title={`${kf.name} (${kf.duration}s)`}
-                  >
-                    {isWatercolor ? (
-                      <WatercolorMiniGlyph variant={variant} keyframeIndex={i} size={32} />
-                    ) : isVector ? (
-                      <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={32} />
-                    ) : (
-                      <MiniGlyph keyframe={kf as GlyphKeyframe} size={32} />
-                    )}
-                  </div>
-                ))}
-                {keyframeCount > 6 && (
-                  <div className="flex items-center px-2 text-xs text-gray-400">
-                    +{keyframeCount - 6}
-                  </div>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tablet/Desktop: Table layout for comparison */}
-      <div className="hidden md:block">
-        <table className="w-full border-collapse">
-          <thead className="sticky top-0 bg-gray-50 z-10">
-            <tr className="border-b border-gray-200 text-left text-sm text-gray-600">
-              <th className="py-3 px-4 font-medium">Preview</th>
-              <th className="py-3 px-4 font-medium whitespace-nowrap">Name</th>
-              <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Renderer</th>
-              <th className="py-3 px-4 font-medium">Description</th>
-              <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Keyframes</th>
-              <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Duration</th>
-              <th className="py-3 px-4 font-medium text-center whitespace-nowrap">Rarity</th>
-              <th className="py-3 px-4 font-medium whitespace-nowrap">Features</th>
-              <th className="py-3 px-4 font-medium whitespace-nowrap">Lifecycle Preview</th>
-            </tr>
-          </thead>
-          <tbody>
-            {PLANT_VARIANTS.map((variant) => {
-              const isVector = isVectorVariant(variant);
-              const isWatercolor = isWatercolorVariant(variant);
-              const keyframeCount = getKeyframeCount(variant);
-              const totalDuration = getBaseTotalDuration(variant);
-
-              // Get preview keyframe (middle keyframe)
-              const previewKeyframeIndex = Math.min(
-                Math.floor(keyframeCount / 2),
-                keyframeCount - 1
-              );
-              const previewKeyframe = isVector
-                ? variant.vectorKeyframes?.[previewKeyframeIndex]
-                : !isWatercolor
-                  ? variant.keyframes[previewKeyframeIndex]
-                  : undefined;
-
-              // Get keyframe strip (first 6 keyframes)
-              const keyframeStrip = isWatercolor
-                ? (variant.watercolorConfig?.keyframes.slice(0, 6) ?? [])
-                : isVector
-                  ? (variant.vectorKeyframes?.slice(0, 6) ?? [])
-                  : variant.keyframes.slice(0, 6);
-
-              // Get transition hint for progressive drawing
-              const transitionHint = isVector
-                ? variant.vectorKeyframes?.find((kf) => kf.transitionHint)?.transitionHint
-                : null;
-
-              const rendererLabel = isWatercolor ? "Watercolor" : isVector ? "Vector" : "Raster";
-              const rendererClass = isWatercolor
-                ? "bg-rose-100 text-rose-700"
-                : isVector
-                  ? "bg-cyan-100 text-cyan-700"
-                  : "bg-gray-100 text-gray-700";
-
-              return (
-                <tr
-                  key={variant.id}
-                  onClick={() => openVariantDetail(variant.id)}
-                  className="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors group"
-                >
-                  {/* Preview */}
-                  <td className="py-3 px-4">
-                    <div
-                      className="rounded-lg p-1.5 inline-block"
-                      style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
-                    >
-                      {isWatercolor ? (
-                        <WatercolorMiniGlyph variant={variant} size={48} />
-                      ) : (
-                        previewKeyframe &&
-                        (isVector ? (
-                          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={48} />
-                        ) : (
-                          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={48} />
-                        ))
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Name */}
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <span className="font-medium text-gray-900 group-hover:text-blue-600">
-                      {variant.name}
-                    </span>
-                  </td>
-
-                  {/* Renderer */}
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <span
-                        className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${rendererClass}`}
-                      >
-                        {rendererLabel}
-                      </span>
-                      {transitionHint && (
-                        <span
-                          className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold"
-                          title={`Strategy: ${transitionHint.strategy}${transitionHint.easing ? `, Easing: ${transitionHint.easing}` : ""}`}
-                        >
-                          P
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Description */}
-                  <td className="py-3 px-4">
-                    <span className="text-sm text-gray-500 line-clamp-2 max-w-xs">
-                      {variant.description || "—"}
-                    </span>
-                  </td>
-
-                  {/* Keyframes */}
-                  <td className="py-3 px-4 text-center">
-                    <span className="text-sm text-gray-700">{keyframeCount}</span>
-                  </td>
-
-                  {/* Duration */}
-                  <td className="py-3 px-4 text-center whitespace-nowrap">
-                    <span className="text-sm text-gray-700">{totalDuration}s</span>
-                  </td>
-
-                  {/* Rarity */}
-                  <td className="py-3 px-4 text-center">
-                    {variant.rarity < 1.0 ? (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded whitespace-nowrap">
-                        {(variant.rarity * 100).toFixed(0)}%
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400">100%</span>
-                    )}
-                  </td>
-
-                  {/* Features */}
-                  <td className="py-3 px-4">
-                    <div className="flex flex-wrap gap-1">
-                      {variant.loop && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                          Loop
-                        </span>
-                      )}
-                      {variant.tweenBetweenKeyframes && (
-                        <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                          Tween
-                        </span>
-                      )}
-                      {variant.colorVariations && variant.colorVariations.length > 0 && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                          {variant.colorVariations.length} clr
-                        </span>
-                      )}
-                      {variant.requiresObservationToGerminate && (
-                        <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded whitespace-nowrap">
-                          Obs
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Lifecycle Preview (keyframe strip) - don't squish */}
-                  <td className="py-3 px-4">
-                    <div className="flex gap-0.5 flex-shrink-0">
-                      {keyframeStrip.map((kf, i) => (
-                        <div
-                          key={i}
-                          className="flex-shrink-0 rounded overflow-hidden"
-                          style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
-                          title={`${kf.name} (${kf.duration}s)`}
-                        >
-                          {isWatercolor ? (
-                            <WatercolorMiniGlyph variant={variant} keyframeIndex={i} size={28} />
-                          ) : isVector ? (
-                            <VectorMiniGlyph keyframe={kf as VectorKeyframe} size={28} />
-                          ) : (
-                            <MiniGlyph keyframe={kf as GlyphKeyframe} size={28} />
-                          )}
-                        </div>
-                      ))}
-                      {keyframeCount > 6 && (
-                        <div className="flex-shrink-0 flex items-center px-1 text-xs text-gray-400 whitespace-nowrap">
-                          +{keyframeCount - 6}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Responsive card grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {PLANT_VARIANTS.map((variant) => (
+          <VariantCard
+            key={variant.id}
+            variant={variant}
+            onSelect={() => openVariantDetail(variant.id)}
+          />
+        ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * Individual variant card with preview glyph, name, description, and feature badges.
+ */
+function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: () => void }) {
+  const isVector = isVectorVariant(variant);
+  const isWatercolor = isWatercolorVariant(variant);
+  const keyframeCount = getKeyframeCount(variant);
+  const totalDuration = getBaseTotalDuration(variant);
+
+  // Middle keyframe for preview
+  const previewKeyframeIndex = Math.min(Math.floor(keyframeCount / 2), keyframeCount - 1);
+  const previewKeyframe = isVector
+    ? variant.vectorKeyframes?.[previewKeyframeIndex]
+    : !isWatercolor
+      ? variant.keyframes[previewKeyframeIndex]
+      : undefined;
+
+  const rendererLabel = isWatercolor ? "Watercolor" : isVector ? "Vector" : "Raster";
+  const rendererBadgeClass = isWatercolor
+    ? "bg-rose-100/80 text-rose-700"
+    : isVector
+      ? "bg-cyan-100/80 text-cyan-700"
+      : "bg-[--wc-paper] text-[--wc-ink-muted]";
+
+  // Collect feature badges (max 3 visible)
+  const features: { label: string; className: string }[] = [];
+  if (variant.loop) features.push({ label: "Loop", className: "bg-blue-100/80 text-blue-700" });
+  if (variant.tweenBetweenKeyframes)
+    features.push({ label: "Tween", className: "bg-green-100/80 text-green-700" });
+  if (variant.colorVariations && variant.colorVariations.length > 0)
+    features.push({
+      label: `${variant.colorVariations.length} colors`,
+      className: "bg-purple-100/80 text-purple-700",
+    });
+  if (variant.requiresObservationToGerminate)
+    features.push({ label: "Observe", className: "bg-indigo-100/80 text-indigo-700" });
+
+  const visibleFeatures = features.slice(0, 3);
+  const extraCount = Math.max(0, features.length - 3);
+
+  return (
+    <button
+      onClick={onSelect}
+      className="group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col"
+    >
+      {/* Preview area */}
+      <div
+        className="flex items-center justify-center p-4"
+        style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
+      >
+        {isWatercolor ? (
+          <WatercolorMiniGlyph variant={variant} size={96} />
+        ) : previewKeyframe && isVector ? (
+          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={96} />
+        ) : previewKeyframe ? (
+          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={96} />
+        ) : (
+          <div style={{ width: 96, height: 96 }} />
+        )}
+      </div>
+
+      {/* Info area */}
+      <div className="p-3 flex-1 flex flex-col gap-2">
+        <h3 className="font-medium text-sm text-[--wc-ink] group-hover:text-[--wc-sage] transition-colors line-clamp-1">
+          {variant.name}
+        </h3>
+
+        {variant.description && (
+          <p className="text-xs text-[--wc-ink-muted] line-clamp-2 leading-relaxed">
+            {variant.description}
+          </p>
+        )}
+
+        {/* Stats */}
+        <div className="text-[10px] text-[--wc-ink-muted]">
+          {keyframeCount} keyframes &middot; {totalDuration}s
+        </div>
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1 mt-auto">
+          <span className={`text-[10px] px-1.5 py-0.5 rounded ${rendererBadgeClass}`}>
+            {rendererLabel}
+          </span>
+          {variant.rarity < 1.0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100/80 text-amber-700">
+              {(variant.rarity * 100).toFixed(0)}%
+            </span>
+          )}
+          {visibleFeatures.map((f) => (
+            <span key={f.label} className={`text-[10px] px-1.5 py-0.5 rounded ${f.className}`}>
+              {f.label}
+            </span>
+          ))}
+          {extraCount > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 text-[--wc-ink-muted]">+{extraCount}</span>
+          )}
+        </div>
+      </div>
+    </button>
   );
 }

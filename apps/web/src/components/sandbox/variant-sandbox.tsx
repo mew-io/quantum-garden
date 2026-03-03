@@ -66,15 +66,15 @@ export function VariantSandbox() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-[--wc-cream] overflow-hidden">
       {/* Header */}
-      <header className="flex-shrink-0 px-6 py-4 bg-white border-b border-gray-200">
+      <header className="flex-shrink-0 px-6 py-4 garden-panel border-b border-[--wc-stone]/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {viewMode === "detail" && (
               <button
                 onClick={goToGallery}
-                className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+                className="flex items-center gap-1 text-[--wc-ink-muted] hover:text-[--wc-ink] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -88,8 +88,8 @@ export function VariantSandbox() {
               </button>
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
-              <p className="text-sm text-gray-600 mt-1">{getSubtitle()}</p>
+              <h1 className="text-2xl font-bold text-[--wc-ink]">{getTitle()}</h1>
+              <p className="text-sm text-[--wc-ink-soft] mt-1">{getSubtitle()}</p>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ export function VariantSandbox() {
       {viewMode === "detail" && <DetailView variant={variant} />}
 
       {/* Footer with file hints */}
-      <footer className="flex-shrink-0 px-6 py-3 bg-gray-100 border-t border-gray-200 text-xs text-gray-500">
+      <footer className="flex-shrink-0 px-6 py-3 bg-[--wc-paper]/60 border-t border-[--wc-stone]/20 text-xs text-[--wc-ink-muted]">
         <div className="flex flex-col gap-1 md:flex-row md:gap-6">
           <span>
             <strong>Variants:</strong> packages/shared/src/variants/definitions.ts

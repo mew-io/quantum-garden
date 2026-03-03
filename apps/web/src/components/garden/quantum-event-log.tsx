@@ -136,7 +136,7 @@ function FilterChip({
       onClick={onClick}
       className={`
         flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium
-        transition-colors
+        transition-colors whitespace-nowrap flex-shrink-0
         ${
           active
             ? `${config.color} bg-black/8 border border-current/30`
@@ -145,7 +145,7 @@ function FilterChip({
       `}
     >
       {config.icon}
-      <span className="hidden sm:inline">{config.label}</span>
+      <span>{config.label}</span>
     </button>
   );
 }
@@ -230,11 +230,12 @@ export function QuantumEventLog() {
         className={`
           pointer-events-auto w-[320px] rounded-xl garden-panel
           animate-in slide-in-from-left-5 duration-300
-          ${isMinimized ? "" : "max-h-[400px]"}
+          flex flex-col overflow-hidden
         `}
+        style={isMinimized ? undefined : { maxHeight: "min(400px, calc(100vh - 8rem))" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[--wc-stone]/20">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[--wc-stone]/20 flex-shrink-0">
           <div className="flex items-center gap-2">
             <QuantumIcon />
             <h3 className="text-sm font-medium text-[--wc-ink]">Quantum Events</h3>
@@ -254,7 +255,7 @@ export function QuantumEventLog() {
         {!isMinimized && (
           <>
             {/* Filter chips */}
-            <div className="flex items-center gap-1 px-3 py-2 border-b border-[--wc-stone]/20 overflow-x-auto">
+            <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-b border-[--wc-stone]/20 flex-shrink-0">
               {(Object.keys(EVENT_CONFIG) as QuantumEventType[]).map((type) => (
                 <FilterChip
                   key={type}
@@ -268,7 +269,7 @@ export function QuantumEventLog() {
             {/* Event list */}
             <div
               ref={scrollContainerRef}
-              className="flex-1 overflow-y-auto max-h-[280px] px-2 py-2 space-y-1"
+              className="flex-1 overflow-y-auto min-h-0 px-2 py-2 space-y-1"
             >
               {eventLog.length === 0 ? (
                 <div className="text-center py-6 px-4">

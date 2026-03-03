@@ -296,72 +296,81 @@ export function EventDetailModal() {
   const diagram = selectedEvent.circuitId ? getCircuitDiagram(selectedEvent.circuitId) : undefined;
 
   return (
-    <div
-      className="
-        fixed inset-0 z-50 flex items-center justify-center
-        bg-[#3A352E]/25 backdrop-blur-sm
-        animate-in fade-in duration-200
-      "
-      onClick={handleClose}
-    >
+    <>
+      {/* Backdrop — sits below UI panels (z-30) so only the garden darkens */}
+      <div
+        className="fixed inset-0 z-30 bg-[#3A352E]/25 animate-in fade-in duration-200"
+        onClick={handleClose}
+      />
+      {/* Modal — sits above UI panels (z-50) */}
       <div
         className="
+          fixed inset-0 z-50 flex items-center justify-center
+          pointer-events-none
+        "
+      >
+        <div
+          className="
+          pointer-events-auto
           relative w-full max-w-lg mx-4 rounded-2xl
-          border border-[--wc-stone]/30 bg-[--wc-cream]
+          border border-[--wc-stone]/30
           shadow-2xl
           animate-in zoom-in-95 duration-200
           max-h-[85vh] flex flex-col
         "
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[--wc-stone]/20 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <span className={`${colorClass}`}>
-              <EventTypeIcon type={selectedEvent.type} />
-            </span>
-            <div>
-              <h2 className="text-lg font-medium text-[--wc-ink]">{title}</h2>
-              <p className="text-xs text-[--wc-ink-muted]">{formatDate(selectedEvent.timestamp)}</p>
+          style={{ backgroundColor: "var(--wc-cream)" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[--wc-stone]/20 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <span className={`${colorClass}`}>
+                <EventTypeIcon type={selectedEvent.type} />
+              </span>
+              <div>
+                <h2 className="text-lg font-medium text-[--wc-ink]">{title}</h2>
+                <p className="text-xs text-[--wc-ink-muted]">
+                  {formatDate(selectedEvent.timestamp)}
+                </p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={handleClose}
-            className="
+            <button
+              onClick={handleClose}
+              className="
               rounded p-2
               text-[--wc-ink-muted] hover:text-[--wc-ink]
               transition-colors
             "
-            aria-label="Close"
-          >
-            <CloseIcon />
-          </button>
-        </div>
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </button>
+          </div>
 
-        {/* Scrollable Content */}
-        <div className="px-6 py-5 overflow-y-auto flex-1">
-          {/* Concept tagline */}
-          <p className={`text-sm font-medium ${colorClass}`}>{concept}</p>
+          {/* Scrollable Content */}
+          <div className="px-6 py-5 overflow-y-auto flex-1">
+            {/* Concept tagline */}
+            <p className={`text-sm font-medium ${colorClass}`}>{concept}</p>
 
-          {/* Circuit diagram for observation events */}
-          {diagram && <CircuitDiagram lines={diagram} />}
+            {/* Circuit diagram for observation events */}
+            {diagram && <CircuitDiagram lines={diagram} />}
 
-          {/* What Happened — friendly explanation (always visible) */}
-          <ExplanationSection title="What Happened" content={explanation.friendly} />
+            {/* What Happened — friendly explanation (always visible) */}
+            <ExplanationSection title="What Happened" content={explanation.friendly} />
 
-          {/* Quantum Details — technical explanation */}
-          <ExplanationSection title="Quantum Details" content={explanation.technical} />
+            {/* Quantum Details — technical explanation */}
+            <ExplanationSection title="Quantum Details" content={explanation.technical} />
 
-          {/* Event-specific metadata */}
-          <EventDetails event={selectedEvent} />
-        </div>
+            {/* Event-specific metadata */}
+            <EventDetails event={selectedEvent} />
+          </div>
 
-        {/* Footer with navigation */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[--wc-stone]/20 flex-shrink-0">
-          <button
-            onClick={handlePrev}
-            disabled={selectedIndex === 0}
-            className={`
+          {/* Footer with navigation */}
+          <div className="flex items-center justify-between px-6 py-4 border-t border-[--wc-stone]/20 flex-shrink-0">
+            <button
+              onClick={handlePrev}
+              disabled={selectedIndex === 0}
+              className={`
               flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium
               transition-colors
               ${
@@ -370,16 +379,16 @@ export function EventDetailModal() {
                   : "text-[--wc-ink-soft] hover:text-[--wc-ink] hover:bg-black/5"
               }
             `}
-          >
-            <ChevronLeftIcon /> Previous
-          </button>
-          <span className="text-xs text-[--wc-ink-muted]">
-            {selectedIndex + 1} / {eventLog.length}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={selectedIndex === eventLog.length - 1}
-            className={`
+            >
+              <ChevronLeftIcon /> Previous
+            </button>
+            <span className="text-xs text-[--wc-ink-muted]">
+              {selectedIndex + 1} / {eventLog.length}
+            </span>
+            <button
+              onClick={handleNext}
+              disabled={selectedIndex === eventLog.length - 1}
+              className={`
               flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium
               transition-colors
               ${
@@ -388,30 +397,31 @@ export function EventDetailModal() {
                   : "text-[--wc-ink-soft] hover:text-[--wc-ink] hover:bg-black/5"
               }
             `}
-          >
-            Next <ChevronRightIcon />
-          </button>
-        </div>
+            >
+              Next <ChevronRightIcon />
+            </button>
+          </div>
 
-        {/* Keyboard hint */}
-        <div className="px-6 pb-4 flex justify-center flex-shrink-0">
-          <p className="text-[10px] text-[--wc-ink-muted]">
-            Use{" "}
-            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
-              &larr;
-            </kbd>{" "}
-            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
-              &rarr;
-            </kbd>{" "}
-            to navigate,{" "}
-            <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
-              Esc
-            </kbd>{" "}
-            to close
-          </p>
+          {/* Keyboard hint */}
+          <div className="px-6 pb-4 flex justify-center flex-shrink-0">
+            <p className="text-[10px] text-[--wc-ink-muted]">
+              Use{" "}
+              <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+                &larr;
+              </kbd>{" "}
+              <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+                &rarr;
+              </kbd>{" "}
+              to navigate,{" "}
+              <kbd className="px-1 py-0.5 bg-[--wc-paper] rounded border border-[--wc-stone]/30">
+                Esc
+              </kbd>{" "}
+              to close
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

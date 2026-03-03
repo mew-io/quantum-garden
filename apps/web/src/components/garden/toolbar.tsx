@@ -66,7 +66,7 @@ export function Toolbar({
       {/* Main Toolbar */}
       <div className="flex flex-wrap items-center gap-2 garden-panel rounded-xl p-2 max-w-full overflow-hidden">
         {/* Status Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-black/5 rounded">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[--wc-paper]/60 rounded">
           <span
             className={`w-2 h-2 rounded-full ${plantCount === 0 ? "bg-yellow-500 animate-pulse" : "bg-green-500 animate-organic-pulse"}`}
           />
@@ -76,7 +76,7 @@ export function Toolbar({
         </div>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-black/10" />
+        <div className="w-px h-6 bg-[--wc-stone]/30" />
 
         {/* Help Button */}
         <ToolbarButton
@@ -216,10 +216,10 @@ function ToolbarButton({
         flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all
         ${
           disabled
-            ? "opacity-40 cursor-not-allowed bg-black/5 border-black/5 text-[--wc-ink-muted]"
+            ? "opacity-40 cursor-not-allowed bg-[--wc-paper]/40 border-[--wc-stone]/10 text-[--wc-ink-muted]"
             : active
               ? activeClasses[activeColor]
-              : "bg-black/5 border-black/8 text-[--wc-ink-soft] hover:bg-black/8 hover:text-[--wc-ink]"
+              : "bg-[--wc-paper]/40 border-[--wc-stone]/20 text-[--wc-ink-soft] hover:bg-[--wc-paper]/70 hover:text-[--wc-ink]"
         }
       `}
       title={shortcut ? `${label} (${shortcut})` : label}

@@ -274,6 +274,7 @@ export class SandboxThreeRenderer {
     this.paperPass = new ShaderPass(PaperGrainShader);
     this.paperPass.uniforms["tPaper"]!.value = paperTexture;
     (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width * dpr, height * dpr);
+    this.paperPass.uniforms["aspectRatio"]!.value = width / height;
     this.composer.addPass(this.paperPass);
 
     const outputPass = new OutputPass();
@@ -713,6 +714,7 @@ export class SandboxThreeRenderer {
           width * dpr,
           height * dpr
         );
+        this.paperPass.uniforms["aspectRatio"]!.value = width / height;
       }
     }
 

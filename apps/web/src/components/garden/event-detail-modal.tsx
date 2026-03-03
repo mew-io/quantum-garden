@@ -299,14 +299,14 @@ export function EventDetailModal() {
     <div
       className="
         fixed inset-0 z-50 flex items-center justify-center
-        bg-[#3A352E]/25
+        bg-[#3A352E]/25 backdrop-blur-sm
         animate-in fade-in duration-200
       "
       onClick={handleClose}
     >
       <div
         className="
-          relative w-full max-w-lg mx-4 rounded-xl
+          relative w-full max-w-lg mx-4 rounded-2xl
           border border-[--wc-stone]/30 bg-[--wc-cream]
           shadow-2xl
           animate-in zoom-in-95 duration-200

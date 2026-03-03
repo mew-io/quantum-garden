@@ -252,11 +252,12 @@ export class SceneManager {
       this.composer.addPass(this.bloomPass);
     }
 
-    // Paper grain pass - replaces white background with paper texture
+    // Atmospheric haze pass - composites backdrop layers onto background
     const paperTexture = createPaperTexture();
     this.paperPass = new ShaderPass(PaperGrainShader);
     this.paperPass.uniforms["tPaper"]!.value = paperTexture;
     (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
+    this.paperPass.uniforms["aspectRatio"]!.value = width / height;
     this.composer.addPass(this.paperPass);
 
     // Output pass - handles color space conversion for final output
@@ -735,6 +736,7 @@ export class SceneManager {
     }
     if (this.paperPass) {
       (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
+      this.paperPass.uniforms["aspectRatio"]!.value = vw / vh;
     }
 
     // Recalculate layout and apply camera

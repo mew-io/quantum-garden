@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { seededRandom, generateNoiseGrid, sampleNoise } from "../paper-texture";
+import { seededRandom, generateNoiseGrid, sampleNoise, PaperGrainShader } from "../paper-texture";
 
 describe("Paper Texture", () => {
   describe("seededRandom", () => {
@@ -112,6 +112,23 @@ describe("Paper Texture", () => {
         expect(val).toBeGreaterThanOrEqual(0);
         expect(val).toBeLessThan(1);
       }
+    });
+  });
+
+  describe("PaperGrainShader", () => {
+    it("should export shader with expected uniforms", () => {
+      expect(PaperGrainShader.uniforms).toHaveProperty("tDiffuse");
+      expect(PaperGrainShader.uniforms).toHaveProperty("tPaper");
+      expect(PaperGrainShader.uniforms).toHaveProperty("resolution");
+      expect(PaperGrainShader.uniforms).toHaveProperty("tileSize");
+      expect(PaperGrainShader.uniforms).toHaveProperty("aspectRatio");
+    });
+
+    it("should have vertex and fragment shaders defined", () => {
+      expect(PaperGrainShader.vertexShader).toBeDefined();
+      expect(PaperGrainShader.fragmentShader).toBeDefined();
+      expect(PaperGrainShader.vertexShader.length).toBeGreaterThan(0);
+      expect(PaperGrainShader.fragmentShader.length).toBeGreaterThan(0);
     });
   });
 });

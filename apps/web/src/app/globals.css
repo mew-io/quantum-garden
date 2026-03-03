@@ -46,12 +46,12 @@ body {
 }
 
 body {
-  /* Subtle radial gradient for depth — warm watercolor paper
-     Center color matches CANVAS.BACKGROUND_COLOR (#F8F5F0) from constants.ts */
+  /* Subtle radial gradient for depth — center matches CANVAS.BACKGROUND_COLOR (#F8F5F0)
+     to prevent color flash when WebGL canvas loads */
   background: radial-gradient(
     ellipse at center,
-    #FDFAF5 0%,
-    #F8F5F0 50%,
+    #F8F5F0 0%,
+    #F5F1EA 50%,
     #F2EDE5 100%
   );
   font-family: var(--font-body), 'Nunito', system-ui, sans-serif;
@@ -65,18 +65,22 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading), 'Cormorant Garamond', Georgia, serif;
-  font-weight: 300;
   letter-spacing: 0.02em;
 }
+h1, h2 { font-weight: 300; }
+h3, h4 { font-weight: 400; }
+h5, h6 { font-weight: 500; }
 
 /* Warm frosted-glass panel style for UI overlays */
 .garden-panel {
-  background: rgba(250, 247, 242, 0.88);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  border: 1px solid rgba(200, 190, 175, 0.3);
+  background: rgba(250, 247, 242, 0.85);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid rgba(200, 190, 175, 0.25);
   color: #4A453E;
-  box-shadow: 0 2px 12px rgba(120, 110, 95, 0.08);
+  box-shadow:
+    0 1px 3px rgba(120, 110, 95, 0.06),
+    0 4px 16px rgba(120, 110, 95, 0.04);
 }
 
 #garden-canvas {

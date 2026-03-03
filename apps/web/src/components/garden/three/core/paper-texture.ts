@@ -1,12 +1,13 @@
 /**
- * Paper Texture — Procedural washi paper grain applied as post-processing
+ * Paper Texture & Atmospheric Haze — Post-processing backdrop
  *
- * Generates a tileable paper grain texture using layered value noise,
- * then applies it via a ShaderPass AFTER the bloom pipeline so the
- * grain isn't washed out by bloom brightening.
+ * Generates a tileable paper grain texture using layered value noise
+ * (used as a subtle grain source), then applies an atmospheric haze
+ * shader via ShaderPass AFTER the bloom pipeline.
  *
- * The shader replaces near-white background pixels with the paper
- * texture while preserving plant colors.
+ * The shader composites four layers onto background pixels while
+ * preserving plant colors: warm radial vignette, bottom botanical
+ * haze, asymmetric corner warmth, and barely-perceptible grain.
  */
 
 import * as THREE from "three";
@@ -167,11 +168,15 @@ export function createPaperTexture(): THREE.CanvasTexture {
 }
 
 /**
- * Shader definition for the paper grain post-processing pass.
+ * Shader definition for the atmospheric haze post-processing pass.
  *
- * Applied after bloom so the grain isn't washed out.
- * Replaces near-white background pixels with the paper texture
- * while preserving plant colors via luminance-based blending.
+ * Applied after bloom. Composites four layers onto background pixels
+ * while preserving plant colors via luminance-based detection:
+ *
+ * 1. Warm radial vignette — golden edge darkening, bright center
+ * 2. Bottom botanical haze — sage green suggesting distant foliage
+ * 3. Asymmetric corner accents — amber top-left, sage bottom-right
+ * 4. Subtle grain — barely-perceptible noise from paper texture
  */
 export const PaperGrainShader = {
   name: "PaperGrainShader",
@@ -181,6 +186,7 @@ export const PaperGrainShader = {
     tPaper: { value: null as THREE.Texture | null },
     resolution: { value: new THREE.Vector2(1, 1) },
     tileSize: { value: PAPER_CONFIG.TILE_SIZE as number },
+    aspectRatio: { value: 1.0 as number },
   },
 
   vertexShader: /* glsl */ `
@@ -196,23 +202,69 @@ export const PaperGrainShader = {
     uniform sampler2D tPaper;
     uniform vec2 resolution;
     uniform float tileSize;
+    uniform float aspectRatio;
 
     varying vec2 vUv;
 
     void main() {
       vec4 scene = texture2D(tDiffuse, vUv);
 
-      // Tile the paper texture across the screen at 1:1 pixel scale
-      vec2 paperUv = (vUv * resolution) / tileSize;
-      vec4 paper = texture2D(tPaper, paperUv);
-
-      // Determine how much this pixel is "background" vs "plant"
-      // After bloom, background is near-white; plants have distinct colors
+      // ─── Background detection ──────────────────────────────────
       float luminance = dot(scene.rgb, vec3(0.299, 0.587, 0.114));
       float bgAmount = smoothstep(0.85, 0.97, luminance);
 
-      // Replace background with paper grain, preserve plant colors
-      gl_FragColor = vec4(mix(scene.rgb, paper.rgb, bgAmount), scene.a);
+      // Early out: skip haze math for plant pixels
+      if (bgAmount < 0.001) {
+        gl_FragColor = scene;
+        return;
+      }
+
+      // ─── Coordinate setup ──────────────────────────────────────
+      vec2 centered = vUv - 0.5;
+      vec2 aspect = vec2(centered.x * aspectRatio, centered.y);
+
+      // ─── Layer 1: Warm radial vignette ─────────────────────────
+      // Slightly asymmetric ellipse for natural feel
+      float vigDist = length(vec2(aspect.x * 1.05, aspect.y * 0.95));
+      float vigAmount = smoothstep(0.3, 0.85, vigDist);
+      vec3 vignetteColor = vec3(0.847, 0.800, 0.733); // warm parchment shadow
+      float vigStrength = 0.15;
+
+      // ─── Layer 2: Bottom botanical haze ────────────────────────
+      float bottomGrad = 1.0 - vUv.y;
+      float botanicalAmount = pow(smoothstep(0.0, 0.30, bottomGrad), 2.5);
+      vec3 sageColor = vec3(0.557, 0.659, 0.533);     // --wc-sage
+      float botanicalStrength = 0.06;
+
+      // ─── Layer 3: Corner warmth accents (asymmetric) ───────────
+      // Top-left: golden sunlight
+      float tlDist = length(vec2(vUv.x, 1.0 - vUv.y));
+      float topLeftWarm = smoothstep(0.2, 1.0, 1.0 - tlDist);
+      topLeftWarm = topLeftWarm * topLeftWarm;
+      vec3 amberColor = vec3(0.784, 0.659, 0.439);    // --wc-amber
+
+      // Bottom-right: sage-stone cool
+      float brDist = length(vec2(1.0 - vUv.x, vUv.y));
+      float botRightCool = smoothstep(0.2, 1.0, 1.0 - brDist);
+      botRightCool = botRightCool * botRightCool;
+      vec3 coolAccent = vec3(0.600, 0.690, 0.580);    // sage-stone blend
+      float cornerStrength = 0.04;
+
+      // ─── Base layer: Paper texture ─────────────────────────────
+      // Replace near-white background with actual paper grain for visible texture
+      vec2 paperUv = (vUv * resolution) / tileSize;
+      vec3 paperSample = texture2D(tPaper, paperUv).rgb;
+
+      // ─── Compositing ──────────────────────────────────────────
+      // Start with paper texture replacing background
+      vec3 result = mix(scene.rgb, paperSample, bgAmount);
+      // Layer atmospheric effects on top
+      result = mix(result, vignetteColor, vigAmount * vigStrength * bgAmount);
+      result = mix(result, sageColor, botanicalAmount * botanicalStrength * bgAmount);
+      result = mix(result, amberColor, topLeftWarm * cornerStrength * bgAmount);
+      result = mix(result, coolAccent, botRightCool * cornerStrength * bgAmount);
+
+      gl_FragColor = vec4(result, scene.a);
     }
   `,
 };

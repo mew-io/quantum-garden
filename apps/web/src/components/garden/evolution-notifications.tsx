@@ -251,7 +251,7 @@ function Notification({ id, message, type, onDismiss }: NotificationProps) {
         <span>{message}</span>
       </div>
       {/* Progress bar showing time until auto-dismiss */}
-      <div className="h-0.5 w-full bg-black/20">
+      <div className="h-0.5 w-full bg-black/10">
         <div
           className={`h-full transition-none ${progressBarColor}`}
           style={{ width: `${progress}%` }}

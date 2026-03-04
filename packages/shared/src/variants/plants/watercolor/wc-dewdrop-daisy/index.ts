@@ -26,7 +26,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
   const cy = 20;
 
   // Stem
-  buildStem(elements, cx, 52, cx, cy + 5, 0.1, 0.55 + openness * 0.3, "#8EA888", 0.55, rng);
+  buildStem(elements, cx, 52, cx, cy + 5, 0.1, 0.55 + openness * 0.3, "#6B8A65", 0.6, rng);
 
   // Leaves
   const leafOpenness = Math.max(0, (openness - 0.1) / 0.9);
@@ -39,7 +39,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
       position: { x: cx + side * 1.5, y: leafY },
       rotation: side * (0.5 + rng() * 0.3),
       scale: leafOpenness * 0.7,
-      color: "#9AAE8C",
+      color: "#788E6A",
       zOffset: 0.5,
     });
   }
@@ -58,7 +58,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
         position: { x: cx, y: cy },
         rotation: angle,
         scale: 1.0,
-        color: "#F8F0E8",
+        color: "#E8DCC8",
         zOffset: 1.0,
       });
 
@@ -89,7 +89,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
       position: { x: cx, y: cy },
       rotation: 0,
       scale: 1,
-      color: "#F0D860",
+      color: "#D8C040",
       opacity: 0.72,
       zOffset: 2.0,
     });
@@ -104,7 +104,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
         position: { x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d },
         rotation: 0,
         scale: 1,
-        color: "#E8C030",
+        color: "#C8A020",
         opacity: 0.4 + rng() * 0.3,
         zOffset: 2.1,
       });
@@ -132,8 +132,8 @@ export const wcDewdropDaisy: PlantVariant = {
     },
   },
   colorVariations: [
-    { name: "classic", weight: 1.0, palettes: { bloom: ["#F8F0E8", "#F0D860", "#8EA888"] } },
-    { name: "pink", weight: 0.6, palettes: { bloom: ["#F0D8E0", "#E8A0B0", "#8EA888"] } },
+    { name: "classic", weight: 1.0, palettes: { bloom: ["#E8DCC8", "#D8C040", "#6B8A65"] } },
+    { name: "pink", weight: 0.6, palettes: { bloom: ["#D8B8C4", "#D08898", "#6B8A65"] } },
   ],
   clusteringBehavior: {
     mode: "cluster",

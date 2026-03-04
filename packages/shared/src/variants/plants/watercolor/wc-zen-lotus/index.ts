@@ -23,9 +23,9 @@ import { createRng, traitOr, radialPositions } from "../_helpers";
  * Each palette has primary (petals), secondary (inner petals), and accent (center/dots).
  */
 const LOTUS_COLORS: Record<string, { primary: string; secondary: string; accent: string }> = {
-  "white-jade": { primary: "#E8EBE8", secondary: "#D8DED8", accent: "#C8D0C8" },
-  "blush-pink": { primary: "#F0E0E4", secondary: "#E4D4DC", accent: "#D8C8D0" },
-  "morning-gold": { primary: "#F0EAE0", secondary: "#E4DED0", accent: "#D8D2C0" },
+  "white-jade": { primary: "#C8CEC8", secondary: "#B0BAB0", accent: "#98A498" },
+  "blush-pink": { primary: "#D8B8C0", secondary: "#C8A8B4", accent: "#B898A8" },
+  "morning-gold": { primary: "#D8CEB8", secondary: "#C8BEA8", accent: "#B8AE98" },
 };
 
 const DEFAULT_COLORS = LOTUS_COLORS["white-jade"]!;
@@ -273,17 +273,17 @@ export const wcZenLotus: PlantVariant = {
     {
       name: "white-jade",
       weight: 1.0,
-      palettes: { bloom: ["#E8EBE8", "#D8DED8", "#C8D0C8"] },
+      palettes: { bloom: ["#C8CEC8", "#B0BAB0", "#98A498"] },
     },
     {
       name: "blush-pink",
       weight: 0.9,
-      palettes: { bloom: ["#F0E0E4", "#E4D4DC", "#D8C8D0"] },
+      palettes: { bloom: ["#D8B8C0", "#C8A8B4", "#B898A8"] },
     },
     {
       name: "morning-gold",
       weight: 0.8,
-      palettes: { bloom: ["#F0EAE0", "#E4DED0", "#D8D2C0"] },
+      palettes: { bloom: ["#D8CEB8", "#C8BEA8", "#B8AE98"] },
     },
   ],
   watercolorConfig: {

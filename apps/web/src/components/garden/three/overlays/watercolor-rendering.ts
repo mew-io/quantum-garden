@@ -241,7 +241,15 @@ export function renderWatercolorElement(
       rng,
       materialPool
     );
-    stemGroup.position.set(element.position.x - 32, element.position.y - 32, 0);
+    // Scale around stem centroid, not the group origin (0,0)
+    const pts = element.shape.points;
+    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    stemGroup.position.set(
+      element.position.x - 32 + cx * (1 - element.scale),
+      element.position.y - 32 + cy * (1 - element.scale),
+      0
+    );
     stemGroup.scale.set(element.scale, element.scale, 1);
     return stemGroup;
   }

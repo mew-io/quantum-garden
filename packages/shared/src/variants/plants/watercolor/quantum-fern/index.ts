@@ -35,29 +35,59 @@ function buildQuantumFernElements(ctx: WatercolorBuildContext): WatercolorElemen
   const darkGreen = "#2D5A27";
   const midGreen = "#4A8F3F";
   const lightGreen = "#8BC34A";
-  const stemColor = "#1E3A1C";
+  const stemColorBase = "#2E6B28";
+  const stemColorHighlight = "#3D8A35";
 
-  // Central stem (rachis)
-  const stemBottom = 56;
-  const stemTop = 12;
+  // Central stem (rachis) — extends below/above the branch zone for a bare stalk
+  const stemBottom = 64;
+  const stemTop = 8;
   const stemMidX = 32;
+  // Branch zone: where fronds attach (narrower than full stem)
+  const branchBottom = 56;
+  const branchTop = 12;
+
+  // Natural S-curve — gentle sway independent of asymmetry
+  const sway = (rng() > 0.5 ? 1 : -1) * (1.5 + rng() * 2.5);
+  const midY = (stemBottom + stemTop) / 2;
+
+  // Thicker base layer for depth
   elements.push({
     shape: {
       type: "stem",
       points: [
         [stemMidX, stemBottom],
-        [stemMidX + (rng() - 0.5) * 4 * asymmetry, (stemBottom + stemTop) / 2],
-        [stemMidX + (rng() - 0.5) * 6 * asymmetry, stemTop + 6],
+        [stemMidX + sway * 0.6 + (rng() - 0.5) * 4 * asymmetry, midY + 6],
+        [stemMidX - sway * 0.4 + (rng() - 0.5) * 6 * asymmetry, stemTop + 10],
         [stemMidX, stemTop],
       ],
-      thickness: 0.7 + openness * 0.4,
+      thickness: 1.2 + openness * 0.6,
     },
     position: { x: 0, y: 0 },
     rotation: 0,
     scale: openness,
-    color: stemColor,
-    opacity: 0.65,
+    color: stemColorBase,
+    opacity: 0.6,
     zOffset: 0,
+  });
+
+  // Lighter highlight layer on top for dimension
+  elements.push({
+    shape: {
+      type: "stem",
+      points: [
+        [stemMidX, stemBottom],
+        [stemMidX + sway * 0.6 + (rng() - 0.5) * 2 * asymmetry, midY + 6],
+        [stemMidX - sway * 0.4 + (rng() - 0.5) * 3 * asymmetry, stemTop + 10],
+        [stemMidX, stemTop],
+      ],
+      thickness: 0.6 + openness * 0.3,
+    },
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    scale: openness,
+    color: stemColorHighlight,
+    opacity: 0.4,
+    zOffset: 0.1,
   });
 
   // Primary branches along the stem
@@ -66,7 +96,7 @@ function buildQuantumFernElements(ctx: WatercolorBuildContext): WatercolorElemen
 
     // Position along stem with asymmetry bias
     const t = (i + 0.5) / branchCount;
-    const y = stemBottom - t * (stemBottom - stemTop);
+    const y = branchBottom - t * (branchBottom - branchTop);
     const asymBias = (rng() - 0.5) * asymmetry * 8;
     const side = i % 2 === 0 ? 1 : -1;
     const branchAngle = side * (0.5 + rng() * 0.4 + asymmetry * 0.3);

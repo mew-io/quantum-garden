@@ -74,11 +74,11 @@ Justin Pincar is a software engineer and technology leader with extensive experi
 
 LinkedIn: https://www.linkedin.com/in/justinpincar/
 
-### Cody Borden — Designer
+### Amber Wang — Creative
 
-Cody Borden is a product designer with over 15 years of experience designing web and mobile tools at scale. Based in Los Angeles, he has led design work for companies including Google, Microsoft, Big Cartel, Fender, Canon, and the NFL. His practice combines systems thinking, visual clarity, and product strategy across complex technical domains. Cody specializes in translating abstract and emerging technologies into intuitive, approachable experiences, with a strong emphasis on open collaboration, experimentation, and extensible design systems.
+Amber Wang is a data scientist and AI entrepreneur focused on growth, SEO, and data driven storytelling. She is the co-founder of PressRoom AI, where she helps companies expand their search presence and scale revenue using AI powered strategies. Amber also co-founded Cerebral Valley, one of the earliest global AI communities with a focus on empowering women in the field. Previously, she worked as a research analyst at Cushman and Wakefield, analyzing large datasets for global financial institutions and producing data driven insights.
 
-LinkedIn: https://www.linkedin.com/in/codyborden/
+LinkedIn: https://www.linkedin.com/in/amber-wang-/
 
 ---
 

@@ -46,18 +46,18 @@ export function VariantSandbox() {
   const getTitle = () => {
     switch (viewMode) {
       case "gallery":
-        return "Variant Sandbox";
+        return "Quantum Garden Seed Box";
       case "detail":
         return variant?.name || "Variant Detail";
       default:
-        return "Variant Sandbox";
+        return "Quantum Garden Seed Box";
     }
   };
 
   const getSubtitle = () => {
     switch (viewMode) {
       case "gallery":
-        return "Browse and preview plant lifecycle animations";
+        return "Every plant that can bloom in the garden";
       case "detail":
         return variant?.description || "View and test variant configuration";
       default:
@@ -99,20 +99,22 @@ export function VariantSandbox() {
       {viewMode === "gallery" && <GalleryView />}
       {viewMode === "detail" && <DetailView variant={variant} />}
 
-      {/* Footer with file hints */}
-      <footer className="flex-shrink-0 px-6 py-3 bg-[--wc-paper]/60 border-t border-[--wc-stone]/20 text-xs text-[--wc-ink-muted]">
-        <div className="flex flex-col gap-1 md:flex-row md:gap-6">
-          <span>
-            <strong>Variants:</strong> packages/shared/src/variants/definitions.ts
-          </span>
-          <span>
-            <strong>Types:</strong> packages/shared/src/variants/types.ts
-          </span>
-          <span>
-            <strong>Docs:</strong> docs/variants-and-lifecycle.md
-          </span>
-        </div>
-      </footer>
+      {/* Footer with file hints — hidden in gallery view for cleaner screenshots */}
+      {viewMode !== "gallery" && (
+        <footer className="flex-shrink-0 px-6 py-3 bg-[--wc-paper]/60 border-t border-[--wc-stone]/20 text-xs text-[--wc-ink-muted]">
+          <div className="flex flex-col gap-1 md:flex-row md:gap-6">
+            <span>
+              <strong>Variants:</strong> packages/shared/src/variants/definitions.ts
+            </span>
+            <span>
+              <strong>Types:</strong> packages/shared/src/variants/types.ts
+            </span>
+            <span>
+              <strong>Docs:</strong> docs/variants-and-lifecycle.md
+            </span>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

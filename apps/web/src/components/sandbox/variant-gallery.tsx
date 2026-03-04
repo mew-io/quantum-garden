@@ -24,20 +24,20 @@ export function VariantGallery() {
   const { openVariantDetail } = useVariantSandboxStore();
 
   return (
-    <div className="p-6">
+    <div className="px-8 py-10 max-w-[1400px]">
       {/* Gallery header */}
-      <div className="mb-6">
-        <h2 className="text-xl text-[--wc-ink]">
-          All Variants
-          <span className="text-[--wc-ink-muted] text-base ml-2">({PLANT_VARIANTS.length})</span>
-        </h2>
-        <p className="text-sm text-[--wc-ink-muted] mt-1">
-          Click a variant to view its details and lifecycle animation
+      <div className="mb-8">
+        <p className="text-sm font-medium tracking-widest uppercase text-[--wc-sage] mb-1">
+          {PLANT_VARIANTS.length} varieties
         </p>
+        <p className="text-sm text-[--wc-ink-muted] mt-2 max-w-lg">
+          Click any plant to explore its full lifecycle animation
+        </p>
+        <div className="mt-4 w-16 h-px bg-[--wc-stone]/30" />
       </div>
 
-      {/* Responsive card grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {/* Responsive card grid — fewer columns for larger cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {PLANT_VARIANTS.map((variant) => (
           <VariantCard
             key={variant.id}
@@ -74,6 +74,13 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
       ? "bg-cyan-100/80 text-cyan-700"
       : "bg-[--wc-paper] text-[--wc-ink-muted]";
 
+  // Top accent color per renderer type
+  const accentBorderColor = isWatercolor
+    ? "border-t-[--wc-rose]"
+    : isVector
+      ? "border-t-[--wc-sky]"
+      : "border-t-[--wc-sage]";
+
   // Collect feature badges (max 3 visible)
   const features: { label: string; className: string }[] = [];
   if (variant.loop) features.push({ label: "Loop", className: "bg-blue-100/80 text-blue-700" });
@@ -93,27 +100,30 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
   return (
     <button
       onClick={onSelect}
-      className="group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col"
+      className={`group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col border-t-2 ${accentBorderColor}`}
     >
-      {/* Preview area */}
+      {/* Preview area — large for marketing screenshots */}
       <div
-        className="flex items-center justify-center p-4"
-        style={{ backgroundColor: CANVAS.BACKGROUND_COLOR }}
+        className="flex items-center justify-center p-6"
+        style={{
+          backgroundColor: CANVAS.BACKGROUND_COLOR,
+          boxShadow: "inset 0 -8px 16px -8px rgba(0,0,0,0.04)",
+        }}
       >
         {isWatercolor ? (
-          <WatercolorMiniGlyph variant={variant} size={96} />
+          <WatercolorMiniGlyph variant={variant} size={160} />
         ) : previewKeyframe && isVector ? (
-          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={96} />
+          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={160} />
         ) : previewKeyframe ? (
-          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={96} />
+          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={160} />
         ) : (
-          <div style={{ width: 96, height: 96 }} />
+          <div style={{ width: 160, height: 160 }} />
         )}
       </div>
 
       {/* Info area */}
-      <div className="p-3 flex-1 flex flex-col gap-2">
-        <h3 className="font-medium text-sm text-[--wc-ink] group-hover:text-[--wc-sage] transition-colors line-clamp-1">
+      <div className="px-4 py-3.5 flex-1 flex flex-col gap-2">
+        <h3 className="font-medium text-base text-[--wc-ink] group-hover:text-[--wc-sage] transition-colors line-clamp-1">
           {variant.name}
         </h3>
 
@@ -124,12 +134,12 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
         )}
 
         {/* Stats */}
-        <div className="text-[10px] text-[--wc-ink-muted]">
+        <div className="text-[11px] text-[--wc-ink-muted]">
           {keyframeCount} keyframes &middot; {totalDuration}s
         </div>
 
         {/* Badges */}
-        <div className="flex flex-wrap gap-1 mt-auto">
+        <div className="flex flex-wrap gap-1 mt-auto pt-1">
           <span className={`text-[10px] px-1.5 py-0.5 rounded ${rendererBadgeClass}`}>
             {rendererLabel}
           </span>

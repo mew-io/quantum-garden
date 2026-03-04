@@ -288,7 +288,7 @@ function buildWatercolorFlowerV2Elements(ctx: WatercolorBuildContext): Watercolo
 
 export const watercolorFlowerV2: PlantVariant = {
   id: "watercolor-flower-v2",
-  name: "Watercolor Flower II",
+  name: "Flower II",
   description:
     "An enhanced painterly flower with quantum-cascaded multi-bloom composition and bespoke petal geometry, shaped by an entanglement circuit",
   rarity: 0.1,

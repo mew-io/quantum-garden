@@ -152,7 +152,7 @@ function buildWcSaplingHopeElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcSaplingHope: PlantVariant = {
   id: "wc-sapling-hope",
-  name: "Watercolor Sapling Hope",
+  name: "Sapling Hope",
   description:
     "A young tree with an expanding crown of soft watercolor foliage, embodying hopeful upward energy",
   rarity: 0.04,

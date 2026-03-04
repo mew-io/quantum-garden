@@ -127,7 +127,7 @@ function buildWcPulsingOrbElements(ctx: WatercolorBuildContext): WatercolorEleme
 
 export const wcPulsingOrb: PlantVariant = {
   id: "wc-pulsing-orb",
-  name: "Watercolor Pulsing Orb",
+  name: "Pulsing Orb",
   description:
     "A glowing central orb with concentric pulse rings emanating outward, like a heartbeat visualized in watercolor",
   rarity: 0.03,

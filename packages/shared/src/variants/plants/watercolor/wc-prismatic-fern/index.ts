@@ -178,7 +178,7 @@ function buildWcPrismaticFernElements(ctx: WatercolorBuildContext): WatercolorEl
 
 export const wcPrismaticFern: PlantVariant = {
   id: "wc-prismatic-fern",
-  name: "Watercolor Prismatic Fern",
+  name: "Prismatic Fern",
   description:
     "A fern with rainbow color shift from warm reds at the base to cool blues at the tips, painted in layered watercolor",
   rarity: 0.03,

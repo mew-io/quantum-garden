@@ -234,7 +234,7 @@ function buildWcWeepingWillowElements(ctx: WatercolorBuildContext): WatercolorEl
 
 export const wcWeepingWillow: PlantVariant = {
   id: "wc-weeping-willow",
-  name: "Watercolor Weeping Willow",
+  name: "Weeping Willow",
   description:
     "A weeping willow tree painted in watercolor with drooping fronds and arching branches, its bilateral symmetry and frond count shaped by a 4-qubit entanglement circuit",
   rarity: 0.03,

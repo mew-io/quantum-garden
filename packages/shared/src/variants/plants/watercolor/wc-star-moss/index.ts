@@ -119,7 +119,7 @@ function buildWcStarMossElements(ctx: WatercolorBuildContext): WatercolorElement
 
 export const wcStarMoss: PlantVariant = {
   id: "wc-star-moss",
-  name: "Watercolor Star Moss",
+  name: "Star Moss",
   description:
     "Ground cover with tiny star-shaped clusters scattered like constellations fallen to earth, painted in soft watercolor",
   rarity: 0.03,

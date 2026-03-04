@@ -103,7 +103,7 @@ function buildWcWhisperReedElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcWhisperReed: PlantVariant = {
   id: "wc-whisper-reed",
-  name: "Watercolor Reed",
+  name: "Reed",
   description: "Tall thin reeds with fluffy tips, painted in muted watercolor tones",
   rarity: 0.14,
   requiresObservationToGerminate: true,

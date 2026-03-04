@@ -3,6 +3,7 @@
 import {
   CANVAS,
   PLANT_VARIANTS,
+  QUANTUM,
   isVectorVariant,
   isWatercolorVariant,
   getKeyframeCount,
@@ -24,7 +25,7 @@ export function VariantGallery() {
   const { openVariantDetail } = useVariantSandboxStore();
 
   return (
-    <div className="px-8 py-10 max-w-[1400px]">
+    <div className="px-8 py-10">
       {/* Gallery header */}
       <div className="mb-8">
         <p className="text-sm font-medium tracking-widest uppercase text-[--wc-sage] mb-1">
@@ -36,8 +37,11 @@ export function VariantGallery() {
         <div className="mt-4 w-16 h-px bg-[--wc-stone]/30" />
       </div>
 
-      {/* Responsive card grid — fewer columns for larger cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {/* Responsive card grid — narrow, tall cards to maximize plant density */}
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}
+      >
         {PLANT_VARIANTS.map((variant) => (
           <VariantCard
             key={variant.id}
@@ -81,11 +85,25 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
       ? "border-t-[--wc-sky]"
       : "border-t-[--wc-sage]";
 
-  // Collect feature badges (max 3 visible)
+  // Count quantum traits from mapping schema or sandbox controls
+  const traitCount =
+    (variant.quantumMapping?.schema ? Object.keys(variant.quantumMapping.schema).length : 0) +
+    (variant.sandboxControls?.length ?? 0);
+
+  // Circuit label (strip "wc_" prefix, replace _ with space)
+  const circuitLabel = variant.circuitId
+    ? variant.circuitId.replace(/^wc_/, "").replace(/_/g, " ")
+    : null;
+
+  // Collect feature badges
   const features: { label: string; className: string }[] = [];
-  if (variant.loop) features.push({ label: "Loop", className: "bg-blue-100/80 text-blue-700" });
-  if (variant.tweenBetweenKeyframes)
-    features.push({ label: "Tween", className: "bg-green-100/80 text-green-700" });
+  if (variant.circuitId)
+    features.push({ label: circuitLabel!, className: "bg-sky-100/80 text-sky-700" });
+  if (traitCount > 0)
+    features.push({
+      label: `${traitCount} traits`,
+      className: "bg-violet-100/80 text-violet-700",
+    });
   if (variant.colorVariations && variant.colorVariations.length > 0)
     features.push({
       label: `${variant.colorVariations.length} colors`,
@@ -93,31 +111,31 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
     });
   if (variant.requiresObservationToGerminate)
     features.push({ label: "Observe", className: "bg-indigo-100/80 text-indigo-700" });
-
-  const visibleFeatures = features.slice(0, 3);
-  const extraCount = Math.max(0, features.length - 3);
+  if (variant.loop) features.push({ label: "Loop", className: "bg-blue-100/80 text-blue-700" });
+  if (variant.tweenBetweenKeyframes)
+    features.push({ label: "Tween", className: "bg-green-100/80 text-green-700" });
 
   return (
     <button
       onClick={onSelect}
       className={`group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col border-t-2 ${accentBorderColor}`}
     >
-      {/* Preview area — large for marketing screenshots */}
+      {/* Preview area — plant fills the card */}
       <div
-        className="flex items-center justify-center p-6"
+        className="flex items-center justify-center p-2"
         style={{
           backgroundColor: CANVAS.BACKGROUND_COLOR,
           boxShadow: "inset 0 -8px 16px -8px rgba(0,0,0,0.04)",
         }}
       >
         {isWatercolor ? (
-          <WatercolorMiniGlyph variant={variant} size={160} />
+          <WatercolorMiniGlyph variant={variant} size={120} />
         ) : previewKeyframe && isVector ? (
-          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={160} />
+          <VectorMiniGlyph keyframe={previewKeyframe as VectorKeyframe} size={120} />
         ) : previewKeyframe ? (
-          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={160} />
+          <MiniGlyph keyframe={previewKeyframe as GlyphKeyframe} size={120} />
         ) : (
-          <div style={{ width: 160, height: 160 }} />
+          <div style={{ width: 120, height: 120 }} />
         )}
       </div>
 
@@ -136,6 +154,7 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
         {/* Stats */}
         <div className="text-[11px] text-[--wc-ink-muted]">
           {keyframeCount} keyframes &middot; {totalDuration}s
+          {variant.circuitId && <> &middot; {QUANTUM.DEFAULT_TRAIT_QUBITS}q</>}
         </div>
 
         {/* Badges */}
@@ -148,14 +167,11 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
               {(variant.rarity * 100).toFixed(0)}%
             </span>
           )}
-          {visibleFeatures.map((f) => (
+          {features.map((f) => (
             <span key={f.label} className={`text-[10px] px-1.5 py-0.5 rounded ${f.className}`}>
               {f.label}
             </span>
           ))}
-          {extraCount > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 text-[--wc-ink-muted]">+{extraCount}</span>
-          )}
         </div>
       </div>
     </button>

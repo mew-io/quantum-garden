@@ -159,7 +159,7 @@ function buildWcPulsingOrbVectorElements(ctx: WatercolorBuildContext): Watercolo
 
 export const wcPulsingOrbVector: PlantVariant = {
   id: "wc-pulsing-orb-vector",
-  name: "Watercolor Pulsing Orb Vector",
+  name: "Pulsing Orb Vector",
   description:
     "A crystalline ice-blue orb with fine concentric rings and inner sparkle dots, like frozen light pulsing in watercolor",
   rarity: 0.02,

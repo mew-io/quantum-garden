@@ -131,7 +131,7 @@ function buildWcSimpleBloomElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcSimpleBloom: PlantVariant = {
   id: "wc-simple-bloom",
-  name: "Watercolor Bloom",
+  name: "Bloom",
   description:
     "A gentle painted flower with soft pastel petals, its form shaped by quantum measurement",
   rarity: 0.15,

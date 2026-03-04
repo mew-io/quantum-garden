@@ -204,7 +204,7 @@ function buildWcMidnightPoppyElements(ctx: WatercolorBuildContext): WatercolorEl
 
 export const wcMidnightPoppy: PlantVariant = {
   id: "wc-midnight-poppy",
-  name: "Watercolor Midnight Poppy",
+  name: "Midnight Poppy",
   description:
     "A dramatic painted poppy with deep crimson petals and a dark center, cycling between open and closed states driven by quantum tunneling",
   rarity: 0.06,

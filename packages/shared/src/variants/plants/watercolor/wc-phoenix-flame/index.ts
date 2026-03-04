@@ -255,7 +255,7 @@ function buildWcPhoenixFlameElements(ctx: WatercolorBuildContext): WatercolorEle
 
 export const wcPhoenixFlame: PlantVariant = {
   id: "wc-phoenix-flame",
-  name: "Watercolor Phoenix Flame",
+  name: "Phoenix Flame",
   description:
     "A phoenix made of flame painted in watercolor with spreading wings and floating embers, its flame height and wing spread shaped by a 3-qubit entanglement circuit",
   rarity: 0.03,

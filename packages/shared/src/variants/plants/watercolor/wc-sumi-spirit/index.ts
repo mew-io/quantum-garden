@@ -241,7 +241,7 @@ function buildWcSumiSpiritElements(ctx: WatercolorBuildContext): WatercolorEleme
 
 export const wcSumiSpirit: PlantVariant = {
   id: "wc-sumi-spirit",
-  name: "Watercolor Sumi Spirit",
+  name: "Sumi Spirit",
   description:
     "A sumi-e ink wash spirit formed as an enso circle with a quantum-determined gap, its completeness collapsing from superposition upon observation like the Zen circle itself",
   rarity: 0.03,

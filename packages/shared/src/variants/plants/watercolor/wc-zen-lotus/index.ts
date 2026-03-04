@@ -245,7 +245,7 @@ function buildWcZenLotusElements(ctx: WatercolorBuildContext): WatercolorElement
 
 export const wcZenLotus: PlantVariant = {
   id: "wc-zen-lotus",
-  name: "Watercolor Zen Lotus",
+  name: "Zen Lotus",
   description:
     "A serene lotus viewed from above, floating on still water with concentric petal rings and a mandala center, its symmetry shaped by entangled qubit pairs",
   rarity: 0.03,

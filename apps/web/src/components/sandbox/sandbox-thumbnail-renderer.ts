@@ -49,11 +49,14 @@ function hashKeyframe(keyframe: GlyphKeyframe): string {
 function getRenderer(): SandboxThreeRenderer {
   if (!renderer) {
     renderer = new SandboxThreeRenderer({
-      width: 64,
-      height: 64,
+      width: 128,
+      height: 128,
       enablePostProcessing: false,
     });
     renderer.setInstanceCount(1);
+    // Tighten camera frustum so the plant fills more of the thumbnail
+    const half = 28; // was 40 (PATTERN_SIZE/2 + 8), now zoomed in
+    renderer.setCameraFrustum(-half, half, -half, half);
   }
   return renderer;
 }
@@ -125,10 +128,13 @@ let watercolorRenderer: SandboxThreeRenderer | null = null;
 function getWatercolorRenderer(): SandboxThreeRenderer {
   if (!watercolorRenderer) {
     watercolorRenderer = new SandboxThreeRenderer({
-      width: 64,
-      height: 64,
+      width: 128,
+      height: 128,
       enablePostProcessing: false,
     });
+    // Tighten camera frustum so the plant fills more of the thumbnail
+    const half = 28;
+    watercolorRenderer.setCameraFrustum(-half, half, -half, half);
   }
   return watercolorRenderer;
 }

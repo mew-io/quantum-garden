@@ -38,7 +38,6 @@ export function MiniGlyph({ keyframe, size = 64, className = "" }: MiniGlyphProp
       style={{
         width: size,
         height: size,
-        imageRendering: "pixelated",
         opacity: keyframe.opacity ?? 1,
         transform: keyframe.scale ? `scale(${keyframe.scale})` : undefined,
       }}

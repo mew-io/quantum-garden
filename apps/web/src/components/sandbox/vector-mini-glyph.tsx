@@ -15,6 +15,84 @@ interface VectorMiniGlyphProps {
 }
 
 /**
+ * Compute the bounding box of a set of vector primitives,
+ * then return a viewBox string that tightly frames them with padding.
+ */
+function computeViewBox(primitives: VectorPrimitive[], padding = 2): string {
+  if (primitives.length === 0) return "0 0 64 64";
+
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+
+  for (const p of primitives) {
+    switch (p.type) {
+      case "circle":
+      case "arc":
+        minX = Math.min(minX, p.cx - p.radius);
+        minY = Math.min(minY, p.cy - p.radius);
+        maxX = Math.max(maxX, p.cx + p.radius);
+        maxY = Math.max(maxY, p.cy + p.radius);
+        break;
+      case "line":
+        minX = Math.min(minX, p.x1, p.x2);
+        minY = Math.min(minY, p.y1, p.y2);
+        maxX = Math.max(maxX, p.x1, p.x2);
+        maxY = Math.max(maxY, p.y1, p.y2);
+        break;
+      case "polygon":
+        minX = Math.min(minX, p.cx - p.radius);
+        minY = Math.min(minY, p.cy - p.radius);
+        maxX = Math.max(maxX, p.cx + p.radius);
+        maxY = Math.max(maxY, p.cy + p.radius);
+        break;
+      case "star":
+        minX = Math.min(minX, p.cx - p.outerRadius);
+        minY = Math.min(minY, p.cy - p.outerRadius);
+        maxX = Math.max(maxX, p.cx + p.outerRadius);
+        maxY = Math.max(maxY, p.cy + p.outerRadius);
+        break;
+      case "diamond":
+        minX = Math.min(minX, p.cx - p.width / 2);
+        minY = Math.min(minY, p.cy - p.height / 2);
+        maxX = Math.max(maxX, p.cx + p.width / 2);
+        maxY = Math.max(maxY, p.cy + p.height / 2);
+        break;
+      case "bezier":
+        minX = Math.min(minX, p.x1, p.cx1, p.cx2, p.x2);
+        minY = Math.min(minY, p.y1, p.cy1, p.cy2, p.y2);
+        maxX = Math.max(maxX, p.x1, p.cx1, p.cx2, p.x2);
+        maxY = Math.max(maxY, p.y1, p.cy1, p.cy2, p.y2);
+        break;
+      case "spiral":
+        minX = Math.min(minX, p.cx - p.endRadius);
+        minY = Math.min(minY, p.cy - p.endRadius);
+        maxX = Math.max(maxX, p.cx + p.endRadius);
+        maxY = Math.max(maxY, p.cy + p.endRadius);
+        break;
+    }
+  }
+
+  // Fallback if bounds are degenerate
+  if (!isFinite(minX)) return "0 0 64 64";
+
+  // Apply padding and ensure square aspect ratio for uniform scaling
+  minX -= padding;
+  minY -= padding;
+  maxX += padding;
+  maxY += padding;
+  const w = maxX - minX;
+  const h = maxY - minY;
+  const side = Math.max(w, h);
+  // Center the shorter axis
+  const cx = minX + w / 2;
+  const cy = minY + h / 2;
+
+  return `${cx - side / 2} ${cy - side / 2} ${side} ${side}`;
+}
+
+/**
  * Mini glyph preview for vector keyframes.
  * Renders vector primitives as SVG for crisp display at any size.
  * Supports progressive drawing via drawFractions.
@@ -31,8 +109,8 @@ export function VectorMiniGlyph({
   const effectiveDrawFractions =
     drawFractions ?? ("drawFractions" in keyframe ? keyframe.drawFractions : undefined);
 
-  // SVG viewBox is 64x64 to match the coordinate space
-  const viewBox = "0 0 64 64";
+  // Compute tight viewBox from primitive bounds
+  const viewBox = computeViewBox(primitives);
 
   return (
     <svg

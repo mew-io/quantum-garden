@@ -108,7 +108,7 @@ function buildWcCloudBushElements(ctx: WatercolorBuildContext): WatercolorElemen
 
 export const wcCloudBush: PlantVariant = {
   id: "wc-cloud-bush",
-  name: "Watercolor Cloud Bush",
+  name: "Cloud Bush",
   description:
     "A soft, puffy bush painted in airy watercolor washes that breathes gently and bears painted berries",
   rarity: 0.06,

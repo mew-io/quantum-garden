@@ -32,6 +32,7 @@ const vertexShader = /* glsl */ `
   // Uniforms
   uniform float u_time;
   uniform float u_patternSize;
+  uniform float u_globalPlantScale;
 
   // Varyings to fragment shader
   varying vec2 v_uv;
@@ -92,7 +93,7 @@ const vertexShader = /* glsl */ `
 
     // Transform position with rotation
     // position is the local quad vertex (-0.5 to 0.5 range)
-    vec3 scaled = position * u_patternSize * finalScale;
+    vec3 scaled = position * u_patternSize * finalScale * u_globalPlantScale;
 
     // Apply rotation if mature plant
     if (lifecycleRotation != 0.0) {
@@ -329,6 +330,7 @@ export function createPlantMaterial(atlasTexture: THREE.Texture): THREE.ShaderMa
       u_patternAtlas: { value: atlasTexture },
       u_time: { value: 0 },
       u_patternSize: { value: PATTERN_SIZE },
+      u_globalPlantScale: { value: 1.5 },
       u_superpositionMode: { value: 0 }, // 0 = stacked ghosts (default)
     },
     transparent: true,

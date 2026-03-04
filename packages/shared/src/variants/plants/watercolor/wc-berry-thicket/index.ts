@@ -131,7 +131,7 @@ function buildWcBerryThicketElements(ctx: WatercolorBuildContext): WatercolorEle
 
 export const wcBerryThicket: PlantVariant = {
   id: "wc-berry-thicket",
-  name: "Watercolor Berry Thicket",
+  name: "Berry Thicket",
   description:
     "A dense thicket of crossing branches painted in earthy watercolor washes, bearing clusters of berries at its tips",
   rarity: 0.06,

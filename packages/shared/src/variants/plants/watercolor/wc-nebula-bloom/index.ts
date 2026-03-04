@@ -163,7 +163,7 @@ function buildWcNebulaBloomElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcNebulaBloom: PlantVariant = {
   id: "wc-nebula-bloom",
-  name: "Watercolor Nebula Bloom",
+  name: "Nebula Bloom",
   description:
     "A cosmic nebula of overlapping diffuse clouds and scattered particles, painted in ethereal watercolor washes",
   rarity: 0.03,

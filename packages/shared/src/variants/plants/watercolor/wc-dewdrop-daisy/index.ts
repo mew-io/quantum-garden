@@ -116,7 +116,7 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
 
 export const wcDewdropDaisy: PlantVariant = {
   id: "wc-dewdrop-daisy",
-  name: "Watercolor Daisy",
+  name: "Daisy",
   description:
     "A cheerful painted daisy with thin ray petals and dewdrop highlights that catch the light",
   rarity: 0.11,

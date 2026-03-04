@@ -275,7 +275,7 @@ function buildWcBellClusterElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcBellCluster: PlantVariant = {
   id: "wc-bell-cluster",
-  name: "Watercolor Bell Cluster",
+  name: "Bell Cluster",
   description:
     "Three hanging bell flowers on arching stems, opening in a quantum-entangled cascade driven by a GHZ-like circuit",
   rarity: 0.06,

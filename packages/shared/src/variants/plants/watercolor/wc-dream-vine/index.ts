@@ -230,7 +230,7 @@ function buildWcDreamVineElements(ctx: WatercolorBuildContext): WatercolorElemen
 
 export const wcDreamVine: PlantVariant = {
   id: "wc-dream-vine",
-  name: "Watercolor Dream Vine",
+  name: "Dream Vine",
   description:
     "A flowing S-curve vine with curling tendrils and dreamy bud dots, its growth pattern shaped by quantum interference",
   rarity: 0.03,

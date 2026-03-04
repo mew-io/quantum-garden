@@ -76,7 +76,7 @@ function buildWcPebblePatchElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcPebblePatch: PlantVariant = {
   id: "wc-pebble-patch",
-  name: "Watercolor Pebbles",
+  name: "Pebbles",
   description: "Warm-toned stones scattered like a watercolor still life on the garden floor",
   rarity: 0.2,
   requiresObservationToGerminate: true,

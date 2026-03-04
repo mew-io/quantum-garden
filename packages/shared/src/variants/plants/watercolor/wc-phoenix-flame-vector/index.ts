@@ -237,7 +237,7 @@ function buildWcPhoenixFlameVectorElements(ctx: WatercolorBuildContext): Waterco
 
 export const wcPhoenixFlameVector: PlantVariant = {
   id: "wc-phoenix-flame-vector",
-  name: "Watercolor Phoenix Flame Vector",
+  name: "Phoenix Flame Vector",
   description:
     "A stylized flame phoenix painted in saturated watercolor with spreading wings and floating embers, driven by quantum interference",
   rarity: 0.02,

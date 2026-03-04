@@ -235,7 +235,7 @@ function buildWcQuantumTulipElements(ctx: WatercolorBuildContext): WatercolorEle
 
 export const wcQuantumTulip: PlantVariant = {
   id: "wc-quantum-tulip",
-  name: "Watercolor Tulip",
+  name: "Tulip",
   description:
     "A tulip painted in watercolor with 3 overlapping cupped petals, its cup depth and color intensity shaped by a 3-qubit superposition circuit",
   rarity: 0.08,

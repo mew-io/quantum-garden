@@ -212,7 +212,7 @@ function buildWcAuroraWispElements(ctx: WatercolorBuildContext): WatercolorEleme
 
 export const wcAuroraWisp: PlantVariant = {
   id: "wc-aurora-wisp",
-  name: "Watercolor Aurora Wisp",
+  name: "Aurora Wisp",
   description:
     "Flowing aurora borealis ribbons painted in watercolor, with sinusoidal curtains of light and glowing wave peaks, shaped by a 4-qubit phase interference circuit",
   rarity: 0.03,

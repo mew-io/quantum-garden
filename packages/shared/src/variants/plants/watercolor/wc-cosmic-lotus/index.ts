@@ -240,7 +240,7 @@ function buildWcCosmicLotusElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcCosmicLotus: PlantVariant = {
   id: "wc-cosmic-lotus",
-  name: "Watercolor Cosmic Lotus",
+  name: "Cosmic Lotus",
   description:
     "A sacred geometry lotus with flower-of-life inner discs, radiating outer petals, and spiral cosmic radiance, its structure encoded by a 5-qubit multi-pair entanglement circuit",
   rarity: 0.02,

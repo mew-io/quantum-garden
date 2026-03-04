@@ -92,7 +92,7 @@ function buildWcMeadowTuftElements(ctx: WatercolorBuildContext): WatercolorEleme
 
 export const wcMeadowTuft: PlantVariant = {
   id: "wc-meadow-tuft",
-  name: "Watercolor Grass",
+  name: "Grass",
   description: "A soft cluster of painted grass blades that sway gently in an invisible breeze",
   rarity: 0.17,
   requiresObservationToGerminate: true,

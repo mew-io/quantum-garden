@@ -180,7 +180,7 @@ function buildWcVortexSpiralElements(ctx: WatercolorBuildContext): WatercolorEle
 
 export const wcVortexSpiral: PlantVariant = {
   id: "wc-vortex-spiral",
-  name: "Watercolor Vortex Spiral",
+  name: "Vortex Spiral",
   description:
     "Spiral arms emanating from a center point like a galaxy or whirlpool, painted in swirling watercolor washes",
   rarity: 0.03,

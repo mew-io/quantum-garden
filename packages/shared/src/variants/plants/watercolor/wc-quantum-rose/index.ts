@@ -246,7 +246,7 @@ function buildWcQuantumRoseElements(ctx: WatercolorBuildContext): WatercolorElem
 
 export const wcQuantumRose: PlantVariant = {
   id: "wc-quantum-rose",
-  name: "Watercolor Quantum Rose",
+  name: "Quantum Rose",
   description:
     "A rose with nested petal layers whose inner and outer counts are anti-correlated through quantum conservation, with thorn-studded stems and spiraling inner petals",
   rarity: 0.03,

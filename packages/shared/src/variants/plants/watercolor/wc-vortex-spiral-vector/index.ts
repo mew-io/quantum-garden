@@ -187,7 +187,7 @@ function buildWcVortexSpiralVectorElements(ctx: WatercolorBuildContext): Waterco
 
 export const wcVortexSpiralVector: PlantVariant = {
   id: "wc-vortex-spiral-vector",
-  name: "Watercolor Vortex Spiral Vector",
+  name: "Vortex Spiral Vector",
   description:
     "A deep cosmic vortex of swirling purple spiral arms with dense particle clouds, like a nebula painted in watercolor",
   rarity: 0.02,

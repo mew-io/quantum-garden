@@ -207,7 +207,7 @@ function buildWatercolorFlowerElements(ctx: WatercolorBuildContext): WatercolorE
 
 export const watercolorFlower: PlantVariant = {
   id: "watercolor-flower",
-  name: "Watercolor Flower",
+  name: "Flower",
   description:
     "A painterly flower rendered with soft watercolor layers, its form shaped by quantum measurement",
   rarity: 0.15,

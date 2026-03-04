@@ -180,7 +180,7 @@ function buildWcCrystalClusterElements(ctx: WatercolorBuildContext): WatercolorE
 
 export const wcCrystalCluster: PlantVariant = {
   id: "wc-crystal-cluster",
-  name: "Watercolor Crystal Cluster",
+  name: "Crystal Cluster",
   description:
     "Angular crystal shards radiating upward from a dark base, their facets catching light through quantum shimmer",
   rarity: 0.03,

@@ -96,7 +96,7 @@ function buildWcSoftMossElements(ctx: WatercolorBuildContext): WatercolorElement
 
 export const wcSoftMoss: PlantVariant = {
   id: "wc-soft-moss",
-  name: "Watercolor Moss",
+  name: "Moss",
   description:
     "A gentle ground cover painted in soft watercolor washes, spreading across the garden floor like spilled tea",
   rarity: 0.18,

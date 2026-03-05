@@ -4,8 +4,8 @@ import { test, expect } from "@playwright/test";
  * E2E tests for the Quantum Garden.
  *
  * These tests verify the garden renders correctly and plants are visible.
- * Testing the full observation flow is complex due to the autonomous reticle
- * and invisible observation regions, so we focus on verifying the components
+ * Testing the full observation flow is complex due to invisible observation
+ * regions and dwell-time requirements, so we focus on verifying the components
  * are initialized correctly.
  */
 
@@ -80,7 +80,7 @@ test.describe("Observation Flow", () => {
   test("should handle observation mutation request", async ({ page }) => {
     // This test verifies the observation endpoint is accessible
     // We can't easily trigger a real observation in E2E due to the
-    // autonomous reticle and invisible regions
+    // invisible regions and dwell-time requirements
 
     // Set up request interception for observation
     let observationRequestMade = false;
@@ -96,7 +96,7 @@ test.describe("Observation Flow", () => {
 
     // In a real scenario, we'd need to:
     // 1. Find a plant location
-    // 2. Move the reticle over it (requires game state access)
+    // 2. Move cursor over it and hold for dwell duration
     // 3. Wait for dwell duration
     // For now, we just verify the app loaded without errors
     expect(observationRequestMade).toBe(false); // No observation yet

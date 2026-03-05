@@ -103,7 +103,7 @@ function hexToHue(hex: string): number {
  * Main garden scene component using Three.js.
  *
  * Renders the quantum garden with efficient instanced rendering.
- * Plants, observation regions, and the reticle are all managed here.
+ * Plants, observation regions, and cursor-based observation are all managed here.
  */
 export function GardenScene() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,6 +118,10 @@ export function GardenScene() {
   // Load plants from server into store (polls every 5s to pick up server-side evolution)
   // Evolution now runs server-side via cron/worker - client is just a viewer
   usePlants();
+
+  // Track cursor position in world coordinates for observation system
+  // Offscreen default so nothing triggers when cursor is outside the canvas
+  const cursorWorldPos = useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
 
   // Store callback ref to keep it stable across renders
   const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
@@ -192,10 +196,20 @@ export function GardenScene() {
       });
     }
 
-    // Initialize observation system (after convertToRenderable and overlayManager)
+    // Track cursor/touch position for observation system
+    const handlePointerMove = (event: PointerEvent) => {
+      cursorWorldPos.current = sceneManager.screenToWorld(event.clientX, event.clientY);
+    };
+    const handlePointerLeave = () => {
+      cursorWorldPos.current = { x: -9999, y: -9999 };
+    };
+    sceneManager.canvas.addEventListener("pointermove", handlePointerMove);
+    sceneManager.canvas.addEventListener("pointerleave", handlePointerLeave);
+
+    // Initialize observation system (cursor-driven observation with dwell)
     const observationSystem = new ObservationSystem(
       initialPlants,
-      () => overlayManager.reticle.getPosition(),
+      () => cursorWorldPos.current,
       (payload) => {
         // Check if this is the user's first observation before triggering callback
         const isFirst = isFirstObservation();
@@ -352,7 +366,6 @@ export function GardenScene() {
         observationCallbackRef.current({
           plantId: clickedPlant.id,
           regionId: "click-region-debug",
-          reticleId: "click-reticle-debug",
           timestamp: new Date(),
         });
 
@@ -440,6 +453,8 @@ export function GardenScene() {
       mounted = false;
       clearInterval(performanceInterval);
       unsubscribe();
+      sceneManager.canvas.removeEventListener("pointermove", handlePointerMove);
+      sceneManager.canvas.removeEventListener("pointerleave", handlePointerLeave);
       sceneManager.canvas.removeEventListener("click", handleClick);
       window.removeEventListener(
         "observation-mode-change" as keyof WindowEventMap,

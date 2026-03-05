@@ -3,8 +3,6 @@ import {
   UI_TIMING,
   type Plant,
   type ObservationRegion,
-  type Reticle,
-  type Position,
   type QuantumEvent,
 } from "@quantum-garden/shared";
 
@@ -70,11 +68,6 @@ interface GardenState {
   activeRegion: ObservationRegion | null;
   setActiveRegion: (region: ObservationRegion | null) => void;
 
-  // Reticle state
-  reticle: Reticle | null;
-  setReticle: (reticle: Reticle) => void;
-  updateReticlePosition: (position: Position) => void;
-
   // Dwell tracking
   dwellTarget: string | null; // Plant ID currently being dwelled on
   dwellProgress: number; // 0-1 progress toward observation
@@ -135,14 +128,6 @@ export const useGardenStore = create<GardenState>((set) => ({
   // Observation region
   activeRegion: null,
   setActiveRegion: (region) => set({ activeRegion: region }),
-
-  // Reticle
-  reticle: null,
-  setReticle: (reticle) => set({ reticle }),
-  updateReticlePosition: (position) =>
-    set((state) => ({
-      reticle: state.reticle ? { ...state.reticle, position } : null,
-    })),
 
   // Dwell
   dwellTarget: null,

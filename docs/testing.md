@@ -125,10 +125,8 @@ Use this checklist when making changes that could affect visual appearance. Test
 
 #### Dwell Overlay
 
-- [ ] Reticle drifts smoothly across garden
-- [ ] Reticle changes appearance when over eligible plant
-- [ ] Progress indicator visible during observation dwell
-- [ ] Progress resets when moving off plant
+- [ ] Progress indicator visible during observation dwell (cursor hovering on plant)
+- [ ] Progress resets when moving cursor off plant
 
 ### UI Components
 

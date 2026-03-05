@@ -146,8 +146,7 @@ export function Toolbar({ isDebugOpen, onDebugToggle, onShowHelp }: ToolbarProps
               Observation
             </h4>
             <p className="text-[--wc-ink-muted] text-xs leading-relaxed">
-              The reticle drifts across the garden. When it aligns with a plant, observation begins
-              automatically.
+              Hover over a plant and hold to observe it. Its quantum traits will be revealed.
             </p>
           </div>
         </div>

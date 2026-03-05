@@ -116,8 +116,8 @@ Plants germinate automatically through the `GardenEvolutionSystem`:
 
 The observation system uses dwell-time triggers:
 
-1. Reticle drifts autonomously across canvas
-2. When reticle overlaps eligible plant, dwell timer starts
+1. User moves cursor over the garden canvas
+2. When cursor overlaps eligible plant in an active region, dwell timer starts
 3. After dwell duration (configurable, default 1.5s): observation triggers
 4. Frontend sends observation request to API
 5. API selects traits from quantum pool based on plant ID hash

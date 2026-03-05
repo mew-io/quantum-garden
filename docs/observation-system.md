@@ -23,8 +23,8 @@ The viewer witnesses observation. They do not perform it.
 Observation occurs only when three conditions align over time:
 
 1. A plant glyph exists inside an invisible observation region
-2. A visible system reticle overlaps that region
-3. Both remain aligned for a required dwell duration
+2. The user's cursor/touch overlaps that region
+3. The cursor dwells on the plant for the required duration
 
 No single condition alone can cause observation.
 
@@ -79,31 +79,13 @@ A plant inside a region becomes eligible for observation but nothing happens yet
 
 ---
 
-### 3. Reticle
+### 3. Cursor tracking
 
-The reticle represents system attention, not user control.
+Observation is driven by the user's cursor (mouse on desktop, touch on mobile).
 
-Visual design:
+The cursor position is converted from screen coordinates to garden world coordinates each frame and fed into the observation system.
 
-- Size: 3x3 or 5x5 pixels
-- Shape: cross or square
-- Color: neutral gray or very pale pastel
-- No glow, no blur, no animation effects
-
-Motion behavior:
-
-- Autonomous and continuous
-- Slow linear drift with gentle pauses
-- Occasional direction changes
-- Does not seek plants
-
-Recommended parameters:
-
-- Speed: 10 to 30 pixels per second
-- Pause duration: 2 to 6 seconds
-- Direction jitter: minimal
-
-The reticle may pass over empty space frequently.
+When the cursor leaves the canvas, position resets to offscreen so no accidental observations occur.
 
 ---
 
@@ -111,25 +93,25 @@ The reticle may pass over empty space frequently.
 
 Alignment determines when observation _may_ occur.
 
-### Reticle to region alignment
+### Cursor to region alignment
 
-Alignment begins when the reticle overlaps an active observation region.
+Alignment begins when the cursor overlaps an active observation region.
 
 Rules:
 
-- Reticle overlapping a plant outside a region does nothing
-- Plant inside a region without reticle does nothing
+- Cursor overlapping a plant outside a region does nothing
+- Plant inside a region without cursor does nothing
 - Alignment is spatial only
 
 Alignment is a prerequisite, not a trigger.
 
 ### Plant exposure requirement
 
-Because plants are larger than the reticle, observation also requires full plant exposure.
+Because plants are larger than a single point, observation also requires full plant exposure.
 
 A plant is considered _exposed_ only when:
 
-- Any part of the plant overlaps the reticle _and_
+- The cursor overlaps any part of the plant _and_
 - The entire plant bounding box is contained within the active observation region
 
 This ensures that observation feels holistic rather than partial.
@@ -140,25 +122,21 @@ If any portion of the plant exits the region, exposure is lost and dwell resets.
 
 ## Observation trigger
 
-> **Implementation Note**: The current implementation triggers observation **immediately** upon alignment, with no dwell time requirement. This section documents the original design concept, which may be revisited in future iterations.
+When all alignment conditions are met, a dwell timer begins. The cursor must remain on the plant for the configured dwell duration before observation triggers.
 
-**Current Behavior** (Immediate Trigger):
-When all alignment conditions are true simultaneously, observation triggers immediately:
+Conditions required:
 
 - Plant is unobserved
 - Entire plant bounding box is contained within the active region
-- Reticle overlaps any portion of the plant
-- Reticle overlaps the active region
+- Cursor overlaps any portion of the plant
+- Cursor overlaps the active region
 
-**Original Design** (Dwell-Based - Not Implemented):
-Observation would require sustained alignment over a dwell duration:
+Dwell behavior:
 
 - Dwell timer runs per eligible plant
-- If any condition breaks, dwell resets to zero
-- Duration: 10 to 20 seconds
+- If any condition breaks (cursor moves away), dwell resets to zero
+- Default duration: 1.5 seconds
 - No partial progress retention
-
-The immediate trigger approach maintains the contemplative feel while reducing complexity.
 
 ---
 
@@ -170,7 +148,6 @@ Event payload:
 
 - plant_id
 - region_id
-- reticle_id
 - timestamp
 
 This event is sent to the backend to perform quantum measurement.
@@ -230,7 +207,6 @@ There is no freezing, halting, or special animation.
 ### System behavior after observation
 
 - The observation region deactivates or relocates
-- The reticle continues its motion uninterrupted
 - The system enforces a global cooldown before another observation can occur
 
 Recommended cooldown:
@@ -243,8 +219,8 @@ Only one observation may complete at a time.
 
 ## Web implementation notes
 
-- Reticle motion and region placement may be deterministic or seeded
-- All alignment and dwell logic can run client side
+- Region placement may be deterministic or seeded
+- All alignment and dwell logic runs client side
 - Backend only handles measurement and persistence
 - Clients update silently on broadcast
 
@@ -258,7 +234,6 @@ The same logic applies unchanged.
 
 Optional adaptations:
 
-- Reticle drift may subtly bias toward visitor presence
 - Region placement may favor occupied areas
 - Observation rate remains capped
 
@@ -269,9 +244,7 @@ No explicit interaction is introduced.
 ## Non negotiable constraints
 
 - Observation regions are never visualized
-- The reticle is never explained
 - The system must tolerate long periods of inactivity
-- Observation must never feel responsive or reactive
 - Visual style never changes during measurement
 
 ---

@@ -2,7 +2,6 @@
  * Overlay Manager - Coordinates all UI overlay elements
  *
  * Manages a separate Three.js scene layer for overlay elements like:
- * - Reticle (system attention indicator)
  * - Entanglement lines (connections between entangled plants)
  * - Dwell indicator (observation progress arc)
  * - Observation feedback (celebration rings)
@@ -13,7 +12,6 @@
 import * as THREE from "three";
 import type { Plant } from "@quantum-garden/shared";
 import type { SceneManager } from "../core/scene-manager";
-import { ReticleOverlay } from "./reticle-overlay";
 import { EntanglementOverlay } from "./entanglement-overlay";
 import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
@@ -30,7 +28,6 @@ export class OverlayManager {
   private overlayScene: THREE.Scene;
 
   // Overlay components
-  public reticle: ReticleOverlay;
   public entanglement: EntanglementOverlay;
   public dwell: DwellOverlay;
   public feedback: FeedbackOverlay;
@@ -46,7 +43,6 @@ export class OverlayManager {
     this.overlayScene = new THREE.Scene();
 
     // Initialize overlay components
-    this.reticle = new ReticleOverlay();
     this.entanglement = new EntanglementOverlay();
     this.dwell = new DwellOverlay();
     this.feedback = new FeedbackOverlay();
@@ -56,7 +52,6 @@ export class OverlayManager {
     this.debug = new DebugOverlay();
 
     // Add all overlay meshes to the overlay scene
-    this.overlayScene.add(this.reticle.getObject());
     this.overlayScene.add(this.entanglement.getObject());
     this.overlayScene.add(this.dwell.getObject());
     this.overlayScene.add(this.feedback.getObject());
@@ -71,9 +66,6 @@ export class OverlayManager {
    * Uses hasActiveAnimations() checks to skip overlays with no work to do.
    */
   update(time: number, deltaTime: number): void {
-    // Reticle always needs updates (continuous drift animation)
-    this.reticle.update(time, deltaTime);
-
     // Only update overlays that have active animations
     if (this.entanglement.hasActiveAnimations()) {
       this.entanglement.update(time);
@@ -144,7 +136,6 @@ export class OverlayManager {
    * Clean up all resources.
    */
   dispose(): void {
-    this.reticle.dispose();
     this.entanglement.dispose();
     this.dwell.dispose();
     this.feedback.dispose();

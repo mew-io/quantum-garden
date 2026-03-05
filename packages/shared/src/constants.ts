@@ -19,24 +19,6 @@ export const OBSERVATION_REGION = {
   MAX_LIFETIME: 120,
 } as const;
 
-/** Reticle configuration */
-export const RETICLE = {
-  /** Size options in pixels */
-  SIZES: [3, 5] as const,
-  /** Default size */
-  DEFAULT_SIZE: 3,
-  /** Minimum drift speed in pixels per second */
-  MIN_SPEED: 10,
-  /** Maximum drift speed in pixels per second */
-  MAX_SPEED: 30,
-  /** Minimum pause duration in seconds */
-  MIN_PAUSE: 2,
-  /** Maximum pause duration in seconds */
-  MAX_PAUSE: 6,
-  /** Color (neutral gray) */
-  COLOR: "#888888",
-} as const;
-
 /** Dwell tracking configuration */
 export const DWELL = {
   /** Minimum dwell duration for observation (seconds) */

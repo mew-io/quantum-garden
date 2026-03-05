@@ -132,9 +132,9 @@ function MyComponent() {
 
 ### Region Mode (Default)
 
-The observation system uses invisible regions and a drifting reticle. Plants are observed when the reticle aligns with a plant inside an active region.
+The observation system uses invisible regions and the user's cursor position. Plants are observed when the cursor dwells on a plant inside an active region.
 
-This is the intended production behavior - observation feels natural and autonomous.
+This is the intended production behavior.
 
 ### Click Mode (Debug)
 

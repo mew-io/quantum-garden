@@ -34,7 +34,7 @@ const TOUR_STEPS: TourStep[] = [
     id: "canvas",
     title: "The Garden",
     description:
-      "Plants exist in quantum superposition until observed. Watch for the drifting reticle—when it aligns with a plant, observation begins.",
+      "Plants exist in quantum superposition until observed. Hover over a plant and hold to observe it.",
     target: "canvas",
     position: "top",
   },
@@ -50,7 +50,7 @@ const TOUR_STEPS: TourStep[] = [
     id: "observation",
     title: "Observation",
     description:
-      "When the reticle dwells on a plant, it collapses from superposition into a definite state. Watch for the celebration effect.",
+      "When you dwell on a plant, it collapses from superposition into a definite state. Watch for the celebration effect.",
     target: "canvas",
     position: "top",
   },

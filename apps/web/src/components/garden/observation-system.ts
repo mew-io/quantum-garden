@@ -1,16 +1,13 @@
 /**
  * Observation System - Core observation logic for Quantum Garden
  *
- * Implements the designed three-condition alignment system:
+ * Implements a three-condition alignment system:
  * 1. Plant inside invisible observation region
- * 2. Reticle overlaps that region
- * 3. Reticle overlaps any part of plant
+ * 2. Cursor/touch overlaps that region
+ * 3. Cursor/touch overlaps any part of plant
  *
- * When all three conditions align → observation triggers immediately (no dwell time).
- *
- * Design Philosophy:
- * "Observation is not something the viewer does. It is something that
- * occasionally happens in their presence."
+ * When all three conditions align and the cursor dwells on the plant
+ * for the configured duration → observation triggers.
  */
 
 import type {
@@ -52,7 +49,7 @@ const DEFAULT_CONFIG: Required<ObservationSystemConfig> = {
   regionLifetime: 75, // 60-90 seconds
   cooldownDuration: 17.5, // 15-20 seconds
   plantSize: 64, // 64x64 pixel plants
-  enableDwellMode: false, // Immediate observation by default
+  enableDwellMode: true, // Dwell observation — cursor must stay on plant
   dwellDuration: 1.5, // 1.5 seconds when dwell mode is enabled
 };
 
@@ -63,7 +60,7 @@ const DEFAULT_CONFIG: Required<ObservationSystemConfig> = {
  */
 export class ObservationSystem {
   private plants: Plant[];
-  private getReticlePosition: () => Vector2;
+  private getCursorPosition: () => Vector2;
   private onObservation: (payload: ObservationPayload) => void;
   private config: Required<ObservationSystemConfig>;
 
@@ -90,12 +87,12 @@ export class ObservationSystem {
 
   constructor(
     plants: Plant[],
-    getReticlePosition: () => Vector2,
+    getCursorPosition: () => Vector2,
     onObservation: (payload: ObservationPayload) => void,
     config: ObservationSystemConfig = {}
   ) {
     this.plants = plants;
-    this.getReticlePosition = getReticlePosition;
+    this.getCursorPosition = getCursorPosition;
     this.onObservation = onObservation;
     this.config = { ...DEFAULT_CONFIG, ...config };
 
@@ -156,17 +153,17 @@ export class ObservationSystem {
   private checkForObservation(deltaTime: number = 0): void {
     if (!this.activeRegion) return;
 
-    const reticlePos = this.getReticlePosition();
+    const cursorPos = this.getCursorPosition();
 
-    // Check if reticle is within region
-    if (!this.isPointInCircle(reticlePos, this.activeRegion.center, this.activeRegion.radius)) {
+    // Check if cursor is within region
+    if (!this.isPointInCircle(cursorPos, this.activeRegion.center, this.activeRegion.radius)) {
       // Reset dwell if cursor leaves region
       this.resetDwellState();
       return;
     }
 
-    // Find eligible plant (unobserved, fully contained in region, overlapping reticle)
-    const eligiblePlant = this.findEligiblePlant(reticlePos);
+    // Find eligible plant (unobserved, fully contained in region, overlapping cursor)
+    const eligiblePlant = this.findEligiblePlant(cursorPos);
 
     if (!eligiblePlant) {
       // No eligible plant under cursor - reset dwell
@@ -233,9 +230,9 @@ export class ObservationSystem {
    * Eligibility criteria:
    * - Plant is unobserved
    * - Plant's full bounding box is within active region
-   * - Reticle overlaps any part of the plant
+   * - Cursor overlaps any part of the plant
    */
-  private findEligiblePlant(reticlePos: Vector2): Plant | null {
+  private findEligiblePlant(cursorPos: Vector2): Plant | null {
     if (!this.activeRegion) return null;
 
     const halfPlantSize = this.config.plantSize / 2;
@@ -267,8 +264,8 @@ export class ObservationSystem {
         continue;
       }
 
-      // Check if reticle overlaps plant
-      if (this.isPointInBoundingBox(reticlePos, plantBounds)) {
+      // Check if cursor overlaps plant
+      if (this.isPointInBoundingBox(cursorPos, plantBounds)) {
         return plant;
       }
     }
@@ -284,7 +281,6 @@ export class ObservationSystem {
     const payload: ObservationPayload = {
       plantId: plant.id,
       regionId: this.activeRegion!.id,
-      reticleId: "system-reticle",
       timestamp: new Date(),
     };
 

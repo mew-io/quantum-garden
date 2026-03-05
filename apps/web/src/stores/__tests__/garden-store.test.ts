@@ -16,7 +16,6 @@ function resetStore() {
   useGardenStore.setState({
     plants: [],
     activeRegion: null,
-    reticle: null,
     dwellTarget: null,
     dwellProgress: 0,
     isInCooldown: false,
@@ -409,55 +408,6 @@ describe("Garden Store", () => {
       setHistoricalEventsLoaded(true);
 
       expect(useGardenStore.getState().historicalEventsLoaded).toBe(true);
-    });
-  });
-
-  describe("reticle state", () => {
-    it("should start with null reticle", () => {
-      const state = useGardenStore.getState();
-      expect(state.reticle).toBeNull();
-    });
-
-    it("should set reticle", () => {
-      const { setReticle } = useGardenStore.getState();
-      const reticle = {
-        id: "reticle-1",
-        position: { x: 100, y: 100 },
-        size: 5,
-        velocity: { x: 1, y: 0 },
-        nextDirectionChange: 2.5,
-      };
-
-      setReticle(reticle);
-
-      expect(useGardenStore.getState().reticle).toEqual(reticle);
-    });
-
-    it("should update reticle position", () => {
-      const { setReticle, updateReticlePosition } = useGardenStore.getState();
-      const reticle = {
-        id: "reticle-1",
-        position: { x: 100, y: 100 },
-        size: 5,
-        velocity: { x: 1, y: 0 },
-        nextDirectionChange: 2.5,
-      };
-      setReticle(reticle);
-
-      updateReticlePosition({ x: 200, y: 150 });
-
-      const state = useGardenStore.getState();
-      expect(state.reticle?.position).toEqual({ x: 200, y: 150 });
-      // Other properties should remain unchanged
-      expect(state.reticle?.velocity).toEqual({ x: 1, y: 0 });
-    });
-
-    it("should not update position when reticle is null", () => {
-      const { updateReticlePosition } = useGardenStore.getState();
-
-      updateReticlePosition({ x: 200, y: 150 });
-
-      expect(useGardenStore.getState().reticle).toBeNull();
     });
   });
 

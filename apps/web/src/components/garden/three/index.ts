@@ -12,7 +12,6 @@ export type { RenderablePlant } from "./plants/plant-instancer";
 
 // Overlay components
 export { OverlayManager } from "./overlays";
-export { ReticleOverlay, type ControlMode } from "./overlays/reticle-overlay";
 export { EntanglementOverlay } from "./overlays/entanglement-overlay";
 export { DwellOverlay } from "./overlays/dwell-overlay";
 export { FeedbackOverlay } from "./overlays/feedback-overlay";

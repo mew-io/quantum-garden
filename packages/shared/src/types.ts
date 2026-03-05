@@ -125,7 +125,7 @@ export interface QuantumRecord {
  * An observation event recording when a plant was observed.
  *
  * Observations are rare, deliberate, and irreversible. They occur when
- * the reticle overlaps an eligible plant for the required dwell duration.
+ * the cursor dwells on an eligible plant for the required duration.
  */
 export interface ObservationEvent {
   id: string;
@@ -153,29 +153,11 @@ export interface ObservationRegion {
 }
 
 /**
- * The system reticle that drifts autonomously through the garden.
- *
- * The reticle represents system attention, not user control.
- * It moves slowly with gentle pauses and direction changes.
- */
-export interface Reticle {
-  id: string;
-  position: Position;
-  /** Size in pixels (typically 3x3 or 5x5) */
-  size: number;
-  /** Current velocity in pixels per second */
-  velocity: Position;
-  /** Time until next direction change (seconds) */
-  nextDirectionChange: number;
-}
-
-/**
  * Payload sent to the backend when observation completes.
  */
 export interface ObservationPayload {
   plantId: string;
   regionId: string;
-  reticleId: string;
   timestamp: Date;
 }
 

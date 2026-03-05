@@ -12,7 +12,7 @@
  * When true, animations should be minimized or disabled:
  * - Shimmer effects should be static
  * - Collapse transitions should be instant
- * - Reticle movement can be slower or paused
+ * - Dwell progress animations can be simplified
  *
  * @returns true if the user prefers reduced motion
  */

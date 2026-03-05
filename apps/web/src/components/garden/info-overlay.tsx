@@ -99,17 +99,19 @@ export function InfoOverlay({ forceShow = false, onDismiss, onStartTour }: InfoO
 
         {/* Device-specific instructions */}
         <div className="bg-[--wc-paper]/60 rounded-lg p-4 mb-4">
-          {isTouch ? (
-            <p className="text-[--wc-ink-soft] text-sm">
-              <span className="text-blue-700 font-medium">Touch and hold</span> on a plant to
-              observe it.
-            </p>
-          ) : (
-            <p className="text-[--wc-ink-soft] text-sm">
-              The <span className="text-blue-700 font-medium">reticle</span> drifts across the
-              garden. When it aligns with a plant, observation begins automatically.
-            </p>
-          )}
+          <p className="text-[--wc-ink-soft] text-sm">
+            {isTouch ? (
+              <>
+                <span className="text-blue-700 font-medium">Touch and hold</span> on a plant to
+                observe it.
+              </>
+            ) : (
+              <>
+                <span className="text-blue-700 font-medium">Hover over a plant</span> and hold to
+                observe it. Its quantum traits will be revealed.
+              </>
+            )}
+          </p>
         </div>
 
         {/* Entanglement explanation */}
@@ -134,12 +136,6 @@ export function InfoOverlay({ forceShow = false, onDismiss, onStartTour }: InfoO
               Keyboard Shortcuts
             </p>
             <div className="flex justify-center gap-4 text-sm">
-              <div className="flex items-center gap-1.5">
-                <kbd className="px-2 py-1 bg-[--wc-paper] text-[--wc-ink-soft] rounded text-xs font-mono border border-[--wc-stone]/40">
-                  T
-                </kbd>
-                <span className="text-[--wc-ink-muted]">Timeline</span>
-              </div>
               <div className="flex items-center gap-1.5">
                 <kbd className="px-2 py-1 bg-[--wc-paper] text-[--wc-ink-soft] rounded text-xs font-mono border border-[--wc-stone]/40">
                   ?

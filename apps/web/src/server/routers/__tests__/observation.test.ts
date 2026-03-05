@@ -3,6 +3,9 @@
  *
  * Tests the complete observation flow from recording an observation
  * through to plant state collapse with mock trait generation.
+ *
+ * These tests require a running PostgreSQL database (DATABASE_URL must be set).
+ * They are automatically skipped in CI environments without a database.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -48,7 +51,8 @@ async function cleanup() {
   testIds.events = [];
 }
 
-describe("observationRouter", () => {
+// Skip entire suite when no database is available (e.g. CI without Postgres)
+describe.skipIf(!process.env.DATABASE_URL)("observationRouter", () => {
   beforeEach(async () => {
     await cleanup();
   });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { GardenScene } from "@/components/garden/three";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { InfoOverlay } from "@/components/garden/info-overlay";
+
 import { DebugPanel } from "@/components/garden/debug-panel";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
@@ -13,14 +13,12 @@ import { EventDetailModal } from "@/components/garden/event-detail-modal";
 import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
-import { OnboardingTour } from "@/components/garden/onboarding-tour";
+
 import { trpc } from "@/lib/trpc/client";
 
 export default function Home() {
   // Panel visibility states
   const [isDebugOpen, setIsDebugOpen] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [isTourActive, setIsTourActive] = useState(false);
 
   // Fetch earliest plant creation time to determine garden age
   const { isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
@@ -48,15 +46,9 @@ export default function Home() {
         });
       }
 
-      // ? - Show help
-      if (e.key === "?") {
-        setShowHelp(true);
-      }
-
       // Escape - Close all panels
       if (e.key === "Escape") {
         setIsDebugOpen(false);
-        setShowHelp(false);
       }
     };
 
@@ -91,15 +83,9 @@ export default function Home() {
               return newValue;
             });
           }}
-          onShowHelp={() => setShowHelp(true)}
         />
 
         {/* Panels */}
-        <InfoOverlay
-          forceShow={showHelp}
-          onDismiss={() => setShowHelp(false)}
-          onStartTour={() => setIsTourActive(true)}
-        />
         <DebugPanel
           isOpen={isDebugOpen}
           onToggle={(newValue) => {
@@ -118,7 +104,6 @@ export default function Home() {
         <EventDetailModal />
         <CooldownIndicator />
         <KeyboardShortcutHint />
-        <OnboardingTour isActive={isTourActive} onComplete={() => setIsTourActive(false)} />
       </main>
     </ErrorBoundary>
   );

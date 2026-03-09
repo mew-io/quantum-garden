@@ -15,7 +15,6 @@ const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
  *
  * Provides visible buttons for:
  * - Debug panel toggle (hidden in production)
- * - Help/info toggle
  * - Sound toggle
  * - Status indicator showing garden activity
  */
@@ -23,10 +22,9 @@ const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 interface ToolbarProps {
   isDebugOpen: boolean;
   onDebugToggle: () => void;
-  onShowHelp: () => void;
 }
 
-export function Toolbar({ isDebugOpen, onDebugToggle, onShowHelp }: ToolbarProps) {
+export function Toolbar({ isDebugOpen, onDebugToggle }: ToolbarProps) {
   const { plants } = useGardenStore();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const { isEnabled: isSoundEnabled, toggleEnabled: toggleSound, init: initAudio } = useAudio();
@@ -64,15 +62,6 @@ export function Toolbar({ isDebugOpen, onDebugToggle, onShowHelp }: ToolbarProps
 
         {/* Divider */}
         <div className="w-px h-6 bg-[--wc-stone]/30" />
-
-        {/* Help Button */}
-        <ToolbarButton
-          icon={<HelpIcon />}
-          label="Help"
-          shortcut="?"
-          onClick={onShowHelp}
-          active={false}
-        />
 
         {/* Sound Toggle */}
         <ToolbarButton
@@ -124,7 +113,6 @@ export function Toolbar({ isDebugOpen, onDebugToggle, onShowHelp }: ToolbarProps
 
           {/* General shortcuts */}
           <div className="space-y-2">
-            <ShortcutRow shortcut="?" description="Show help" />
             <ShortcutRow shortcut="`" description="Toggle debug panel" />
             <ShortcutRow shortcut="Esc" description="Close panels" />
           </div>
@@ -250,23 +238,6 @@ function ShortcutRow({ shortcut, description }: { shortcut: string; description:
 }
 
 // Icons
-function HelpIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-      <circle cx="12" cy="17" r="0.5" fill="currentColor" />
-    </svg>
-  );
-}
-
 function BugIcon() {
   return (
     <svg

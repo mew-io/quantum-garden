@@ -20,6 +20,26 @@ import {
 } from "@quantum-garden/shared";
 
 /** Visual constants for vector plants */
+/** Per-category scale multipliers for visual hierarchy */
+function getCategoryScale(variantId: string): number {
+  const id = variantId.toLowerCase();
+  if (id.includes("tree") || id.includes("oak") || id.includes("pine") || id.includes("willow"))
+    return 3.5;
+  if (id.includes("shrub") || id.includes("bush") || id.includes("thicket") || id.includes("vine"))
+    return 3.5;
+  if (id.includes("grass") || id.includes("fern") || id.includes("reed") || id.includes("tuft"))
+    return 2.5;
+  if (id.includes("ethereal") || id.includes("spirit") || id.includes("wisp")) return 3;
+  if (
+    id.includes("moss") ||
+    id.includes("lichen") ||
+    id.includes("ground") ||
+    id.includes("pebble")
+  )
+    return 2;
+  return 2; // flowers and default
+}
+
 const VECTOR_PLANT_CONFIG = {
   /** Number of segments for circle approximation */
   CIRCLE_SEGMENTS: 64,
@@ -346,7 +366,7 @@ export class VectorPlantOverlay {
     keyframe: VectorKeyframe | InterpolatedVectorKeyframe
   ): void {
     const isTransitioning = isInterpolatedVectorKeyframe(keyframe);
-    const scale = keyframe.scale ?? 1.0;
+    const scale = (keyframe.scale ?? 1.0) * getCategoryScale(plant.variantId);
 
     // For static keyframes, try to use cached meshes
     if (!isTransitioning) {
@@ -463,7 +483,7 @@ export class VectorPlantOverlay {
     }
 
     // Position the plant group
-    const scale = keyframe.scale ?? 1.0;
+    const scale = (keyframe.scale ?? 1.0) * getCategoryScale(plant.variantId);
     plantGroup.position.set(plant.position.x, plant.position.y, VECTOR_PLANT_CONFIG.Z_POSITION);
     plantGroup.scale.set(scale, scale, 1);
   }

@@ -37,6 +37,16 @@ const Z_LAYERS: Record<string, number> = {
   ethereal: 50,
 };
 
+/** Per-category scale multipliers for visual hierarchy */
+const CATEGORY_SCALE: Record<string, number> = {
+  "ground-cover": 2,
+  grass: 2.5,
+  flower: 2,
+  shrub: 3.5,
+  tree: 3.5,
+  ethereal: 3,
+};
+
 /**
  * Interface for plant data needed for rendering.
  */
@@ -478,9 +488,10 @@ export class PlantInstancer {
     this.setPaletteColors(index, palette);
 
     // Set state (opacity, scale, visualState, transitionProgress)
+    const categoryScale = CATEGORY_SCALE[category] ?? 2;
     const stateBase = index * 4;
     this.instanceState[stateBase] = opacity;
-    this.instanceState[stateBase + 1] = scale;
+    this.instanceState[stateBase + 1] = scale * categoryScale;
     this.instanceState[stateBase + 2] = plant.visualState === "collapsed" ? 1 : 0;
     this.instanceState[stateBase + 3] = animState.transitionProgress;
 

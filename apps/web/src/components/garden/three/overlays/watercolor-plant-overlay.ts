@@ -28,6 +28,26 @@ import { createSeededRng, hashString, renderWatercolorElement } from "./watercol
 /** Z position for watercolor plants (above vector plants) */
 const WATERCOLOR_Z_POSITION = 61;
 
+/** Category-based scale multipliers for watercolor plants */
+function getCategoryScale(variantId: string): number {
+  const id = variantId.toLowerCase();
+  if (id.includes("tree") || id.includes("oak") || id.includes("pine") || id.includes("willow"))
+    return 3.5;
+  if (id.includes("shrub") || id.includes("bush") || id.includes("thicket") || id.includes("vine"))
+    return 3.5;
+  if (id.includes("grass") || id.includes("fern") || id.includes("reed") || id.includes("tuft"))
+    return 2.5;
+  if (id.includes("ethereal") || id.includes("spirit") || id.includes("wisp")) return 3;
+  if (
+    id.includes("moss") ||
+    id.includes("lichen") ||
+    id.includes("ground") ||
+    id.includes("pebble")
+  )
+    return 2;
+  return 2; // flowers and default
+}
+
 /**
  * Cached render state to detect when geometry needs rebuilding.
  */
@@ -181,9 +201,10 @@ export class WatercolorPlantOverlay {
       plantGroup.add(elementGroup);
     }
 
-    // Position and scale the plant — 1.4x for painterly presence
+    // Position and scale the plant — 1.4x painterly multiplier * category scale
+    const catScale = getCategoryScale(plant.variantId) * 1.4;
     plantGroup.position.set(plant.position.x, plant.position.y, WATERCOLOR_Z_POSITION);
-    plantGroup.scale.set(1.4, 1.4, 1);
+    plantGroup.scale.set(catScale, catScale, 1);
   }
 
   private clearPlantGroup(group: THREE.Group): void {

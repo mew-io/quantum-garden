@@ -1,60 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { GardenScene } from "@/components/garden/three";
 import { ErrorBoundary } from "@/components/error-boundary";
 
-import { DebugPanel } from "@/components/garden/debug-panel";
 import { EvolutionNotifications } from "@/components/garden/evolution-notifications";
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { EntanglementDetailPanel } from "@/components/garden/entanglement-detail-panel";
-import { QuantumEventLog } from "@/components/garden/quantum-event-log";
 import { EventDetailModal } from "@/components/garden/event-detail-modal";
-import { Toolbar } from "@/components/garden/toolbar";
 import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
+import { GardenDrawer } from "@/components/garden/drawer";
 
 import { trpc } from "@/lib/trpc/client";
 
 export default function Home() {
-  // Panel visibility states
-  const [isDebugOpen, setIsDebugOpen] = useState(false);
-
   // Fetch earliest plant creation time to determine garden age
   const { isLoading: isPlantsLoading } = trpc.plants.list.useQuery();
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if not typing in an input field
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      // Backtick - Toggle debug panel
-      if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        setIsDebugOpen((v) => {
-          const newValue = !v;
-          // Dispatch event for Three.js scene to react
-          window.dispatchEvent(
-            new CustomEvent("debug-visibility-change", {
-              detail: { visible: newValue },
-            })
-          );
-          return newValue;
-        });
-      }
-
-      // Escape - Close all panels
-      if (e.key === "Escape") {
-        setIsDebugOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   return (
     <ErrorBoundary>
@@ -69,38 +30,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* Toolbar with visible controls */}
-        <Toolbar
-          isDebugOpen={isDebugOpen}
-          onDebugToggle={() => {
-            setIsDebugOpen((v) => {
-              const newValue = !v;
-              window.dispatchEvent(
-                new CustomEvent("debug-visibility-change", {
-                  detail: { visible: newValue },
-                })
-              );
-              return newValue;
-            });
-          }}
-        />
+        {/* Consolidated drawer (replaces Toolbar, DebugPanel, QuantumEventLog) */}
+        <GardenDrawer />
 
-        {/* Panels */}
-        <DebugPanel
-          isOpen={isDebugOpen}
-          onToggle={(newValue) => {
-            setIsDebugOpen(newValue);
-            window.dispatchEvent(
-              new CustomEvent("debug-visibility-change", {
-                detail: { visible: newValue },
-              })
-            );
-          }}
-        />
+        {/* Independent widgets */}
         <EvolutionNotifications />
         <ObservationContextPanel />
         <EntanglementDetailPanel />
-        <QuantumEventLog />
         <EventDetailModal />
         <CooldownIndicator />
         <KeyboardShortcutHint />

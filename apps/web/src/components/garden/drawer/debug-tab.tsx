@@ -12,16 +12,10 @@ import {
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
 
-/**
- * Format relative time since a timestamp.
- * Returns human-readable strings like "just now", "2m ago", "1h ago"
- */
 function formatRelativeTime(timestamp: number | null): string {
   if (!timestamp) return "—";
-
   const now = Date.now();
   const diff = now - timestamp;
-
   if (diff < 10_000) return "just now";
   if (diff < 60_000) return `${Math.floor(diff / 1000)}s ago`;
   if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
@@ -29,55 +23,16 @@ function formatRelativeTime(timestamp: number | null): string {
   return `${Math.floor(diff / 86400_000)}d ago`;
 }
 
-/**
- * Check if debug mode is enabled via environment variable.
- * Set NEXT_PUBLIC_DEBUG_ENABLED=false to hide debug features.
- * Defaults to true (debug toggle always available).
- */
-const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
-
-interface DebugPanelProps {
-  isOpen?: boolean;
-  onToggle?: (isOpen: boolean) => void;
+interface DebugTabProps {
+  isActive: boolean;
 }
 
-/**
- * Debug panel for viewing quantum garden internals.
- * Toggle with backtick (`) key or via toolbar button.
- *
- * Features:
- * - Garden overview statistics
- * - Quantum service status and configuration
- * - Observation system mode toggle
- * - Live log message display with filtering
- * - System state indicators
- * - Selected plant details
- *
- * Note: Debug panel is disabled in production by default.
- * Set NEXT_PUBLIC_DEBUG_ENABLED=true to enable in production.
- */
-export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
-  const [internalVisible, setInternalVisible] = useState(false);
-
-  // Use external control if provided, otherwise internal state
-  // Debug disabled check happens at render time, not before hooks
-  const isVisible = isDebugEnabled && (isOpen !== undefined ? isOpen : internalVisible);
-  const setIsVisible = useCallback(
-    (value: boolean | ((prev: boolean) => boolean)) => {
-      const newValue = typeof value === "function" ? value(isVisible) : value;
-      if (onToggle) {
-        onToggle(newValue);
-      } else {
-        setInternalVisible(newValue);
-      }
-    },
-    [isVisible, onToggle]
-  );
+export function DebugTab({ isActive }: DebugTabProps) {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [observationMode, setObservationMode] = useState<"region" | "click">("region");
   const [showModeConfirm, setShowModeConfirm] = useState(false);
-  const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0); // 0 = stacked ghosts, 1 = flickering
-  const [activeTab, setActiveTab] = useState<"overview" | "logs" | "plants">("overview");
+  const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0);
+  const [activeSubTab, setActiveSubTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
     levels: LogLevel[];
@@ -86,7 +41,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     levels: ["debug", "info", "warn", "error"],
   });
 
-  // Get garden store state
   const {
     evolutionPaused,
     evolutionStats,
@@ -96,76 +50,29 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     performanceStats,
   } = useGardenStore();
 
-  // Get debug logs
   const allLogs = useDebugLogs();
   const filteredLogs = filterLogs(allLogs, logFilters);
 
-  // Fetch all plants for overview
   const { data: plants, refetch: refetchPlants } = trpc.plants.list.useQuery(undefined, {
-    enabled: isVisible,
-    refetchInterval: isVisible ? 2000 : false,
+    enabled: isActive,
+    refetchInterval: isActive ? 2000 : false,
   });
 
-  // Fetch quantum service configuration
   const { data: quantumConfig, refetch: refetchConfig } = trpc.quantum.getConfig.useQuery(
     undefined,
     {
-      enabled: isVisible,
-      refetchInterval: isVisible ? 5000 : false,
+      enabled: isActive,
+      refetchInterval: isActive ? 5000 : false,
     }
   );
 
-  // Fetch job queue statistics
   const { data: jobStats, refetch: refetchJobStats } = trpc.quantum.getJobStats.useQuery(
     undefined,
     {
-      enabled: isVisible,
-      refetchInterval: isVisible ? 2000 : false,
+      enabled: isActive,
+      refetchInterval: isActive ? 2000 : false,
     }
   );
-
-  // Toggle visibility with backtick key (only when not externally controlled and debug is enabled)
-  useEffect(() => {
-    // Skip if debug is disabled or externally controlled
-    if (!isDebugEnabled || isOpen !== undefined) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        setIsVisible((v) => {
-          const newVisibility = !v;
-          window.dispatchEvent(
-            new CustomEvent("debug-visibility-change", {
-              detail: { visible: newVisibility },
-            })
-          );
-          // Log visibility change
-          if (newVisibility) {
-            debugLogger.system.info("Debug panel opened");
-          }
-          return newVisibility;
-        });
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, setIsVisible]);
-
-  // Sync debug overlay visibility when isVisible changes from external control (toolbar button)
-  useEffect(() => {
-    // Only dispatch if using external control (isOpen prop is defined)
-    if (isOpen !== undefined) {
-      window.dispatchEvent(
-        new CustomEvent("debug-visibility-change", {
-          detail: { visible: isOpen },
-        })
-      );
-      if (isOpen) {
-        debugLogger.system.info("Debug panel opened via toolbar");
-      }
-    }
-  }, [isOpen]);
 
   // Listen for plant selection events from the canvas
   useEffect(() => {
@@ -184,18 +91,15 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
       );
   }, []);
 
-  // Show confirmation dialog before switching observation mode
   const requestModeChange = useCallback(() => {
     setShowModeConfirm(true);
   }, []);
 
-  // Actually perform the observation mode change after confirmation
   const confirmModeChange = useCallback(() => {
     const newMode = observationMode === "region" ? "click" : "region";
     setObservationMode(newMode);
     setShowModeConfirm(false);
     debugLogger.observation.info(`Observation mode changed to ${newMode}`);
-
     window.dispatchEvent(
       new CustomEvent("observation-mode-change", {
         detail: { mode: newMode, debugMode: newMode === "click" },
@@ -203,19 +107,16 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     );
   }, [observationMode]);
 
-  // Cancel the mode change
   const cancelModeChange = useCallback(() => {
     setShowModeConfirm(false);
   }, []);
 
-  // Toggle superposition visualization mode
   const toggleSuperpositionMode = useCallback(() => {
     const newMode = superpositionMode === 0 ? 1 : 0;
     setSuperpositionMode(newMode);
     debugLogger.rendering.info(
       `Superposition mode changed to ${newMode === 0 ? "stacked ghosts" : "flickering"}`
     );
-
     window.dispatchEvent(
       new CustomEvent("superposition-mode-change", {
         detail: { mode: newMode },
@@ -223,7 +124,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     );
   }, [superpositionMode]);
 
-  // Toggle category filter
   const toggleCategory = (category: LogCategory) => {
     setLogFilters((prev) => ({
       ...prev,
@@ -233,7 +133,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     }));
   };
 
-  // Toggle level filter
   const toggleLevel = (level: LogLevel) => {
     setLogFilters((prev) => ({
       ...prev,
@@ -243,10 +142,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
     }));
   };
 
-  if (!isVisible) {
-    return null;
-  }
-
   const observedCount = plants?.filter((p: Plant) => p.observed).length ?? 0;
   const germinatedCount = plants?.filter((p: Plant) => p.germinatedAt !== null).length ?? 0;
   const dormantCount = plants?.filter((p: Plant) => p.germinatedAt === null).length ?? 0;
@@ -254,29 +149,15 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   const selectedPlant = plants?.find((p: Plant) => p.id === selectedPlantId);
 
   return (
-    <div className="fixed top-[var(--inset-top)] right-[var(--inset-right)] z-50 w-96 max-h-[85vh] overflow-hidden garden-panel rounded-xl text-sm flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 bg-[--wc-cream] px-4 py-3 border-b border-[--wc-stone]/20 flex justify-between items-center">
-        <h3 className="text-[--wc-ink] font-medium flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Quantum Debug
-        </h3>
-        <button
-          onClick={() => setIsVisible(false)}
-          className="text-[--wc-ink-muted] hover:text-[--wc-ink-soft] text-xs"
-        >
-          [`] to close
-        </button>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex border-b border-[--wc-stone]/20 bg-[--wc-paper]/60">
+    <div className="flex flex-col h-full relative">
+      {/* Sub-tab Navigation */}
+      <div className="flex border-b border-[--wc-stone]/20 bg-[--wc-paper]/60 flex-shrink-0">
         {(["overview", "logs", "plants"] as const).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => setActiveSubTab(tab)}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-              activeTab === tab
+              activeSubTab === tab
                 ? "text-emerald-700 border-b-2 border-emerald-600"
                 : "text-[--wc-ink-muted] hover:text-[--wc-ink-soft]"
             }`}
@@ -289,11 +170,10 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
         ))}
       </div>
 
-      {/* Tab Content */}
+      {/* Sub-tab Content */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {activeTab === "overview" && (
+        {activeSubTab === "overview" && (
           <>
-            {/* Performance Metrics */}
             {performanceStats && (
               <section>
                 <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
@@ -328,7 +208,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </section>
             )}
 
-            {/* System State Indicators */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 System State
@@ -357,7 +236,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                   />
                 )}
               </div>
-              {/* Evolution Stats from Store */}
               {evolutionStats && (
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <span className="text-[--wc-ink-muted]">
@@ -378,7 +256,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               )}
             </section>
 
-            {/* Garden Overview */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 Garden Stats
@@ -393,7 +270,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </div>
             </section>
 
-            {/* Quantum Service Status */}
             {quantumConfig && (
               <section>
                 <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
@@ -434,7 +310,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </section>
             )}
 
-            {/* Job Queue Stats */}
             {jobStats && (
               <section>
                 <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
@@ -449,7 +324,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </section>
             )}
 
-            {/* Observation Mode Toggle */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 Controls
@@ -488,7 +362,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </div>
             </section>
 
-            {/* UI Preferences Reset */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 UI Preferences
@@ -496,21 +369,27 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               <UIPreferencesSection />
             </section>
 
-            {/* Keyboard Shortcuts */}
             <section>
-              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
-                Keyboard Shortcuts
-              </h4>
-              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1 text-xs">
-                <ShortcutRow shortcut="`" description="Toggle debug panel" />
+              <div className="flex justify-between items-center">
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide">Actions</h4>
               </div>
+              <button
+                onClick={() => {
+                  refetchPlants();
+                  refetchConfig();
+                  refetchJobStats();
+                  debugLogger.system.debug("Manual refresh triggered");
+                }}
+                className="mt-2 w-full py-1.5 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
+              >
+                Refresh All
+              </button>
             </section>
           </>
         )}
 
-        {activeTab === "logs" && (
+        {activeSubTab === "logs" && (
           <>
-            {/* Log Filters */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 Filters
@@ -520,7 +399,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                   {(
                     ["quantum", "observation", "evolution", "rendering", "system"] as LogCategory[]
                   ).map((cat) => (
-                    <FilterChip
+                    <DebugFilterChip
                       key={cat}
                       label={cat}
                       active={logFilters.categories.includes(cat)}
@@ -531,7 +410,7 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {(["debug", "info", "warn", "error"] as LogLevel[]).map((level) => (
-                    <FilterChip
+                    <DebugFilterChip
                       key={level}
                       label={level}
                       active={logFilters.levels.includes(level)}
@@ -543,7 +422,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </div>
             </section>
 
-            {/* Log Messages */}
             <section>
               <div className="flex justify-between items-center mb-2">
                 <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide">
@@ -573,9 +451,8 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
           </>
         )}
 
-        {activeTab === "plants" && (
+        {activeSubTab === "plants" && (
           <>
-            {/* Selected Plant Details */}
             {selectedPlant && (
               <section>
                 <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
@@ -649,7 +526,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
               </section>
             )}
 
-            {/* Plant List */}
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 All Plants ({totalCount})
@@ -660,7 +536,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
                     key={plant.id}
                     onClick={() => {
                       setSelectedPlantId(plant.id);
-                      // Dispatch event to highlight plant in debug overlay
                       window.dispatchEvent(
                         new CustomEvent("plant-debug-highlight", {
                           detail: { plantId: plant.id },
@@ -696,21 +571,6 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-[--wc-stone]/20 px-4 py-2 bg-[--wc-paper]/60">
-        <button
-          onClick={() => {
-            refetchPlants();
-            refetchConfig();
-            refetchJobStats();
-            debugLogger.system.debug("Manual refresh triggered");
-          }}
-          className="w-full py-1.5 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
-        >
-          Refresh All
-        </button>
-      </div>
-
       {/* Observation Mode Change Confirmation Dialog */}
       {showModeConfirm && (
         <div className="absolute inset-0 bg-[#3A352E]/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
@@ -742,15 +602,8 @@ export function DebugPanel({ isOpen, onToggle }: DebugPanelProps) {
   );
 }
 
-// Helper Components
+// Helper components
 
-/**
- * Stat component with smooth value transitions.
- *
- * When values change, a subtle highlight animation plays to indicate the update
- * without being jarring. Uses a brief flash effect rather than interpolating
- * values (which would feel laggy for real-time data like FPS).
- */
 function Stat({
   label,
   value,
@@ -763,13 +616,10 @@ function Stat({
   const prevValueRef = useRef<string | number>(value);
   const [isFlashing, setIsFlashing] = useState(false);
 
-  // Detect value changes and trigger flash animation
   useEffect(() => {
     if (prevValueRef.current !== value) {
       prevValueRef.current = value;
       setIsFlashing(true);
-
-      // Reset flash after animation completes
       const timer = setTimeout(() => setIsFlashing(false), 300);
       return () => clearTimeout(timer);
     }
@@ -784,7 +634,6 @@ function Stat({
     purple: "text-purple-700",
   }[color];
 
-  // Background flash color based on value color (subtle highlight)
   const flashClass = isFlashing
     ? color === "green"
       ? "bg-emerald-100/40"
@@ -809,12 +658,6 @@ function Stat({
   );
 }
 
-/**
- * Status badge with smooth state transitions.
- *
- * Colors and text smoothly transition when the active state changes,
- * providing visual feedback without jarring updates.
- */
 function StatusBadge({
   label,
   active,
@@ -849,9 +692,6 @@ function StatusBadge({
   );
 }
 
-/**
- * UI Preferences section showing dismissed UI elements and reset button.
- */
 function UIPreferencesSection() {
   const [preferences, setPreferences] = useState(() => getUIPreferences());
   const [showConfirm, setShowConfirm] = useState(false);
@@ -921,18 +761,7 @@ function UIPreferencesSection() {
   );
 }
 
-function ShortcutRow({ shortcut, description }: { shortcut: string; description: string }) {
-  return (
-    <div className="flex justify-between">
-      <span className="text-[--wc-ink-muted]">{description}</span>
-      <kbd className="bg-[--wc-paper] px-1.5 py-0.5 rounded text-[--wc-ink-soft] font-mono border border-[--wc-stone]/40">
-        {shortcut}
-      </kbd>
-    </div>
-  );
-}
-
-function FilterChip({
+function DebugFilterChip({
   label,
   active,
   onClick,

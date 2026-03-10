@@ -7,7 +7,8 @@
  * @see docs/sound-effects-plan.md for full architecture
  */
 
-import { Howl, Howler } from "howler";
+import { Howler } from "howler";
+import { type AmbientHandle, startAmbient } from "./ambient-generator";
 
 /** localStorage keys for audio preferences */
 const AUDIO_PREF_KEYS = {
@@ -21,13 +22,8 @@ const DEFAULTS = {
   VOLUME: 0.7, // 70% volume
 } as const;
 
-/** Static ambient MP3 settings */
-const AMBIENT = {
-  /** Path to ambient audio file */
-  PATH: "/sounds/ambient-loop.mp3",
-  /** Volume multiplier for ambient (relative to master) */
-  VOLUME_MULTIPLIER: 0.25, // 25% of master volume - very subtle
-} as const;
+/** Ambient volume multiplier (relative to master) — very subtle */
+const AMBIENT_VOLUME_MULTIPLIER = 0.25;
 
 /**
  * Singleton AudioManager class.
@@ -40,7 +36,7 @@ class AudioManager {
   private _volume: number = DEFAULTS.VOLUME;
   private _isInitialized: boolean = false;
 
-  private ambientLoop: Howl | null = null;
+  private ambientHandle: AmbientHandle | null = null;
 
   // Listeners for state changes
   private listeners: Set<() => void> = new Set();
@@ -79,22 +75,9 @@ class AudioManager {
     }
   }
 
-  /**
-   * Load the ambient MP3.
-   */
-  private loadAmbientSound(): void {
-    if (this.ambientLoop) return; // Already loaded
-
-    this.ambientLoop = new Howl({
-      src: [AMBIENT.PATH],
-      volume: this._volume * AMBIENT.VOLUME_MULTIPLIER,
-      html5: true,
-      preload: true,
-      onloaderror: (_id, error) => {
-        console.warn("[Audio] Failed to load ambient sound:", error);
-        this.ambientLoop = null;
-      },
-    });
+  /** Effective ambient volume based on master volume and multiplier. */
+  private get ambientVolume(): number {
+    return this._volume * AMBIENT_VOLUME_MULTIPLIER;
   }
 
   /**
@@ -195,43 +178,35 @@ class AudioManager {
   }
 
   /**
-   * Play the ambient MP3.
+   * Start the procedural ambient sound.
    * No-op if sound is disabled or not initialized.
    */
   playAmbient(): void {
     if (!this._isEnabled || !this._isInitialized) return;
 
-    // Load if not already loaded
-    if (!this.ambientLoop) {
-      this.loadAmbientSound();
-    }
-
-    if (!this.ambientLoop) return;
-
-    // If already playing, just update volume
-    if (this.ambientLoop.playing()) {
-      this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
+    if (this.ambientHandle) {
+      this.ambientHandle.setVolume(this.ambientVolume);
       return;
     }
 
-    this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
-    this.ambientLoop.play();
+    this.ambientHandle = startAmbient(this.ambientVolume);
   }
 
   /**
-   * Stop the ambient MP3.
+   * Stop the ambient sound.
    */
   stopAmbient(): void {
-    if (!this.ambientLoop || !this.ambientLoop.playing()) return;
-    this.ambientLoop.stop();
+    if (!this.ambientHandle) return;
+    this.ambientHandle.stop();
+    this.ambientHandle = null;
   }
 
   /**
    * Update ambient volume when master volume changes.
    */
   private updateAmbientVolume(): void {
-    if (!this.ambientLoop || !this.ambientLoop.playing()) return;
-    this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
+    if (!this.ambientHandle) return;
+    this.ambientHandle.setVolume(this.ambientVolume);
   }
 
   // ============ Subscription ============
@@ -258,11 +233,6 @@ class AudioManager {
    */
   dispose(): void {
     this.stopAmbient();
-
-    if (this.ambientLoop) {
-      this.ambientLoop.unload();
-      this.ambientLoop = null;
-    }
 
     this._isInitialized = false;
     this.listeners.clear();

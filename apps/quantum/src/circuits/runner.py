@@ -101,7 +101,7 @@ async def _execute_mock(circuit: QuantumCircuit, shots: int) -> ExecutionResult:
 
     This is fast and works offline, but doesn't reflect real quantum noise.
     """
-    from qiskit_aer import AerSimulator  # type: ignore[import-not-found]
+    from qiskit_aer import AerSimulator  # type: ignore[import-untyped]
 
     # Run in thread pool to avoid blocking
     loop = asyncio.get_event_loop()

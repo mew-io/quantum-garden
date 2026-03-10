@@ -23,6 +23,8 @@ import {
   createPaperTexture,
   PaperGrainShader,
   CloudShader,
+  CloudStaticShader,
+  loadCloudBackgroundTexture,
 } from "./backgrounds";
 
 export interface SceneManagerConfig {
@@ -109,7 +111,8 @@ export class SceneManager {
   // Background post-processing passes (all created, only one enabled)
   private paperPass: ShaderPass | null = null;
   private cloudPass: ShaderPass | null = null;
-  private currentBackground: BackgroundType = "clouds";
+  private cloudStaticPass: ShaderPass | null = null;
+  private currentBackground: BackgroundType = "clouds-static";
 
   private container: HTMLElement;
   private animationId: number | null = null;
@@ -283,6 +286,15 @@ export class SceneManager {
     this.cloudPass.uniforms["uTime"]!.value = 0;
     this.cloudPass.enabled = this.currentBackground === "clouds";
     this.composer.addPass(this.cloudPass);
+
+    // Static cloud background pass (image-based with blur)
+    this.cloudStaticPass = new ShaderPass(CloudStaticShader);
+    const bgTexture = loadCloudBackgroundTexture();
+    this.cloudStaticPass.uniforms["tBackground"]!.value = bgTexture;
+    (this.cloudStaticPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
+    this.cloudStaticPass.uniforms["aspectRatio"]!.value = width / height;
+    this.cloudStaticPass.enabled = this.currentBackground === "clouds-static";
+    this.composer.addPass(this.cloudStaticPass);
 
     // Output pass - handles color space conversion for final output
     const outputPass = new OutputPass();
@@ -723,9 +735,12 @@ export class SceneManager {
     this.updateCameraPan();
     this.updateUserZoom();
 
-    // Update cloud animation time
+    // Update cloud animation time (procedural + static sparkles)
     if (this.cloudPass?.enabled) {
       this.cloudPass.uniforms["uTime"]!.value += deltaTime;
+    }
+    if (this.cloudStaticPass?.enabled) {
+      this.cloudStaticPass.uniforms["uTime"]!.value += deltaTime;
     }
 
     // Render through post-processing pipeline
@@ -789,6 +804,10 @@ export class SceneManager {
       (this.cloudPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
       this.cloudPass.uniforms["aspectRatio"]!.value = vw / vh;
     }
+    if (this.cloudStaticPass) {
+      (this.cloudStaticPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
+      this.cloudStaticPass.uniforms["aspectRatio"]!.value = vw / vh;
+    }
 
     // Recalculate layout and apply camera
     this.computeLayout(vw, vh);
@@ -851,7 +870,7 @@ export class SceneManager {
     // Toggle passes
     if (this.paperPass) this.paperPass.enabled = type === "parchment";
     if (this.cloudPass) this.cloudPass.enabled = type === "clouds";
-    // "plain" = no background pass enabled
+    if (this.cloudStaticPass) this.cloudStaticPass.enabled = type === "clouds-static";
   }
 
   /**
@@ -1003,6 +1022,11 @@ export class SceneManager {
     }
     if (this.cloudPass) {
       this.cloudPass.material?.dispose();
+    }
+    if (this.cloudStaticPass) {
+      const bgTex = this.cloudStaticPass.uniforms["tBackground"]!.value as THREE.Texture | null;
+      bgTex?.dispose();
+      this.cloudStaticPass.material?.dispose();
     }
 
     // Dispose of Three.js resources

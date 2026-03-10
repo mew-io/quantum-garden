@@ -24,7 +24,7 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [detailPlantId, setDetailPlantId] = useState<string | null>(null);
   const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0);
-  const [backgroundType, setBackgroundType] = useState<BackgroundType>("clouds");
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>("clouds-static");
   const [activeSubTab, setActiveSubTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
@@ -274,7 +274,7 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
                   <span className="text-xs">Background</span>
                   <span
                     className={`text-xs font-mono px-2 py-1 rounded ${
-                      backgroundType === "clouds"
+                      backgroundType === "clouds" || backgroundType === "clouds-static"
                         ? "bg-sky-50/60 text-sky-700"
                         : backgroundType === "parchment"
                           ? "bg-amber-50/60 text-amber-700"

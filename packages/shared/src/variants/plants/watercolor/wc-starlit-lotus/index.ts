@@ -398,43 +398,6 @@ function buildWcStarlitLotusElements(ctx: WatercolorBuildContext): WatercolorEle
       ? COLORS[ctx.colorVariationName]!
       : DEFAULT_COLORS;
 
-  // === DARK WATER SURFACE ===
-  // Deep water background
-  elements.push({
-    shape: { type: "disc", radius: 38 },
-    position: { x: 32, y: 34 },
-    rotation: 0,
-    scale: 1,
-    color: colors.waterDeep,
-    opacity: 0.25,
-    zOffset: 0.01,
-  });
-
-  // Water surface
-  elements.push({
-    shape: { type: "disc", radius: 34 },
-    position: { x: 32, y: 32 },
-    rotation: 0,
-    scale: 1,
-    color: colors.water,
-    opacity: 0.2,
-    zOffset: 0.015,
-  });
-
-  // Subtle water highlights
-  const waterHighlightCount = 4 + Math.floor(rng() * 3);
-  for (let i = 0; i < waterHighlightCount; i++) {
-    elements.push({
-      shape: { type: "disc", radius: 6 + rng() * 8 },
-      position: { x: 32 + (rng() - 0.5) * 40, y: 20 + rng() * 28 },
-      rotation: 0,
-      scale: 1,
-      color: colors.waterHighlight,
-      opacity: 0.04 + rng() * 0.03,
-      zOffset: 0.02,
-    });
-  }
-
   // === LILY PADS ===
   if (leafOpenness > 0) {
     const pads = generateLilyPads(rng, Math.round(lilyPadCount));

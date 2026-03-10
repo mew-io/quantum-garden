@@ -47,6 +47,7 @@ const vertexShader = /* glsl */ `
   varying float v_transitionProgress;
   varying float v_shimmerPhase;
   varying float v_lifecycleProgress;
+  varying float v_depthT; // 0 = top/far, 1 = bottom/near
 
   void main() {
     // Pass attributes to fragment shader
@@ -90,15 +91,28 @@ const vertexShader = /* glsl */ `
       }
     }
 
-    // Depth-based scale: plants at top (far) slightly smaller, bottom (near) normal
+    // Depth factor: 0 at top (far), 1 at bottom (near)
     float depthT = clamp(instancePosition.y / u_gardenHeight, 0.0, 1.0);
-    float depthScale = mix(0.85, 1.0, depthT);
+    v_depthT = depthT;
+
+    // Depth-based scale: distant plants noticeably smaller
+    float depthScale = mix(0.6, 1.0, depthT);
+
+    // Vertical squish: distant plants compressed vertically to simulate
+    // looking at a tilted ground plane. Near plants are 1:1, far plants
+    // are squished to ~70% vertical height.
+    float verticalSquish = mix(0.7, 1.0, depthT);
 
     float finalScale = baseScale * scalePulse * lifecycleScale * depthScale;
 
     // Transform position with rotation
     // position is the local quad vertex (-0.5 to 0.5 range)
     vec3 scaled = position * u_patternSize * finalScale * u_globalPlantScale;
+
+    // Apply vertical squish (compress Y relative to plant base)
+    // Anchor to bottom of quad so plants appear grounded
+    scaled.y *= verticalSquish;
+    scaled.y += u_patternSize * finalScale * u_globalPlantScale * 0.5 * (1.0 - verticalSquish);
 
     // Apply rotation if mature plant
     if (lifecycleRotation != 0.0) {
@@ -147,6 +161,7 @@ const fragmentShader = /* glsl */ `
   varying float v_transitionProgress;
   varying float v_shimmerPhase;
   varying float v_lifecycleProgress;
+  varying float v_depthT; // 0 = top/far, 1 = bottom/near
 
   // RGB to HSV conversion
   vec3 rgb2hsv(vec3 c) {
@@ -309,6 +324,18 @@ const fragmentShader = /* glsl */ `
       float opacityVariance = sin(u_time * 0.8 + v_shimmerPhase) * 0.05;
       finalOpacity = clamp(finalOpacity + opacityVariance, 0.15, 1.0);
     }
+
+    // Atmospheric perspective: distant plants fade toward a hazy tint
+    // and lose saturation, simulating aerial haze
+    float atmosphereT = 1.0 - v_depthT; // 0 = near, 1 = far
+    float atmosphereStrength = atmosphereT * atmosphereT * 0.35; // quadratic falloff, max 35%
+    vec3 hazeColor = vec3(0.75, 0.78, 0.82); // soft blue-grey haze
+    color = mix(color, hazeColor, atmosphereStrength);
+
+    // Desaturate distant plants slightly
+    vec3 atmosHSV = rgb2hsv(color);
+    atmosHSV.y *= mix(0.55, 1.0, v_depthT); // far plants lose ~45% saturation
+    color = hsv2rgb(atmosHSV);
 
     gl_FragColor = vec4(color, finalOpacity);
 

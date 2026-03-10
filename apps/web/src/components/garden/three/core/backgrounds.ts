@@ -30,12 +30,7 @@ export const BACKGROUND_CONFIGS: Record<
 };
 
 /** All background types in cycle order */
-export const BACKGROUND_ORDER: BackgroundType[] = [
-  "clouds",
-  "clouds-static",
-  "parchment",
-  "plain",
-];
+export const BACKGROUND_ORDER: BackgroundType[] = ["clouds", "clouds-static", "parchment", "plain"];
 
 /**
  * Cloud background shader — dreamy pastel clouds with sparkles

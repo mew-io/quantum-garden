@@ -329,7 +329,10 @@ export class EntanglementOverlay {
    * Returns true when visible and there are entanglement groups or active pulses/waves.
    */
   hasActiveAnimations(): boolean {
-    return this.isVisible && (this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0);
+    return (
+      this.isVisible &&
+      (this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0)
+    );
   }
 
   /**

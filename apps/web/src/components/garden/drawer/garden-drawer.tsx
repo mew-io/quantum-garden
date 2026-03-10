@@ -46,7 +46,7 @@ export function GardenDrawer() {
     const handleOpenPlantDetail = (e: CustomEvent<{ plantId: string }>) => {
       setFocusedPlantId(e.detail.plantId);
       setIsOpen(true);
-      setActiveTab("debug");
+      setActiveTab("garden");
     };
 
     window.addEventListener(
@@ -131,14 +131,14 @@ export function GardenDrawer() {
         >
           {activeTab === "info" && <InfoTab />}
           {activeTab === "events" && <EventsTab />}
-          {activeTab === "garden" && <GardenTab />}
-          {activeTab === "debug" && (
-            <DebugTab
-              isActive={isOpen && activeTab === "debug"}
+          {activeTab === "garden" && (
+            <GardenTab
+              isActive={isOpen && activeTab === "garden"}
               focusedPlantId={focusedPlantId}
               onFocusedPlantHandled={() => setFocusedPlantId(null)}
             />
           )}
+          {activeTab === "debug" && <DebugTab isActive={isOpen && activeTab === "debug"} />}
         </div>
       </div>
 

@@ -14,18 +14,16 @@ import {
   getEffectivePalette,
   computeLifecycleState,
 } from "@quantum-garden/shared";
-import type { ObservationPayload, Plant } from "@quantum-garden/shared";
+import type { Plant } from "@quantum-garden/shared";
 import { SceneManager } from "./core/scene-manager";
 import { PlantInstancer, type RenderablePlant } from "./plants/plant-instancer";
 import { disposeTextureAtlas } from "./core/texture-atlas";
 import { OverlayManager } from "./overlays";
-import { ObservationSystem } from "@/components/garden/observation-system";
-import { useObservation } from "@/hooks/use-observation";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
 import { debugLogger } from "@/lib/debug-logger";
-import { isFirstObservation } from "@/lib/first-observation";
+import { isFirstObservation, markFirstObservationComplete } from "@/lib/first-observation";
 import { audioManager } from "@/lib/audio/audio-manager";
 
 /**
@@ -105,27 +103,23 @@ function hexToHue(hex: string): number {
  * Renders the quantum garden with efficient instanced rendering.
  * Plants, observation regions, and cursor-based observation are all managed here.
  */
+/** Auto-observation timeout in milliseconds */
+const AUTO_OBSERVE_TIMEOUT = 30_000;
+
 export function GardenScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const plantInstancerRef = useRef<PlantInstancer | null>(null);
   const overlayManagerRef = useRef<OverlayManager | null>(null);
-  const observationSystemRef = useRef<ObservationSystem | null>(null);
-
-  // Observation hook for quantum measurement
-  const { triggerObservation } = useObservation();
 
   // Load plants from server into store (polls every 5s to pick up server-side evolution)
   // Evolution now runs server-side via cron/worker - client is just a viewer
   usePlants();
 
-  // Track cursor position in world coordinates for observation system
-  // Offscreen default so nothing triggers when cursor is outside the canvas
-  const cursorWorldPos = useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
-
-  // Store callback ref to keep it stable across renders
-  const observationCallbackRef = useRef<(payload: ObservationPayload) => void>(() => {});
-  observationCallbackRef.current = triggerObservation;
+  // Track which plants have been observed client-side (not persisted to server)
+  const observedPlantsRef = useRef<Set<string>>(new Set());
+  // Track auto-observation timers per plant
+  const autoObserveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -196,72 +190,103 @@ export function GardenScene() {
       });
     }
 
-    // Track cursor/touch position for observation system
-    const handlePointerMove = (event: PointerEvent) => {
-      cursorWorldPos.current = sceneManager.screenToWorld(event.clientX, event.clientY);
-    };
-    const handlePointerLeave = () => {
-      cursorWorldPos.current = { x: -9999, y: -9999 };
-    };
-    sceneManager.canvas.addEventListener("pointermove", handlePointerMove);
-    sceneManager.canvas.addEventListener("pointerleave", handlePointerLeave);
+    /**
+     * Observe a plant (client-side only).
+     * Marks it as collapsed in the local store and triggers celebration feedback.
+     */
+    const observePlant = (plantId: string) => {
+      if (observedPlantsRef.current.has(plantId)) return;
+      observedPlantsRef.current.add(plantId);
 
-    // Initialize observation system (cursor-driven observation with dwell)
-    const observationSystem = new ObservationSystem(
-      initialPlants,
-      () => cursorWorldPos.current,
-      (payload) => {
-        // Check if this is the user's first observation before triggering callback
-        const isFirst = isFirstObservation();
+      // Cancel any pending auto-observe timer
+      const timer = autoObserveTimersRef.current.get(plantId);
+      if (timer) {
+        clearTimeout(timer);
+        autoObserveTimersRef.current.delete(plantId);
+      }
 
-        observationCallbackRef.current(payload);
+      // Update plant in local store (client-side only, not persisted)
+      const store = useGardenStore.getState();
+      store.updatePlant(plantId, {
+        observed: true,
+        visualState: "collapsed",
+      });
 
-        // Find the observed plant
-        const plant = useGardenStore.getState().plants.find((p) => p.id === payload.plantId);
-        if (plant) {
-          // Get plant's primary color for celebration feedback
-          const primaryColor = getPlantPrimaryColor(plant);
+      // Find the plant for feedback
+      const plant = store.plants.find((p) => p.id === plantId);
+      if (!plant) return;
 
-          // Trigger celebration feedback - enhanced for first observation
-          if (isFirst) {
-            overlayManager.feedback.triggerFirstObservationCelebration(
-              plant.position.x,
-              plant.position.y
-            );
-          } else {
-            overlayManager.feedback.triggerCelebration(
-              plant.position.x,
-              plant.position.y,
-              primaryColor
-            );
+      const isFirst = isFirstObservation();
+      const primaryColor = getPlantPrimaryColor(plant);
+      const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
+      const hue = primaryColor ? hexToHue(primaryColor) : 120;
+
+      // Visual celebration
+      if (isFirst) {
+        overlayManager.feedback.triggerFirstObservationCelebration(
+          plant.position.x,
+          plant.position.y
+        );
+        audioManager.playEffect("firstObservation", { pan, hue });
+        markFirstObservationComplete();
+      } else {
+        overlayManager.feedback.triggerCelebration(
+          plant.position.x,
+          plant.position.y,
+          primaryColor
+        );
+        audioManager.playEffect("observation", { pan, hue });
+      }
+
+      // Entanglement pulse if applicable
+      if (plant.entanglementGroupId) {
+        overlayManager.entanglement.triggerPulse(plant.entanglementGroupId);
+        audioManager.playEffect("entanglement", { pan });
+
+        // Also observe entangled partners
+        const partners = store.plants.filter(
+          (p) => p.entanglementGroupId === plant.entanglementGroupId && p.id !== plantId
+        );
+        for (const partner of partners) {
+          if (!observedPlantsRef.current.has(partner.id)) {
+            observedPlantsRef.current.add(partner.id);
+            const partnerTimer = autoObserveTimersRef.current.get(partner.id);
+            if (partnerTimer) {
+              clearTimeout(partnerTimer);
+              autoObserveTimersRef.current.delete(partner.id);
+            }
+            store.updatePlant(partner.id, {
+              observed: true,
+              visualState: "collapsed",
+            });
           }
-
-          // Calculate audio panning from plant position
-          const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
-
-          // Extract hue from color for observation tone (default 120 = green)
-          const hue = primaryColor ? hexToHue(primaryColor) : 120;
-
-          // Play observation sound (enhanced for first observation)
-          if (isFirst) {
-            audioManager.playEffect("firstObservation", { pan, hue });
-          } else {
-            audioManager.playEffect("observation", { pan, hue });
-          }
-
-          // Trigger entanglement pulse if plant is entangled
-          if (plant.entanglementGroupId) {
-            overlayManager.entanglement.triggerPulse(plant.entanglementGroupId);
-            // Play entanglement harmony sound
-            audioManager.playEffect("entanglement", { pan });
-          }
-
-          // Haptic feedback
-          hapticSuccess();
         }
       }
-    );
-    observationSystemRef.current = observationSystem;
+
+      hapticSuccess();
+    };
+
+    /**
+     * Start auto-observation timer for an unobserved plant.
+     * After AUTO_OBSERVE_TIMEOUT, the plant automatically collapses.
+     */
+    const startAutoObserveTimer = (plantId: string) => {
+      if (observedPlantsRef.current.has(plantId)) return;
+      if (autoObserveTimersRef.current.has(plantId)) return;
+
+      const timer = setTimeout(() => {
+        autoObserveTimersRef.current.delete(plantId);
+        observePlant(plantId);
+      }, AUTO_OBSERVE_TIMEOUT);
+      autoObserveTimersRef.current.set(plantId, timer);
+    };
+
+    // Start auto-observe timers for initial germinated plants
+    for (const plant of initialPlants) {
+      if (!plant.observed && plant.germinatedAt) {
+        startAutoObserveTimer(plant.id);
+      }
+    }
 
     // Subscribe to store changes
     const unsubscribe = useGardenStore.subscribe((state, prevState) => {
@@ -270,12 +295,12 @@ export function GardenScene() {
       if (state.plants !== prevState.plants) {
         plantInstancer.syncPlants(convertToRenderable(state.plants));
         overlayManager.setPlants(state.plants);
-        observationSystem.updatePlants(state.plants);
 
-        // Detect germinations and trigger particle effects + audio
+        // Detect germinations and start auto-observe timers
         for (const plant of state.plants) {
           const prevPlant = prevState.plants.find((p) => p.id === plant.id);
-          // Check if this plant just germinated (had no germinatedAt, now has one)
+
+          // Check if this plant just germinated
           if (plant.germinatedAt && (!prevPlant || !prevPlant.germinatedAt)) {
             const accentColor = getPlantPrimaryColor(plant);
             overlayManager.germination.triggerGermination(
@@ -284,25 +309,17 @@ export function GardenScene() {
               accentColor
             );
 
-            // Play germination chime with spatial panning based on plant position
             const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
             audioManager.playEffect("germination", { pan });
-          }
-        }
-      }
-      // Update debug overlay when active region changes
-      if (state.activeRegion !== prevState.activeRegion) {
-        overlayManager.debug.setActiveRegion(state.activeRegion);
-      }
 
-      // Handle camera micro-transitions on dwell state changes
-      if (state.dwellTarget !== prevState.dwellTarget) {
-        if (state.dwellTarget !== null) {
-          // Starting to dwell on a plant - subtle zoom in
-          sceneManager.onDwellStart();
-        } else {
-          // Stopped dwelling - return to normal zoom
-          sceneManager.onDwellEnd();
+            // Start auto-observe timer for newly germinated plant
+            startAutoObserveTimer(plant.id);
+          }
+
+          // Start timers for any new unobserved plants we haven't seen before
+          if (!plant.observed && plant.germinatedAt && !prevPlant) {
+            startAutoObserveTimer(plant.id);
+          }
         }
       }
     });
@@ -317,16 +334,8 @@ export function GardenScene() {
       lastTime = time;
 
       plantInstancer.updateTime(time);
-
-      // Update only actively transitioning plants (collapse/color animations).
-      // Full syncPlants() is called by the store subscription when state changes.
       plantInstancer.updateTransitions();
-
-      // Update overlays (time-based animations still need updating even after sync)
       overlayManager.update(time, deltaTime);
-
-      // Update observation system (region-based observation)
-      observationSystem.update(deltaTime);
     };
     sceneManager.addUpdateCallback(updateCallback);
 
@@ -336,71 +345,25 @@ export function GardenScene() {
     };
     sceneManager.addPostRenderCallback(postRenderCallback);
 
-    // Click handler for direct plant observation (DEBUG MODE ONLY)
+    // Click handler for plant observation (click any unobserved plant to observe)
     const handleClick = (event: MouseEvent) => {
-      // Only handle clicks in debug mode
-      if (!observationSystem.getDebugMode()) {
-        return;
-      }
-
       const { x, y } = sceneManager.screenToWorld(event.clientX, event.clientY);
 
-      // Find plant at click position
       const plants = useGardenStore.getState().plants;
       const clickedPlant = plants.find((plant) => {
-        if (plant.observed) return false;
+        if (observedPlantsRef.current.has(plant.id)) return false;
+        if (!plant.germinatedAt) return false;
         const dx = plant.position.x - x;
         const dy = plant.position.y - y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < 32; // Click radius in pixels
+        return distance < 48; // Click radius in world pixels
       });
 
       if (clickedPlant) {
-        // Check if this is the user's first observation
-        const isFirst = isFirstObservation();
-
-        // Get plant's primary color for celebration feedback
-        const primaryColor = getPlantPrimaryColor(clickedPlant);
-
-        // Trigger observation
-        observationCallbackRef.current({
-          plantId: clickedPlant.id,
-          regionId: "click-region-debug",
-          timestamp: new Date(),
-        });
-
-        // Trigger celebration feedback - enhanced for first observation
-        if (isFirst) {
-          overlayManager.feedback.triggerFirstObservationCelebration(
-            clickedPlant.position.x,
-            clickedPlant.position.y
-          );
-        } else {
-          overlayManager.feedback.triggerCelebration(
-            clickedPlant.position.x,
-            clickedPlant.position.y,
-            primaryColor
-          );
-        }
-
-        // Trigger entanglement pulse if plant is entangled
-        if (clickedPlant.entanglementGroupId) {
-          overlayManager.entanglement.triggerPulse(clickedPlant.entanglementGroupId);
-        }
-
-        hapticSuccess();
+        observePlant(clickedPlant.id);
       }
     };
     sceneManager.canvas.addEventListener("click", handleClick);
-
-    // Handle observation mode changes from debug panel
-    const handleObservationModeChange = (e: CustomEvent<{ mode: string; debugMode: boolean }>) => {
-      observationSystem.setDebugMode(e.detail.debugMode);
-    };
-    window.addEventListener(
-      "observation-mode-change" as keyof WindowEventMap,
-      handleObservationModeChange as EventListener
-    );
 
     // Handle debug panel visibility changes
     const handleDebugVisibilityChange = (e: CustomEvent<{ visible: boolean }>) => {
@@ -418,6 +381,20 @@ export function GardenScene() {
     window.addEventListener(
       "plant-debug-highlight" as keyof WindowEventMap,
       handlePlantDebugSelect as EventListener
+    );
+
+    // Handle plant locate from debug panel (pan + zoom + emphasis)
+    const handlePlantDebugLocate = (
+      e: CustomEvent<{ plantId: string; position: { x: number; y: number } }>
+    ) => {
+      const { plantId, position } = e.detail;
+      overlayManager.setSelectedPlant(plantId);
+      sceneManager.panTo(position.x, position.y);
+      overlayManager.triggerLocatePulse();
+    };
+    window.addEventListener(
+      "plant-debug-locate" as keyof WindowEventMap,
+      handlePlantDebugLocate as EventListener
     );
 
     // Handle superposition mode changes from debug panel
@@ -448,18 +425,22 @@ export function GardenScene() {
       });
     }, 500);
 
+    // Capture ref values for cleanup
+    const autoObserveTimers = autoObserveTimersRef.current;
+
     // Cleanup
     return () => {
       mounted = false;
       clearInterval(performanceInterval);
       unsubscribe();
-      sceneManager.canvas.removeEventListener("pointermove", handlePointerMove);
-      sceneManager.canvas.removeEventListener("pointerleave", handlePointerLeave);
+
+      // Clear all auto-observe timers
+      for (const timer of autoObserveTimers.values()) {
+        clearTimeout(timer);
+      }
+      autoObserveTimers.clear();
+
       sceneManager.canvas.removeEventListener("click", handleClick);
-      window.removeEventListener(
-        "observation-mode-change" as keyof WindowEventMap,
-        handleObservationModeChange as EventListener
-      );
       window.removeEventListener(
         "debug-visibility-change" as keyof WindowEventMap,
         handleDebugVisibilityChange as EventListener
@@ -472,13 +453,12 @@ export function GardenScene() {
         "superposition-mode-change" as keyof WindowEventMap,
         handleSuperpositionModeChange as EventListener
       );
+      window.removeEventListener(
+        "plant-debug-locate" as keyof WindowEventMap,
+        handlePlantDebugLocate as EventListener
+      );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);
-
-      if (observationSystemRef.current) {
-        observationSystemRef.current.dispose();
-        observationSystemRef.current = null;
-      }
 
       if (overlayManagerRef.current) {
         overlayManagerRef.current.dispose();

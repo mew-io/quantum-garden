@@ -387,19 +387,32 @@ export async function getJobStats(): Promise<JobStatsResponse> {
  *
  * @returns The complete quantum pool with all results
  */
+// Cached pool data to avoid re-reading from disk on every observation
+let cachedPool: QuantumPool | null = null;
+
 export async function getQuantumPool(): Promise<QuantumPool> {
-  const url = `${getQuantumServiceUrl()}/circuits/pool`;
+  // Return cached pool if available
+  if (cachedPool) return cachedPool;
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  // Try the quantum service first
+  try {
+    const url = `${getQuantumServiceUrl()}/circuits/pool`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(3000),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to get quantum pool: ${response.statusText}`);
+    if (response.ok) {
+      cachedPool = await response.json();
+      return cachedPool!;
+    }
+  } catch {
+    // Service unavailable — fall through to bundled pool
   }
 
-  return response.json();
+  // Fall back to bundled pool data
+  const poolData = await import("../data/quantum-pool.json");
+  cachedPool = poolData.default as unknown as QuantumPool;
+  return cachedPool;
 }

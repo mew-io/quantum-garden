@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import type { Plant, CircuitType } from "@quantum-garden/shared";
+import type { Plant, CircuitType, VisualState } from "@quantum-garden/shared";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 
@@ -48,6 +48,8 @@ export function usePlants() {
   });
 
   // Sync plants to store when data ACTUALLY changes (not just reference)
+  // Preserves client-side observation state (observed/visualState) since
+  // observation is a client-side-only concept not persisted to the server.
   useEffect(() => {
     if (plants) {
       const hash = computePlantsHash(plants);
@@ -98,7 +100,26 @@ export function usePlants() {
         // Update previous plants map
         previousPlantsRef.current = new Map(plants.map((p) => [p.id, p]));
 
-        setPlants(plants);
+        // Merge server data with local observation state.
+        // Observation is client-side only — preserve any local observations
+        // that the server doesn't know about.
+        const currentStorePlants = useGardenStore.getState().plants;
+        const localObserved = new Map<string, { observed: boolean; visualState: VisualState }>();
+        for (const p of currentStorePlants) {
+          if (p.observed) {
+            localObserved.set(p.id, { observed: p.observed, visualState: p.visualState });
+          }
+        }
+
+        const mergedPlants = plants.map((serverPlant) => {
+          const localState = localObserved.get(serverPlant.id);
+          if (localState) {
+            return { ...serverPlant, ...localState };
+          }
+          return serverPlant;
+        });
+
+        setPlants(mergedPlants);
       }
       // Reset error state on successful load
       hasShownErrorRef.current = false;

@@ -15,10 +15,6 @@ import type { Plant } from "@quantum-garden/shared";
 function resetStore() {
   useGardenStore.setState({
     plants: [],
-    activeRegion: null,
-    dwellTarget: null,
-    dwellProgress: 0,
-    isInCooldown: false,
     notifications: [],
     observationContext: null,
     evolutionPaused: true,
@@ -241,59 +237,6 @@ describe("Garden Store", () => {
     });
   });
 
-  describe("dwell state", () => {
-    it("should start with no dwell target", () => {
-      const state = useGardenStore.getState();
-      expect(state.dwellTarget).toBeNull();
-      expect(state.dwellProgress).toBe(0);
-    });
-
-    it("should set dwell target", () => {
-      const { setDwellTarget } = useGardenStore.getState();
-
-      setDwellTarget("plant-1");
-
-      expect(useGardenStore.getState().dwellTarget).toBe("plant-1");
-    });
-
-    it("should set dwell progress", () => {
-      const { setDwellProgress } = useGardenStore.getState();
-
-      setDwellProgress(0.5);
-
-      expect(useGardenStore.getState().dwellProgress).toBe(0.5);
-    });
-
-    it("should reset dwell state", () => {
-      const { setDwellTarget, setDwellProgress, resetDwell } = useGardenStore.getState();
-
-      setDwellTarget("plant-1");
-      setDwellProgress(0.75);
-      resetDwell();
-
-      const state = useGardenStore.getState();
-      expect(state.dwellTarget).toBeNull();
-      expect(state.dwellProgress).toBe(0);
-    });
-  });
-
-  describe("cooldown state", () => {
-    it("should start with cooldown disabled", () => {
-      const state = useGardenStore.getState();
-      expect(state.isInCooldown).toBe(false);
-    });
-
-    it("should set cooldown state", () => {
-      const { setIsInCooldown } = useGardenStore.getState();
-
-      setIsInCooldown(true);
-      expect(useGardenStore.getState().isInCooldown).toBe(true);
-
-      setIsInCooldown(false);
-      expect(useGardenStore.getState().isInCooldown).toBe(false);
-    });
-  });
-
   describe("observation context", () => {
     it("should start with no observation context", () => {
       const state = useGardenStore.getState();
@@ -408,48 +351,6 @@ describe("Garden Store", () => {
       setHistoricalEventsLoaded(true);
 
       expect(useGardenStore.getState().historicalEventsLoaded).toBe(true);
-    });
-  });
-
-  describe("active region", () => {
-    it("should start with null active region", () => {
-      const state = useGardenStore.getState();
-      expect(state.activeRegion).toBeNull();
-    });
-
-    it("should set active region", () => {
-      const { setActiveRegion } = useGardenStore.getState();
-      const region = {
-        id: "region-1",
-        center: { x: 100, y: 100 },
-        radius: 50,
-        lifetime: 60,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 60000),
-        active: true,
-      };
-
-      setActiveRegion(region);
-
-      expect(useGardenStore.getState().activeRegion).toEqual(region);
-    });
-
-    it("should clear active region", () => {
-      const { setActiveRegion } = useGardenStore.getState();
-      const region = {
-        id: "region-1",
-        center: { x: 100, y: 100 },
-        radius: 50,
-        lifetime: 60,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 60000),
-        active: true,
-      };
-      setActiveRegion(region);
-
-      setActiveRegion(null);
-
-      expect(useGardenStore.getState().activeRegion).toBeNull();
     });
   });
 });

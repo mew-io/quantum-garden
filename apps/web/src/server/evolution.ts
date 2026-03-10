@@ -20,6 +20,7 @@ import {
   type ClusteringBehavior,
   type PlantVariant,
 } from "@quantum-garden/shared";
+import { resolveTraitsFromPool } from "./resolve-traits";
 
 /** Evolution timing constants (in milliseconds) */
 export const EVOLUTION_CONFIG = {
@@ -571,7 +572,7 @@ async function autoReseedIfNeeded(
     const circuitId = variant.circuitId ?? "superposition";
     const quantumCircuitId = await getQuantumRecordId(circuitId);
 
-    await db.plant.create({
+    const newPlant = await db.plant.create({
       data: {
         positionX: position.x,
         positionY: position.y,
@@ -582,6 +583,21 @@ async function autoReseedIfNeeded(
         lifecycleModifier: 0.8 + Math.random() * 0.4, // 0.8-1.2 range
       },
     });
+
+    // Pre-compute traits from quantum pool
+    try {
+      const { traits } = await resolveTraitsFromPool({
+        plantId: newPlant.id,
+        circuitId,
+        variantId,
+      });
+      await db.plant.update({
+        where: { id: newPlant.id },
+        data: { traits: traits as unknown as object },
+      });
+    } catch {
+      // Non-fatal: plant will still work without pre-computed traits
+    }
   }
 
   return plantsNeeded;

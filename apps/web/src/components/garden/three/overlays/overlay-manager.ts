@@ -13,7 +13,6 @@ import * as THREE from "three";
 import type { Plant } from "@quantum-garden/shared";
 import type { SceneManager } from "../core/scene-manager";
 import { EntanglementOverlay } from "./entanglement-overlay";
-import { DwellOverlay } from "./dwell-overlay";
 import { FeedbackOverlay } from "./feedback-overlay";
 import { GerminationOverlay } from "./germination-overlay";
 import { VectorPlantOverlay } from "./vector-plant-overlay";
@@ -29,7 +28,6 @@ export class OverlayManager {
 
   // Overlay components
   public entanglement: EntanglementOverlay;
-  public dwell: DwellOverlay;
   public feedback: FeedbackOverlay;
   public germination: GerminationOverlay;
   public vectorPlants: VectorPlantOverlay;
@@ -44,7 +42,6 @@ export class OverlayManager {
 
     // Initialize overlay components
     this.entanglement = new EntanglementOverlay();
-    this.dwell = new DwellOverlay();
     this.feedback = new FeedbackOverlay();
     this.germination = new GerminationOverlay();
     this.vectorPlants = new VectorPlantOverlay();
@@ -53,7 +50,6 @@ export class OverlayManager {
 
     // Add all overlay meshes to the overlay scene
     this.overlayScene.add(this.entanglement.getObject());
-    this.overlayScene.add(this.dwell.getObject());
     this.overlayScene.add(this.feedback.getObject());
     this.overlayScene.add(this.germination.getObject());
     this.overlayScene.add(this.vectorPlants.getObject());
@@ -69,10 +65,6 @@ export class OverlayManager {
     // Only update overlays that have active animations
     if (this.entanglement.hasActiveAnimations()) {
       this.entanglement.update(time);
-    }
-
-    if (this.dwell.hasActiveAnimations()) {
-      this.dwell.update(time);
     }
 
     if (this.feedback.hasActiveAnimations()) {
@@ -113,6 +105,13 @@ export class OverlayManager {
   }
 
   /**
+   * Trigger a locate pulse on the selected plant.
+   */
+  triggerLocatePulse(): void {
+    this.debug.triggerLocatePulse();
+  }
+
+  /**
    * Render the overlay scene on top of the main scene.
    * Should be called after the main scene render.
    */
@@ -137,7 +136,6 @@ export class OverlayManager {
    */
   dispose(): void {
     this.entanglement.dispose();
-    this.dwell.dispose();
     this.feedback.dispose();
     this.germination.dispose();
     this.vectorPlants.dispose();

@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.circuits import ExecutionMode, get_circuit, get_execution_mode
-from src.circuits.base import QuantumCircuitExecutor
+from src.circuits.runner import execute_circuit
 
 
 # Pool configuration
@@ -48,12 +48,12 @@ async def generate_result_for_circuit(
     # Get circuit instance
     circuit_executor = get_circuit(circuit_type)
 
-    # Generate circuit with deterministic seed
+    # Create circuit with deterministic seed
     seed = hash(f"{circuit_type}_{index}") & 0xFFFFFFFF  # 32-bit seed
-    circuit = circuit_executor.generate(seed)
+    circuit = circuit_executor.create(seed)
 
     # Execute circuit with error mitigation disabled
-    result = await circuit_executor.execute(
+    result = await execute_circuit(
         circuit, shots=DEFAULT_SHOTS, mode=execution_mode
     )
 

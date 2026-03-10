@@ -7,7 +7,6 @@ import { EvolutionNotifications } from "@/components/garden/evolution-notificati
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { EntanglementDetailPanel } from "@/components/garden/entanglement-detail-panel";
 import { EventDetailModal } from "@/components/garden/event-detail-modal";
-import { CooldownIndicator } from "@/components/garden/cooldown-indicator";
 import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
 import { GardenDrawer } from "@/components/garden/drawer";
 
@@ -38,7 +37,6 @@ export default function Home() {
         <ObservationContextPanel />
         <EntanglementDetailPanel />
         <EventDetailModal />
-        <CooldownIndicator />
         <KeyboardShortcutHint />
       </main>
     </ErrorBoundary>

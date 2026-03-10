@@ -437,7 +437,21 @@ function PlantDetailView({
         >
           &larr; All Plants
         </button>
-        <span className="text-[--wc-ink-muted]/60 font-mono text-xs">{plant.id.slice(-8)}</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent("plant-debug-locate", {
+                  detail: { plantId: plant.id, position: plant.position },
+                })
+              );
+            }}
+            className="text-[10px] px-1.5 py-0.5 rounded border border-[--wc-ink-muted]/20 text-[--wc-ink-muted] hover:text-[--wc-ink-soft] hover:border-[--wc-ink-muted]/40 transition-colors"
+          >
+            Locate
+          </button>
+          <span className="text-[--wc-ink-muted]/60 font-mono text-xs">{plant.id.slice(-8)}</span>
+        </div>
       </div>
 
       {/* Plant Info */}
@@ -509,6 +523,14 @@ function PlantDetailView({
         </h4>
         {signals ? (
           <div className="space-y-4">
+            {/* Execution mode indicator for mock traits */}
+            {!quantumRecord?.probabilities?.length && plant.observed && (
+              <div className="bg-amber-50/60 border border-amber-200/40 rounded p-2 text-[10px] text-amber-800 leading-relaxed">
+                Mock signals — quantum pool was unavailable at observation time. Traits are seeded
+                from the circuit definition.
+              </div>
+            )}
+
             {/* Quantum Signals */}
             <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
               <p className="text-[10px] text-[--wc-ink-muted] leading-relaxed mb-1">
@@ -683,32 +705,47 @@ function PlantDetailView({
           </div>
         ) : (
           <div className="bg-[--wc-paper]/60 rounded p-3 text-xs text-[--wc-ink-muted] space-y-2">
-            <p>
-              This plant is still in superposition — its quantum state hasn&apos;t been measured
-              yet.
-            </p>
-            <p className="text-[10px] leading-relaxed">
-              When observed, the wave function collapses and measurement outcomes are recorded. From
-              those outcomes, six quantum signals are computed (entropy, dominance, spread, parity
-              bias, growth, certainty) which then drive this plant&apos;s visual traits.
-            </p>
-            {variant?.quantumMapping?.schema && (
-              <div className="border-t border-[--wc-stone]/15 pt-2 mt-2 space-y-1">
-                <p className="text-[10px] text-[--wc-ink-muted]">
-                  Pending trait mappings for this variant:
+            {plant.observed ? (
+              <>
+                <p>
+                  This plant was observed but has no quantum signals — it was likely observed when
+                  the quantum pool was unavailable and before mock signal generation was added.
                 </p>
-                {Object.entries(variant.quantumMapping.schema as QuantumPropertySchema).map(
-                  ([propName, mapping]) => (
-                    <div key={propName} className="text-[10px] flex justify-between">
-                      <span>{propName}</span>
-                      <span className="text-[--wc-ink-muted]/60">
-                        {mapping.signal} &rarr; [{mapping.range[0]}, {mapping.range[1]}]
-                        {mapping.round ? " (round)" : ""}
-                      </span>
-                    </div>
-                  )
+                <p className="text-[10px] leading-relaxed">
+                  Visual traits were set from fallback values. Re-observation is not possible, but
+                  the plant renders normally with its stored traits.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  This plant is still in superposition — its quantum state hasn&apos;t been measured
+                  yet.
+                </p>
+                <p className="text-[10px] leading-relaxed">
+                  When observed, the wave function collapses and measurement outcomes are recorded.
+                  From those outcomes, six quantum signals are computed (entropy, dominance, spread,
+                  parity bias, growth, certainty) which then drive this plant&apos;s visual traits.
+                </p>
+                {variant?.quantumMapping?.schema && (
+                  <div className="border-t border-[--wc-stone]/15 pt-2 mt-2 space-y-1">
+                    <p className="text-[10px] text-[--wc-ink-muted]">
+                      Pending trait mappings for this variant:
+                    </p>
+                    {Object.entries(variant.quantumMapping.schema as QuantumPropertySchema).map(
+                      ([propName, mapping]) => (
+                        <div key={propName} className="text-[10px] flex justify-between">
+                          <span>{propName}</span>
+                          <span className="text-[--wc-ink-muted]/60">
+                            {mapping.signal} &rarr; [{mapping.range[0]}, {mapping.range[1]}]
+                            {mapping.round ? " (round)" : ""}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         )}

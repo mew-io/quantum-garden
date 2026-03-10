@@ -138,11 +138,31 @@ function generateMockTraits(
   // Generate opacity (0.7 to 1.0)
   const opacity = 0.7 + random() * 0.3;
 
+  // Generate mock quantum signals from the seeded values.
+  // Creates a synthetic 3-qubit probability distribution for signal computation.
+  const mockProbs: Record<string, number> = {};
+  const numQubits = 3;
+  const numOutcomes = Math.pow(2, numQubits);
+  let total = 0;
+  const rawWeights: number[] = [];
+  for (let i = 0; i < numOutcomes; i++) {
+    const w = random() + 0.01; // avoid zero
+    rawWeights.push(w);
+    total += w;
+  }
+  for (let i = 0; i < numOutcomes; i++) {
+    const bitstring = i.toString(2).padStart(numQubits, "0");
+    mockProbs[bitstring] = rawWeights[i]! / total;
+  }
+
+  const quantumSignals = computeQuantumSignals(mockProbs, numQubits, growthRate, opacity);
+
   return {
     glyphPattern,
     colorPalette,
     growthRate,
     opacity,
+    quantumSignals,
   };
 }
 
@@ -205,6 +225,8 @@ export const observationRouter = router({
       // Resolve traits from pre-computed quantum pool
       let resolvedTraits: ResolvedTraits;
       let executionMode = "mock";
+      let poolMeasurements: number[] | undefined;
+      let poolProbabilities: number[] | undefined;
       let measurementSummary:
         | {
             shots: number;
@@ -244,6 +266,10 @@ export const observationRouter = router({
           distinctOutcomes: probEntries.length,
         };
 
+        // Capture pool data for quantum record update
+        poolMeasurements = poolResult.measurements;
+        poolProbabilities = Object.values(poolResult.probabilities);
+
         console.log(
           `[Quantum] Plant ${plant.id} using pool result ${poolResult.index} from ${circuitId} (mode: ${executionMode}, seed: ${plant.entanglementGroupId ? "group" : "plant"})`
         );
@@ -258,10 +284,10 @@ export const observationRouter = router({
           plant.variantId,
           plant.colorVariationName
         );
-        // Apply TS mapping with null signals — must return safe defaults
+        // Apply TS mapping using mock signals
         const mockVariant = getVariantById(plant.variantId);
         const mockTsProps = mockVariant?.quantumMapping
-          ? resolveQuantumProperties(mockVariant.quantumMapping, null)
+          ? resolveQuantumProperties(mockVariant.quantumMapping, mockBase.quantumSignals ?? null)
           : {};
         resolvedTraits = { ...mockBase, ...mockTsProps };
       }
@@ -275,6 +301,19 @@ export const observationRouter = router({
           traits: resolvedTraits as unknown as object,
         },
       });
+
+      // Update quantum record with measurement results and mark completed
+      if (plant.quantumCircuitId) {
+        await ctx.db.quantumRecord.update({
+          where: { id: plant.quantumCircuitId },
+          data: {
+            status: "completed",
+            completedAt: new Date(),
+            measurements: poolMeasurements ?? [],
+            probabilities: poolProbabilities ?? [],
+          },
+        });
+      }
 
       // Record the observation event
       await ctx.db.observationEvent.create({
@@ -347,7 +386,10 @@ export const observationRouter = router({
               );
               const partnerVariant = getVariantById(partner.variantId);
               const partnerMockTsProps = partnerVariant?.quantumMapping
-                ? resolveQuantumProperties(partnerVariant.quantumMapping, null)
+                ? resolveQuantumProperties(
+                    partnerVariant.quantumMapping,
+                    partnerMockBase.quantumSignals ?? null
+                  )
                 : {};
               correlatedTraits = { ...partnerMockBase, ...partnerMockTsProps };
             }
@@ -361,6 +403,17 @@ export const observationRouter = router({
                 traits: correlatedTraits as unknown as object,
               },
             });
+
+            // Update partner's quantum record
+            if (partner.quantumCircuitId) {
+              await ctx.db.quantumRecord.update({
+                where: { id: partner.quantumCircuitId },
+                data: {
+                  status: "completed",
+                  completedAt: new Date(),
+                },
+              });
+            }
 
             // Record observation event for partner
             await ctx.db.observationEvent.create({

@@ -1,23 +1,19 @@
 /**
- * Debug Overlay - Visualization for observation system debugging
+ * Debug Overlay - Plant marker visualization for debugging
  *
- * Renders observation regions as visible circles when debug mode is enabled.
- * Also shows plant bounding boxes and position markers for debugging visibility issues.
+ * Shows plant bounding boxes and position markers for debugging visibility issues.
  * This overlay is only visible during development and can be completely removed for production.
  */
 
 import * as THREE from "three";
-import type { ObservationRegion, Plant } from "@quantum-garden/shared";
+import type { Plant } from "@quantum-garden/shared";
 import { PATTERN_SIZE } from "@quantum-garden/shared";
 
 /**
- * Renders debug visualizations for the observation system.
+ * Renders debug visualizations for plants.
  */
 export class DebugOverlay {
   private group: THREE.Group;
-  private regionCircle: THREE.LineLoop | null = null;
-  private regionCenterDot: THREE.Mesh | null = null;
-  private activeRegion: ObservationRegion | null = null;
   private isVisible: boolean = false;
 
   // Plant debug visualization
@@ -33,6 +29,13 @@ export class DebugOverlay {
     crosshair: THREE.LineSegments | null;
   } = { box: null, dot: null, crosshair: null };
 
+  // Locate pulse animation
+  private locatePulse: { active: boolean; startTime: number } = {
+    active: false,
+    startTime: 0,
+  };
+  private static readonly LOCATE_PULSE_DURATION = 1.5; // seconds
+
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "debug-overlay";
@@ -40,74 +43,6 @@ export class DebugOverlay {
     this.plantMarkersGroup = new THREE.Group();
     this.plantMarkersGroup.name = "plant-markers";
     this.group.add(this.plantMarkersGroup);
-  }
-
-  /**
-   * Update the active region visualization.
-   */
-  setActiveRegion(region: ObservationRegion | null): void {
-    this.activeRegion = region;
-
-    // Clear previous visualization
-    if (this.regionCircle) {
-      this.group.remove(this.regionCircle);
-      this.regionCircle.geometry.dispose();
-      (this.regionCircle.material as THREE.Material).dispose();
-      this.regionCircle = null;
-    }
-
-    if (this.regionCenterDot) {
-      this.group.remove(this.regionCenterDot);
-      this.regionCenterDot.geometry.dispose();
-      (this.regionCenterDot.material as THREE.Material).dispose();
-      this.regionCenterDot = null;
-    }
-
-    // Create new visualization if region exists and debug is visible
-    if (region && this.isVisible) {
-      this.createRegionVisualization(region);
-    }
-  }
-
-  /**
-   * Create visualization for an observation region.
-   */
-  private createRegionVisualization(region: ObservationRegion): void {
-    // Create circle outline
-    const segments = 64;
-    const circleGeometry = new THREE.BufferGeometry();
-    const vertices: number[] = [];
-
-    for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * Math.PI * 2;
-      const x = region.center.x + Math.cos(angle) * region.radius;
-      const y = region.center.y + Math.sin(angle) * region.radius;
-      vertices.push(x, y, 2); // z = 2 for overlay layer
-    }
-
-    circleGeometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-
-    const circleMaterial = new THREE.LineBasicMaterial({
-      color: 0x22c55e, // Green
-      transparent: true,
-      opacity: 0.3,
-      linewidth: 2,
-    });
-
-    this.regionCircle = new THREE.LineLoop(circleGeometry, circleMaterial);
-    this.group.add(this.regionCircle);
-
-    // Create center dot
-    const dotGeometry = new THREE.CircleGeometry(3, 16);
-    const dotMaterial = new THREE.MeshBasicMaterial({
-      color: 0x22c55e,
-      transparent: true,
-      opacity: 0.5,
-    });
-
-    this.regionCenterDot = new THREE.Mesh(dotGeometry, dotMaterial);
-    this.regionCenterDot.position.set(region.center.x, region.center.y, 2);
-    this.group.add(this.regionCenterDot);
   }
 
   /**
@@ -131,6 +66,13 @@ export class DebugOverlay {
         this.updatePlantMarkers();
       }
     }
+  }
+
+  /**
+   * Trigger a brief locate pulse animation on the selected plant.
+   */
+  triggerLocatePulse(): void {
+    this.locatePulse = { active: true, startTime: -1 };
   }
 
   /**
@@ -172,7 +114,7 @@ export class DebugOverlay {
 
       const isSelected = plant.id === this.selectedPlantId;
 
-      // Determine color based on plant state (or white if selected)
+      // Determine color based on plant state
       let color: number;
       if (isSelected) {
         color = 0xff00ff; // Bright magenta for selected
@@ -215,7 +157,7 @@ export class DebugOverlay {
       });
 
       const box = new THREE.Line(boxGeometry, boxMaterial);
-      box.position.set(plant.position.x, plant.position.y, 3); // z = 3 for debug layer
+      box.position.set(plant.position.x, plant.position.y, 3);
       markerGroup.add(box);
 
       // Create center dot (larger for selected)
@@ -251,7 +193,7 @@ export class DebugOverlay {
       crosshairGeometry.setAttribute("position", new THREE.BufferAttribute(crosshairVerts, 3));
 
       const crosshairMaterial = new THREE.LineBasicMaterial({
-        color: isSelected ? 0xffffff : 0xffffff,
+        color: 0xffffff,
         transparent: true,
         opacity: isSelected ? 1.0 : 0.6,
       });
@@ -277,16 +219,8 @@ export class DebugOverlay {
     this.isVisible = visible;
 
     if (visible) {
-      // Show existing region
-      if (this.activeRegion) {
-        this.createRegionVisualization(this.activeRegion);
-      }
-      // Show plant markers
       this.updatePlantMarkers();
     } else {
-      // Hide region
-      this.setActiveRegion(null);
-      // Clear plant markers
       this.updatePlantMarkers();
     }
 
@@ -305,18 +239,36 @@ export class DebugOverlay {
    * Animates the selected plant marker with a gentle pulse effect.
    */
   update(time: number, _deltaTime: number): void {
-    // Animate selected plant marker with pulse effect
     if (this.selectedPlantId && this.isVisible) {
       const { box, dot, crosshair } = this.selectedMarkerComponents;
 
-      // Pulse frequency: 2 Hz (2 cycles per second)
-      const pulsePhase = (time * 2 * Math.PI * 2) % (Math.PI * 2);
+      // Initialize locate pulse start time on first frame
+      if (this.locatePulse.active && this.locatePulse.startTime < 0) {
+        this.locatePulse.startTime = time;
+      }
 
-      // Scale pulse: oscillates between 1.0 and 1.15
-      const scalePulse = 1.0 + Math.sin(pulsePhase) * 0.15;
+      let scalePulse: number;
+      let opacityPulse: number;
 
-      // Opacity pulse: oscillates between 0.7 and 1.0
-      const opacityPulse = 0.85 + Math.sin(pulsePhase) * 0.15;
+      if (this.locatePulse.active) {
+        const elapsed = time - this.locatePulse.startTime;
+        const progress = Math.min(elapsed / DebugOverlay.LOCATE_PULSE_DURATION, 1);
+
+        if (progress >= 1) {
+          this.locatePulse.active = false;
+          scalePulse = 1.0;
+          opacityPulse = 1.0;
+        } else {
+          const decay = 1 - progress;
+          const phase = (elapsed * 2 * Math.PI * 4) % (Math.PI * 2);
+          scalePulse = 1.0 + Math.sin(phase) * 0.4 * decay;
+          opacityPulse = 0.6 + Math.sin(phase) * 0.4 * decay;
+        }
+      } else {
+        const pulsePhase = (time * 2 * Math.PI * 2) % (Math.PI * 2);
+        scalePulse = 1.0 + Math.sin(pulsePhase) * 0.15;
+        opacityPulse = 0.85 + Math.sin(pulsePhase) * 0.15;
+      }
 
       if (box) {
         box.scale.set(scalePulse, scalePulse, 1);
@@ -337,10 +289,8 @@ export class DebugOverlay {
 
   /**
    * Check if there are any active animations that need updating.
-   * Returns true when visible (for region updates) or when animating selected plant.
    */
   hasActiveAnimations(): boolean {
-    // Always need updates when visible (selected plant pulse animation)
     return this.isVisible;
   }
 
@@ -355,17 +305,6 @@ export class DebugOverlay {
    * Clean up resources.
    */
   dispose(): void {
-    if (this.regionCircle) {
-      this.regionCircle.geometry.dispose();
-      (this.regionCircle.material as THREE.Material).dispose();
-    }
-
-    if (this.regionCenterDot) {
-      this.regionCenterDot.geometry.dispose();
-      (this.regionCenterDot.material as THREE.Material).dispose();
-    }
-
-    // Clean up plant markers
     this.plantMarkers.forEach((marker) => {
       marker.traverse((child) => {
         if (child instanceof THREE.Mesh || child instanceof THREE.Line) {

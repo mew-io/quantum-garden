@@ -128,6 +128,8 @@ export class SceneManager {
 
   // Camera panning state
   private panOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private targetPanOffset: { x: number; y: number } | null = null;
+  private targetUserZoom: number | null = null;
 
   // Touch state for single-finger pan
   private touchState: {
@@ -681,6 +683,10 @@ export class SceneManager {
     // Update camera zoom with smooth interpolation
     this.updateCameraZoom();
 
+    // Update smooth pan and zoom animations (from panTo)
+    this.updateCameraPan();
+    this.updateUserZoom();
+
     // Render through post-processing pipeline (bloom + paper grain)
     this.composer!.render();
 
@@ -803,6 +809,66 @@ export class SceneManager {
 
     // Apply camera (which combines baseZoom, userZoom, and currentZoom)
     this.applyCamera();
+  }
+
+  /**
+   * Update camera pan with smooth interpolation toward target.
+   */
+  private updateCameraPan(): void {
+    if (!this.targetPanOffset) return;
+
+    const dx = this.targetPanOffset.x - this.panOffset.x;
+    const dy = this.targetPanOffset.y - this.panOffset.y;
+
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+      this.panOffset.x = this.targetPanOffset.x;
+      this.panOffset.y = this.targetPanOffset.y;
+      this.targetPanOffset = null;
+    } else {
+      this.panOffset.x += dx * CAMERA_CONFIG.ZOOM_SMOOTHING;
+      this.panOffset.y += dy * CAMERA_CONFIG.ZOOM_SMOOTHING;
+    }
+
+    this.clampPanOffset();
+    this.applyCamera();
+  }
+
+  /**
+   * Update user zoom with smooth interpolation toward target.
+   */
+  private updateUserZoom(): void {
+    if (this.targetUserZoom === null) return;
+
+    const diff = this.targetUserZoom - this.userZoom;
+
+    if (Math.abs(diff) < 0.005) {
+      this.userZoom = this.targetUserZoom;
+      this.targetUserZoom = null;
+    } else {
+      this.userZoom += diff * CAMERA_CONFIG.ZOOM_SMOOTHING;
+    }
+
+    this.clampPanOffset();
+    this.applyCamera();
+  }
+
+  /**
+   * Smoothly pan and zoom the camera to center on a world position.
+   */
+  panTo(worldX: number, worldY: number): void {
+    const gardenW = CANVAS.DEFAULT_WIDTH;
+    const gardenH = CANVAS.DEFAULT_HEIGHT;
+
+    // Pan offset is relative to the garden center
+    this.targetPanOffset = {
+      x: worldX - gardenW / 2,
+      y: worldY - gardenH / 2,
+    };
+
+    // Zoom in to see the plant clearly (only if not already zoomed in more)
+    if (this.userZoom < 2.5) {
+      this.targetUserZoom = 2.5;
+    }
   }
 
   /**

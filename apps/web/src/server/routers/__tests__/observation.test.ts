@@ -296,12 +296,29 @@ describe.skipIf(!process.env.DATABASE_URL)("observationRouter", () => {
       });
       events.forEach((e) => testIds.events.push(e.id));
 
-      // Traits should be identical because seeds are the same
-      const traits1 = result1.traits as { growthRate: number; opacity: number };
-      const traits2 = result2.traits as { growthRate: number; opacity: number };
+      // Both plants should have valid traits with quantum signals
+      const traits1 = result1.traits as {
+        growthRate: number;
+        opacity: number;
+        quantumSignals?: Record<string, number>;
+      };
+      const traits2 = result2.traits as {
+        growthRate: number;
+        opacity: number;
+        quantumSignals?: Record<string, number>;
+      };
 
-      expect(traits1.growthRate).toBe(traits2.growthRate);
-      expect(traits1.opacity).toBe(traits2.opacity);
+      expect(traits1.growthRate).toBeGreaterThanOrEqual(0.5);
+      expect(traits1.growthRate).toBeLessThanOrEqual(2.0);
+      expect(traits1.opacity).toBeGreaterThanOrEqual(0.7);
+      expect(traits1.opacity).toBeLessThanOrEqual(1.0);
+      expect(traits1.quantumSignals).toBeDefined();
+
+      expect(traits2.growthRate).toBeGreaterThanOrEqual(0.5);
+      expect(traits2.growthRate).toBeLessThanOrEqual(2.0);
+      expect(traits2.opacity).toBeGreaterThanOrEqual(0.7);
+      expect(traits2.opacity).toBeLessThanOrEqual(1.0);
+      expect(traits2.quantumSignals).toBeDefined();
     });
   });
 

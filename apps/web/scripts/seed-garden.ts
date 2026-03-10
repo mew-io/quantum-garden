@@ -16,6 +16,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import { CANVAS, getSpawnableVariants, selectColorVariation } from "@quantum-garden/shared";
+import { resolveTraitsFromPool } from "../src/server/resolve-traits";
 
 const db = new PrismaClient();
 
@@ -336,8 +337,8 @@ async function main() {
     // Random lifecycle modifier (0.8 - 1.2 speed variation)
     const lifecycleModifier = 0.8 + Math.random() * 0.4;
 
-    // Create plant with quantum circuit
-    await db.plant.create({
+    // Create plant with quantum circuit and pre-computed traits
+    const plant = await db.plant.create({
       data: {
         positionX: position.x,
         positionY: position.y,
@@ -351,13 +352,37 @@ async function main() {
           create: {
             circuitId,
             circuitDefinition,
-            status: "pending",
+            status: "completed",
             measurements: [],
             probabilities: [],
           },
         },
       },
     });
+
+    // Pre-compute traits from quantum pool
+    const { traits, measurements, probabilities } = await resolveTraitsFromPool({
+      plantId: plant.id,
+      circuitId,
+      variantId: variant.id,
+      colorVariationName,
+    });
+
+    await db.plant.update({
+      where: { id: plant.id },
+      data: { traits: traits as unknown as object },
+    });
+
+    // Update quantum record with measurement data
+    if (plant.quantumCircuitId && (measurements || probabilities)) {
+      await db.quantumRecord.update({
+        where: { id: plant.quantumCircuitId },
+        data: {
+          measurements: measurements ?? [],
+          probabilities: probabilities ?? [],
+        },
+      });
+    }
 
     console.log(
       `  Created plant ${i + 1}/${NUM_PLANTS}: ${variant.name} (${circuitId}) at (${position.x.toFixed(0)}, ${position.y.toFixed(0)})${germinatedAt ? " [germinated]" : " [dormant]"}`

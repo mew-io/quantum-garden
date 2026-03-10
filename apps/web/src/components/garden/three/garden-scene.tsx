@@ -25,7 +25,6 @@ import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
 import { debugLogger } from "@/lib/debug-logger";
 import { isFirstObservation, markFirstObservationComplete } from "@/lib/first-observation";
-import { audioManager } from "@/lib/audio/audio-manager";
 
 /**
  * Get the primary color from a plant's palette for celebration feedback.
@@ -65,37 +64,6 @@ function getPlantPrimaryColor(plant: Plant): string | undefined {
   // For dormant plants, just use the first palette color
   const palette = getEffectivePalette(keyframe, variant, plant.colorVariationName ?? null);
   return palette[0];
-}
-
-/**
- * Convert a hex color string to HSL hue (0-360).
- * Used to map plant colors to audio frequencies.
- */
-function hexToHue(hex: string): number {
-  // Remove # if present
-  const clean = hex.replace("#", "");
-  const num = parseInt(clean, 16);
-
-  const r = ((num >> 16) & 0xff) / 255;
-  const g = ((num >> 8) & 0xff) / 255;
-  const b = (num & 0xff) / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const delta = max - min;
-
-  if (delta === 0) return 0; // Gray, no hue
-
-  let h = 0;
-  if (max === r) {
-    h = ((g - b) / delta + (g < b ? 6 : 0)) / 6;
-  } else if (max === g) {
-    h = ((b - r) / delta + 2) / 6;
-  } else {
-    h = ((r - g) / delta + 4) / 6;
-  }
-
-  return h * 360;
 }
 
 /**
@@ -219,8 +187,6 @@ export function GardenScene() {
 
       const isFirst = isFirstObservation();
       const primaryColor = getPlantPrimaryColor(plant);
-      const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
-      const hue = primaryColor ? hexToHue(primaryColor) : 120;
 
       // Visual celebration
       if (isFirst) {
@@ -228,7 +194,7 @@ export function GardenScene() {
           plant.position.x,
           plant.position.y
         );
-        audioManager.playEffect("firstObservation", { pan, hue });
+
         markFirstObservationComplete();
       } else {
         overlayManager.feedback.triggerCelebration(
@@ -236,13 +202,11 @@ export function GardenScene() {
           plant.position.y,
           primaryColor
         );
-        audioManager.playEffect("observation", { pan, hue });
       }
 
       // Entanglement pulse if applicable
       if (plant.entanglementGroupId) {
         overlayManager.entanglement.triggerPulse(plant.entanglementGroupId);
-        audioManager.playEffect("entanglement", { pan });
 
         // Also observe entangled partners
         const partners = store.plants.filter(
@@ -309,9 +273,6 @@ export function GardenScene() {
               plant.position.y,
               accentColor
             );
-
-            const pan = (plant.position.x / CANVAS.DEFAULT_WIDTH) * 2 - 1;
-            audioManager.playEffect("germination", { pan });
 
             // Start auto-observe timer for newly germinated plant
             startAutoObserveTimer(plant.id);

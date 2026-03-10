@@ -8,7 +8,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { audioManager, type SoundEffect } from "../audio-manager";
+import { audioManager } from "../audio-manager";
 
 /**
  * Audio state exposed by the hook.
@@ -32,8 +32,6 @@ interface UseAudioReturn extends AudioState {
   toggleEnabled: () => void;
   /** Set the master volume (0.0 to 1.0) */
   setVolume: (volume: number) => void;
-  /** Play a sound effect */
-  playEffect: (effect: SoundEffect, options?: { pan?: number }) => void;
   /** Initialize the audio system (must be called from user gesture) */
   init: () => Promise<void>;
   /** Start playing ambient loop */
@@ -136,10 +134,6 @@ export function useAudio(): UseAudioReturn {
     audioManager.setVolume(volume);
   }, []);
 
-  const playEffect = useCallback((effect: SoundEffect, options?: { pan?: number }) => {
-    audioManager.playEffect(effect, options);
-  }, []);
-
   const init = useCallback(async () => {
     await audioManager.init();
   }, []);
@@ -157,7 +151,6 @@ export function useAudio(): UseAudioReturn {
     setEnabled,
     toggleEnabled,
     setVolume,
-    playEffect,
     init,
     playAmbient,
     stopAmbient,

@@ -150,7 +150,7 @@ function EventDetails({ event }: { event: QuantumEvent }) {
     const circuit = getCircuitInfo(event.circuitId);
     details.push({
       label: "Circuit",
-      value: `${circuit.name} (L${circuit.level}, ${circuit.qubits}q)`,
+      value: `${circuit.name} (${circuit.qubits}q)`,
     });
   }
   if (event.executionMode) {

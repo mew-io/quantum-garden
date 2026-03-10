@@ -600,7 +600,7 @@ function CircuitSection({
           <div className="flex justify-between items-center">
             <span className="text-purple-700 font-medium">{circuitInfo.name}</span>
             <span className="text-[--wc-ink-muted] font-mono text-[10px]">
-              Level {circuitInfo.level} &middot; {circuitInfo.qubits} qubit
+              {circuitInfo.qubits} qubit
               {circuitInfo.qubits > 1 ? "s" : ""}
             </span>
           </div>

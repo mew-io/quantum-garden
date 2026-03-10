@@ -387,7 +387,7 @@ export class PlantInstancer {
     this.mesh.count = newCount;
 
     // Clear any trailing instances that may have been used previously
-    for (let i = newCount; i < (oldPlantIndexMap.size); i++) {
+    for (let i = newCount; i < oldPlantIndexMap.size; i++) {
       this.clearInstance(i);
     }
 

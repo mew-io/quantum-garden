@@ -72,9 +72,6 @@ function getPlantPrimaryColor(plant: Plant): string | undefined {
  * Renders the quantum garden with efficient instanced rendering.
  * Plants, observation regions, and cursor-based observation are all managed here.
  */
-/** Auto-observation timeout in milliseconds */
-const AUTO_OBSERVE_TIMEOUT = 30_000;
-
 export function GardenScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneManagerRef = useRef<SceneManager | null>(null);
@@ -87,8 +84,6 @@ export function GardenScene() {
 
   // Track which plants have been observed client-side (not persisted to server)
   const observedPlantsRef = useRef<Set<string>>(new Set());
-  // Track auto-observation timers per plant
-  const autoObserveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -167,13 +162,6 @@ export function GardenScene() {
       if (observedPlantsRef.current.has(plantId)) return;
       observedPlantsRef.current.add(plantId);
 
-      // Cancel any pending auto-observe timer
-      const timer = autoObserveTimersRef.current.get(plantId);
-      if (timer) {
-        clearTimeout(timer);
-        autoObserveTimersRef.current.delete(plantId);
-      }
-
       // Update plant in local store (client-side only, not persisted)
       const store = useGardenStore.getState();
       store.updatePlant(plantId, {
@@ -215,11 +203,6 @@ export function GardenScene() {
         for (const partner of partners) {
           if (!observedPlantsRef.current.has(partner.id)) {
             observedPlantsRef.current.add(partner.id);
-            const partnerTimer = autoObserveTimersRef.current.get(partner.id);
-            if (partnerTimer) {
-              clearTimeout(partnerTimer);
-              autoObserveTimersRef.current.delete(partner.id);
-            }
             store.updatePlant(partner.id, {
               observed: true,
               visualState: "collapsed",
@@ -230,28 +213,6 @@ export function GardenScene() {
 
       hapticSuccess();
     };
-
-    /**
-     * Start auto-observation timer for an unobserved plant.
-     * After AUTO_OBSERVE_TIMEOUT, the plant automatically collapses.
-     */
-    const startAutoObserveTimer = (plantId: string) => {
-      if (observedPlantsRef.current.has(plantId)) return;
-      if (autoObserveTimersRef.current.has(plantId)) return;
-
-      const timer = setTimeout(() => {
-        autoObserveTimersRef.current.delete(plantId);
-        observePlant(plantId);
-      }, AUTO_OBSERVE_TIMEOUT);
-      autoObserveTimersRef.current.set(plantId, timer);
-    };
-
-    // Start auto-observe timers for initial germinated plants
-    for (const plant of initialPlants) {
-      if (!plant.observed && plant.germinatedAt) {
-        startAutoObserveTimer(plant.id);
-      }
-    }
 
     // Subscribe to store changes
     const unsubscribe = useGardenStore.subscribe((state, prevState) => {
@@ -273,14 +234,6 @@ export function GardenScene() {
               plant.position.y,
               accentColor
             );
-
-            // Start auto-observe timer for newly germinated plant
-            startAutoObserveTimer(plant.id);
-          }
-
-          // Start timers for any new unobserved plants we haven't seen before
-          if (!plant.observed && plant.germinatedAt && !prevPlant) {
-            startAutoObserveTimer(plant.id);
           }
         }
       }
@@ -420,20 +373,11 @@ export function GardenScene() {
       });
     }, 500);
 
-    // Capture ref values for cleanup
-    const autoObserveTimers = autoObserveTimersRef.current;
-
     // Cleanup
     return () => {
       mounted = false;
       clearInterval(performanceInterval);
       unsubscribe();
-
-      // Clear all auto-observe timers
-      for (const timer of autoObserveTimers.values()) {
-        clearTimeout(timer);
-      }
-      autoObserveTimers.clear();
 
       sceneManager.canvas.removeEventListener("click", handleClick);
       window.removeEventListener(

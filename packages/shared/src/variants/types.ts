@@ -781,6 +781,22 @@ export interface WatercolorElement {
   opacity?: number;
   /** Z offset for stacking order within the composition */
   zOffset?: number;
+
+  // ── Quantum-driven animation parameters ──
+
+  /** Sway amplitude multiplier (default 1.0). Quantum-driven: uncertain plants sway more. */
+  swayAmplitude?: number;
+  /** Sway frequency multiplier (default 1.0). Quantum-driven: varies movement speed per element. */
+  swayFrequency?: number;
+  /** Breathing amplitude multiplier (default 1.0). Quantum-driven: dominant plants pulse more. */
+  breathAmplitude?: number;
+
+  // ── Quantum-driven visual parameters ──
+
+  /** Iridescence amount (0-1). Controls hue shift magnitude. Default 0.3. */
+  iridescence?: number;
+  /** Saturation boost (0-1). Enriches color vibrancy. Default 0. */
+  saturationBoost?: number;
 }
 
 /**

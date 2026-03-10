@@ -8,3 +8,4 @@ export { OverlayManager } from "./overlay-manager";
 export { EntanglementOverlay } from "./entanglement-overlay";
 export { FeedbackOverlay } from "./feedback-overlay";
 export { GerminationOverlay } from "./germination-overlay";
+export { QuantumParticleOverlay } from "./quantum-particle-overlay";

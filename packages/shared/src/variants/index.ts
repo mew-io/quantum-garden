@@ -80,3 +80,14 @@ export {
 
 // Variant definitions
 export { PLANT_VARIANTS, getVariantById, getAllVariants, getSpawnableVariants } from "./registry";
+
+// Watercolor builder helpers (quantum annotation)
+export {
+  annotateElements,
+  computeQuantumVisuals,
+  computeAuraParams,
+  computeParticleParams,
+  type QuantumVisualParams,
+  type AuraParams,
+  type ParticleParams,
+} from "./plants/watercolor/_helpers";

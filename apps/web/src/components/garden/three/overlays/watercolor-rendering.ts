@@ -288,27 +288,40 @@ export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
     },
     vertexShader: `
       uniform float u_time;
+
+      // Per-vertex attributes
       attribute vec4 aColor;
+      attribute float aSwayAmplitude;
+      attribute float aSwayFrequency;
+      attribute float aBreathAmplitude;
+      attribute float aIridescence;
+      attribute float aSaturationBoost;
+
+      // Varyings
       varying vec4 vColor;
+      varying float vIridescence;
+      varying float vSaturationBoost;
+      varying vec2 vWorldPos;
+
       void main() {
         vColor = aColor;
+        vIridescence = aIridescence;
+        vSaturationBoost = aSaturationBoost;
 
         // Organic sway: use world position (modelMatrix) for per-plant phase variation
         vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldPos = worldPos.xy;
         float phase = worldPos.x * 0.007 + worldPos.y * 0.005;
 
         // Height factor: roots stay anchored, tips sway most
-        // Geometry is baked into group-local space (centered around 0,0)
-        // Positive Y = upward = tips, negative Y = downward = roots
-        // Use position relative to group origin (the plant's center)
         float heightFactor = max(0.0, -position.y * 0.04);
 
-        // Breathing scale (±0.75%, 4s cycle)
-        float breath = 1.0 + sin(u_time * 1.571 + phase) * 0.0075;
+        // Breathing scale — quantum-driven amplitude (±0.75% base, modulated)
+        float breath = 1.0 + sin(u_time * 1.571 * aSwayFrequency + phase) * 0.0075 * aBreathAmplitude;
 
-        // Gentle sway, modulated by height
-        float swayX = sin(u_time * 1.257 + phase * 2.0) * 1.25 * heightFactor;
-        float swayY = sin(u_time * 0.943 + phase * 1.5) * 0.5 * heightFactor;
+        // Gentle sway — quantum-driven amplitude and frequency
+        float swayX = sin(u_time * 1.257 * aSwayFrequency + phase * 2.0) * 1.25 * heightFactor * aSwayAmplitude;
+        float swayY = sin(u_time * 0.943 * aSwayFrequency + phase * 1.5) * 0.5 * heightFactor * aSwayAmplitude;
 
         vec3 pos = position;
         pos.xy *= breath;
@@ -319,9 +332,43 @@ export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
       }
     `,
     fragmentShader: `
+      uniform float u_time;
+
       varying vec4 vColor;
+      varying float vIridescence;
+      varying float vSaturationBoost;
+      varying vec2 vWorldPos;
+
+      // RGB ↔ HSV conversions for iridescence
+      vec3 rgb2hsv(vec3 c) {
+        vec4 K = vec4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+        vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+        vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+        float d = q.x - min(q.w, q.y);
+        float e = 1.0e-10;
+        return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+      }
+
+      vec3 hsv2rgb(vec3 c) {
+        vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+      }
+
       void main() {
-        gl_FragColor = vColor;
+        vec4 color = vColor;
+
+        // Apply iridescence: quantum-driven hue shift
+        if (vIridescence > 0.001) {
+          vec3 hsv = rgb2hsv(color.rgb);
+          float iriShift = sin(u_time * 0.8 + vWorldPos.x * 0.012 + vWorldPos.y * 0.009) * vIridescence * 0.08;
+          hsv.x = fract(hsv.x + iriShift);
+          // Saturation boost from quantum dominance
+          hsv.y = min(1.0, hsv.y * (1.0 + vSaturationBoost * 0.3));
+          color.rgb = hsv2rgb(hsv);
+        }
+
+        gl_FragColor = color;
       }
     `,
     transparent: true,
@@ -390,8 +437,42 @@ export function mergeWatercolorElements(
   return new THREE.Mesh(merged, material);
 }
 
-function addVertexColors(geo: THREE.BufferGeometry, color: THREE.Color, opacity: number): void {
+/** Per-element quantum visual parameters passed through to vertex attributes. */
+interface ElementVisualParams {
+  swayAmplitude: number;
+  swayFrequency: number;
+  breathAmplitude: number;
+  iridescence: number;
+  saturationBoost: number;
+}
+
+const DEFAULT_VISUAL_PARAMS: ElementVisualParams = {
+  swayAmplitude: 1.0,
+  swayFrequency: 1.0,
+  breathAmplitude: 1.0,
+  iridescence: 0.3,
+  saturationBoost: 0.0,
+};
+
+function getElementVisualParams(element: WatercolorElement): ElementVisualParams {
+  return {
+    swayAmplitude: element.swayAmplitude ?? DEFAULT_VISUAL_PARAMS.swayAmplitude,
+    swayFrequency: element.swayFrequency ?? DEFAULT_VISUAL_PARAMS.swayFrequency,
+    breathAmplitude: element.breathAmplitude ?? DEFAULT_VISUAL_PARAMS.breathAmplitude,
+    iridescence: element.iridescence ?? DEFAULT_VISUAL_PARAMS.iridescence,
+    saturationBoost: element.saturationBoost ?? DEFAULT_VISUAL_PARAMS.saturationBoost,
+  };
+}
+
+function addVertexAttributes(
+  geo: THREE.BufferGeometry,
+  color: THREE.Color,
+  opacity: number,
+  params: ElementVisualParams
+): void {
   const count = geo.getAttribute("position").count;
+
+  // Color (RGBA)
   const colors = new Float32Array(count * 4);
   const r = color.r,
     g = color.g,
@@ -404,6 +485,19 @@ function addVertexColors(geo: THREE.BufferGeometry, color: THREE.Color, opacity:
     colors[i4 + 3] = opacity;
   }
   geo.setAttribute("aColor", new THREE.BufferAttribute(colors, 4));
+
+  // Animation attributes (per-vertex, uniform within an element)
+  const sway = new Float32Array(count).fill(params.swayAmplitude);
+  const freq = new Float32Array(count).fill(params.swayFrequency);
+  const breath = new Float32Array(count).fill(params.breathAmplitude);
+  const iri = new Float32Array(count).fill(params.iridescence);
+  const sat = new Float32Array(count).fill(params.saturationBoost);
+
+  geo.setAttribute("aSwayAmplitude", new THREE.BufferAttribute(sway, 1));
+  geo.setAttribute("aSwayFrequency", new THREE.BufferAttribute(freq, 1));
+  geo.setAttribute("aBreathAmplitude", new THREE.BufferAttribute(breath, 1));
+  geo.setAttribute("aIridescence", new THREE.BufferAttribute(iri, 1));
+  geo.setAttribute("aSaturationBoost", new THREE.BufferAttribute(sat, 1));
 }
 
 function stripUnneededAttributes(geo: THREE.BufferGeometry): void {
@@ -425,6 +519,7 @@ function collectShapeGeometries(
 ): void {
   const n = effect.layers;
   const baseOp = element.opacity ?? effect.opacity;
+  const visualParams = getElementVisualParams(element);
 
   for (let i = 0; i < n; i++) {
     const t = n > 1 ? i / (n - 1) : 0.5;
@@ -457,7 +552,7 @@ function collectShapeGeometries(
     matrix.compose(tempPos, tempQuat, tempScale);
     geo.applyMatrix4(matrix);
 
-    addVertexColors(geo, c, op);
+    addVertexAttributes(geo, c, op, visualParams);
     out.push(geo);
   }
 }
@@ -479,6 +574,7 @@ function collectStemGeometries(
 
   const n = Math.min(effect.layers, 3);
   const baseOp = element.opacity ?? effect.opacity;
+  const visualParams = getElementVisualParams(element);
   const curvePoints = points.map((p) => new THREE.Vector3(p[0], p[1], 0));
 
   // Stem centroid for scale-around-center
@@ -528,7 +624,7 @@ function collectStemGeometries(
     matrix.compose(tempPos, tempQuat, tempScale);
     geo.applyMatrix4(matrix);
 
-    addVertexColors(geo, c, op);
+    addVertexAttributes(geo, c, op, visualParams);
     out.push(geo);
   }
 }

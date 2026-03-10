@@ -243,3 +243,193 @@ export function resolveColors(
   }
   return fallback;
 }
+
+// ── Quantum Visual Annotation ────────────────────────────────────────────────
+
+/**
+ * Quantum-derived visual parameters for animation and iridescence.
+ * Computed from quantum signals and applied to all elements in a plant.
+ */
+export interface QuantumVisualParams {
+  /** Per-element sway intensity: uncertain plants sway more (0.5–1.5) */
+  swayAmplitude: number;
+  /** Per-element sway speed variation (0.7–1.3) */
+  swayFrequency: number;
+  /** Breathing depth: dominant plants pulse more visibly (0.7–1.3) */
+  breathAmplitude: number;
+  /** Iridescence (hue shift) amount: high entropy = more color play (0.2–0.8) */
+  iridescence: number;
+  /** Saturation boost: dominant measurement = richer colors (0–0.8) */
+  saturationBoost: number;
+}
+
+/**
+ * Compute quantum-driven visual parameters from a plant's traits.
+ * Returns safe defaults for unobserved plants (stronger iridescence to visualize uncertainty).
+ */
+export function computeQuantumVisuals(traits: ResolvedTraits | null): QuantumVisualParams {
+  const signals = traits?.quantumSignals;
+  if (!signals) {
+    // Unobserved: stronger iridescence + more sway (quantum uncertainty)
+    return {
+      swayAmplitude: 1.3,
+      swayFrequency: 1.0,
+      breathAmplitude: 0.8,
+      iridescence: 0.7,
+      saturationBoost: 0.0,
+    };
+  }
+  return {
+    swayAmplitude: 0.5 + (1 - signals.certainty) * 1.0,
+    swayFrequency: 0.7 + signals.spread * 0.6,
+    breathAmplitude: 0.7 + signals.dominance * 0.6,
+    iridescence: 0.2 + signals.entropy * 0.6,
+    saturationBoost: signals.dominance * 0.8,
+  };
+}
+
+/**
+ * Stamp quantum-driven animation and iridescence parameters onto all elements.
+ * Call this after building elements in a variant's buildElements function,
+ * or in the overlay before merging. Each element gets slightly different
+ * values via seeded RNG jitter for organic variety.
+ */
+export function annotateElements(
+  elements: WatercolorElement[],
+  traits: ResolvedTraits | null,
+  rng: () => number
+): WatercolorElement[] {
+  const qv = computeQuantumVisuals(traits);
+
+  return elements.map((el) => ({
+    ...el,
+    swayAmplitude: qv.swayAmplitude * (0.8 + rng() * 0.4),
+    swayFrequency: qv.swayFrequency * (0.85 + rng() * 0.3),
+    breathAmplitude: qv.breathAmplitude * (0.8 + rng() * 0.4),
+    iridescence: qv.iridescence,
+    saturationBoost: qv.saturationBoost,
+  }));
+}
+
+// ── Quantum Aura Parameters ──────────────────────────────────────────────────
+
+/**
+ * Parameters for the quantum aura glow rendered behind each plant.
+ */
+export interface AuraParams {
+  /** Aura color (hex string), shifted by parityBias between warm and cool */
+  color: string;
+  /** Aura radius in 64×64 coordinate space (8–20) */
+  radius: number;
+  /** Base opacity (0.08–0.35) */
+  opacity: number;
+  /** Pulse speed multiplier (0.5–2.0) */
+  pulseSpeed: number;
+}
+
+/**
+ * Compute aura glow parameters from quantum signals.
+ * Unobserved plants get a dim, neutral white aura.
+ */
+export function computeAuraParams(traits: ResolvedTraits | null): AuraParams {
+  const signals = traits?.quantumSignals;
+  if (!signals) {
+    return { color: "#c8c8d0", radius: 10, opacity: 0.06, pulseSpeed: 1.5 };
+  }
+
+  // parityBias shifts hue: 0 = warm amber (#FFD080), 1 = cool cyan (#80D0FF)
+  const hue = 30 + signals.parityBias * 170; // 30° (amber) → 200° (cyan)
+  const sat = 40 + signals.dominance * 30; // 40-70%
+  const light = 70 + signals.certainty * 15; // 70-85%
+  const color = hslToHex(hue, sat, light);
+
+  return {
+    color,
+    radius: 8 + signals.entropy * 12,
+    opacity: 0.08 + signals.dominance * 0.27,
+    pulseSpeed: 0.5 + signals.spread * 1.5,
+  };
+}
+
+// ── Quantum Particle Parameters ──────────────────────────────────────────────
+
+/**
+ * Parameters for ambient quantum particles emitted by a plant.
+ */
+export interface ParticleParams {
+  /** Number of particles (2–6) */
+  count: number;
+  /** Upward drift speed multiplier (0.5–2.0) */
+  speed: number;
+  /** Particle color (hex) */
+  color: string;
+  /** Particle size (0.3–1.2 in 64×64 space) */
+  size: number;
+  /** Horizontal spread radius (4–12 in 64×64 space) */
+  spreadRadius: number;
+}
+
+/**
+ * Compute particle emission parameters from quantum signals.
+ * Unobserved plants get fewer, flickering particles.
+ */
+export function computeParticleParams(
+  traits: ResolvedTraits | null,
+  plantColor: string
+): ParticleParams {
+  const signals = traits?.quantumSignals;
+  if (!signals) {
+    return { count: 1, speed: 0.8, color: "#e0e0e8", size: 0.4, spreadRadius: 6 };
+  }
+
+  // Shift plant's primary color by parityBias for particle tint
+  const color = shiftHue(plantColor, (signals.parityBias - 0.5) * 30);
+
+  return {
+    count: Math.round(2 + signals.entropy * 4),
+    speed: 0.5 + signals.growth * 1.5,
+    color,
+    size: 0.3 + signals.dominance * 0.9,
+    spreadRadius: 4 + signals.spread * 8,
+  };
+}
+
+// ── Color Utilities ──────────────────────────────────────────────────────────
+
+function hslToHex(h: number, s: number, l: number): string {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function shiftHue(hex: string, degrees: number): string {
+  // Parse hex to RGB
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+  // RGB → HSL
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0,
+    s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+
+  return hslToHex((h * 360 + degrees + 360) % 360, s * 100, l * 100);
+}

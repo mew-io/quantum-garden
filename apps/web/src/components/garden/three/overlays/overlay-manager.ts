@@ -21,6 +21,7 @@ import { FeedbackOverlay } from "./feedback-overlay";
 import { GerminationOverlay } from "./germination-overlay";
 import { VectorPlantOverlay } from "./vector-plant-overlay";
 import { WatercolorPlantOverlay } from "./watercolor-plant-overlay";
+import { QuantumParticleOverlay } from "./quantum-particle-overlay";
 import { DebugOverlay } from "./debug-overlay";
 
 /**
@@ -36,6 +37,7 @@ export class OverlayManager {
   public germination: GerminationOverlay;
   public vectorPlants: VectorPlantOverlay;
   public watercolorPlants: WatercolorPlantOverlay;
+  public particles: QuantumParticleOverlay;
   public debug: DebugOverlay;
 
   // Track whether plant overlays have content (set via setPlants)
@@ -61,6 +63,7 @@ export class OverlayManager {
     this.germination = new GerminationOverlay();
     this.vectorPlants = new VectorPlantOverlay();
     this.watercolorPlants = new WatercolorPlantOverlay();
+    this.particles = new QuantumParticleOverlay();
     this.debug = new DebugOverlay();
 
     // Add all overlay meshes to the overlay scene
@@ -69,6 +72,7 @@ export class OverlayManager {
     this.overlayScene.add(this.germination.getObject());
     this.overlayScene.add(this.vectorPlants.getObject());
     this.overlayScene.add(this.watercolorPlants.getObject());
+    this.overlayScene.add(this.particles.getObject());
     this.overlayScene.add(this.debug.getObject());
   }
 
@@ -112,6 +116,12 @@ export class OverlayManager {
       }
     }
 
+    if (this.particles.hasActiveAnimations()) {
+      if (this.particles.update(time, deltaTime)) {
+        this.dirty = true;
+      }
+    }
+
     if (this.debug.hasActiveAnimations()) {
       this.debug.update(time, deltaTime);
       this.dirty = true;
@@ -124,9 +134,12 @@ export class OverlayManager {
   setPlants(plants: Plant[]): void {
     this.vectorPlants.setPlants(plants);
     this.watercolorPlants.setPlants(plants);
+    this.particles.setPlants(plants);
     this.debug.setPlants(plants);
     this.hasPlantOverlayContent =
-      this.vectorPlants.hasActiveAnimations() || this.watercolorPlants.hasActiveAnimations();
+      this.vectorPlants.hasActiveAnimations() ||
+      this.watercolorPlants.hasActiveAnimations() ||
+      this.particles.hasActiveAnimations();
     this.dirty = true;
   }
 
@@ -247,6 +260,7 @@ export class OverlayManager {
     this.germination.dispose();
     this.vectorPlants.dispose();
     this.watercolorPlants.dispose();
+    this.particles.dispose();
     this.debug.dispose();
 
     this.renderTarget?.dispose();

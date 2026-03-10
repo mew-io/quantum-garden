@@ -214,7 +214,7 @@ function generateObservationExplanation(event: QuantumEvent): QuantumExplanation
 
   // Build technical details
   const technicalParts: string[] = [
-    `Circuit: ${circuit.name} (Level ${circuit.level}, ${circuit.qubits} qubit${circuit.qubits > 1 ? "s" : ""}).`,
+    `Circuit: ${circuit.name} (${circuit.qubits} qubit${circuit.qubits > 1 ? "s" : ""}).`,
     `Gate sequence: ${circuit.gateDescription}.`,
   ];
 

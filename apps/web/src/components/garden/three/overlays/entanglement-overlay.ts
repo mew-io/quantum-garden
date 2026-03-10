@@ -54,6 +54,7 @@ export class EntanglementOverlay {
   private groups: EntanglementGroup[] = [];
   private pulsingGroups: Map<string, number> = new Map();
   private storeUnsubscribe: (() => void) | null = null;
+  private isVisible: boolean = false;
 
   // Wave particles
   private waveParticles: WaveParticle[] = [];
@@ -63,6 +64,7 @@ export class EntanglementOverlay {
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "entanglement";
+    this.group.visible = false;
 
     // Create dashed line material
     this.material = new THREE.LineDashedMaterial({
@@ -315,11 +317,19 @@ export class EntanglementOverlay {
   }
 
   /**
+   * Set visibility of entanglement overlay (only shown in debug mode).
+   */
+  setVisible(visible: boolean): void {
+    this.isVisible = visible;
+    this.group.visible = visible;
+  }
+
+  /**
    * Check if there are any active animations that need updating.
-   * Returns true when there are entanglement groups or active pulses/waves.
+   * Returns true when visible and there are entanglement groups or active pulses/waves.
    */
   hasActiveAnimations(): boolean {
-    return this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0;
+    return this.isVisible && (this.groups.length > 0 || this.pulsingGroups.size > 0 || this.waveParticles.length > 0);
   }
 
   /**

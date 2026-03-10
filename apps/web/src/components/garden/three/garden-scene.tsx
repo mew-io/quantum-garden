@@ -388,6 +388,7 @@ export function GardenScene() {
     // Handle debug panel visibility changes
     const handleDebugVisibilityChange = (e: CustomEvent<{ visible: boolean }>) => {
       overlayManager.debug.setVisible(e.detail.visible);
+      overlayManager.entanglement.setVisible(e.detail.visible);
     };
     window.addEventListener(
       "debug-visibility-change" as keyof WindowEventMap,

@@ -4,24 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useGardenStore } from "@/stores/garden-store";
 import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
-import {
-  getUIPreferences,
-  resetAllUIPreferences,
-  UI_PREFERENCE_LABELS,
-} from "@/lib/ui-preferences";
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant } from "@quantum-garden/shared";
-
-function formatRelativeTime(timestamp: number | null): string {
-  if (!timestamp) return "—";
-  const now = Date.now();
-  const diff = now - timestamp;
-  if (diff < 10_000) return "just now";
-  if (diff < 60_000) return `${Math.floor(diff / 1000)}s ago`;
-  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`;
-  return `${Math.floor(diff / 86400_000)}d ago`;
-}
 
 interface DebugTabProps {
   isActive: boolean;
@@ -39,38 +23,25 @@ export function DebugTab({ isActive }: DebugTabProps) {
     levels: ["debug", "info", "warn", "error"],
   });
 
-  const {
-    evolutionPaused,
-    evolutionStats,
-    lastGerminationTime,
-    notifications,
-    observationContext,
-    performanceStats,
-  } = useGardenStore();
+  const { notifications, performanceStats } = useGardenStore();
 
   const allLogs = useDebugLogs();
   const filteredLogs = filterLogs(allLogs, logFilters);
 
-  const { data: plants, refetch: refetchPlants } = trpc.plants.list.useQuery(undefined, {
+  const { data: plants } = trpc.plants.list.useQuery(undefined, {
     enabled: isActive,
     refetchInterval: isActive ? 2000 : false,
   });
 
-  const { data: quantumConfig, refetch: refetchConfig } = trpc.quantum.getConfig.useQuery(
-    undefined,
-    {
-      enabled: isActive,
-      refetchInterval: isActive ? 5000 : false,
-    }
-  );
+  const { data: quantumConfig } = trpc.quantum.getConfig.useQuery(undefined, {
+    enabled: isActive,
+    refetchInterval: isActive ? 5000 : false,
+  });
 
-  const { data: jobStats, refetch: refetchJobStats } = trpc.quantum.getJobStats.useQuery(
-    undefined,
-    {
-      enabled: isActive,
-      refetchInterval: isActive ? 2000 : false,
-    }
-  );
+  const { data: jobStats } = trpc.quantum.getJobStats.useQuery(undefined, {
+    enabled: isActive,
+    refetchInterval: isActive ? 2000 : false,
+  });
 
   // Listen for plant selection events from the canvas
   useEffect(() => {
@@ -188,46 +159,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
 
             <section>
               <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
-                System State
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                <StatusBadge
-                  label="Evolution"
-                  active={!evolutionPaused}
-                  activeColor="green"
-                  inactiveText="Paused"
-                />
-                {observationContext && (
-                  <StatusBadge
-                    label="Context Panel"
-                    active={true}
-                    activeColor="cyan"
-                    activeText="Visible"
-                  />
-                )}
-              </div>
-              {evolutionStats && (
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  <span className="text-[--wc-ink-muted]">
-                    Dormant: <span className="text-yellow-700">{evolutionStats.dormantCount}</span>
-                  </span>
-                  <span className="text-[--wc-ink-muted]">
-                    Tracked: <span className="text-cyan-700">{evolutionStats.trackedCount}</span>
-                  </span>
-                  {lastGerminationTime && (
-                    <span className="text-[--wc-ink-muted]">
-                      Last germination:{" "}
-                      <span className="text-emerald-700">
-                        {formatRelativeTime(lastGerminationTime)}
-                      </span>
-                    </span>
-                  )}
-                </div>
-              )}
-            </section>
-
-            <section>
-              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
                 Garden Stats
               </h4>
               <div className="grid grid-cols-3 gap-2">
@@ -315,30 +246,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
                   </span>
                 </button>
               </div>
-            </section>
-
-            <section>
-              <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
-                UI Preferences
-              </h4>
-              <UIPreferencesSection />
-            </section>
-
-            <section>
-              <div className="flex justify-between items-center">
-                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide">Actions</h4>
-              </div>
-              <button
-                onClick={() => {
-                  refetchPlants();
-                  refetchConfig();
-                  refetchJobStats();
-                  debugLogger.system.debug("Manual refresh triggered");
-                }}
-                className="mt-2 w-full py-1.5 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
-              >
-                Refresh All
-              </button>
             </section>
           </>
         )}
@@ -581,109 +488,6 @@ function Stat({
     >
       <div className="text-[--wc-ink-muted] text-xs">{label}</div>
       <div className={`font-mono transition-opacity duration-150 ${colorClass}`}>{value}</div>
-    </div>
-  );
-}
-
-function StatusBadge({
-  label,
-  active,
-  activeColor,
-  activeText,
-  inactiveText,
-  inactiveColor = "gray",
-}: {
-  label: string;
-  active: boolean;
-  activeColor: "green" | "blue" | "purple" | "cyan" | "amber";
-  activeText?: string;
-  inactiveText?: string;
-  inactiveColor?: "gray" | "amber";
-}) {
-  const colorClasses = {
-    green: "bg-emerald-50/60 text-emerald-700 border-emerald-300/40",
-    blue: "bg-blue-50/60 text-blue-700 border-blue-300/40",
-    purple: "bg-purple-50/60 text-purple-700 border-purple-300/40",
-    cyan: "bg-cyan-50/60 text-cyan-700 border-cyan-300/40",
-    amber: "bg-amber-50/60 text-amber-700 border-amber-300/40",
-    gray: "bg-black/5 text-[--wc-ink-muted] border-[--wc-stone]/30",
-  };
-
-  const className = active ? colorClasses[activeColor] : colorClasses[inactiveColor];
-  const text = active ? (activeText ?? "Active") : (inactiveText ?? "Inactive");
-
-  return (
-    <div className={`text-xs px-2 py-1 rounded border transition-all duration-300 ${className}`}>
-      <span className="opacity-60">{label}:</span> {text}
-    </div>
-  );
-}
-
-function UIPreferencesSection() {
-  const [preferences, setPreferences] = useState(() => getUIPreferences());
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const dismissedCount = Object.values(preferences).filter(Boolean).length;
-
-  const handleReset = () => {
-    resetAllUIPreferences();
-    setPreferences(getUIPreferences());
-    setShowConfirm(false);
-    debugLogger.system.info("UI preferences reset");
-  };
-
-  if (dismissedCount === 0) {
-    return (
-      <div className="bg-[--wc-paper]/60 rounded p-3 text-xs text-[--wc-ink-muted]">
-        No dismissed UI elements
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
-      <div className="text-xs text-[--wc-ink-muted] mb-2">
-        Dismissed UI elements ({dismissedCount}):
-      </div>
-      <div className="space-y-1">
-        {(Object.keys(UI_PREFERENCE_LABELS) as Array<keyof typeof UI_PREFERENCE_LABELS>).map(
-          (key) =>
-            preferences[key] && (
-              <div key={key} className="flex items-center gap-2 text-xs text-[--wc-ink-muted]">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500/60" />
-                {UI_PREFERENCE_LABELS[key]}
-              </div>
-            )
-        )}
-      </div>
-      {!showConfirm ? (
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="w-full mt-2 py-1.5 px-3 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
-        >
-          Reset All Preferences
-        </button>
-      ) : (
-        <div className="mt-2 space-y-2">
-          <p className="text-xs text-amber-700">
-            This will restore all dismissed panels and hints.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="flex-1 py-1.5 px-2 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 py-1.5 px-2 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

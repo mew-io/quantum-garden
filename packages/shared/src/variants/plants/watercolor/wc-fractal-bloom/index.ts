@@ -68,9 +68,19 @@ function buildFractalBranch(
   openness: number,
   rng: () => number
 ): void {
-  // End point of this branch segment
-  const endX = startX + Math.cos(angle) * length;
-  const endY = startY + Math.sin(angle) * length;
+  // Branch segment grows in length based on openness at this depth
+  const depthThreshold = 0.05 + depth * 0.15;
+  const segmentGrowth = Math.min(1, Math.max(0, (openness - depthThreshold) / 0.25));
+
+  // End point of this branch segment — grows outward
+  const endX = startX + Math.cos(angle) * length * segmentGrowth;
+  const endY = startY + Math.sin(angle) * length * segmentGrowth;
+
+  if (segmentGrowth <= 0) {
+    // Consume RNG to keep deterministic
+    rng();
+    return;
+  }
 
   // Stem element for the branch
   buildStem(
@@ -79,16 +89,17 @@ function buildFractalBranch(
     startY,
     endX,
     endY,
-    0.08 + rng() * 0.06, // subtle curvature
+    (0.08 + rng() * 0.06) * segmentGrowth, // subtle curvature
     thickness,
     colors.branch,
-    0.5 + openness * 0.15,
+    (0.5 + openness * 0.15) * Math.min(1, segmentGrowth * 2),
     rng
   );
 
   if (depth >= maxDepth) {
     // Terminal branch: add petal cluster and dot accent
-    const petalOpenness = Math.max(0, (openness - 0.8) / 0.2);
+    // Flowers appear once the branch segment is mostly grown
+    const petalOpenness = Math.max(0, (segmentGrowth - 0.6) / 0.4);
     if (petalOpenness > 0) {
       const petalCount = 3 + Math.floor(rng() * 3); // 3-5 petals
       const step = (Math.PI * 2) / petalCount;

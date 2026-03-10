@@ -24,16 +24,34 @@ function buildWcDewdropDaisyElements(ctx: WatercolorBuildContext): WatercolorEle
   const openness = standardOpenness(ctx.keyframeName, ctx.keyframeProgress);
   const cx = 32;
   const cy = 20;
+  const stemBottom = 52;
+  const stemFullTop = cy + 5;
 
-  // Stem
-  buildStem(elements, cx, 52, cx, cy + 5, 0.1, 0.55 + openness * 0.3, "#6B8A65", 0.6, rng);
+  // Stem — grows upward with openness
+  const stemGrowth = Math.min(1, openness / 0.3);
+  if (stemGrowth > 0) {
+    const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
+    buildStem(
+      elements,
+      cx,
+      stemBottom,
+      cx,
+      stemTopY,
+      0.1 * stemGrowth,
+      0.55 + openness * 0.3,
+      "#6B8A65",
+      0.6 * Math.min(1, stemGrowth * 2),
+      rng
+    );
+  }
 
-  // Leaves
+  // Leaves — positioned along the grown portion of the stem
   const leafOpenness = Math.max(0, (openness - 0.1) / 0.9);
+  const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
   for (let i = 0; i < 2; i++) {
     if (leafOpenness <= 0) break;
     const side = i === 0 ? -1 : 1;
-    const leafY = 38 + i * 6;
+    const leafY = stemBottom + (stemTopY - stemBottom) * (0.4 + i * 0.25);
     elements.push({
       shape: { type: "leaf", width: 3, length: 8 },
       position: { x: cx + side * 1.5, y: leafY },

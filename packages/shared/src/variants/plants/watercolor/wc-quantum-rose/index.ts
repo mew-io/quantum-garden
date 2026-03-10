@@ -92,19 +92,20 @@ function buildWcQuantumRoseElements(ctx: WatercolorBuildContext): WatercolorElem
   const stemTopY = 30;
 
   // === STEM ===
-  // Visible from bud stage onward, with a gentle curve
-  if (openness > 0.05) {
-    const stemOpenness = Math.min(1, openness / 0.3);
+  // Grows upward from bud stage onward, with a gentle curve
+  const stemGrowth = Math.min(1, openness / 0.3);
+  if (stemGrowth > 0) {
+    const grownStemTopY = stemBottomY + (stemTopY - stemBottomY) * stemGrowth;
     buildStem(
       elements,
       cx,
       stemBottomY,
       cx,
-      stemTopY,
-      0.3, // curvature
-      1.0 + stemOpenness * 0.3, // thickness
+      grownStemTopY,
+      0.3 * stemGrowth, // curvature grows with stem
+      1.0 + stemGrowth * 0.3, // thickness
       colorSet.stem,
-      0.5 * stemOpenness,
+      0.5 * Math.min(1, stemGrowth * 2),
       rng
     );
   }
@@ -114,10 +115,11 @@ function buildWcQuantumRoseElements(ctx: WatercolorBuildContext): WatercolorElem
   if (openness > 0.15) {
     const thornOpenness = Math.min(1, (openness - 0.15) / 0.35);
     const thornCount = Math.round(thornDensity);
+    const grownStemTopY = stemBottomY + (stemTopY - stemBottomY) * stemGrowth;
 
     for (let i = 0; i < thornCount; i++) {
       const t = (i + 0.5) / thornCount; // distribute along stem
-      const thornY = stemBottomY + (stemTopY - stemBottomY) * t;
+      const thornY = stemBottomY + (grownStemTopY - stemBottomY) * t;
       const side = i % 2 === 0 ? -1 : 1; // alternate sides
       const thornAngle = side * (Math.PI * 0.3 + rng() * 0.2);
 

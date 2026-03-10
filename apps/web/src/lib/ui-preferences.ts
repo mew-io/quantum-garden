@@ -11,8 +11,6 @@ export const UI_PREFERENCE_KEYS = {
   FIRST_OBSERVATION: "quantum-garden-first-observation-completed",
   /** Observation context panel - can be permanently hidden */
   CONTEXT_PANEL: "quantum-garden-hide-context-panel",
-  /** Keyboard shortcut hint - shows once */
-  KEYBOARD_HINT: "quantum-garden-keyboard-hint-shown",
 } as const;
 
 /**
@@ -23,14 +21,12 @@ export function getUIPreferences(): Record<keyof typeof UI_PREFERENCE_KEYS, bool
     return {
       FIRST_OBSERVATION: false,
       CONTEXT_PANEL: false,
-      KEYBOARD_HINT: false,
     };
   }
 
   return {
     FIRST_OBSERVATION: localStorage.getItem(UI_PREFERENCE_KEYS.FIRST_OBSERVATION) === "true",
     CONTEXT_PANEL: localStorage.getItem(UI_PREFERENCE_KEYS.CONTEXT_PANEL) === "true",
-    KEYBOARD_HINT: localStorage.getItem(UI_PREFERENCE_KEYS.KEYBOARD_HINT) === "true",
   };
 }
 
@@ -60,5 +56,4 @@ export function resetUIPreference(key: keyof typeof UI_PREFERENCE_KEYS): void {
 export const UI_PREFERENCE_LABELS: Record<keyof typeof UI_PREFERENCE_KEYS, string> = {
   FIRST_OBSERVATION: "First observation celebration",
   CONTEXT_PANEL: "Observation context panel",
-  KEYBOARD_HINT: "Keyboard shortcut hint",
 };

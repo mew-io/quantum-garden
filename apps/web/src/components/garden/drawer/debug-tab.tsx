@@ -29,8 +29,6 @@ interface DebugTabProps {
 
 export function DebugTab({ isActive }: DebugTabProps) {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
-  const [observationMode, setObservationMode] = useState<"region" | "click">("region");
-  const [showModeConfirm, setShowModeConfirm] = useState(false);
   const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0);
   const [activeSubTab, setActiveSubTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
@@ -89,26 +87,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
         "plant-debug-select" as keyof WindowEventMap,
         handlePlantSelect as EventListener
       );
-  }, []);
-
-  const requestModeChange = useCallback(() => {
-    setShowModeConfirm(true);
-  }, []);
-
-  const confirmModeChange = useCallback(() => {
-    const newMode = observationMode === "region" ? "click" : "region";
-    setObservationMode(newMode);
-    setShowModeConfirm(false);
-    debugLogger.observation.info(`Observation mode changed to ${newMode}`);
-    window.dispatchEvent(
-      new CustomEvent("observation-mode-change", {
-        detail: { mode: newMode, debugMode: newMode === "click" },
-      })
-    );
-  }, [observationMode]);
-
-  const cancelModeChange = useCallback(() => {
-    setShowModeConfirm(false);
   }, []);
 
   const toggleSuperpositionMode = useCallback(() => {
@@ -219,14 +197,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
                   activeColor="green"
                   inactiveText="Paused"
                 />
-                <StatusBadge
-                  label="Observation"
-                  active={observationMode === "region"}
-                  activeColor="blue"
-                  activeText="Region"
-                  inactiveText="Click"
-                  inactiveColor="amber"
-                />
                 {observationContext && (
                   <StatusBadge
                     label="Context Panel"
@@ -329,21 +299,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
                 Controls
               </h4>
               <div className="space-y-2">
-                <button
-                  onClick={requestModeChange}
-                  className="w-full py-2 px-3 bg-[--wc-paper]/60 hover:bg-[--wc-paper] text-[--wc-ink-soft] rounded flex items-center justify-between"
-                >
-                  <span className="text-xs">Toggle Observation Mode</span>
-                  <span
-                    className={`text-xs font-mono px-2 py-1 rounded ${
-                      observationMode === "region"
-                        ? "bg-emerald-50/60 text-emerald-700"
-                        : "bg-amber-50/60 text-amber-700"
-                    }`}
-                  >
-                    {observationMode === "region" ? "REGION" : "CLICK"}
-                  </span>
-                </button>
                 <button
                   onClick={toggleSuperpositionMode}
                   className="w-full py-2 px-3 bg-[--wc-paper]/60 hover:bg-[--wc-paper] text-[--wc-ink-soft] rounded flex items-center justify-between"
@@ -570,34 +525,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
           </>
         )}
       </div>
-
-      {/* Observation Mode Change Confirmation Dialog */}
-      {showModeConfirm && (
-        <div className="absolute inset-0 bg-[#3A352E]/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-          <div className="bg-[--wc-cream] rounded-lg border border-[--wc-stone]/30 p-4 mx-4 max-w-xs shadow-xl">
-            <h4 className="text-[--wc-ink] font-medium mb-2">Switch Observation Mode?</h4>
-            <p className="text-[--wc-ink-soft] text-xs mb-4">
-              {observationMode === "region"
-                ? "Switching to Click mode allows direct click observation (debug only)."
-                : "Switching to Region mode enables automatic dwell-based observation."}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={cancelModeChange}
-                className="flex-1 py-2 px-3 bg-[--wc-paper] hover:bg-[--wc-stone]/30 text-[--wc-ink-soft] rounded text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmModeChange}
-                className="flex-1 py-2 px-3 bg-[--wc-bark] hover:bg-[#6A5E4D] text-white rounded text-xs"
-              >
-                Switch Mode
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

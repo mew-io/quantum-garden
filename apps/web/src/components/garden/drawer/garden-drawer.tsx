@@ -5,19 +5,17 @@ import { DrawerHandle } from "./drawer-handle";
 import { InfoTab } from "./info-tab";
 import { EventsTab } from "./events-tab";
 import { GardenTab } from "./garden-tab";
-import { ShortcutsTab } from "./shortcuts-tab";
 import { DebugTab } from "./debug-tab";
 import { debugLogger } from "@/lib/debug-logger";
 
 const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 
-type TabId = "info" | "events" | "garden" | "shortcuts" | "debug";
+type TabId = "info" | "events" | "garden" | "debug";
 
 const TABS: { id: TabId; label: string; debugOnly?: boolean }[] = [
   { id: "info", label: "Info" },
   { id: "events", label: "Events" },
   { id: "garden", label: "Garden" },
-  { id: "shortcuts", label: "Keys" },
   { id: "debug", label: "Debug", debugOnly: true },
 ];
 
@@ -116,7 +114,6 @@ export function GardenDrawer() {
           {activeTab === "info" && <InfoTab />}
           {activeTab === "events" && <EventsTab />}
           {activeTab === "garden" && <GardenTab />}
-          {activeTab === "shortcuts" && <ShortcutsTab />}
           {activeTab === "debug" && isDebugEnabled && (
             <DebugTab isActive={isOpen && activeTab === "debug"} />
           )}

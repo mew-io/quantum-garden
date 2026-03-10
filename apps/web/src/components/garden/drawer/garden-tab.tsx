@@ -2,14 +2,7 @@
 
 import { useMemo } from "react";
 import { useGardenStore } from "@/stores/garden-store";
-import { useAudio } from "@/lib/audio";
-import {
-  SeedIcon,
-  SproutIcon,
-  EyeIcon,
-  SpeakerOnIcon,
-  SpeakerOffIcon,
-} from "@/components/garden/icons";
+import { SeedIcon, SproutIcon, EyeIcon } from "@/components/garden/icons";
 
 function StatusItem({
   icon,
@@ -41,8 +34,7 @@ function StatusItem({
 }
 
 export function GardenTab() {
-  const { plants, evolutionPaused, evolutionStats, lastGerminationTime } = useGardenStore();
-  const { isEnabled: isSoundEnabled, toggleEnabled: toggleSound, init: initAudio } = useAudio();
+  const { plants, lastGerminationTime } = useGardenStore();
 
   const { germinatedCount, dormantCount, observedCount } = useMemo(
     () => ({
@@ -52,11 +44,6 @@ export function GardenTab() {
     }),
     [plants]
   );
-
-  const handleSoundToggle = () => {
-    initAudio();
-    toggleSound();
-  };
 
   const formatRelativeTime = (timestamp: number | null): string => {
     if (!timestamp) return "—";
@@ -71,54 +58,20 @@ export function GardenTab() {
     <div className="p-4 space-y-4">
       {/* Plant counts */}
       <section className="space-y-1.5">
-        <StatusItem icon={<SeedIcon />} label="Dormant" value={dormantCount} color="gray" />
+        <StatusItem icon={<SeedIcon />} label="Seeds" value={dormantCount} color="gray" />
         <StatusItem icon={<SproutIcon />} label="Growing" value={germinatedCount} color="green" />
         <StatusItem icon={<EyeIcon />} label="Observed" value={observedCount} color="cyan" />
       </section>
 
-      {/* Evolution state */}
-      <section className="border-t border-[--wc-stone]/20 pt-3">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-[--wc-ink-muted]">Evolution</span>
-          <span className={evolutionPaused ? "text-amber-700" : "text-emerald-700"}>
-            {evolutionPaused ? "Paused" : "Active"}
-          </span>
-        </div>
-        {evolutionStats && (
-          <div className="mt-2 text-xs text-[--wc-ink-muted] space-y-1">
-            <div className="flex justify-between">
-              <span>Tracked</span>
-              <span className="text-cyan-700">{evolutionStats.trackedCount}</span>
-            </div>
-          </div>
-        )}
-        {lastGerminationTime && (
-          <div className="mt-1 flex justify-between text-xs">
+      {/* Last germination */}
+      {lastGerminationTime && (
+        <section className="border-t border-[--wc-stone]/20 pt-3">
+          <div className="flex justify-between text-xs">
             <span className="text-[--wc-ink-muted]">Last germination</span>
             <span className="text-emerald-700">{formatRelativeTime(lastGerminationTime)}</span>
           </div>
-        )}
-      </section>
-
-      {/* Sound toggle */}
-      <section className="border-t border-[--wc-stone]/20 pt-3">
-        <button
-          onClick={handleSoundToggle}
-          className={`
-            w-full flex items-center justify-between px-3 py-2 rounded border transition-colors
-            ${
-              isSoundEnabled
-                ? "bg-cyan-50/60 text-cyan-800 border-cyan-300/40"
-                : "bg-[--wc-paper]/40 border-[--wc-stone]/20 text-[--wc-ink-soft] hover:bg-[--wc-paper]/70"
-            }
-          `}
-        >
-          <div className="flex items-center gap-2">
-            {isSoundEnabled ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
-            <span className="text-xs font-medium">{isSoundEnabled ? "Sound On" : "Sound Off"}</span>
-          </div>
-        </button>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

@@ -138,11 +138,7 @@ export const CloudStaticShader = {
       sparkleMask *= smoothstep(0.82, 0.92, bgLum); // brighter in clearer sky areas
 
       vec3 sparkleColor = vec3(1.0, 0.97, 0.95);
-      bg += sparkleColor * sparkleBrightness * sparkleMask * 0.6;
-
-      // Second sparkle layer (larger, slower)
-      float sparkleLg = sparkle(sparkleUv * 0.4 + vec2(100.0, 50.0), uTime * 0.7);
-      bg += sparkleColor * sparkleLg * sparkleMask * 0.3;
+      bg += sparkleColor * sparkleBrightness * sparkleMask * 0.7;
 
       // ─── Compositing ─────────────────────────────────────────
       vec3 result = mix(scene.rgb, bg, bgAmount);

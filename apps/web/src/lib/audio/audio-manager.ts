@@ -103,10 +103,8 @@ class AudioManager {
   private loadPreferences(): void {
     if (typeof window === "undefined") return;
 
-    const savedEnabled = localStorage.getItem(AUDIO_PREF_KEYS.ENABLED);
-    if (savedEnabled !== null) {
-      this._isEnabled = savedEnabled === "true";
-    }
+    // Always start disabled — user must click to enable each session
+    this._isEnabled = false;
 
     const savedVolume = localStorage.getItem(AUDIO_PREF_KEYS.VOLUME);
     if (savedVolume !== null) {
@@ -116,8 +114,7 @@ class AudioManager {
       }
     }
 
-    // Apply volume to Howler global
-    Howler.volume(this._isEnabled ? this._volume : 0);
+    Howler.volume(0);
   }
 
   /**

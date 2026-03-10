@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Sandbox } from "@/components/sandbox";
 
 export const metadata: Metadata = {
-  title: "Pattern Sandbox | Quantum Garden",
+  title: "Pattern Seed Box | Quantum Garden",
   description: "Visual development environment for glyph patterns",
 };
 

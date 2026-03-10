@@ -5,5 +5,5 @@ import { redirect } from "next/navigation";
  * The variant sandbox is now the main sandbox at /sandbox.
  */
 export default function VariantSandboxPage() {
-  redirect("/sandbox");
+  redirect("/seed-box");
 }

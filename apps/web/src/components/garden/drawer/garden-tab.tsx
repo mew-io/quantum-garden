@@ -132,7 +132,7 @@ export function GardenTab({ isActive, focusedPlantId, onFocusedPlantHandled }: G
 
       {/* Plant list */}
       <section>
-        <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+        <h4 className="text-[--wc-ink-soft] text-[11px] font-semibold uppercase tracking-wider mb-3">
           Plants ({totalCount})
         </h4>
         <div className="space-y-1">
@@ -198,8 +198,6 @@ function PlantDetailView({
   isActive: boolean;
   onBack: () => void;
 }) {
-  const [showCircuitDef, setShowCircuitDef] = useState(false);
-
   const { data, isLoading } = trpc.plants.getDebugDetail.useQuery(
     { id: plantId },
     { enabled: isActive, refetchInterval: isActive ? 3000 : false }
@@ -251,7 +249,7 @@ function PlantDetailView({
   const signals = traits?.quantumSignals;
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-6 pb-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <button
@@ -279,8 +277,10 @@ function PlantDetailView({
 
       {/* Plant Info */}
       <section>
-        <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">Plant Info</h4>
-        <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1.5 text-xs">
+        <h4 className="text-[--wc-ink-soft] text-[11px] font-semibold uppercase tracking-wider mb-3">
+          Plant Info
+        </h4>
+        <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2 text-xs">
           <DetailRow
             label="Variant"
             value={variant?.name ?? plant.variantId}
@@ -331,21 +331,15 @@ function PlantDetailView({
       </section>
 
       {/* Quantum Circuit */}
-      {quantumRecord && (
-        <CircuitSection
-          quantumRecord={quantumRecord}
-          showCircuitDef={showCircuitDef}
-          onToggleCircuitDef={() => setShowCircuitDef(!showCircuitDef)}
-        />
-      )}
+      {quantumRecord && <CircuitSection quantumRecord={quantumRecord} />}
 
       {/* Measurement Data */}
       <section>
-        <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+        <h4 className="text-[--wc-ink-soft] text-[11px] font-semibold uppercase tracking-wider mb-3">
           Measurement Data
         </h4>
         {signals ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {!quantumRecord?.probabilities?.length && plant.observed && (
               <div className="bg-amber-50/60 border border-amber-200/40 rounded p-2 text-[10px] text-amber-800 leading-relaxed">
                 Mock signals — quantum pool was unavailable at observation time. Traits are seeded
@@ -354,8 +348,8 @@ function PlantDetailView({
             )}
 
             {/* Quantum Signals */}
-            <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
-              <p className="text-[10px] text-[--wc-ink-muted] leading-relaxed mb-1">
+            <div className="bg-[--wc-paper]/60 rounded p-3 space-y-4">
+              <p className="text-[10px] text-[--wc-ink-muted] leading-relaxed">
                 Statistical properties derived from the probability distribution. These drive visual
                 traits.
               </p>
@@ -399,7 +393,7 @@ function PlantDetailView({
 
             {/* Probability Distribution */}
             {quantumRecord && quantumRecord.probabilities.length > 0 && (
-              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1.5">
+              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2">
                 <p className="text-[10px] text-[--wc-ink-muted] mb-1">
                   Raw probability per measurement outcome
                 </p>
@@ -469,7 +463,7 @@ function PlantDetailView({
 
             {/* Resolved Traits */}
             {traits && (
-              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-1.5 text-xs">
+              <div className="bg-[--wc-paper]/60 rounded p-3 space-y-2 text-xs">
                 <p className="text-[10px] text-[--wc-ink-muted] mb-1">
                   Final trait values stored on this plant
                 </p>
@@ -582,8 +576,6 @@ function PlantDetailView({
 
 function CircuitSection({
   quantumRecord,
-  showCircuitDef,
-  onToggleCircuitDef,
 }: {
   quantumRecord: {
     circuitId: string;
@@ -595,17 +587,15 @@ function CircuitSection({
     createdAt: Date | string;
     completedAt: Date | string | null;
   };
-  showCircuitDef: boolean;
-  onToggleCircuitDef: () => void;
 }) {
   const circuitInfo = getCircuitInfo(quantumRecord.circuitId as CircuitType);
 
   return (
     <section>
-      <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+      <h4 className="text-[--wc-ink-soft] text-[11px] font-semibold uppercase tracking-wider mb-3">
         Quantum Circuit
       </h4>
-      <div className="bg-[--wc-paper]/60 rounded p-3 space-y-3 text-xs">
+      <div className="bg-[--wc-paper]/60 rounded p-3 space-y-4 text-xs">
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
             <span className="text-purple-700 font-medium">{circuitInfo.name}</span>
@@ -625,7 +615,7 @@ function CircuitSection({
           {circuitInfo.gateDescription}
         </p>
 
-        <div className="border-t border-[--wc-stone]/15 pt-2 space-y-1.5">
+        <div className="border-t border-[--wc-stone]/15 pt-3 space-y-2">
           <DetailRow
             label="Status"
             value={quantumRecord.status}
@@ -645,17 +635,12 @@ function CircuitSection({
           )}
         </div>
 
-        <button
-          onClick={onToggleCircuitDef}
-          className="text-[--wc-ink-muted] hover:text-[--wc-ink-soft] text-[10px] underline"
-        >
-          {showCircuitDef ? "Hide" : "Show"} raw circuit data
-        </button>
-        {showCircuitDef && (
-          <pre className="p-2 bg-[--wc-paper]/80 rounded text-[10px] text-[--wc-ink-soft] overflow-x-auto max-h-32 overflow-y-auto">
-            {JSON.stringify(quantumRecord.circuitDefinition, null, 2)}
-          </pre>
-        )}
+        <div className="flex items-baseline gap-2 text-[10px] min-w-0">
+          <span className="text-[--wc-ink-muted] shrink-0">Circuit</span>
+          <span className="font-mono text-[--wc-ink-soft] truncate">
+            {JSON.stringify(quantumRecord.circuitDefinition)}
+          </span>
+        </div>
       </div>
     </section>
   );
@@ -696,13 +681,15 @@ function SignalBar({
   description?: string;
 }) {
   return (
-    <div className="space-y-0.5">
-      <div className="flex justify-between text-[10px]">
-        <span className="text-[--wc-ink-muted]">
+    <div>
+      <div className="flex justify-between items-baseline text-[11px] mb-1">
+        <span className="text-[--wc-ink-soft] font-medium">
           {label}
-          {description && <span className="text-[--wc-ink-muted]/50 ml-1">({description})</span>}
+          {description && (
+            <span className="text-[--wc-ink-muted] font-normal ml-1.5">({description})</span>
+          )}
         </span>
-        <span className="text-[--wc-ink-soft] font-mono">{value.toFixed(3)}</span>
+        <span className="text-[--wc-ink-soft] font-mono text-[10px]">{value.toFixed(3)}</span>
       </div>
       <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
         <div

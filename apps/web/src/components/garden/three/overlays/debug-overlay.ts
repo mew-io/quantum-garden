@@ -34,6 +34,7 @@ export class DebugOverlay {
     active: false,
     startTime: 0,
   };
+  private temporarilyVisible: boolean = false;
   private static readonly LOCATE_PULSE_DURATION = 1.5; // seconds
 
   constructor() {
@@ -73,6 +74,11 @@ export class DebugOverlay {
    */
   triggerLocatePulse(): void {
     this.locatePulse = { active: true, startTime: -1 };
+    // Temporarily show the overlay if not already visible
+    if (!this.isVisible) {
+      this.temporarilyVisible = true;
+      this.setVisible(true);
+    }
   }
 
   /**
@@ -256,6 +262,12 @@ export class DebugOverlay {
 
         if (progress >= 1) {
           this.locatePulse.active = false;
+          // Hide overlay if it was only shown temporarily for the pulse
+          if (this.temporarilyVisible) {
+            this.temporarilyVisible = false;
+            this.setVisible(false);
+            return;
+          }
           scalePulse = 1.0;
           opacityPulse = 1.0;
         } else {
@@ -291,7 +303,7 @@ export class DebugOverlay {
    * Check if there are any active animations that need updating.
    */
   hasActiveAnimations(): boolean {
-    return this.isVisible;
+    return this.isVisible || this.locatePulse.active;
   }
 
   /**

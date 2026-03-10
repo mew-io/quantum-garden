@@ -49,7 +49,7 @@ export class SandboxErrorBoundary extends Component<
           }}
         >
           <div style={{ textAlign: "center", padding: "2rem", maxWidth: "600px" }}>
-            <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Sandbox Error</h2>
+            <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>Seed Box Error</h2>
             <p style={{ fontSize: "0.875rem", opacity: 0.7, marginBottom: "1rem" }}>
               {this.state.error?.message ?? "An unexpected error occurred"}
             </p>

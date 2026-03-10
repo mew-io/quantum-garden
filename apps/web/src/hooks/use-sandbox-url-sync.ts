@@ -94,5 +94,5 @@ export function buildSandboxUrl(options: { variantId?: string; colorVariation?: 
   }
 
   const queryString = params.toString();
-  return queryString ? `/sandbox?${queryString}` : "/sandbox";
+  return queryString ? `/seed-box?${queryString}` : "/seed-box";
 }

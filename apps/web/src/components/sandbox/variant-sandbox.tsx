@@ -71,6 +71,12 @@ export function VariantSandbox() {
       <header className="flex-shrink-0 px-6 py-4 garden-panel border-b border-[--wc-stone]/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <a
+              href="/"
+              className="flex items-center gap-1 text-[--wc-ink-muted] hover:text-[--wc-ink] transition-colors text-sm"
+            >
+              &larr; Garden
+            </a>
             {viewMode === "detail" && (
               <button
                 onClick={goToGallery}

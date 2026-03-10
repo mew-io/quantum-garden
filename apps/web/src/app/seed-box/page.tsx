@@ -4,7 +4,7 @@ import { VariantSandbox } from "@/components/sandbox";
 import { SandboxErrorBoundary } from "./error-boundary";
 
 export const metadata: Metadata = {
-  title: "Sandbox | Quantum Garden",
+  title: "Seed Box | Quantum Garden",
   description: "Visual development environment for plant variants and lifecycle animations",
 };
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 function SandboxLoading() {
   return (
     <div className="h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-gray-500">Loading sandbox...</div>
+      <div className="text-gray-500">Loading seed box...</div>
     </div>
   );
 }

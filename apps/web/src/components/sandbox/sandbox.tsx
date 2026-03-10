@@ -34,7 +34,7 @@ export function Sandbox() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Sprite Sandbox</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Sprite Seed Box</h1>
         <p className="text-sm text-gray-600 mt-1">
           Visual development environment for plant glyphs
         </p>

@@ -40,6 +40,21 @@ export function InfoTab() {
       </div>
 
       <div className="pt-2 border-t border-[--wc-stone]/20">
+        <a
+          href="/sandbox"
+          className="block rounded-md bg-[--wc-stone]/10 px-3 py-2.5 hover:bg-[--wc-stone]/20 transition-colors group"
+        >
+          <h4 className="text-[--wc-ink] text-xs font-medium mb-0.5 group-hover:text-[--wc-ink] transition-colors">
+            Explore the Sandbox
+          </h4>
+          <p className="text-[--wc-ink-muted] text-[11px] leading-relaxed">
+            Design and preview plant variants. Experiment with forms, colors, and growth
+            patterns&mdash;then contribute them back to the garden.
+          </p>
+        </a>
+      </div>
+
+      <div className="pt-2 border-t border-[--wc-stone]/20">
         <p className="text-[--wc-ink-muted] text-[11px] leading-relaxed">
           Supported by{" "}
           <a

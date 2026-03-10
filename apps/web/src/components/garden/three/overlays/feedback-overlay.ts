@@ -1,8 +1,10 @@
 /**
  * Feedback Overlay - Observation celebration effect
  *
- * Three.js implementation of the expanding ring animation that plays
- * when an observation completes successfully.
+ * Three.js implementation of expanding soft ring animations that play
+ * when an observation completes successfully. Uses filled RingGeometry
+ * meshes with additive blending for smooth, anti-aliased rendering
+ * (LineLoop renders as 1px hairlines on most GPUs).
  */
 
 import * as THREE from "three";
@@ -17,9 +19,9 @@ const OBSERVATION_FEEDBACK = {
   OUTER_DELAY: 0.1,
   PRIMARY_COLOR: 0x4ecdc4,
   SECONDARY_COLOR: 0xffffff,
-  START_ALPHA: 1.0, // Full opacity to maximize bloom trigger
+  START_ALPHA: 0.6,
   SEGMENTS: 48,
-  LINE_WIDTH: 2.5, // Slightly thicker for better bloom
+  RING_THICKNESS: 2.0,
 };
 
 /** Enhanced constants for first observation celebration */
@@ -30,23 +32,24 @@ const FIRST_OBSERVATION_FEEDBACK = {
   OUTER_END_RADIUS: 120,
   THIRD_START_RADIUS: 45,
   THIRD_END_RADIUS: 160,
-  DURATION: 1.4, // Longer duration for emphasis
+  DURATION: 1.4,
   OUTER_DELAY: 0.15,
   THIRD_DELAY: 0.3,
-  PRIMARY_COLOR: 0xffd700, // Gold for special moment
+  PRIMARY_COLOR: 0xffd700,
   SECONDARY_COLOR: 0xffffff,
-  TERTIARY_COLOR: 0xc4b5fd, // Purple quantum accent
-  START_ALPHA: 1.0,
-  SEGMENTS: 64, // Smoother rings
+  TERTIARY_COLOR: 0xc4b5fd,
+  START_ALPHA: 0.7,
+  SEGMENTS: 64,
+  RING_THICKNESS: 2.5,
 };
 
 interface FeedbackAnimation {
   x: number;
   y: number;
   startTime: number;
-  innerRing: THREE.LineLoop;
-  outerRing: THREE.LineLoop;
-  thirdRing?: THREE.LineLoop; // Optional third ring for first observation
+  innerRing: THREE.Mesh;
+  outerRing: THREE.Mesh;
+  thirdRing?: THREE.Mesh;
   isFirstObservation?: boolean;
 }
 
@@ -63,12 +66,10 @@ function hexStringToNumber(hex: string): number {
  * Complementary colors are opposite on the color wheel (180° hue shift in HSL space).
  */
 function computeComplementaryColor(hexColor: number): number {
-  // Extract RGB components
   const r = (hexColor >> 16) & 0xff;
   const g = (hexColor >> 8) & 0xff;
   const b = hexColor & 0xff;
 
-  // Convert RGB to HSL
   const rNorm = r / 255;
   const gNorm = g / 255;
   const bNorm = b / 255;
@@ -93,10 +94,8 @@ function computeComplementaryColor(hexColor: number): number {
     }
   }
 
-  // Rotate hue by 180 degrees for complementary color
   h = (h + 0.5) % 1;
 
-  // Convert back to RGB
   const hueToRgb = (p: number, q: number, t: number): number => {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
@@ -108,7 +107,6 @@ function computeComplementaryColor(hexColor: number): number {
 
   let rOut, gOut, bOut;
   if (s === 0) {
-    // Achromatic (gray) - return white as complementary for better visibility
     return 0xffffff;
   } else {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
@@ -127,60 +125,57 @@ function computeComplementaryColor(hexColor: number): number {
 
 /**
  * Renders expanding ring animations when observations complete.
+ * Uses filled RingGeometry meshes scaled from unit size for smooth rendering.
  */
 export class FeedbackOverlay {
   private group: THREE.Group;
   private activeAnimations: FeedbackAnimation[] = [];
 
-  // Reusable geometries for different ring sizes
-  private ringGeometries: Map<number, THREE.BufferGeometry> = new Map();
+  // Shared unit-scale ring geometries (one per segment count)
+  private ringGeometry: THREE.RingGeometry;
+  private ringGeometryHQ: THREE.RingGeometry;
 
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "observation-feedback";
+
+    // Unit-scale ring: inner=1-halfThick, outer=1+halfThick, scaled per frame
+    const ht = OBSERVATION_FEEDBACK.RING_THICKNESS * 0.5;
+    this.ringGeometry = new THREE.RingGeometry(
+      1 - ht / OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      1 + ht / OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      OBSERVATION_FEEDBACK.SEGMENTS
+    );
+
+    const htHQ = FIRST_OBSERVATION_FEEDBACK.RING_THICKNESS * 0.5;
+    this.ringGeometryHQ = new THREE.RingGeometry(
+      1 - htHQ / FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      1 + htHQ / FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
+      FIRST_OBSERVATION_FEEDBACK.SEGMENTS
+    );
   }
 
   /**
-   * Get or create a ring geometry for the given radius.
+   * Create a filled ring mesh with the given color and blending.
    */
-  private getRingGeometry(radius: number): THREE.BufferGeometry {
-    // Round radius to reduce geometry count
-    const roundedRadius = Math.round(radius);
-
-    let geometry = this.ringGeometries.get(roundedRadius);
-    if (!geometry) {
-      const vertices: number[] = [];
-      for (let i = 0; i <= OBSERVATION_FEEDBACK.SEGMENTS; i++) {
-        const angle = (i / OBSERVATION_FEEDBACK.SEGMENTS) * Math.PI * 2;
-        vertices.push(Math.cos(angle), Math.sin(angle), 0);
-      }
-
-      geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-      this.ringGeometries.set(roundedRadius, geometry);
-    }
-
-    return geometry;
-  }
-
-  /**
-   * Create a ring with the given color.
-   */
-  private createRing(color: number): THREE.LineLoop {
-    const material = new THREE.LineBasicMaterial({
+  private createRing(
+    color: number,
+    startAlpha: number,
+    startRadius: number,
+    highQuality?: boolean
+  ): THREE.Mesh {
+    const material = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: OBSERVATION_FEEDBACK.START_ALPHA,
+      opacity: startAlpha,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
 
-    // Start with a unit circle - we'll scale it
-    const geometry = this.getRingGeometry(1);
-    const ring = new THREE.LineLoop(geometry, material);
-    ring.scale.set(
-      OBSERVATION_FEEDBACK.INNER_START_RADIUS,
-      OBSERVATION_FEEDBACK.INNER_START_RADIUS,
-      1
-    );
+    const geometry = highQuality ? this.ringGeometryHQ : this.ringGeometry;
+    const ring = new THREE.Mesh(geometry, material);
+    ring.scale.set(startRadius, startRadius, 1);
 
     return ring;
   }
@@ -193,23 +188,27 @@ export class FeedbackOverlay {
    * @param primaryColor - Optional primary color from plant's palette (hex string like "#4ecdc4")
    */
   triggerCelebration(x: number, y: number, primaryColor?: string): void {
-    // Use plant's primary color for inner ring if provided, otherwise default cyan
     const innerColor = primaryColor
       ? hexStringToNumber(primaryColor)
       : OBSERVATION_FEEDBACK.PRIMARY_COLOR;
 
-    // Create inner ring with plant's color or default
-    const innerRing = this.createRing(innerColor);
+    const innerRing = this.createRing(
+      innerColor,
+      OBSERVATION_FEEDBACK.START_ALPHA,
+      OBSERVATION_FEEDBACK.INNER_START_RADIUS
+    );
     innerRing.position.set(x, y, 2);
 
-    // Create outer ring with complementary color for visual harmony
-    // Falls back to white if no primary color provided
     const outerColor = primaryColor
       ? computeComplementaryColor(innerColor)
       : OBSERVATION_FEEDBACK.SECONDARY_COLOR;
-    const outerRing = this.createRing(outerColor);
+    const outerRing = this.createRing(
+      outerColor,
+      OBSERVATION_FEEDBACK.START_ALPHA,
+      OBSERVATION_FEEDBACK.OUTER_START_RADIUS
+    );
     outerRing.position.set(x, y, 2);
-    outerRing.visible = false; // Starts hidden, appears after delay
+    outerRing.visible = false;
 
     this.group.add(innerRing);
     this.group.add(outerRing);
@@ -231,47 +230,28 @@ export class FeedbackOverlay {
    * @param y - Y position in world coordinates
    */
   triggerFirstObservationCelebration(x: number, y: number): void {
-    // Create inner ring (gold)
-    const innerMaterial = new THREE.LineBasicMaterial({
-      color: FIRST_OBSERVATION_FEEDBACK.PRIMARY_COLOR,
-      transparent: true,
-      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
-    });
-    const innerGeometry = this.getRingGeometry(1);
-    const innerRing = new THREE.LineLoop(innerGeometry, innerMaterial);
-    innerRing.scale.set(
+    const innerRing = this.createRing(
+      FIRST_OBSERVATION_FEEDBACK.PRIMARY_COLOR,
+      FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
       FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
-      FIRST_OBSERVATION_FEEDBACK.INNER_START_RADIUS,
-      1
+      true
     );
     innerRing.position.set(x, y, 2);
 
-    // Create outer ring (white)
-    const outerMaterial = new THREE.LineBasicMaterial({
-      color: FIRST_OBSERVATION_FEEDBACK.SECONDARY_COLOR,
-      transparent: true,
-      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
-    });
-    const outerRing = new THREE.LineLoop(innerGeometry, outerMaterial);
-    outerRing.scale.set(
+    const outerRing = this.createRing(
+      FIRST_OBSERVATION_FEEDBACK.SECONDARY_COLOR,
+      FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
       FIRST_OBSERVATION_FEEDBACK.OUTER_START_RADIUS,
-      FIRST_OBSERVATION_FEEDBACK.OUTER_START_RADIUS,
-      1
+      true
     );
     outerRing.position.set(x, y, 2);
     outerRing.visible = false;
 
-    // Create third ring (purple quantum accent)
-    const thirdMaterial = new THREE.LineBasicMaterial({
-      color: FIRST_OBSERVATION_FEEDBACK.TERTIARY_COLOR,
-      transparent: true,
-      opacity: FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
-    });
-    const thirdRing = new THREE.LineLoop(innerGeometry, thirdMaterial);
-    thirdRing.scale.set(
+    const thirdRing = this.createRing(
+      FIRST_OBSERVATION_FEEDBACK.TERTIARY_COLOR,
+      FIRST_OBSERVATION_FEEDBACK.START_ALPHA,
       FIRST_OBSERVATION_FEEDBACK.THIRD_START_RADIUS,
-      FIRST_OBSERVATION_FEEDBACK.THIRD_START_RADIUS,
-      1
+      true
     );
     thirdRing.position.set(x, y, 2);
     thirdRing.visible = false;
@@ -302,10 +282,8 @@ export class FeedbackOverlay {
       const anim = this.activeAnimations[i]!;
       const elapsed = (now - anim.startTime) / 1000;
 
-      // Use different timing constants for first observation vs regular
       const config = anim.isFirstObservation ? FIRST_OBSERVATION_FEEDBACK : OBSERVATION_FEEDBACK;
 
-      // Check if animation is complete
       if (elapsed >= config.DURATION) {
         completedIndices.push(i);
         continue;
@@ -337,7 +315,7 @@ export class FeedbackOverlay {
         );
       }
 
-      // Update third ring for first observation (starts after third delay)
+      // Update third ring for first observation
       if (anim.isFirstObservation && anim.thirdRing) {
         const thirdElapsed = elapsed - FIRST_OBSERVATION_FEEDBACK.THIRD_DELAY;
         if (thirdElapsed > 0) {
@@ -355,23 +333,19 @@ export class FeedbackOverlay {
       }
     }
 
-    // Remove completed animations (in reverse order)
+    // Remove completed animations (reverse order)
     for (let i = completedIndices.length - 1; i >= 0; i--) {
       const index = completedIndices[i]!;
       const anim = this.activeAnimations[index]!;
 
-      // Clean up rings
       this.group.remove(anim.innerRing);
       this.group.remove(anim.outerRing);
+      (anim.innerRing.material as THREE.MeshBasicMaterial).dispose();
+      (anim.outerRing.material as THREE.MeshBasicMaterial).dispose();
+
       if (anim.thirdRing) {
         this.group.remove(anim.thirdRing);
-      }
-
-      // Dispose materials (geometries are shared)
-      (anim.innerRing.material as THREE.LineBasicMaterial).dispose();
-      (anim.outerRing.material as THREE.LineBasicMaterial).dispose();
-      if (anim.thirdRing) {
-        (anim.thirdRing.material as THREE.LineBasicMaterial).dispose();
+        (anim.thirdRing.material as THREE.MeshBasicMaterial).dispose();
       }
 
       this.activeAnimations.splice(index, 1);
@@ -382,7 +356,7 @@ export class FeedbackOverlay {
    * Update a single ring's scale and opacity.
    */
   private updateRing(
-    ring: THREE.LineLoop,
+    ring: THREE.Mesh,
     elapsed: number,
     delay: number,
     startRadius: number,
@@ -402,7 +376,7 @@ export class FeedbackOverlay {
 
     // Fade out alpha
     const alpha = startAlpha * Math.pow(1 - progress, 1.5);
-    (ring.material as THREE.LineBasicMaterial).opacity = alpha;
+    (ring.material as THREE.MeshBasicMaterial).opacity = alpha;
   }
 
   /**
@@ -423,18 +397,14 @@ export class FeedbackOverlay {
    * Clean up resources.
    */
   dispose(): void {
-    // Clean up any active animations
     for (const anim of this.activeAnimations) {
-      (anim.innerRing.material as THREE.LineBasicMaterial).dispose();
-      (anim.outerRing.material as THREE.LineBasicMaterial).dispose();
+      (anim.innerRing.material as THREE.MeshBasicMaterial).dispose();
+      (anim.outerRing.material as THREE.MeshBasicMaterial).dispose();
       if (anim.thirdRing) {
-        (anim.thirdRing.material as THREE.LineBasicMaterial).dispose();
+        (anim.thirdRing.material as THREE.MeshBasicMaterial).dispose();
       }
     }
-
-    // Dispose cached geometries
-    for (const geometry of this.ringGeometries.values()) {
-      geometry.dispose();
-    }
+    this.ringGeometry.dispose();
+    this.ringGeometryHQ.dispose();
   }
 }

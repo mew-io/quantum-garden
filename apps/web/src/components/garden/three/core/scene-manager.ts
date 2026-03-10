@@ -20,9 +20,6 @@ import { CANVAS } from "@quantum-garden/shared";
 import {
   type BackgroundType,
   BACKGROUND_CONFIGS,
-  createPaperTexture,
-  PaperGrainShader,
-  CloudShader,
   CloudStaticShader,
   loadCloudBackgroundTexture,
 } from "./backgrounds";
@@ -108,9 +105,7 @@ export class SceneManager {
   private bloomPass: UnrealBloomPass | null = null;
   private bloomEnabled: boolean = false;
 
-  // Background post-processing passes (all created, only one enabled)
-  private paperPass: ShaderPass | null = null;
-  private cloudPass: ShaderPass | null = null;
+  // Background post-processing pass
   private cloudStaticPass: ShaderPass | null = null;
   private currentBackground: BackgroundType = "clouds-static";
 
@@ -269,23 +264,6 @@ export class SceneManager {
       );
       this.composer.addPass(this.bloomPass);
     }
-
-    // Parchment background pass (atmospheric haze)
-    const paperTexture = createPaperTexture();
-    this.paperPass = new ShaderPass(PaperGrainShader);
-    this.paperPass.uniforms["tPaper"]!.value = paperTexture;
-    (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
-    this.paperPass.uniforms["aspectRatio"]!.value = width / height;
-    this.paperPass.enabled = this.currentBackground === "parchment";
-    this.composer.addPass(this.paperPass);
-
-    // Cloud background pass (procedural FBM clouds)
-    this.cloudPass = new ShaderPass(CloudShader);
-    (this.cloudPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
-    this.cloudPass.uniforms["aspectRatio"]!.value = width / height;
-    this.cloudPass.uniforms["uTime"]!.value = 0;
-    this.cloudPass.enabled = this.currentBackground === "clouds";
-    this.composer.addPass(this.cloudPass);
 
     // Static cloud background pass (image-based with blur)
     this.cloudStaticPass = new ShaderPass(CloudStaticShader);
@@ -735,10 +713,7 @@ export class SceneManager {
     this.updateCameraPan();
     this.updateUserZoom();
 
-    // Update cloud animation time (procedural + static sparkles)
-    if (this.cloudPass?.enabled) {
-      this.cloudPass.uniforms["uTime"]!.value += deltaTime;
-    }
+    // Update cloud sparkle animation time
     if (this.cloudStaticPass?.enabled) {
       this.cloudStaticPass.uniforms["uTime"]!.value += deltaTime;
     }
@@ -795,14 +770,6 @@ export class SceneManager {
     }
     if (this.bloomPass) {
       this.bloomPass.resolution.set(Math.floor(vw / 2), Math.floor(vh / 2));
-    }
-    if (this.paperPass) {
-      (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
-      this.paperPass.uniforms["aspectRatio"]!.value = vw / vh;
-    }
-    if (this.cloudPass) {
-      (this.cloudPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
-      this.cloudPass.uniforms["aspectRatio"]!.value = vw / vh;
     }
     if (this.cloudStaticPass) {
       (this.cloudStaticPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
@@ -868,8 +835,6 @@ export class SceneManager {
     this.scene.background = new THREE.Color(config.backgroundColor);
 
     // Toggle passes
-    if (this.paperPass) this.paperPass.enabled = type === "parchment";
-    if (this.cloudPass) this.cloudPass.enabled = type === "clouds";
     if (this.cloudStaticPass) this.cloudStaticPass.enabled = type === "clouds-static";
   }
 
@@ -1016,13 +981,6 @@ export class SceneManager {
     }
 
     // Dispose of background pass textures
-    if (this.paperPass) {
-      const tex = this.paperPass.uniforms["tPaper"]!.value as THREE.Texture | null;
-      tex?.dispose();
-    }
-    if (this.cloudPass) {
-      this.cloudPass.material?.dispose();
-    }
     if (this.cloudStaticPass) {
       const bgTex = this.cloudStaticPass.uniforms["tBackground"]!.value as THREE.Texture | null;
       bgTex?.dispose();

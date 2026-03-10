@@ -35,7 +35,10 @@ import {
   updatePlantMaterialTime,
 } from "@/components/garden/three/plants/plant-material";
 import { getTextureAtlas, type TextureAtlas } from "@/components/garden/three/core/texture-atlas";
-import { createPaperTexture, PaperGrainShader } from "@/components/garden/three/core/paper-texture";
+import {
+  CloudStaticShader,
+  loadCloudBackgroundTexture,
+} from "@/components/garden/three/core/backgrounds";
 import {
   createSeededRng,
   hashString,
@@ -270,9 +273,9 @@ export class SandboxThreeRenderer {
     );
     this.composer.addPass(bloomPass);
 
-    const paperTexture = createPaperTexture();
-    this.paperPass = new ShaderPass(PaperGrainShader);
-    this.paperPass.uniforms["tPaper"]!.value = paperTexture;
+    const bgTexture = loadCloudBackgroundTexture();
+    this.paperPass = new ShaderPass(CloudStaticShader);
+    this.paperPass.uniforms["tBackground"]!.value = bgTexture;
     (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width * dpr, height * dpr);
     this.paperPass.uniforms["aspectRatio"]!.value = width / height;
     this.composer.addPass(this.paperPass);

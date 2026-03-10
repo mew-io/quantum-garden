@@ -239,11 +239,9 @@ export function DebugTab({ isActive }: DebugTabProps) {
                   <span className="text-xs">Background</span>
                   <span
                     className={`text-xs font-mono px-2 py-1 rounded ${
-                      backgroundType === "clouds" || backgroundType === "clouds-static"
+                      backgroundType === "clouds-static"
                         ? "bg-sky-50/60 text-sky-700"
-                        : backgroundType === "parchment"
-                          ? "bg-amber-50/60 text-amber-700"
-                          : "bg-black/5 text-[--wc-ink-muted]"
+                        : "bg-black/5 text-[--wc-ink-muted]"
                     }`}
                   >
                     {BACKGROUND_CONFIGS[backgroundType].label}

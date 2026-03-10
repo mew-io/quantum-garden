@@ -22,6 +22,7 @@ import {
   getVariantById,
   computeLifecycleState,
   isWatercolorVariant,
+  CANVAS,
 } from "@quantum-garden/shared";
 import {
   createSeededRng,
@@ -203,9 +204,14 @@ export class WatercolorPlantOverlay {
     }
 
     // Position and scale the plant — 1.4x painterly multiplier * category scale
+    // Apply depth perspective: distant plants smaller + vertically squished
     const catScale = getCategoryScale(plant.variantId) * 1.4;
+    const depthT = Math.max(0, Math.min(1, plant.position.y / CANVAS.DEFAULT_HEIGHT));
+    const depthScale = 0.6 + 0.4 * depthT;
+    const verticalSquish = 0.7 + 0.3 * depthT;
+    const perspectiveScale = catScale * depthScale;
     plantGroup.position.set(plant.position.x, plant.position.y, WATERCOLOR_Z_POSITION);
-    plantGroup.scale.set(catScale, catScale, 1);
+    plantGroup.scale.set(perspectiveScale, perspectiveScale * verticalSquish, 1);
   }
 
   private clearPlantGroup(group: THREE.Group): void {

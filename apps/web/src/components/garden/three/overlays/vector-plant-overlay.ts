@@ -17,7 +17,20 @@ import {
   getActiveVectorVisual,
   isInterpolatedVectorKeyframe,
   type PlantWithLifecycle,
+  CANVAS,
 } from "@quantum-garden/shared";
+
+/**
+ * Compute depth-based scale and vertical squish for a plant's Y position.
+ * Matches the perspective effect applied to pixel-art plants in plant-material.ts.
+ */
+function computeDepthPerspective(y: number): { depthScale: number; verticalSquish: number } {
+  const depthT = Math.max(0, Math.min(1, y / CANVAS.DEFAULT_HEIGHT));
+  return {
+    depthScale: 0.6 + 0.4 * depthT, // 0.6 at top (far) to 1.0 at bottom (near)
+    verticalSquish: 0.7 + 0.3 * depthT, // 0.7 at top (far) to 1.0 at bottom (near)
+  };
+}
 
 /** Visual constants for vector plants */
 /** Per-category scale multipliers for visual hierarchy */
@@ -316,9 +329,11 @@ export class VectorPlantOverlay {
       plantGroup.add(cloned);
     }
 
-    // Position the plant group
+    // Position the plant group with depth perspective
+    const depth = computeDepthPerspective(plant.position.y);
+    const perspectiveScale = scale * depth.depthScale;
     plantGroup.position.set(plant.position.x, plant.position.y, VECTOR_PLANT_CONFIG.Z_POSITION);
-    plantGroup.scale.set(scale, scale, 1);
+    plantGroup.scale.set(perspectiveScale, perspectiveScale * depth.verticalSquish, 1);
 
     return true;
   }
@@ -482,10 +497,12 @@ export class VectorPlantOverlay {
       }
     }
 
-    // Position the plant group
+    // Position the plant group with depth perspective
     const scale = (keyframe.scale ?? 1.0) * getCategoryScale(plant.variantId);
+    const depth = computeDepthPerspective(plant.position.y);
+    const perspectiveScale = scale * depth.depthScale;
     plantGroup.position.set(plant.position.x, plant.position.y, VECTOR_PLANT_CONFIG.Z_POSITION);
-    plantGroup.scale.set(scale, scale, 1);
+    plantGroup.scale.set(perspectiveScale, perspectiveScale * depth.verticalSquish, 1);
   }
 
   /**

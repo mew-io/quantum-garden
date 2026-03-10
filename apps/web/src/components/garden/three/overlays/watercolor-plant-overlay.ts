@@ -105,6 +105,7 @@ function getCategoryScale(variantId: string): number {
     return 5.25;
   if (id.includes("grass") || id.includes("fern") || id.includes("reed") || id.includes("tuft"))
     return 2.5;
+  if (id.includes("celestial-sakura")) return 6;
   if (id.includes("ethereal") || id.includes("spirit") || id.includes("wisp")) return 3;
   if (
     id.includes("moss") ||

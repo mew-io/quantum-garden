@@ -7,7 +7,6 @@ import { EvolutionNotifications } from "@/components/garden/evolution-notificati
 import { ObservationContextPanel } from "@/components/garden/observation-context-panel";
 import { EntanglementDetailPanel } from "@/components/garden/entanglement-detail-panel";
 import { EventDetailModal } from "@/components/garden/event-detail-modal";
-import { KeyboardShortcutHint } from "@/components/garden/keyboard-shortcut-hint";
 import { GardenDrawer } from "@/components/garden/drawer";
 
 import { trpc } from "@/lib/trpc/client";
@@ -37,7 +36,6 @@ export default function Home() {
         <ObservationContextPanel />
         <EntanglementDetailPanel />
         <EventDetailModal />
-        <KeyboardShortcutHint />
       </main>
     </ErrorBoundary>
   );

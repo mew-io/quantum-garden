@@ -84,7 +84,7 @@ export class WatercolorPlantOverlay {
   private mergedMaterial: THREE.ShaderMaterial;
   private needsUpdate: boolean = false;
   private lastLifecycleCheckTime: number = 0;
-  private static LIFECYCLE_CHECK_INTERVAL = 5.0; // seconds
+  private static LIFECYCLE_CHECK_INTERVAL = 0.1; // seconds
 
   constructor() {
     this.group = new THREE.Group();
@@ -244,15 +244,22 @@ export class WatercolorPlantOverlay {
    * Update the overlay each frame.
    * Only rebuilds plants whose visual state has changed.
    */
-  update(time: number): void {
+  update(time: number): boolean {
+    // Always update time uniform for shader-driven sway/breathing animation
+    if (this.mergedMaterial.uniforms.u_time) {
+      this.mergedMaterial.uniforms.u_time.value = time;
+    }
+
     // Periodically re-check for lifecycle progression (keyframe changes)
     if (time - this.lastLifecycleCheckTime >= WatercolorPlantOverlay.LIFECYCLE_CHECK_INTERVAL) {
       this.lastLifecycleCheckTime = time;
       this.needsUpdate = true;
     }
 
-    if (!this.needsUpdate) return;
+    // Shader animation means we always have visual changes when plants exist
+    if (!this.needsUpdate) return this.plants.length > 0;
 
+    let changed = false;
     const seenIds = new Set<string>();
 
     for (const plant of this.plants) {
@@ -315,6 +322,7 @@ export class WatercolorPlantOverlay {
       ) {
         this.rebuildPlant(plantGroup!, plant, variant);
         this.plantRenderStates.set(plant.id, currentState);
+        changed = true;
       }
     }
 
@@ -325,18 +333,17 @@ export class WatercolorPlantOverlay {
         this.disposePlantGroup(meshGroup);
         this.plantMeshes.delete(id);
         this.plantRenderStates.delete(id);
+        changed = true;
       }
     }
 
     this.needsUpdate = false;
+    return changed;
   }
 
   hasActiveAnimations(): boolean {
-    if (this.plants.length === 0) return false;
-    if (this.needsUpdate) return true;
-    // Periodic lifecycle check — update() handles the timing
-    const now = performance.now() / 1000;
-    return now - this.lastLifecycleCheckTime >= WatercolorPlantOverlay.LIFECYCLE_CHECK_INTERVAL;
+    // Always active when plants exist — shader drives continuous sway/breathing
+    return this.plants.length > 0;
   }
 
   getObject(): THREE.Object3D {

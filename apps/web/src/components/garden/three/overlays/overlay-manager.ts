@@ -101,13 +101,15 @@ export class OverlayManager {
     }
 
     if (this.vectorPlants.hasActiveAnimations()) {
-      this.vectorPlants.update(time);
-      this.dirty = true;
+      if (this.vectorPlants.update(time)) {
+        this.dirty = true;
+      }
     }
 
     if (this.watercolorPlants.hasActiveAnimations()) {
-      this.watercolorPlants.update(time);
-      this.dirty = true;
+      if (this.watercolorPlants.update(time)) {
+        this.dirty = true;
+      }
     }
 
     if (this.debug.hasActiveAnimations()) {

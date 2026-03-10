@@ -1108,18 +1108,19 @@ export class VectorPlantOverlay {
    * Update the overlay each frame.
    * Only rebuilds geometry for plants whose visual state has changed.
    */
-  update(time: number): void {
+  update(time: number): boolean {
     // Periodically re-check for lifecycle progression (keyframe changes)
     if (time - this.lastLifecycleCheckTime >= VectorPlantOverlay.LIFECYCLE_CHECK_INTERVAL) {
       this.lastLifecycleCheckTime = time;
       this.needsUpdate = true;
     }
 
-    if (!this.needsUpdate) return;
+    if (!this.needsUpdate) return false;
 
     // Incrementally update only plants that need it
-    this.updateChangedPlants();
+    const changed = this.updateChangedPlants();
     this.needsUpdate = false;
+    return changed;
   }
 
   /**
@@ -1186,7 +1187,8 @@ export class VectorPlantOverlay {
   /**
    * Update only plants whose render state has changed.
    */
-  private updateChangedPlants(): void {
+  private updateChangedPlants(): boolean {
+    let changed = false;
     const seenPlantIds = new Set<string>();
 
     for (const plant of this.plants) {
@@ -1217,6 +1219,7 @@ export class VectorPlantOverlay {
       if (isNewPlant || !prevState || !this.renderStatesEqual(prevState, currentState)) {
         this.updatePlantGroup(plantGroup!, plant, keyframe);
         this.plantRenderStates.set(plant.id, currentState);
+        changed = true;
       }
     }
 
@@ -1227,8 +1230,11 @@ export class VectorPlantOverlay {
         this.disposeMeshGroup(meshGroup);
         this.plantMeshes.delete(plantId);
         this.plantRenderStates.delete(plantId);
+        changed = true;
       }
     }
+
+    return changed;
   }
 
   /**

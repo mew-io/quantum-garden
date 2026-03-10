@@ -283,12 +283,39 @@ export function renderWatercolorElement(
 
 export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
+    uniforms: {
+      u_time: { value: 0.0 },
+    },
     vertexShader: `
+      uniform float u_time;
       attribute vec4 aColor;
       varying vec4 vColor;
       void main() {
         vColor = aColor;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+        // Organic sway: use world position (modelMatrix) for per-plant phase variation
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        float phase = worldPos.x * 0.007 + worldPos.y * 0.005;
+
+        // Height factor: roots stay anchored, tips sway most
+        // Geometry is baked into group-local space (centered around 0,0)
+        // Positive Y = upward = tips, negative Y = downward = roots
+        // Use position relative to group origin (the plant's center)
+        float heightFactor = max(0.0, -position.y * 0.04);
+
+        // Breathing scale (±0.75%, 4s cycle)
+        float breath = 1.0 + sin(u_time * 1.571 + phase) * 0.0075;
+
+        // Gentle sway, modulated by height
+        float swayX = sin(u_time * 1.257 + phase * 2.0) * 1.25 * heightFactor;
+        float swayY = sin(u_time * 0.943 + phase * 1.5) * 0.5 * heightFactor;
+
+        vec3 pos = position;
+        pos.xy *= breath;
+        pos.x += swayX;
+        pos.y += swayY;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `

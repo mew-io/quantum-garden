@@ -144,7 +144,7 @@ function renderCascade(
 
   const { topX, topY, length, sway } = cascade;
   const cascadeLen = length * bloomOpenness;
-  const bottomY = topY + cascadeLen;
+  const _bottomY = topY + cascadeLen;
   const bottomX = topX + sway * bloomOpenness;
 
   // === GLOW COLUMN behind the entire cascade ===

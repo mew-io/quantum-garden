@@ -28,23 +28,48 @@ const POPPY_COLORS: Record<string, { petal: string; center: string; stem: string
 const POPPY_DEFAULT_COLORS = POPPY_COLORS.crimson!;
 
 /**
+ * Smooth ease-in-out curve: accelerates then decelerates.
+ */
+function easeInOut(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
+/**
+ * Linearly interpolate between two values.
+ */
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/**
  * Custom lifecycle openness for the poppy open/close cycle.
  *
- * Unlike the standard 4-phase flower openness, poppies have a dramatic
- * closed -> opening -> open -> closing loop. The poppyOpenness trait
+ * Unlike the standard 4-phase flower openness, poppies have a gradual
+ * closed -> opening -> open -> closing loop. Uses easeInOut curves for
+ * smooth, organic transitions between phases. The poppyOpenness trait
  * (from the quantum circuit) modulates the maximum spread in the "open" phase.
+ *
+ * The "open" phase includes a subtle breathing motion rather than holding
+ * a static value, and all boundaries are continuous across keyframes:
+ *   closed: 0.1 → 0.2   |  opening: 0.2 → maxOpen
+ *   open:   maxOpen ± breathing  |  closing: maxOpen → 0.1 (loops back)
  */
 function getPoppyOpenness(keyframeName: string, progress: number, poppyOpenness: number): number {
   const maxOpen = 0.7 + poppyOpenness * 0.3;
+  const t = easeInOut(progress);
   switch (keyframeName) {
     case "closed":
-      return 0.1 + progress * 0.1; // 0.1 -> 0.2
+      return lerp(0.1, 0.2, t);
     case "opening":
-      return 0.2 + progress * 0.5; // 0.2 -> 0.7
-    case "open":
-      return maxOpen; // quantum-driven max openness (0.7 - 1.0)
+      return lerp(0.2, maxOpen, t);
+    case "open": {
+      // Subtle breathing: gentle sine wave oscillation around maxOpen
+      const breath = Math.sin(progress * Math.PI) * 0.04;
+      return maxOpen + breath;
+    }
     case "closing":
-      return maxOpen * (1 - progress * 0.7); // maxOpen -> maxOpen * 0.3
+      // End at 0.1 so the loop back to "closed" (which starts at 0.1) is seamless
+      return lerp(maxOpen, 0.1, t);
     default:
       return 0.5;
   }

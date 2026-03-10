@@ -93,7 +93,7 @@ export function GardenDrawer() {
       {/* Drawer Panel */}
       <div
         className={`
-          pointer-events-auto sm:w-[380px] garden-panel rounded-xl
+          pointer-events-auto w-full sm:w-[380px] garden-panel rounded-xl
           flex flex-col overflow-hidden
           transition-all duration-300 ease-out origin-bottom
           ${

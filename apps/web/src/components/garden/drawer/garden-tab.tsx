@@ -103,7 +103,7 @@ export function GardenTab({ isActive, focusedPlantId, onFocusedPlantHandled }: G
   // If viewing a plant detail, show that instead
   if (detailPlantId) {
     return (
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+      <div className="flex-1 min-h-0 min-w-0 overflow-y-auto p-4">
         <PlantDetailView
           plantId={detailPlantId}
           isActive={isActive}
@@ -595,7 +595,7 @@ function CircuitSection({
       <h4 className="text-[--wc-ink-soft] text-[11px] font-semibold uppercase tracking-wider mb-3">
         Quantum Circuit
       </h4>
-      <div className="bg-[--wc-paper]/60 rounded p-3 space-y-4 text-xs">
+      <div className="bg-[--wc-paper]/60 rounded p-3 space-y-4 text-xs min-w-0">
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
             <span className="text-purple-700 font-medium">{circuitInfo.name}</span>
@@ -607,7 +607,7 @@ function CircuitSection({
           <p className="text-[--wc-ink-muted] text-[11px] leading-relaxed">{circuitInfo.concept}</p>
         </div>
 
-        <pre className="p-2 bg-[--wc-paper]/80 rounded text-[10px] text-purple-700/80 font-mono leading-tight overflow-x-auto">
+        <pre className="p-2 bg-[--wc-paper]/80 rounded text-[10px] text-purple-700/80 font-mono leading-tight overflow-x-auto max-w-full">
           {circuitInfo.diagram.join("\n")}
         </pre>
 

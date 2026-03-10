@@ -70,6 +70,7 @@ import { wcMoonlightHydrangea } from "./plants/watercolor/wc-moonlight-hydrangea
 import { wcTwilightAzalea } from "./plants/watercolor/wc-twilight-azalea";
 import { wcStarfireHeath } from "./plants/watercolor/wc-starfire-heath";
 import { wcBlushingPeony } from "./plants/watercolor/wc-blushing-peony";
+import { wcRadiantMagnolia } from "./plants/watercolor/wc-radiant-magnolia";
 
 // Watercolor — Geometric
 import { wcSacredMandala } from "./plants/watercolor/wc-sacred-mandala";
@@ -139,6 +140,7 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   wcTwilightAzalea,
   wcStarfireHeath,
   wcBlushingPeony,
+  wcRadiantMagnolia,
   // Geometric
   wcSacredMandala,
   wcCrystalLattice,

@@ -23,6 +23,8 @@ import {
   computeLifecycleState,
   isWatercolorVariant,
   CANVAS,
+  annotateElements,
+  computeAuraParams,
 } from "@quantum-garden/shared";
 import {
   createSeededRng,
@@ -33,6 +35,66 @@ import {
 
 /** Z position for watercolor plants (above vector plants) */
 const WATERCOLOR_Z_POSITION = 61;
+
+// =============================================================================
+// Aura Glow Material (shared across all plants)
+// =============================================================================
+
+function createAuraMaterial(): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      u_time: { value: 0.0 },
+    },
+    vertexShader: `
+      uniform float u_time;
+
+      attribute vec3 aAuraColor;
+      attribute float aAuraOpacity;
+      attribute float aAuraPulseSpeed;
+
+      varying vec3 vAuraColor;
+      varying float vAuraOpacity;
+      varying vec2 vUv;
+
+      void main() {
+        vUv = uv;
+        vAuraColor = aAuraColor;
+
+        // Pulse the opacity with quantum-driven speed
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        float phase = worldPos.x * 0.005 + worldPos.y * 0.003;
+        float pulse = 0.85 + 0.15 * sin(u_time * aAuraPulseSpeed + phase);
+        vAuraOpacity = aAuraOpacity * pulse;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vAuraColor;
+      varying float vAuraOpacity;
+      varying vec2 vUv;
+
+      void main() {
+        // Radial gradient: bright center → transparent edge
+        vec2 center = vUv - 0.5;
+        float dist = length(center) * 2.0; // 0 at center, 1 at edge
+        float falloff = 1.0 - smoothstep(0.0, 1.0, dist);
+        // Softer falloff curve for ethereal glow
+        falloff = falloff * falloff;
+
+        float alpha = vAuraOpacity * falloff;
+        gl_FragColor = vec4(vAuraColor, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+}
+
+/** Shared plane geometry for aura discs (1×1, scaled per-plant) */
+const AURA_GEOMETRY = new THREE.PlaneGeometry(1, 1);
 
 /** Category-based scale multipliers for watercolor plants */
 function getCategoryScale(variantId: string): number {
@@ -82,6 +144,7 @@ export class WatercolorPlantOverlay {
   private lastPlantsRef: Plant[] | null = null;
   private variantCache: Map<string, PlantVariant> = new Map();
   private mergedMaterial: THREE.ShaderMaterial;
+  private auraMaterial: THREE.ShaderMaterial;
   private needsUpdate: boolean = false;
   private lastLifecycleCheckTime: number = 0;
   private static LIFECYCLE_CHECK_INTERVAL = 0.1; // seconds
@@ -90,6 +153,7 @@ export class WatercolorPlantOverlay {
     this.group = new THREE.Group();
     this.group.name = "watercolor-plants";
     this.mergedMaterial = createMergedWatercolorMaterial();
+    this.auraMaterial = createAuraMaterial();
   }
 
   /**
@@ -189,7 +253,13 @@ export class WatercolorPlantOverlay {
     };
 
     // Call the variant's builder to get elements
-    const elements = config.buildElements(ctx);
+    const rawElements = config.buildElements(ctx);
+
+    // Stamp quantum-driven animation + iridescence params onto all elements
+    const annotationRng = createSeededRng(hashString(plant.id + "-qv"));
+    const elements = annotateElements(rawElements, plant.traits ?? null, () =>
+      annotationRng.next()
+    );
 
     // Clear and rebuild geometry
     this.clearPlantGroup(plantGroup);
@@ -202,6 +272,32 @@ export class WatercolorPlantOverlay {
     if (mergedMesh) {
       plantGroup.add(mergedMesh);
     }
+
+    // Quantum aura glow disc behind the plant
+    const auraParams = computeAuraParams(plant.traits ?? null);
+    const auraGeo = AURA_GEOMETRY.clone();
+    const vertCount = auraGeo.getAttribute("position").count;
+    const auraColor = new THREE.Color(auraParams.color);
+    const aColors = new Float32Array(vertCount * 3);
+    const aOpacities = new Float32Array(vertCount);
+    const aPulse = new Float32Array(vertCount);
+    for (let i = 0; i < vertCount; i++) {
+      aColors[i * 3] = auraColor.r;
+      aColors[i * 3 + 1] = auraColor.g;
+      aColors[i * 3 + 2] = auraColor.b;
+      aOpacities[i] = auraParams.opacity;
+      aPulse[i] = auraParams.pulseSpeed;
+    }
+    auraGeo.setAttribute("aAuraColor", new THREE.BufferAttribute(aColors, 3));
+    auraGeo.setAttribute("aAuraOpacity", new THREE.BufferAttribute(aOpacities, 1));
+    auraGeo.setAttribute("aAuraPulseSpeed", new THREE.BufferAttribute(aPulse, 1));
+    const auraMesh = new THREE.Mesh(auraGeo, this.auraMaterial);
+    // Scale the aura disc (radius in 64×64 space, diameter = radius * 2)
+    const auraDiameter = auraParams.radius * 2;
+    auraMesh.scale.set(auraDiameter, auraDiameter, 1);
+    // Position behind the plant (lower z)
+    auraMesh.position.set(0, -4, -0.5);
+    plantGroup.add(auraMesh);
 
     // Position and scale the plant — 1.4x painterly multiplier * category scale
     // Apply depth perspective: distant plants smaller + vertically squished
@@ -245,9 +341,12 @@ export class WatercolorPlantOverlay {
    * Only rebuilds plants whose visual state has changed.
    */
   update(time: number): boolean {
-    // Always update time uniform for shader-driven sway/breathing animation
+    // Always update time uniform for shader-driven sway/breathing/aura animation
     if (this.mergedMaterial.uniforms.u_time) {
       this.mergedMaterial.uniforms.u_time.value = time;
+    }
+    if (this.auraMaterial.uniforms.u_time) {
+      this.auraMaterial.uniforms.u_time.value = time;
     }
 
     // Periodically re-check for lifecycle progression (keyframe changes)
@@ -357,5 +456,6 @@ export class WatercolorPlantOverlay {
     this.plantMeshes.clear();
     this.plantRenderStates.clear();
     this.mergedMaterial.dispose();
+    this.auraMaterial.dispose();
   }
 }

@@ -8,6 +8,7 @@
 import * as THREE from "three";
 import {
   PATTERN_SIZE,
+  CANVAS,
   computeLifecycleState,
   getEffectivePalette,
   getVariantById,
@@ -27,14 +28,14 @@ import { prefersReducedMotion } from "@/lib/accessibility";
 // Maximum number of plant instances
 const MAX_INSTANCES = 1000;
 
-// Z-layer offsets for plant categories
-const Z_LAYERS: Record<string, number> = {
-  "ground-cover": 0,
-  grass: 10,
-  flower: 20,
-  shrub: 30,
-  tree: 40,
-  ethereal: 50,
+// Small Z tiebreaker offsets per category (within same Y band, taller plants render in front)
+const CATEGORY_Z_OFFSET: Record<string, number> = {
+  "ground-cover": 0.0,
+  grass: 0.1,
+  flower: 0.2,
+  shrub: 0.3,
+  tree: 0.4,
+  ethereal: 0.5,
 };
 
 /** Per-category scale multipliers for visual hierarchy */
@@ -223,6 +224,10 @@ export class PlantInstancer {
       const variant = getVariantById(plant.variantId);
       return variant?.renderMode !== "vector" && variant?.renderMode !== "watercolor";
     });
+
+    // Sort by Y ascending (top of screen first = farthest = drawn first)
+    // This ensures correct painter's algorithm ordering for semi-transparent plants
+    pixelPlants.sort((a, b) => a.position.y - b.position.y);
 
     // Track which plants are still active
     const activePlantIds = new Set<string>();
@@ -465,17 +470,16 @@ export class PlantInstancer {
     const patternId = this.getPatternId(plant, variant);
     const atlasEntry = this.atlas.getOrAddPattern(patternId, pattern);
 
-    // Calculate Z position based on variant category
+    // Calculate Z position: Y-primary for 2.5D depth (lower on screen = closer = higher Z)
     const category = this.getPlantCategory(variant);
-    const zBase = Z_LAYERS[category] ?? 25;
-    // Add small offset based on Y position for consistent ordering within layer
-    const zOffset = plant.position.y / 10000;
+    const zPrimary = (plant.position.y / CANVAS.DEFAULT_HEIGHT) * 100;
+    const zOffset = CATEGORY_Z_OFFSET[category] ?? 0.25;
 
     // Set instance position
     const posBase = index * 3;
     this.instancePositions[posBase] = plant.position.x;
     this.instancePositions[posBase + 1] = plant.position.y;
-    this.instancePositions[posBase + 2] = zBase + zOffset;
+    this.instancePositions[posBase + 2] = zPrimary + zOffset;
 
     // Set UV bounds
     const uvBase = index * 4;
@@ -671,7 +675,7 @@ export class PlantInstancer {
     const posBase = index * 3;
     this.instancePositions[posBase] = plant.position.x;
     this.instancePositions[posBase + 1] = plant.position.y;
-    this.instancePositions[posBase + 2] = 25;
+    this.instancePositions[posBase + 2] = (plant.position.y / CANVAS.DEFAULT_HEIGHT) * 100 + 0.2;
 
     const uvBase = index * 4;
     this.instanceUVBounds[uvBase] = atlasEntry.uvBounds[0];

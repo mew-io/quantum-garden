@@ -33,6 +33,7 @@ const vertexShader = /* glsl */ `
   uniform float u_time;
   uniform float u_patternSize;
   uniform float u_globalPlantScale;
+  uniform float u_gardenHeight;
 
   // Varyings to fragment shader
   varying vec2 v_uv;
@@ -89,7 +90,11 @@ const vertexShader = /* glsl */ `
       }
     }
 
-    float finalScale = baseScale * scalePulse * lifecycleScale;
+    // Depth-based scale: plants at top (far) slightly smaller, bottom (near) normal
+    float depthT = clamp(instancePosition.y / u_gardenHeight, 0.0, 1.0);
+    float depthScale = mix(0.85, 1.0, depthT);
+
+    float finalScale = baseScale * scalePulse * lifecycleScale * depthScale;
 
     // Transform position with rotation
     // position is the local quad vertex (-0.5 to 0.5 range)
@@ -306,6 +311,11 @@ const fragmentShader = /* glsl */ `
     }
 
     gl_FragColor = vec4(color, finalOpacity);
+
+    // Discard near-transparent pixels so they don't write to depth buffer
+    if (gl_FragColor.a < 0.1) {
+      discard;
+    }
   }
 `;
 
@@ -332,9 +342,10 @@ export function createPlantMaterial(atlasTexture: THREE.Texture): THREE.ShaderMa
       u_patternSize: { value: PATTERN_SIZE },
       u_globalPlantScale: { value: 1.5 },
       u_superpositionMode: { value: 0 }, // 0 = stacked ghosts (default)
+      u_gardenHeight: { value: 2160 },
     },
     transparent: true,
-    depthWrite: false, // Important for proper transparency blending
+    depthWrite: true,
     depthTest: true,
     side: THREE.DoubleSide,
   });

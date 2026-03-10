@@ -124,7 +124,7 @@ function PanelContent({
   return (
     <div
       className={`
-        w-[320px] rounded-xl garden-panel
+        w-full sm:w-[320px] rounded-xl garden-panel
         p-4
         ${animationClasses}
       `}
@@ -322,7 +322,7 @@ export function ObservationContextPanel() {
   return (
     <div
       className="
-        pointer-events-none fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] z-40
+        pointer-events-none fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] right-[var(--inset-right)] sm:right-auto z-40
         flex flex-col items-start
       "
     >

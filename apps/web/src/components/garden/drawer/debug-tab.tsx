@@ -7,6 +7,11 @@ import { useDebugLogs, filterLogs, debugLogger } from "@/lib/debug-logger";
 import type { LogCategory, LogLevel } from "@/lib/debug-logger";
 import type { Plant, QuantumPropertySchema, CircuitType } from "@quantum-garden/shared";
 import { getVariantById } from "@quantum-garden/shared";
+import {
+  BACKGROUND_ORDER,
+  BACKGROUND_CONFIGS,
+  type BackgroundType,
+} from "../three/core/backgrounds";
 import { getCircuitInfo } from "@/lib/quantum-explanations";
 
 interface DebugTabProps {
@@ -19,6 +24,7 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [detailPlantId, setDetailPlantId] = useState<string | null>(null);
   const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0);
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>("clouds");
   const [activeSubTab, setActiveSubTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
@@ -87,6 +93,19 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
       })
     );
   }, [superpositionMode]);
+
+  const cycleBackground = useCallback(() => {
+    const currentIndex = BACKGROUND_ORDER.indexOf(backgroundType);
+    const nextIndex = (currentIndex + 1) % BACKGROUND_ORDER.length;
+    const newType = BACKGROUND_ORDER[nextIndex]!;
+    setBackgroundType(newType);
+    debugLogger.rendering.info(`Background changed to ${newType}`);
+    window.dispatchEvent(
+      new CustomEvent("background-change", {
+        detail: { type: newType },
+      })
+    );
+  }, [backgroundType]);
 
   const toggleCategory = (category: LogCategory) => {
     setLogFilters((prev) => ({
@@ -246,6 +265,23 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
                     }`}
                   >
                     {superpositionMode === 0 ? "GHOSTS" : "FLICKER"}
+                  </span>
+                </button>
+                <button
+                  onClick={cycleBackground}
+                  className="w-full py-2 px-3 bg-[--wc-paper]/60 hover:bg-[--wc-paper] text-[--wc-ink-soft] rounded flex items-center justify-between"
+                >
+                  <span className="text-xs">Background</span>
+                  <span
+                    className={`text-xs font-mono px-2 py-1 rounded ${
+                      backgroundType === "clouds"
+                        ? "bg-sky-50/60 text-sky-700"
+                        : backgroundType === "parchment"
+                          ? "bg-amber-50/60 text-amber-700"
+                          : "bg-black/5 text-[--wc-ink-muted]"
+                    }`}
+                  >
+                    {BACKGROUND_CONFIGS[backgroundType].label}
                   </span>
                 </button>
               </div>

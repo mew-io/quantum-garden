@@ -16,6 +16,7 @@ import {
 } from "@quantum-garden/shared";
 import type { Plant } from "@quantum-garden/shared";
 import { SceneManager } from "./core/scene-manager";
+import type { BackgroundType } from "./core/backgrounds";
 import { PlantInstancer, type RenderablePlant } from "./plants/plant-instancer";
 import { disposeTextureAtlas } from "./core/texture-atlas";
 import { OverlayManager } from "./overlays";
@@ -428,6 +429,16 @@ export function GardenScene() {
       handleSuperpositionModeChange as EventListener
     );
 
+    // Handle background changes from debug panel
+    const handleBackgroundChange = (e: CustomEvent<{ type: BackgroundType }>) => {
+      sceneManager.setBackground(e.detail.type);
+      debugLogger.rendering.info(`Background set to ${e.detail.type}`);
+    };
+    window.addEventListener(
+      "background-change" as keyof WindowEventMap,
+      handleBackgroundChange as EventListener
+    );
+
     // Start render loop
     debugLogger.rendering.info("Starting render loop");
     sceneManager.start();
@@ -475,6 +486,10 @@ export function GardenScene() {
       window.removeEventListener(
         "plant-debug-locate" as keyof WindowEventMap,
         handlePlantDebugLocate as EventListener
+      );
+      window.removeEventListener(
+        "background-change" as keyof WindowEventMap,
+        handleBackgroundChange as EventListener
       );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);

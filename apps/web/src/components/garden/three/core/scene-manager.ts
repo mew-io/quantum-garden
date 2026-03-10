@@ -17,7 +17,13 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { CANVAS } from "@quantum-garden/shared";
-import { createPaperTexture, PaperGrainShader } from "./paper-texture";
+import {
+  type BackgroundType,
+  BACKGROUND_CONFIGS,
+  createPaperTexture,
+  PaperGrainShader,
+  CloudShader,
+} from "./backgrounds";
 
 export interface SceneManagerConfig {
   container: HTMLElement;
@@ -100,8 +106,10 @@ export class SceneManager {
   private bloomPass: UnrealBloomPass | null = null;
   private bloomEnabled: boolean = false;
 
-  // Paper grain post-processing
+  // Background post-processing passes (all created, only one enabled)
   private paperPass: ShaderPass | null = null;
+  private cloudPass: ShaderPass | null = null;
+  private currentBackground: BackgroundType = "clouds";
 
   private container: HTMLElement;
   private animationId: number | null = null;
@@ -166,9 +174,10 @@ export class SceneManager {
     const vw = config.width ?? window.innerWidth;
     const vh = config.height ?? window.innerHeight;
 
-    // Create scene
+    // Create scene with default background
     this.scene = new THREE.Scene();
-    const bgColor = config.backgroundColor ?? CANVAS.BACKGROUND_COLOR;
+    const bgColor =
+      config.backgroundColor ?? BACKGROUND_CONFIGS[this.currentBackground].backgroundColor;
     this.scene.background = new THREE.Color(bgColor);
 
     // Create orthographic camera with garden-world frustum
@@ -258,13 +267,22 @@ export class SceneManager {
       this.composer.addPass(this.bloomPass);
     }
 
-    // Atmospheric haze pass - composites backdrop layers onto background
+    // Parchment background pass (atmospheric haze)
     const paperTexture = createPaperTexture();
     this.paperPass = new ShaderPass(PaperGrainShader);
     this.paperPass.uniforms["tPaper"]!.value = paperTexture;
     (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
     this.paperPass.uniforms["aspectRatio"]!.value = width / height;
+    this.paperPass.enabled = this.currentBackground === "parchment";
     this.composer.addPass(this.paperPass);
+
+    // Cloud background pass (procedural FBM clouds)
+    this.cloudPass = new ShaderPass(CloudShader);
+    (this.cloudPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
+    this.cloudPass.uniforms["aspectRatio"]!.value = width / height;
+    this.cloudPass.uniforms["uTime"]!.value = 0;
+    this.cloudPass.enabled = this.currentBackground === "clouds";
+    this.composer.addPass(this.cloudPass);
 
     // Output pass - handles color space conversion for final output
     const outputPass = new OutputPass();
@@ -705,7 +723,12 @@ export class SceneManager {
     this.updateCameraPan();
     this.updateUserZoom();
 
-    // Render through post-processing pipeline (bloom + paper grain)
+    // Update cloud animation time
+    if (this.cloudPass?.enabled) {
+      this.cloudPass.uniforms["uTime"]!.value += deltaTime;
+    }
+
+    // Render through post-processing pipeline
     this.composer!.render();
 
     // Update performance metrics after render
@@ -762,6 +785,10 @@ export class SceneManager {
       (this.paperPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
       this.paperPass.uniforms["aspectRatio"]!.value = vw / vh;
     }
+    if (this.cloudPass) {
+      (this.cloudPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
+      this.cloudPass.uniforms["aspectRatio"]!.value = vw / vh;
+    }
 
     // Recalculate layout and apply camera
     this.computeLayout(vw, vh);
@@ -809,6 +836,29 @@ export class SceneManager {
     if (this.bloomPass) {
       this.bloomPass.strength = strength;
     }
+  }
+
+  /**
+   * Switch the active background type.
+   */
+  setBackground(type: BackgroundType): void {
+    this.currentBackground = type;
+
+    // Update scene background color
+    const config = BACKGROUND_CONFIGS[type];
+    this.scene.background = new THREE.Color(config.backgroundColor);
+
+    // Toggle passes
+    if (this.paperPass) this.paperPass.enabled = type === "parchment";
+    if (this.cloudPass) this.cloudPass.enabled = type === "clouds";
+    // "plain" = no background pass enabled
+  }
+
+  /**
+   * Get the current background type.
+   */
+  getBackground(): BackgroundType {
+    return this.currentBackground;
   }
 
   /**
@@ -946,10 +996,13 @@ export class SceneManager {
       this.composer.dispose();
     }
 
-    // Dispose of paper grain texture
+    // Dispose of background pass textures
     if (this.paperPass) {
       const tex = this.paperPass.uniforms["tPaper"]!.value as THREE.Texture | null;
       tex?.dispose();
+    }
+    if (this.cloudPass) {
+      this.cloudPass.material?.dispose();
     }
 
     // Dispose of Three.js resources

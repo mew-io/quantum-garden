@@ -6,6 +6,7 @@
  */
 
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type {
   WatercolorElement,
   WatercolorEffect,
@@ -274,4 +275,233 @@ export function renderWatercolorElement(
   layerGroup.scale.set(element.scale, element.scale, 1);
 
   return layerGroup;
+}
+
+// =============================================================================
+// Merged Geometry Rendering (batched draw calls)
+// =============================================================================
+
+export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    vertexShader: `
+      attribute vec4 aColor;
+      varying vec4 vColor;
+      void main() {
+        vColor = aColor;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec4 vColor;
+      void main() {
+        gl_FragColor = vColor;
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+}
+
+/**
+ * Merge all watercolor elements for a plant into a single mesh with vertex colors.
+ * Reduces draw calls from N*layers to 1 per plant.
+ */
+export function mergeWatercolorElements(
+  elements: WatercolorElement[],
+  effect: WatercolorEffect,
+  rng: SeededRng,
+  material: THREE.ShaderMaterial
+): THREE.Mesh | null {
+  const geometries: THREE.BufferGeometry[] = [];
+  const matrix = new THREE.Matrix4();
+  const tempPos = new THREE.Vector3();
+  const tempQuat = new THREE.Quaternion();
+  const tempScale = new THREE.Vector3();
+
+  for (const element of elements) {
+    const zBase = element.zOffset ?? 0;
+
+    if (element.shape.type === "stem") {
+      collectStemGeometries(
+        geometries,
+        element,
+        effect,
+        zBase,
+        rng,
+        matrix,
+        tempPos,
+        tempQuat,
+        tempScale
+      );
+    } else {
+      const shape = buildShape(element.shape);
+      if (!shape) continue;
+      collectShapeGeometries(
+        geometries,
+        shape,
+        element,
+        effect,
+        zBase,
+        rng,
+        matrix,
+        tempPos,
+        tempQuat,
+        tempScale
+      );
+    }
+  }
+
+  if (geometries.length === 0) return null;
+
+  const merged = mergeGeometries(geometries, false);
+  if (!merged) return null;
+
+  // Dispose individual geometries
+  for (const geo of geometries) geo.dispose();
+
+  return new THREE.Mesh(merged, material);
+}
+
+function addVertexColors(geo: THREE.BufferGeometry, color: THREE.Color, opacity: number): void {
+  const count = geo.getAttribute("position").count;
+  const colors = new Float32Array(count * 4);
+  const r = color.r,
+    g = color.g,
+    b = color.b;
+  for (let i = 0; i < count; i++) {
+    const i4 = i * 4;
+    colors[i4] = r;
+    colors[i4 + 1] = g;
+    colors[i4 + 2] = b;
+    colors[i4 + 3] = opacity;
+  }
+  geo.setAttribute("aColor", new THREE.BufferAttribute(colors, 4));
+}
+
+function stripUnneededAttributes(geo: THREE.BufferGeometry): void {
+  geo.deleteAttribute("normal");
+  geo.deleteAttribute("uv");
+}
+
+function collectShapeGeometries(
+  out: THREE.BufferGeometry[],
+  shape: THREE.Shape,
+  element: WatercolorElement,
+  effect: WatercolorEffect,
+  zBase: number,
+  rng: SeededRng,
+  matrix: THREE.Matrix4,
+  tempPos: THREE.Vector3,
+  tempQuat: THREE.Quaternion,
+  tempScale: THREE.Vector3
+): void {
+  const n = effect.layers;
+  const baseOp = element.opacity ?? effect.opacity;
+
+  for (let i = 0; i < n; i++) {
+    const t = n > 1 ? i / (n - 1) : 0.5;
+
+    const c = new THREE.Color(element.color);
+    const hsl = { h: 0, s: 0, l: 0 };
+    c.getHSL(hsl);
+    hsl.h += (rng.next() - 0.5) * effect.colorVariation;
+    hsl.s = THREE.MathUtils.clamp(hsl.s + (rng.next() - 0.5) * effect.colorVariation, 0, 1);
+    hsl.l = THREE.MathUtils.clamp(hsl.l + (rng.next() - 0.5) * effect.colorVariation * 1.5, 0, 1);
+    c.setHSL(hsl.h, hsl.s, hsl.l);
+
+    const layerScale = 1.0 + (1.0 - t) * effect.spread * 4;
+    const op = baseOp * (0.18 + 0.82 * t);
+    const jitterX = (rng.next() - 0.5) * effect.spread * 0.5;
+    const jitterY = (rng.next() - 0.5) * effect.spread * 0.5;
+
+    const geo = new THREE.ShapeGeometry(shape, WATERCOLOR_RENDER_CONFIG.SHAPE_SEGMENTS);
+    stripUnneededAttributes(geo);
+
+    // Compose transform: element position/rotation/scale + layer jitter/scale/z
+    const totalScale = element.scale * layerScale;
+    tempPos.set(
+      element.position.x - 32 + jitterX * element.scale,
+      element.position.y - 32 + jitterY * element.scale,
+      zBase + i * 0.002
+    );
+    tempQuat.setFromAxisAngle(new THREE.Vector3(0, 0, 1), element.rotation);
+    tempScale.set(totalScale, totalScale, 1);
+    matrix.compose(tempPos, tempQuat, tempScale);
+    geo.applyMatrix4(matrix);
+
+    addVertexColors(geo, c, op);
+    out.push(geo);
+  }
+}
+
+function collectStemGeometries(
+  out: THREE.BufferGeometry[],
+  element: WatercolorElement,
+  effect: WatercolorEffect,
+  zBase: number,
+  rng: SeededRng,
+  matrix: THREE.Matrix4,
+  tempPos: THREE.Vector3,
+  tempQuat: THREE.Quaternion,
+  tempScale: THREE.Vector3
+): void {
+  if (element.shape.type !== "stem") return;
+  const points = element.shape.points;
+  const thickness = element.shape.thickness;
+
+  const n = Math.min(effect.layers, 3);
+  const baseOp = element.opacity ?? effect.opacity;
+  const curvePoints = points.map((p) => new THREE.Vector3(p[0], p[1], 0));
+
+  // Stem centroid for scale-around-center
+  const cx = points.reduce((s, p) => s + p[0], 0) / points.length;
+  const cy = points.reduce((s, p) => s + p[1], 0) / points.length;
+
+  for (let i = 0; i < n; i++) {
+    const t = n > 1 ? i / (n - 1) : 0.5;
+
+    const c = new THREE.Color(element.color);
+    const hsl = { h: 0, s: 0, l: 0 };
+    c.getHSL(hsl);
+    hsl.h += (rng.next() - 0.5) * effect.colorVariation * 0.5;
+    hsl.s = THREE.MathUtils.clamp(hsl.s + (rng.next() - 0.5) * effect.colorVariation * 0.5, 0, 1);
+    c.setHSL(hsl.h, hsl.s, hsl.l);
+
+    const thicknessScale = 1.0 + (1.0 - t) * effect.spread * 2;
+    const op = baseOp * (0.3 + 0.7 * t);
+
+    const offsetPoints = curvePoints.map(
+      (p) =>
+        new THREE.Vector3(
+          p.x + (rng.next() - 0.5) * effect.spread * 0.3,
+          p.y + (rng.next() - 0.5) * effect.spread * 0.3,
+          0
+        )
+    );
+
+    const curve = new THREE.CatmullRomCurve3(offsetPoints, false, "catmullrom", 0.5);
+    const geo = new THREE.TubeGeometry(
+      curve,
+      WATERCOLOR_RENDER_CONFIG.TUBE_TUBULAR_SEGMENTS,
+      thickness * thicknessScale,
+      WATERCOLOR_RENDER_CONFIG.TUBE_RADIAL_SEGMENTS,
+      false
+    );
+    stripUnneededAttributes(geo);
+
+    // Position: element offset (scale around centroid) + z layer offset
+    tempPos.set(
+      element.position.x - 32 + cx * (1 - element.scale),
+      element.position.y - 32 + cy * (1 - element.scale),
+      zBase + i * 0.002
+    );
+    tempQuat.identity();
+    tempScale.set(element.scale, element.scale, 1);
+    matrix.compose(tempPos, tempQuat, tempScale);
+    geo.applyMatrix4(matrix);
+
+    addVertexColors(geo, c, op);
+    out.push(geo);
+  }
 }

@@ -23,7 +23,12 @@ import {
   computeLifecycleState,
   isWatercolorVariant,
 } from "@quantum-garden/shared";
-import { createSeededRng, hashString, renderWatercolorElement } from "./watercolor-rendering";
+import {
+  createSeededRng,
+  hashString,
+  createMergedWatercolorMaterial,
+  mergeWatercolorElements,
+} from "./watercolor-rendering";
 
 /** Z position for watercolor plants (above vector plants) */
 const WATERCOLOR_Z_POSITION = 61;
@@ -75,14 +80,15 @@ export class WatercolorPlantOverlay {
   private plants: Plant[] = [];
   private lastPlantsRef: Plant[] | null = null;
   private variantCache: Map<string, PlantVariant> = new Map();
-  private materialPool: Map<string, THREE.MeshBasicMaterial> = new Map();
+  private mergedMaterial: THREE.ShaderMaterial;
   private needsUpdate: boolean = false;
   private lastLifecycleCheckTime: number = 0;
-  private static LIFECYCLE_CHECK_INTERVAL = 1.0; // seconds
+  private static LIFECYCLE_CHECK_INTERVAL = 5.0; // seconds
 
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "watercolor-plants";
+    this.mergedMaterial = createMergedWatercolorMaterial();
   }
 
   /**
@@ -190,15 +196,10 @@ export class WatercolorPlantOverlay {
     // Create a seeded RNG for the watercolor layering effect
     const rng = createSeededRng(hashString(plant.id + "-wc"));
 
-    // Render each element with watercolor effect
-    for (const element of elements) {
-      const elementGroup = renderWatercolorElement(
-        element,
-        config.wcEffect,
-        rng,
-        this.materialPool
-      );
-      plantGroup.add(elementGroup);
+    // Merge all elements into a single mesh with vertex colors
+    const mergedMesh = mergeWatercolorElements(elements, config.wcEffect, rng, this.mergedMaterial);
+    if (mergedMesh) {
+      plantGroup.add(mergedMesh);
     }
 
     // Position and scale the plant — 1.4x painterly multiplier * category scale
@@ -342,10 +343,6 @@ export class WatercolorPlantOverlay {
     }
     this.plantMeshes.clear();
     this.plantRenderStates.clear();
-
-    for (const mat of this.materialPool.values()) {
-      mat.dispose();
-    }
-    this.materialPool.clear();
+    this.mergedMaterial.dispose();
   }
 }

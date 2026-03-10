@@ -1,9 +1,9 @@
 /**
  * Watercolor Stellar Geometry
  *
- * Star polygon -- sharp petal points radiating from center + connecting stem
- * lines between alternate points (creating the inner polygon). Like a star
- * of David or pentagram drawn in watercolor.
+ * Star polygon -- sharp petal points radiating from center + soft scattered
+ * watercolor washes between alternate points (suggesting the inner polygon
+ * without hard lines). Like a star of David drawn in watercolor.
  *
  * Category: watercolor (geometric)
  * Rarity: 0.03
@@ -118,7 +118,7 @@ function buildWcStellarGeometryElements(ctx: WatercolorBuildContext): Watercolor
     }
   }
 
-  // -- Inner polygon: stems connecting every-other point (skip-1) -------------
+  // -- Inner connections: soft watercolor washes between alternate points ------
   const connectOpenness = Math.max(0, (openness - 0.35) / 0.55);
   if (connectOpenness > 0) {
     // Compute the tip positions at the outer radius
@@ -130,43 +130,57 @@ function buildWcStellarGeometryElements(ctx: WatercolorBuildContext): Watercolor
       baseRotation
     );
 
-    // Connect every-other point to create the inner star polygon
+    // Scatter soft dots along paths between alternate points (instead of hard stems)
     for (let i = 0; i < pointCount; i++) {
       const from = tipPositions[i]!;
       const to = tipPositions[(i + 2) % pointCount]!;
 
-      const midX = (from.x + to.x) / 2;
-      const midY = (from.y + to.y) / 2;
+      // Place 4-6 scattered watercolor dots along each connection path
+      const dotCount = 4 + Math.floor(rng() * 3);
+      for (let d = 0; d < dotCount; d++) {
+        const t = (d + 0.5) / dotCount;
+        const baseX = from.x + (to.x - from.x) * t;
+        const baseY = from.y + (to.y - from.y) * t;
+        // Organic scatter perpendicular to the connection line
+        const jitterX = (rng() - 0.5) * 1.8;
+        const jitterY = (rng() - 0.5) * 1.8;
+
+        elements.push({
+          shape: { type: "dot", radius: 0.4 + rng() * 0.6 },
+          position: { x: baseX + jitterX, y: baseY + jitterY },
+          rotation: 0,
+          scale: 1,
+          color: colors.connection,
+          opacity: (0.15 + rng() * 0.2) * connectOpenness,
+          zOffset: 0.8 + rng() * 0.4,
+        });
+      }
+
+      // Add a single soft petal wash at the midpoint for continuity
+      const midX = (from.x + to.x) / 2 + (rng() - 0.5) * 0.6;
+      const midY = (from.y + to.y) / 2 + (rng() - 0.5) * 0.6;
+      const connectionAngle = Math.atan2(to.y - from.y, to.x - from.x);
 
       elements.push({
-        shape: {
-          type: "stem",
-          points: [
-            [from.x, from.y],
-            [midX + rng() * 0.4 - 0.2, midY + rng() * 0.4 - 0.2],
-            [midX - rng() * 0.4 + 0.2, midY - rng() * 0.4 + 0.2],
-            [to.x, to.y],
-          ],
-          thickness: 0.3 * connectOpenness,
-        },
-        position: { x: 0, y: 0 },
-        rotation: 0,
-        scale: 1,
+        shape: { type: "petal", width: 1.2 + rng() * 0.8, length: 2.5 + rng() * 1.5, roundness: 0.7 + rng() * 0.25 },
+        position: { x: midX, y: midY },
+        rotation: connectionAngle + (rng() - 0.5) * 0.3,
+        scale: connectOpenness,
         color: colors.connection,
-        opacity: 0.35 + connectOpenness * 0.2,
-        zOffset: 1.0,
+        opacity: 0.12 + connectOpenness * 0.1,
+        zOffset: 0.6,
       });
     }
 
-    // Inner disc ring at the inner radius
+    // Soft inner wash — low-opacity disc with large spread instead of solid ring
     if (connectOpenness > 0.3) {
       elements.push({
-        shape: { type: "disc", radius: innerRadius * connectOpenness },
-        position: { x: cx, y: cy },
+        shape: { type: "disc", radius: innerRadius * connectOpenness * 1.3 },
+        position: { x: cx + (rng() - 0.5) * 0.4, y: cy + (rng() - 0.5) * 0.4 },
         rotation: 0,
         scale: 1,
         color: colors.connection,
-        opacity: 0.15 + connectOpenness * 0.1,
+        opacity: 0.07 + connectOpenness * 0.06,
         zOffset: 0.3,
       });
     }
@@ -209,7 +223,7 @@ export const wcStellarGeometry: PlantVariant = {
   id: "wc-stellar-geometry",
   name: "Stellar Geometry",
   description:
-    "A star polygon of sharp radiating points with an inner connecting polygon, its form driven by quantum entropy",
+    "A star polygon of sharp radiating points with soft watercolor washes between them, its form driven by quantum entropy",
   rarity: 0.03,
   requiresObservationToGerminate: true,
   renderMode: "watercolor",

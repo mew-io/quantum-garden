@@ -124,7 +124,7 @@ function PanelContent({
   return (
     <div
       className={`
-        w-[320px] rounded-xl garden-panel
+        w-[min(320px,calc(100vw-2*var(--inset-left)))] rounded-xl garden-panel
         p-4
         ${animationClasses}
       `}

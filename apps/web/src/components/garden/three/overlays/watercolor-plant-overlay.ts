@@ -114,7 +114,7 @@ function getCategoryScale(variantId: string): number {
     id.includes("pebble")
   )
     return 2;
-  return 2; // flowers and default
+  return 3; // flowers and default
 }
 
 /**

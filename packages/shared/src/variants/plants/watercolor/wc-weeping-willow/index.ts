@@ -64,7 +64,7 @@ function buildWcWeepingWillowElements(ctx: WatercolorBuildContext): WatercolorEl
 
   // Path A: read properties from Python circuit's extra dict (via plant.traits).
   // Fallback values for unobserved plants (ctx.traits is null).
-  const frondCount = traitOr(ctx.traits, "frondCount", 6);
+  const frondCount = traitOr(ctx.traits, "frondCount", 8);
   const droopAngle = traitOr(ctx.traits, "droopAngle", 0.55);
   const symmetryBias = traitOr(ctx.traits, "symmetryBias", 0.5);
   const trunkThickness = traitOr(ctx.traits, "trunkThickness", 0.8);
@@ -120,8 +120,8 @@ function buildWcWeepingWillowElements(ctx: WatercolorBuildContext): WatercolorEl
     const branchOpenness = Math.min(1, (openness - 0.35) / 0.35);
     const frondOpenness = Math.max(0, (openness - 0.7) / 0.3);
 
-    // Number of main branches: 4-6 based on frondCount
-    const branchCount = Math.min(6, Math.max(4, Math.floor(frondCount * 0.7)));
+    // Number of main branches: 6-9 based on frondCount
+    const branchCount = Math.min(9, Math.max(6, Math.floor(frondCount * 1.1)));
 
     for (let i = 0; i < branchCount; i++) {
       // Distribute branches around the crown
@@ -171,21 +171,22 @@ function buildWcWeepingWillowElements(ctx: WatercolorBuildContext): WatercolorEl
 
       // === FRONDS DROOPING FROM BRANCH TIPS ===
       if (frondOpenness > 0) {
-        // Each branch gets 2-4 fronds based on frondCount
-        const frondsPerBranch = Math.max(2, Math.floor(frondCount / branchCount) + 1);
+        // Each branch gets 3-5 fronds for a dense curtain effect
+        const frondsPerBranch = Math.max(3, Math.floor(frondCount / branchCount) + 2);
 
         for (let f = 0; f < frondsPerBranch; f++) {
-          const frondAngleOffset = (rng() - 0.5) * 0.8;
-          const frondStartX = bx + (rng() - 0.5) * 2;
-          const frondStartY = by + rng() * 1;
+          const frondAngleOffset = (rng() - 0.5) * 1.0;
+          const frondStartX = bx + (rng() - 0.5) * 3;
+          const frondStartY = by + rng() * 1.5;
 
           // Frond droops downward with gravity effect controlled by droopAngle
-          const frondLen = (8 + rng() * 6) * frondOpenness;
-          const droopX = frondStartX + Math.cos(branchAngle + frondAngleOffset) * frondLen * 0.3;
-          const droopY = frondStartY + frondLen * droopAngle * 1.2;
+          // Longer fronds for a more dramatic weeping effect
+          const frondLen = (12 + rng() * 10) * frondOpenness;
+          const droopX = frondStartX + Math.cos(branchAngle + frondAngleOffset) * frondLen * 0.25;
+          const droopY = frondStartY + frondLen * droopAngle * 1.3;
 
           // Gentle curve as the frond hangs
-          const midX = (frondStartX + droopX) / 2 + (rng() - 0.5) * 2;
+          const midX = (frondStartX + droopX) / 2 + (rng() - 0.5) * 2.5;
           const midY = (frondStartY + droopY) / 2 + frondLen * droopAngle * 0.4;
 
           elements.push({
@@ -200,16 +201,55 @@ function buildWcWeepingWillowElements(ctx: WatercolorBuildContext): WatercolorEl
                 [midX, midY],
                 [droopX, droopY],
               ],
-              thickness: 0.15 + rng() * 0.1,
+              thickness: 0.12 + rng() * 0.1,
             },
             position: { x: 0, y: 0 },
             rotation: 0,
             scale: 1,
             color: colorSet.foliage,
-            opacity: 0.35 + frondOpenness * 0.2,
+            opacity: 0.3 + frondOpenness * 0.2,
             zOffset: 1.0 + i * 0.1 + f * 0.02,
           });
         }
+      }
+    }
+
+    // === CASCADE FRONDS FROM CROWN ===
+    // Extra fronds that drape directly from the crown area for a fuller curtain
+    if (frondOpenness > 0) {
+      const cascadeCount = Math.floor(frondCount * 1.5);
+      for (let c = 0; c < cascadeCount; c++) {
+        const angle = (c / cascadeCount) * Math.PI * 2 + (rng() - 0.5) * 0.4;
+        const startDist = 2 + rng() * 3;
+        const startX = cx + Math.cos(angle) * startDist;
+        const startY = trunkTop - 1 + Math.sin(angle) * startDist * 0.4;
+
+        const frondLen = (10 + rng() * 12) * frondOpenness;
+        const sway = (rng() - 0.5) * 4;
+        const endX = startX + sway;
+        const endY = startY + frondLen * droopAngle * 1.4;
+
+        const midX = (startX + endX) / 2 + (rng() - 0.5) * 3;
+        const midY = (startY + endY) / 2 + frondLen * droopAngle * 0.3;
+
+        elements.push({
+          shape: {
+            type: "stem",
+            points: [
+              [startX, startY],
+              [startX + (midX - startX) * 0.35, startY + (midY - startY) * 0.25],
+              [midX, midY],
+              [endX, endY],
+            ],
+            thickness: 0.1 + rng() * 0.08,
+          },
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          scale: 1,
+          color: colorSet.foliage,
+          opacity: 0.25 + frondOpenness * 0.15,
+          zOffset: 1.5 + c * 0.02,
+        });
       }
     }
 
@@ -246,7 +286,7 @@ export const wcWeepingWillow: PlantVariant = {
   // frondCount, droopAngle, symmetryBias, and trunkThickness in its extra dict.
   circuitId: "wc_weeping_willow",
   sandboxControls: [
-    { key: "frondCount", label: "Frond Count", min: 4, max: 8, step: 1, default: 6 },
+    { key: "frondCount", label: "Frond Count", min: 4, max: 12, step: 1, default: 8 },
     { key: "droopAngle", label: "Droop Angle", min: 0.3, max: 0.8, step: 0.05, default: 0.55 },
     {
       key: "symmetryBias",

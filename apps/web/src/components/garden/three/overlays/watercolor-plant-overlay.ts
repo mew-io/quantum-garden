@@ -291,7 +291,7 @@ export class WatercolorPlantOverlay {
 
       const currentState: PlantRenderState = {
         keyframeIndex: lifecycleState.keyframeIndex,
-        keyframeProgress: Math.round(lifecycleState.keyframeProgress * 10) / 10,
+        keyframeProgress: Math.round(lifecycleState.keyframeProgress * 50) / 50,
         positionX: plant.position.x,
         positionY: plant.position.y,
         observed: plant.observed,

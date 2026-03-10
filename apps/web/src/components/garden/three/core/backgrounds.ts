@@ -126,7 +126,7 @@ export const CloudStaticShader = {
       }
 
       // ─── Sample background image directly ─────────────────────
-      vec3 bg = texture2D(tBackground, vUv).rgb;
+      vec3 bg = mix(texture2D(tBackground, vUv).rgb, vec3(1.0), 0.2);
 
       // ─── Sparkles ────────────────────────────────────────────
       vec2 sparkleUv = vUv * vec2(aspectRatio, 1.0) * 18.0;

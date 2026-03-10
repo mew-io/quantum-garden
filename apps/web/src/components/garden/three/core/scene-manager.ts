@@ -81,6 +81,12 @@ export interface PerformanceMetrics {
   drawCalls: number;
   /** Number of triangles rendered in the last frame */
   triangles: number;
+  /** Per-section timing breakdown (ms) for the last frame */
+  timing: {
+    updates: number;
+    composerRender: number;
+    overlays: number;
+  };
 }
 
 /**
@@ -123,6 +129,7 @@ export class SceneManager {
     frameTimeMs: 0,
     drawCalls: 0,
     triangles: 0,
+    timing: { updates: 0, composerRender: 0, overlays: 0 },
   };
 
   // Camera zoom state
@@ -724,6 +731,9 @@ export class SceneManager {
       this.frameTimes.shift();
     }
 
+    // --- Per-section timing ---
+    const t0 = performance.now();
+
     // Call all update callbacks
     for (const callback of this.updateCallbacks) {
       callback(deltaTime);
@@ -756,8 +766,12 @@ export class SceneManager {
       this.cloudStaticPass.uniforms["uTime"]!.value += deltaTime;
     }
 
+    const t1 = performance.now();
+
     // Render through post-processing pipeline
     this.composer!.render();
+
+    const t2 = performance.now();
 
     // Update performance metrics after render
     this.updatePerformanceMetrics();
@@ -766,6 +780,13 @@ export class SceneManager {
     for (const callback of this.postRenderCallbacks) {
       callback();
     }
+
+    const t3 = performance.now();
+    this._performanceMetrics.timing = {
+      updates: t1 - t0,
+      composerRender: t2 - t1,
+      overlays: t3 - t2,
+    };
   };
 
   /**

@@ -416,6 +416,7 @@ export function GardenScene() {
         frameTimeMs: metrics.frameTimeMs,
         drawCalls: metrics.drawCalls,
         triangles: metrics.triangles,
+        timing: metrics.timing,
       });
     }, 500);
 

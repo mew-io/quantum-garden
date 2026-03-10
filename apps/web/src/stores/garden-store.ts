@@ -45,6 +45,12 @@ export interface PerformanceStats {
   drawCalls: number;
   /** Number of triangles rendered in the last frame */
   triangles: number;
+  /** Per-section timing breakdown (ms) */
+  timing?: {
+    updates: number;
+    composerRender: number;
+    overlays: number;
+  };
 }
 
 /**

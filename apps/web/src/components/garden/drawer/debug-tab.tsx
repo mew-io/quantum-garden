@@ -142,6 +142,25 @@ export function DebugTab({ isActive }: DebugTabProps) {
                   <Stat label="Draws" value={performanceStats.drawCalls} color="cyan" />
                   <Stat label="Tris" value={performanceStats.triangles} color="purple" />
                 </div>
+                {performanceStats.timing && (
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Stat
+                      label="Updates"
+                      value={`${performanceStats.timing.updates.toFixed(1)}ms`}
+                      color="cyan"
+                    />
+                    <Stat
+                      label="Render"
+                      value={`${performanceStats.timing.composerRender.toFixed(1)}ms`}
+                      color="purple"
+                    />
+                    <Stat
+                      label="Overlays"
+                      value={`${performanceStats.timing.overlays.toFixed(1)}ms`}
+                      color="yellow"
+                    />
+                  </div>
+                )}
               </section>
             )}
 

@@ -7,6 +7,10 @@
  * - Observation feedback (celebration rings)
  *
  * These are rendered on top of the plant scene.
+ *
+ * Performance: The overlay scene is rendered to a cached render target.
+ * Only re-renders when content changes (dirty flag). On most frames,
+ * composites the cached texture with a single full-screen quad draw.
  */
 
 import * as THREE from "three";
@@ -37,10 +41,18 @@ export class OverlayManager {
   // Track whether plant overlays have content (set via setPlants)
   private hasPlantOverlayContent = false;
 
+  // Cached render target for overlay scene
+  private renderTarget: THREE.WebGLRenderTarget | null = null;
+  private compositeQuad: THREE.Mesh | null = null;
+  private compositeScene: THREE.Scene | null = null;
+  private compositeCamera: THREE.OrthographicCamera | null = null;
+  private dirty = true;
+  private lastCameraMatrix = new THREE.Matrix4();
+
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
 
-    // Create a separate scene for overlays (rendered after main scene)
+    // Create a separate scene for overlays (rendered to cache)
     this.overlayScene = new THREE.Scene();
 
     // Initialize overlay components
@@ -61,6 +73,13 @@ export class OverlayManager {
   }
 
   /**
+   * Mark overlay cache as dirty so it re-renders next frame.
+   */
+  markDirty(): void {
+    this.dirty = true;
+  }
+
+  /**
    * Update all overlays. Called each frame.
    * Uses hasActiveAnimations() checks to skip overlays with no work to do.
    */
@@ -68,26 +87,32 @@ export class OverlayManager {
     // Only update overlays that have active animations
     if (this.entanglement.hasActiveAnimations()) {
       this.entanglement.update(time);
+      this.dirty = true;
     }
 
     if (this.feedback.hasActiveAnimations()) {
       this.feedback.update(time);
+      this.dirty = true;
     }
 
     if (this.germination.hasActiveAnimations()) {
       this.germination.update(time);
+      this.dirty = true;
     }
 
     if (this.vectorPlants.hasActiveAnimations()) {
       this.vectorPlants.update(time);
+      this.dirty = true;
     }
 
     if (this.watercolorPlants.hasActiveAnimations()) {
       this.watercolorPlants.update(time);
+      this.dirty = true;
     }
 
     if (this.debug.hasActiveAnimations()) {
       this.debug.update(time, deltaTime);
+      this.dirty = true;
     }
   }
 
@@ -95,10 +120,12 @@ export class OverlayManager {
    * Set plants for the vector plant overlay and debug overlay.
    */
   setPlants(plants: Plant[]): void {
-    this.hasPlantOverlayContent = plants.length > 0;
     this.vectorPlants.setPlants(plants);
     this.watercolorPlants.setPlants(plants);
     this.debug.setPlants(plants);
+    this.hasPlantOverlayContent =
+      this.vectorPlants.hasActiveAnimations() || this.watercolorPlants.hasActiveAnimations();
+    this.dirty = true;
   }
 
   /**
@@ -106,6 +133,7 @@ export class OverlayManager {
    */
   setSelectedPlant(plantId: string | null): void {
     this.debug.setSelectedPlant(plantId);
+    this.dirty = true;
   }
 
   /**
@@ -113,6 +141,7 @@ export class OverlayManager {
    */
   triggerLocatePulse(): void {
     this.debug.triggerLocatePulse();
+    this.dirty = true;
   }
 
   /**
@@ -130,22 +159,80 @@ export class OverlayManager {
   }
 
   /**
+   * Ensure the render target and composite quad exist and match the renderer size.
+   */
+  private ensureRenderTarget(): void {
+    const renderer = this.sceneManager.renderer;
+    const size = renderer.getSize(new THREE.Vector2());
+    const pixelRatio = renderer.getPixelRatio();
+    const w = Math.floor(size.x * pixelRatio);
+    const h = Math.floor(size.y * pixelRatio);
+
+    if (this.renderTarget && this.renderTarget.width === w && this.renderTarget.height === h) {
+      return;
+    }
+
+    // Dispose old target
+    this.renderTarget?.dispose();
+
+    this.renderTarget = new THREE.WebGLRenderTarget(w, h, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat,
+      stencilBuffer: false,
+    });
+
+    // Create composite quad for blitting the cached texture
+    const mat = new THREE.MeshBasicMaterial({
+      map: this.renderTarget.texture,
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+    });
+
+    if (this.compositeQuad) {
+      (this.compositeQuad.material as THREE.Material).dispose();
+      this.compositeQuad.geometry.dispose();
+    }
+
+    this.compositeQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+    this.compositeScene = new THREE.Scene();
+    this.compositeScene.add(this.compositeQuad);
+    this.compositeCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    this.dirty = true;
+  }
+
+  /**
    * Render the overlay scene on top of the main scene.
-   * Should be called after the main scene render.
+   * Uses a cached render target — only re-renders the full overlay scene when dirty.
    */
   render(): void {
     const renderer = this.sceneManager.renderer;
     const camera = this.sceneManager.camera;
 
-    // Reset render target to canvas (in case EffectComposer left it on a framebuffer)
-    renderer.setRenderTarget(null);
+    this.ensureRenderTarget();
 
-    // Clear only the depth buffer so overlay renders on top of main scene
+    // Check if camera changed (zoom/pan) — invalidates cached overlay
+    if (!this.lastCameraMatrix.equals(camera.projectionMatrix)) {
+      this.lastCameraMatrix.copy(camera.projectionMatrix);
+      this.dirty = true;
+    }
+
+    // Only re-render overlay scene to cache when content changed
+    if (this.dirty) {
+      renderer.setRenderTarget(this.renderTarget);
+      renderer.setClearColor(0x000000, 0);
+      renderer.clear(true, true, false);
+      renderer.render(this.overlayScene, camera);
+      renderer.setRenderTarget(null);
+      this.dirty = false;
+    }
+
+    // Composite cached overlay texture on top of main scene (1 draw call)
     renderer.clearDepth();
-
-    // Don't clear color - render on top of existing content
     renderer.autoClear = false;
-    renderer.render(this.overlayScene, camera);
+    renderer.render(this.compositeScene!, this.compositeCamera!);
     renderer.autoClear = true;
   }
 
@@ -159,5 +246,11 @@ export class OverlayManager {
     this.vectorPlants.dispose();
     this.watercolorPlants.dispose();
     this.debug.dispose();
+
+    this.renderTarget?.dispose();
+    if (this.compositeQuad) {
+      (this.compositeQuad.material as THREE.Material).dispose();
+      this.compositeQuad.geometry.dispose();
+    }
   }
 }

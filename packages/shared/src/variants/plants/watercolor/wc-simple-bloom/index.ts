@@ -41,27 +41,33 @@ function buildWcSimpleBloomElements(ctx: WatercolorBuildContext): WatercolorElem
   const cx = 32;
   const cy = 22;
   const stemBottom = 52;
+  const stemFullTop = cy + 4;
 
-  // Stem
-  buildStem(
-    elements,
-    cx,
-    stemBottom,
-    cx,
-    cy + 4,
-    stemCurvature,
-    0.6 + openness * 0.3,
-    colors.stem,
-    0.55,
-    rng
-  );
+  // Stem — grows upward with openness so it doesn't appear as a static stick
+  const stemGrowth = Math.min(1, openness / 0.3);
+  if (stemGrowth > 0) {
+    const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
+    buildStem(
+      elements,
+      cx,
+      stemBottom,
+      cx,
+      stemTopY,
+      stemCurvature * stemGrowth,
+      0.6 + openness * 0.3,
+      colors.stem,
+      0.55 * Math.min(1, stemGrowth * 2),
+      rng
+    );
+  }
 
-  // Leaves
+  // Leaves — positioned along the grown portion of the stem
   const leafOpenness = Math.max(0, (openness - 0.1) / 0.9);
   for (let i = 0; i < leafCount; i++) {
     if (leafOpenness <= 0) break;
     const t = (i + 0.5) / leafCount;
-    const leafY = stemBottom - t * (stemBottom - cy - 4);
+    const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
+    const leafY = stemBottom - t * (stemBottom - stemTopY);
     const side = i % 2 === 0 ? 1 : -1;
     const angle = side * (0.4 + rng() * 0.6);
     const scale = (0.5 + rng() * 0.5) * leafOpenness;

@@ -140,21 +140,28 @@ function buildWcWildflowerSprayElements(ctx: WatercolorBuildContext): Watercolor
   const forkY = 30;
   const stemBottom = 54;
 
-  // === MAIN STEM (bottom to fork point) ===
-  buildStem(
-    elements,
-    forkX,
-    stemBottom,
-    forkX,
-    forkY,
-    0.1,
-    0.5 + openness * 0.25,
-    colors.stem,
-    0.55,
-    rng
-  );
+  // Stem growth factor — stem grows upward before branches appear
+  const stemGrowth = Math.min(1, openness / 0.3);
 
-  // === BRANCH STEMS (fork to each bloom) ===
+  // === MAIN STEM (bottom to fork point) — grows upward ===
+  if (stemGrowth > 0) {
+    const mainStemTopY = stemBottom + (forkY - stemBottom) * stemGrowth;
+    buildStem(
+      elements,
+      forkX,
+      stemBottom,
+      forkX,
+      mainStemTopY,
+      0.1 * stemGrowth,
+      0.5 + openness * 0.25,
+      colors.stem,
+      0.55 * Math.min(1, stemGrowth * 2),
+      rng
+    );
+  }
+
+  // === BRANCH STEMS (fork to each bloom) — only appear once main stem is grown ===
+  const branchGrowth = Math.max(0, (stemGrowth - 0.7) / 0.3); // branches start when main stem ~70%
   for (let i = 0; i < clampedCount; i++) {
     const [bCx, bCy] = positions[i]!;
 
@@ -162,28 +169,39 @@ function buildWcWildflowerSprayElements(ctx: WatercolorBuildContext): Watercolor
     const spreadCx = forkX + (bCx - forkX) * branchSpread;
     const spreadCy = forkY + (bCy - forkY) * branchSpread;
 
-    // Mid-control for a natural arc
-    const midX = (forkX + spreadCx) / 2 + (rng() - 0.5) * 3;
-    const midY = (forkY + spreadCy) / 2 - 2 - rng() * 2;
+    if (branchGrowth > 0) {
+      // Branch tip grows outward from fork point
+      const tipX = forkX + (spreadCx - forkX) * branchGrowth;
+      const tipY = forkY + (spreadCy - forkY) * branchGrowth;
 
-    elements.push({
-      shape: {
-        type: "stem",
-        points: [
-          [forkX, forkY],
-          [midX, midY],
-          [spreadCx + (rng() - 0.5) * 1.5, spreadCy + 2],
-          [spreadCx, spreadCy],
-        ],
-        thickness: 0.35 + openness * 0.15,
-      },
-      position: { x: 0, y: 0 },
-      rotation: 0,
-      scale: 1,
-      color: colors.stem,
-      opacity: 0.5,
-      zOffset: 0.2,
-    });
+      // Mid-control for a natural arc
+      const midX = (forkX + tipX) / 2 + (rng() - 0.5) * 3 * branchGrowth;
+      const midY = (forkY + tipY) / 2 - (2 + rng() * 2) * branchGrowth;
+
+      elements.push({
+        shape: {
+          type: "stem",
+          points: [
+            [forkX, forkY],
+            [midX, midY],
+            [tipX + (rng() - 0.5) * 1.5 * branchGrowth, tipY + 2 * branchGrowth],
+            [tipX, tipY],
+          ],
+          thickness: 0.35 + openness * 0.15,
+        },
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        scale: 1,
+        color: colors.stem,
+        opacity: 0.5 * Math.min(1, branchGrowth * 2),
+        zOffset: 0.2,
+      });
+    } else {
+      // Consume RNG to keep deterministic sequence
+      rng();
+      rng();
+      rng();
+    }
 
     // === BLOOM at branch tip ===
     // Vary petal count slightly per bloom
@@ -192,11 +210,12 @@ function buildWcWildflowerSprayElements(ctx: WatercolorBuildContext): Watercolor
   }
 
   // === LEAVES (2-3 small leaves near fork and along main stem) ===
+  const mainStemTopY = stemBottom + (forkY - stemBottom) * stemGrowth;
   const leafCount = 2 + Math.floor(rng() * 2); // 2-3 leaves
   for (let i = 0; i < leafCount; i++) {
     if (leafOpenness <= 0) break;
     const t = (i + 0.4) / (leafCount + 0.2);
-    const leafY = stemBottom - t * (stemBottom - forkY) * 0.85;
+    const leafY = stemBottom - t * (stemBottom - mainStemTopY) * 0.85;
     const side = i % 2 === 0 ? 1 : -1;
 
     buildLeaf(

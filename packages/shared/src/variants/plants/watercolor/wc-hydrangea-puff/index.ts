@@ -102,27 +102,33 @@ function buildWcHydrangeaPuffElements(ctx: WatercolorBuildContext): WatercolorEl
   const cx = 32;
   const cy = 22;
   const stemBottom = 56;
+  const stemFullTop = cy + 6;
 
-  // === STEM (thick, sturdy) ===
-  buildStem(
-    elements,
-    cx,
-    stemBottom,
-    cx,
-    cy + 6,
-    0.08,
-    0.8 + openness * 0.35,
-    colors.stem,
-    0.58,
-    rng
-  );
+  // === STEM (thick, sturdy) — grows upward with openness ===
+  const stemGrowth = Math.min(1, openness / 0.3);
+  if (stemGrowth > 0) {
+    const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
+    buildStem(
+      elements,
+      cx,
+      stemBottom,
+      cx,
+      stemTopY,
+      0.08 * stemGrowth,
+      0.8 + openness * 0.35,
+      colors.stem,
+      0.58 * Math.min(1, stemGrowth * 2),
+      rng
+    );
+  }
 
-  // === BROAD LEAVES (2-3 large hydrangea leaves) ===
+  // === BROAD LEAVES (2-3 large hydrangea leaves) — along grown stem ===
+  const stemTopY = stemBottom + (stemFullTop - stemBottom) * stemGrowth;
   const leafCount = 2 + Math.floor(rng() * 2);
   for (let i = 0; i < leafCount; i++) {
     if (leafOpenness <= 0) break;
     const t = (i + 0.4) / (leafCount + 0.2);
-    const leafY = stemBottom - t * (stemBottom - cy - 6) * 0.7;
+    const leafY = stemBottom - t * (stemBottom - stemTopY) * 0.7;
     const side = i % 2 === 0 ? 1 : -1;
 
     buildLeaf(

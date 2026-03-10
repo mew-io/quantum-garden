@@ -63,6 +63,7 @@ import { wcSunfireCosmos } from "./plants/watercolor/wc-sunfire-cosmos";
 import { wcLuminousTulip } from "./plants/watercolor/wc-luminous-tulip";
 import { wcEmberPeony } from "./plants/watercolor/wc-ember-peony";
 import { wcCelestialSakura } from "./plants/watercolor/wc-celestial-sakura";
+import { wcEtherealWisteria } from "./plants/watercolor/wc-ethereal-wisteria";
 
 // Watercolor — Geometric
 import { wcSacredMandala } from "./plants/watercolor/wc-sacred-mandala";
@@ -125,6 +126,7 @@ export const PLANT_VARIANTS: PlantVariant[] = [
   wcLuminousTulip,
   wcEmberPeony,
   wcCelestialSakura,
+  wcEtherealWisteria,
   // Geometric
   wcSacredMandala,
   wcCrystalLattice,

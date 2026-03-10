@@ -5,7 +5,7 @@
  * each implemented as a post-processing shader pass.
  *
  * Background types:
- * - Clouds Static: Pre-rendered cloud image with blur and sparkles
+ * - Clouds Static: Pre-rendered cloud image with sparkles
  * - Plain: Minimal solid color, no post-processing
  */
 
@@ -27,11 +27,10 @@ export const BACKGROUND_CONFIGS: Record<
 export const BACKGROUND_ORDER: BackgroundType[] = ["clouds-static", "plain"];
 
 /**
- * Static cloud background shader — image-based with Gaussian blur
+ * Static cloud background shader — composites cloud image with sparkles.
  *
- * Samples a pre-made cloud image texture stretched to fill the viewport,
- * applies a soft Gaussian blur for a dreamy feel, and composites onto
- * background pixels (preserving plants).
+ * Samples the cloud image directly (no per-frame blur), adds sparkles,
+ * and composites onto background pixels (preserving plants).
  */
 export const CloudStaticShader = {
   name: "CloudStaticShader",
@@ -39,7 +38,6 @@ export const CloudStaticShader = {
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
     tBackground: { value: null as THREE.Texture | null },
-    resolution: { value: new THREE.Vector2(1, 1) },
     aspectRatio: { value: 1.0 as number },
     uTime: { value: 0.0 as number },
   },
@@ -55,7 +53,6 @@ export const CloudStaticShader = {
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
     uniform sampler2D tBackground;
-    uniform vec2 resolution;
     uniform float aspectRatio;
     uniform float uTime;
 
@@ -80,6 +77,10 @@ export const CloudStaticShader = {
           vec2 neighbor = vec2(float(x), float(y));
           vec2 cellId = cell + neighbor;
 
+          // Early-exit: skip cells with no sparkle
+          float exists = step(0.7, hash(cellId + 31.5));
+          if (exists < 0.5) continue;
+
           vec2 starPos = vec2(hash(cellId), hash(cellId + 71.7)) - 0.5;
           vec2 diff = neighbor + starPos - local;
           float dist = length(diff);
@@ -103,10 +104,9 @@ export const CloudStaticShader = {
           twinkle = twinkle * 0.5 + 0.5;
           twinkle = pow(twinkle, 3.0);
 
-          float exists = step(0.7, hash(cellId + 31.5));
           float sizeVar = 0.5 + hash(cellId + 99.9) * 0.5;
 
-          brightness += star * twinkle * exists * sizeVar;
+          brightness += star * twinkle * sizeVar;
         }
       }
 
@@ -125,41 +125,27 @@ export const CloudStaticShader = {
         return;
       }
 
-      // ─── Gaussian blur (5x5 kernel) ───────────────────────────
-      vec2 texel = 1.0 / resolution;
-      float blurRadius = 4.0;
-
-      vec3 blurred = vec3(0.0);
-      float totalWeight = 0.0;
-
-      for (int y = -2; y <= 2; y++) {
-        for (int x = -2; x <= 2; x++) {
-          vec2 offset = vec2(float(x), float(y)) * texel * blurRadius;
-          float weight = exp(-0.5 * float(x * x + y * y) / 2.0);
-          blurred += texture2D(tBackground, vUv + offset).rgb * weight;
-          totalWeight += weight;
-        }
-      }
-      blurred /= totalWeight;
+      // ─── Sample background image directly ─────────────────────
+      vec3 bg = texture2D(tBackground, vUv).rgb;
 
       // ─── Sparkles ────────────────────────────────────────────
       vec2 sparkleUv = vUv * vec2(aspectRatio, 1.0) * 18.0;
       float sparkleBrightness = sparkle(sparkleUv, uTime);
 
       // Use image luminance to determine cloud density for masking
-      float bgLum = dot(blurred, vec3(0.299, 0.587, 0.114));
+      float bgLum = dot(bg, vec3(0.299, 0.587, 0.114));
       float sparkleMask = smoothstep(0.2, 0.8, vUv.y) * 0.7 + 0.3;
       sparkleMask *= smoothstep(0.82, 0.92, bgLum); // brighter in clearer sky areas
 
       vec3 sparkleColor = vec3(1.0, 0.97, 0.95);
-      blurred += sparkleColor * sparkleBrightness * sparkleMask * 0.6;
+      bg += sparkleColor * sparkleBrightness * sparkleMask * 0.6;
 
       // Second sparkle layer (larger, slower)
       float sparkleLg = sparkle(sparkleUv * 0.4 + vec2(100.0, 50.0), uTime * 0.7);
-      blurred += sparkleColor * sparkleLg * sparkleMask * 0.3;
+      bg += sparkleColor * sparkleLg * sparkleMask * 0.3;
 
       // ─── Compositing ─────────────────────────────────────────
-      vec3 result = mix(scene.rgb, blurred, bgAmount);
+      vec3 result = mix(scene.rgb, bg, bgAmount);
 
       gl_FragColor = vec4(result, scene.a);
     }

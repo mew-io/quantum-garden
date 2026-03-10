@@ -271,11 +271,10 @@ export class SceneManager {
       this.composer.addPass(this.bloomPass);
     }
 
-    // Static cloud background pass (image-based with blur)
+    // Static cloud background pass (image + sparkles, no per-frame blur)
     this.cloudStaticPass = new ShaderPass(CloudStaticShader);
     const bgTexture = loadCloudBackgroundTexture();
     this.cloudStaticPass.uniforms["tBackground"]!.value = bgTexture;
-    (this.cloudStaticPass.uniforms["resolution"]!.value as THREE.Vector2).set(width, height);
     this.cloudStaticPass.uniforms["aspectRatio"]!.value = width / height;
     this.cloudStaticPass.enabled = this.currentBackground === "clouds-static";
     this.composer.addPass(this.cloudStaticPass);
@@ -811,7 +810,6 @@ export class SceneManager {
       this.bloomPass.resolution.set(Math.floor(vw / 2), Math.floor(vh / 2));
     }
     if (this.cloudStaticPass) {
-      (this.cloudStaticPass.uniforms["resolution"]!.value as THREE.Vector2).set(vw, vh);
       this.cloudStaticPass.uniforms["aspectRatio"]!.value = vw / vh;
     }
 

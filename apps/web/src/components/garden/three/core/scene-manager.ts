@@ -156,6 +156,12 @@ export class SceneManager {
     startPan: { x: number; y: number };
   } | null = null;
 
+  // Touch tap detection state (tracks single-finger taps for plant selection)
+  private touchTapState: {
+    startPos: { x: number; y: number };
+    wasDragged: boolean;
+  } | null = null;
+
   /** Whether the last mouse interaction was a drag (moved > threshold) */
   private _wasDragging = false;
   private static readonly DRAG_THRESHOLD = 5; // pixels
@@ -464,21 +470,41 @@ export class SceneManager {
         startUserZoom: this.userZoom,
         center: { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 },
       };
-      // Cancel any active single-finger pan
+      // Cancel any active single-finger pan and tap detection
       this.touchState = null;
-    } else if (e.touches.length === 1 && this.isPanningEnabled) {
-      // Start single-finger pan
+      this.touchTapState = null;
+    } else if (e.touches.length === 1) {
       const touch = e.touches[0]!;
-      this.touchState = {
+
+      // Always track for tap detection (plant selection on mobile)
+      this.touchTapState = {
         startPos: { x: touch.clientX, y: touch.clientY },
-        startPan: { ...this.panOffset },
+        wasDragged: false,
       };
+
+      // Start single-finger pan (only when zoomed in)
+      if (this.isPanningEnabled) {
+        this.touchState = {
+          startPos: { x: touch.clientX, y: touch.clientY },
+          startPan: { ...this.panOffset },
+        };
+      }
       this.pinchState = null;
     }
   };
 
   private handleTouchMove = (e: TouchEvent): void => {
     e.preventDefault();
+
+    // Track movement for tap detection
+    if (e.touches.length === 1 && this.touchTapState && !this.touchTapState.wasDragged) {
+      const touch = e.touches[0]!;
+      const dx = touch.clientX - this.touchTapState.startPos.x;
+      const dy = touch.clientY - this.touchTapState.startPos.y;
+      if (Math.sqrt(dx * dx + dy * dy) > SceneManager.DRAG_THRESHOLD) {
+        this.touchTapState.wasDragged = true;
+      }
+    }
 
     if (e.touches.length === 2 && this.pinchState) {
       // Pinch-to-zoom
@@ -529,6 +555,7 @@ export class SceneManager {
       // Start a new pan from the remaining finger
       const touch = e.touches[0]!;
       this.pinchState = null;
+      this.touchTapState = null; // pinch cancels tap
       if (this.isPanningEnabled) {
         this.touchState = {
           startPos: { x: touch.clientX, y: touch.clientY },
@@ -536,9 +563,21 @@ export class SceneManager {
         };
       }
     } else if (e.touches.length === 0) {
-      // All fingers lifted
+      // All fingers lifted — check for tap (plant selection)
+      if (this.touchTapState && !this.touchTapState.wasDragged) {
+        const { startPos } = this.touchTapState;
+        // Dispatch a synthetic click so the existing click handler picks it up
+        const syntheticClick = new MouseEvent("click", {
+          clientX: startPos.x,
+          clientY: startPos.y,
+          bubbles: true,
+        });
+        this.renderer.domElement.dispatchEvent(syntheticClick);
+      }
+
       this.touchState = null;
       this.pinchState = null;
+      this.touchTapState = null;
     }
   };
 

@@ -51,7 +51,7 @@ function PanelContent({
     return (
       <div
         className={`
-          w-[320px] rounded-xl garden-panel
+          w-full sm:w-[320px] rounded-xl garden-panel
           p-4
           ${animationClasses}
         `}
@@ -82,7 +82,7 @@ function PanelContent({
   return (
     <div
       className={`
-        w-[320px] rounded-xl garden-panel
+        w-full sm:w-[320px] rounded-xl garden-panel
         p-4
         ${animationClasses}
       `}
@@ -293,7 +293,7 @@ export function EntanglementDetailPanel() {
   return (
     <div
       className="
-        pointer-events-none fixed bottom-[var(--inset-bottom)] right-[var(--inset-right)] z-40
+        pointer-events-none fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] sm:left-auto right-[var(--inset-right)] z-40
         flex flex-col items-end
       "
     >

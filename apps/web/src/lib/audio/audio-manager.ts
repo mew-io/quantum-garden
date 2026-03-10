@@ -17,7 +17,7 @@ const AUDIO_PREF_KEYS = {
 
 /** Default audio settings */
 const DEFAULTS = {
-  ENABLED: true,
+  ENABLED: false,
   VOLUME: 0.7, // 70% volume
 } as const;
 
@@ -88,6 +88,7 @@ class AudioManager {
     this.ambientLoop = new Howl({
       src: [AMBIENT.PATH],
       volume: this._volume * AMBIENT.VOLUME_MULTIPLIER,
+      html5: true,
       preload: true,
       onloaderror: (_id, error) => {
         console.warn("[Audio] Failed to load ambient sound:", error);

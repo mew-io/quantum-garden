@@ -97,7 +97,6 @@ export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: De
     }));
   };
 
-
   const observedCount = plants?.filter((p: Plant) => p.observed).length ?? 0;
   const germinatedCount = plants?.filter((p: Plant) => p.germinatedAt !== null).length ?? 0;
   const dormantCount = plants?.filter((p: Plant) => p.germinatedAt === null).length ?? 0;

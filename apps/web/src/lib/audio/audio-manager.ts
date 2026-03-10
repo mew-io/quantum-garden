@@ -41,7 +41,7 @@ const AMBIENT = {
   /** Fade duration in milliseconds */
   FADE_DURATION: 2000, // 2 second fade
   /** Whether the loop is ready (file exists) */
-  READY: false, // Set to true when ambient-loop.mp3 is added
+  READY: true,
 } as const;
 
 /**
@@ -101,14 +101,8 @@ class AudioManager {
     this.notifyListeners();
 
     // Auto-start ambient if sound is enabled
-    if (this._isEnabled) {
-      // Start procedural ambient drone
-      webAudioGenerator.startAmbient();
-
-      // Also start file-based ambient if available
-      if (AMBIENT.READY) {
-        this.playAmbient();
-      }
+    if (this._isEnabled && AMBIENT.READY) {
+      this.playAmbient();
     }
   }
 
@@ -203,12 +197,8 @@ class AudioManager {
     if (enabled && !this._isInitialized) {
       this.init();
     } else if (enabled && this._isInitialized) {
-      // Start ambient when enabled
-      webAudioGenerator.startAmbient();
       this.playAmbient();
     } else if (!enabled) {
-      // Stop ambient when disabled
-      webAudioGenerator.stopAmbient();
       this.stopAmbient();
     }
   }

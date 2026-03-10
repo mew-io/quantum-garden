@@ -28,7 +28,7 @@ const AUDIO_PREF_KEYS = {
 
 /** Default audio settings */
 const DEFAULTS = {
-  ENABLED: false, // Start muted
+  ENABLED: true,
   VOLUME: 0.7, // 70% volume
 } as const;
 

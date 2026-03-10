@@ -8,7 +8,7 @@
  * - Germination: Bright, ascending chimes (pentatonic scale)
  * - Observation: Warm tones mapped to plant palette color
  * - Entanglement: Harmonic intervals (5ths) suggesting connection
- * - Ambient: Deep, slowly modulating drone
+ * - Ambient: Handled by file-based MP3 loop (see audio-manager.ts)
  */
 
 /** Pentatonic scale intervals (semitones from root) */
@@ -63,20 +63,6 @@ const PARAMS = {
     /** Base octave */
     OCTAVE: 4,
   },
-
-  /** Ambient drone settings */
-  AMBIENT: {
-    /** Base frequency (low bass) */
-    BASE_FREQ: 55, // A1
-    /** LFO modulation speed (Hz) */
-    LFO_SPEED: 0.1,
-    /** LFO modulation depth */
-    LFO_DEPTH: 5,
-    /** Filter cutoff frequency */
-    FILTER_FREQ: 200,
-    /** Volume relative to master */
-    VOLUME: 0.15,
-  },
 };
 
 /**
@@ -89,12 +75,6 @@ export class WebAudioGenerator {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private isEnabled: boolean = false;
-
-  // Ambient drone nodes (persistent)
-  private ambientOsc: OscillatorNode | null = null;
-  private ambientLfo: OscillatorNode | null = null;
-  private ambientGain: GainNode | null = null;
-  private ambientFilter: BiquadFilterNode | null = null;
 
   /**
    * Initialize the audio context.
@@ -116,10 +96,6 @@ export class WebAudioGenerator {
    */
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
-
-    if (!enabled) {
-      this.stopAmbient();
-    }
   }
 
   /**
@@ -338,91 +314,9 @@ export class WebAudioGenerator {
   }
 
   /**
-   * Start the ambient drone.
-   * Creates a deep, slowly modulating background tone.
-   */
-  startAmbient(): void {
-    if (!this.ctx || !this.masterGain || !this.isEnabled) return;
-    if (this.ambientOsc) return; // Already playing
-
-    const { BASE_FREQ, LFO_SPEED, LFO_DEPTH, FILTER_FREQ, VOLUME } = PARAMS.AMBIENT;
-
-    // Create base oscillator
-    this.ambientOsc = this.ctx.createOscillator();
-    this.ambientOsc.type = "sine";
-    this.ambientOsc.frequency.value = BASE_FREQ;
-
-    // Create LFO for subtle pitch modulation
-    this.ambientLfo = this.ctx.createOscillator();
-    this.ambientLfo.type = "sine";
-    this.ambientLfo.frequency.value = LFO_SPEED;
-
-    const lfoGain = this.ctx.createGain();
-    lfoGain.gain.value = LFO_DEPTH;
-
-    this.ambientLfo.connect(lfoGain);
-    lfoGain.connect(this.ambientOsc.frequency);
-
-    // Create low-pass filter for warmth
-    this.ambientFilter = this.ctx.createBiquadFilter();
-    this.ambientFilter.type = "lowpass";
-    this.ambientFilter.frequency.value = FILTER_FREQ;
-    this.ambientFilter.Q.value = 1;
-
-    // Create gain with fade in
-    this.ambientGain = this.ctx.createGain();
-    this.ambientGain.gain.setValueAtTime(0, this.ctx.currentTime);
-    this.ambientGain.gain.linearRampToValueAtTime(VOLUME, this.ctx.currentTime + 2);
-
-    // Connect chain
-    this.ambientOsc.connect(this.ambientFilter);
-    this.ambientFilter.connect(this.ambientGain);
-    this.ambientGain.connect(this.masterGain);
-
-    // Start
-    this.ambientOsc.start();
-    this.ambientLfo.start();
-  }
-
-  /**
-   * Stop the ambient drone with fade out.
-   */
-  stopAmbient(): void {
-    if (!this.ctx || !this.ambientOsc || !this.ambientGain) return;
-
-    const now = this.ctx.currentTime;
-
-    // Fade out
-    this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
-    this.ambientGain.gain.linearRampToValueAtTime(0, now + 2);
-
-    // Clean up after fade
-    const osc = this.ambientOsc;
-    const lfo = this.ambientLfo;
-    const filter = this.ambientFilter;
-    const gain = this.ambientGain;
-
-    setTimeout(() => {
-      osc?.stop();
-      lfo?.stop();
-      osc?.disconnect();
-      lfo?.disconnect();
-      filter?.disconnect();
-      gain?.disconnect();
-    }, 2100);
-
-    this.ambientOsc = null;
-    this.ambientLfo = null;
-    this.ambientFilter = null;
-    this.ambientGain = null;
-  }
-
-  /**
    * Dispose of all resources.
    */
   dispose(): void {
-    this.stopAmbient();
-
     if (this.ctx) {
       this.ctx.close();
       this.ctx = null;

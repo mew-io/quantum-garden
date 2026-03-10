@@ -21,16 +21,12 @@ const DEFAULTS = {
   VOLUME: 0.7, // 70% volume
 } as const;
 
-/** Ambient audio settings */
+/** Static ambient MP3 settings */
 const AMBIENT = {
-  /** Path to ambient loop audio file */
+  /** Path to ambient audio file */
   PATH: "/sounds/ambient-loop.mp3",
   /** Volume multiplier for ambient (relative to master) */
   VOLUME_MULTIPLIER: 0.25, // 25% of master volume - very subtle
-  /** Fade duration in milliseconds */
-  FADE_DURATION: 2000, // 2 second fade
-  /** Whether the loop is ready (file exists) */
-  READY: true,
 } as const;
 
 /**
@@ -74,34 +70,27 @@ class AudioManager {
     // Unlock audio context (required by some browsers)
     Howler.autoUnlock = true;
 
-    // Load ambient loop if available
-    if (AMBIENT.READY) {
-      this.loadAmbientLoop();
-    }
-
     this._isInitialized = true;
     this.notifyListeners();
 
     // Auto-start ambient if sound is enabled
-    if (this._isEnabled && AMBIENT.READY) {
+    if (this._isEnabled) {
       this.playAmbient();
     }
   }
 
   /**
-   * Load the ambient loop audio.
+   * Load the ambient MP3.
    */
-  private loadAmbientLoop(): void {
+  private loadAmbientSound(): void {
     if (this.ambientLoop) return; // Already loaded
 
     this.ambientLoop = new Howl({
       src: [AMBIENT.PATH],
-      loop: true,
-      volume: 0, // Start silent, will fade in
-      html5: true, // Use HTML5 Audio for better streaming of long files
+      volume: this._volume * AMBIENT.VOLUME_MULTIPLIER,
       preload: true,
       onloaderror: (_id, error) => {
-        console.warn("[Audio] Failed to load ambient loop:", error);
+        console.warn("[Audio] Failed to load ambient sound:", error);
         this.ambientLoop = null;
       },
     });
@@ -208,53 +197,35 @@ class AudioManager {
   }
 
   /**
-   * Start playing the ambient loop with fade in.
+   * Play the ambient MP3.
    * No-op if sound is disabled or not initialized.
    */
   playAmbient(): void {
     if (!this._isEnabled || !this._isInitialized) return;
-    if (!AMBIENT.READY) {
-      console.debug("[Audio] Ambient loop not available (AMBIENT.READY = false)");
-      return;
-    }
 
     // Load if not already loaded
     if (!this.ambientLoop) {
-      this.loadAmbientLoop();
+      this.loadAmbientSound();
     }
 
     if (!this.ambientLoop) return;
 
-    // Calculate target volume (ambient is quieter than effects)
-    const targetVolume = this._volume * AMBIENT.VOLUME_MULTIPLIER;
-
-    // If already playing, just adjust volume
+    // If already playing, just update volume
     if (this.ambientLoop.playing()) {
-      this.ambientLoop.fade(this.ambientLoop.volume(), targetVolume, AMBIENT.FADE_DURATION);
+      this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
       return;
     }
 
-    // Start playing with fade in
-    this.ambientLoop.volume(0);
+    this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
     this.ambientLoop.play();
-    this.ambientLoop.fade(0, targetVolume, AMBIENT.FADE_DURATION);
   }
 
   /**
-   * Stop the ambient loop with fade out.
+   * Stop the ambient MP3.
    */
   stopAmbient(): void {
     if (!this.ambientLoop || !this.ambientLoop.playing()) return;
-
-    const currentVolume = this.ambientLoop.volume();
-    this.ambientLoop.fade(currentVolume, 0, AMBIENT.FADE_DURATION);
-
-    // Stop after fade completes
-    setTimeout(() => {
-      if (this.ambientLoop) {
-        this.ambientLoop.stop();
-      }
-    }, AMBIENT.FADE_DURATION);
+    this.ambientLoop.stop();
   }
 
   /**
@@ -262,9 +233,7 @@ class AudioManager {
    */
   private updateAmbientVolume(): void {
     if (!this.ambientLoop || !this.ambientLoop.playing()) return;
-
-    const targetVolume = this._volume * AMBIENT.VOLUME_MULTIPLIER;
-    this.ambientLoop.fade(this.ambientLoop.volume(), targetVolume, 300); // Quick fade
+    this.ambientLoop.volume(this._volume * AMBIENT.VOLUME_MULTIPLIER);
   }
 
   // ============ Subscription ============

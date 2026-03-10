@@ -148,6 +148,7 @@ const fragmentShader = /* glsl */ `
   uniform sampler2D u_patternAtlas;
   uniform float u_time;
   uniform int u_superpositionMode; // 0 = stacked ghosts (default), 1 = flickering
+  uniform int u_qualityLevel; // 0=ultra, 1=high, 2=medium, 3=low
 
   // Varyings from vertex shader
   varying vec2 v_uv;
@@ -217,25 +218,21 @@ const fragmentShader = /* glsl */ `
 
     // Apply color transition with saturation fade if transitioning
     if (v_colorTransition > 0.0 && v_colorTransition < 1.0) {
-      // Apply smooth easing to transition progress
       float easedTransition = easeInOutCubic(v_colorTransition);
 
-      // Convert to HSV for saturation control
-      vec3 hsv = rgb2hsv(color);
-
-      // Desaturate in first half (0-0.5), saturate in second half (0.5-1.0)
-      // Creates a smooth fade through desaturated colors
-      float saturationMultiplier;
-      if (easedTransition < 0.5) {
-        // Fade out saturation: 1.0 -> 0.3
-        saturationMultiplier = mix(1.0, 0.3, easedTransition * 2.0);
-      } else {
-        // Fade in saturation: 0.3 -> 1.0
-        saturationMultiplier = mix(0.3, 1.0, (easedTransition - 0.5) * 2.0);
+      if (u_qualityLevel < 2) {
+        // Full quality: HSV saturation fade
+        vec3 hsv = rgb2hsv(color);
+        float saturationMultiplier;
+        if (easedTransition < 0.5) {
+          saturationMultiplier = mix(1.0, 0.3, easedTransition * 2.0);
+        } else {
+          saturationMultiplier = mix(0.3, 1.0, (easedTransition - 0.5) * 2.0);
+        }
+        hsv.y *= saturationMultiplier;
+        color = hsv2rgb(hsv);
       }
-
-      hsv.y *= saturationMultiplier;
-      color = hsv2rgb(hsv);
+      // Medium/Low: skip HSV conversion, just use RGB color as-is
     }
 
     // Calculate final opacity based on visual state
@@ -243,71 +240,71 @@ const fragmentShader = /* glsl */ `
 
     // Enhanced superposition visualization
     if (v_visualState < 0.5) {
-      // Iridescent hue shift for all superposition modes
-      // Creates a subtle rainbow shimmer effect on quantum-uncertain plants
-      vec3 hsv = rgb2hsv(color);
-      float hueShift = sin(u_time * 0.5 + v_shimmerPhase) * 0.06; // ±6% hue rotation
-      hsv.x = fract(hsv.x + hueShift); // Wrap hue around 0-1
-      // Slightly boost saturation for more visible iridescence
-      hsv.y = min(1.0, hsv.y * 1.15);
-      color = hsv2rgb(hsv);
+      // Iridescent hue shift (skip at medium/low quality)
+      if (u_qualityLevel < 2) {
+        vec3 hsv = rgb2hsv(color);
+        float hueShift = sin(u_time * 0.5 + v_shimmerPhase) * 0.06;
+        hsv.x = fract(hsv.x + hueShift);
+        hsv.y = min(1.0, hsv.y * 1.15);
+        color = hsv2rgb(hsv);
+      }
 
       if (u_superpositionMode == 1) {
-        // MODE 1: Flickering - rapid opacity oscillation
-        // Multiple frequency shimmer creates unstable, flickering appearance
+        // MODE 1: Flickering
         float shimmer1 = sin(u_time * 3.0 + v_shimmerPhase) * 0.15;
         float shimmer2 = sin(u_time * 7.0 + v_shimmerPhase * 2.0) * 0.08;
         float shimmer3 = sin(u_time * 13.0 + v_shimmerPhase * 3.0) * 0.05;
-
-        // Occasional "flash" effect (quantum fluctuation)
         float flash = step(0.97, fract(sin(u_time * 0.5 + v_shimmerPhase) * 43758.5453));
 
         finalOpacity = v_opacity + shimmer1 + shimmer2 + shimmer3 + flash * 0.3;
         finalOpacity = clamp(finalOpacity, 0.1, 0.6);
 
-        // If pixel is empty, discard
         if (patternValue < 0.5) {
           discard;
         }
       } else {
-        // MODE 0: Stacked ghosts - sample with offsets for blur/uncertainty effect
-        // Create ghost layers at different time-varying offsets
-        float angle1 = u_time * 0.5 + v_shimmerPhase;
-        float angle2 = u_time * 0.5 + v_shimmerPhase + 2.094; // +120 degrees
-        float angle3 = u_time * 0.5 + v_shimmerPhase + 4.189; // +240 degrees
+        // MODE 0: Stacked ghosts
+        if (u_qualityLevel < 2) {
+          // Full quality: 3 ghost texture samples
+          float angle1 = u_time * 0.5 + v_shimmerPhase;
+          float angle2 = u_time * 0.5 + v_shimmerPhase + 2.094;
+          float angle3 = u_time * 0.5 + v_shimmerPhase + 4.189;
 
-        float ghostRadius = 0.03; // Subtle offset
-        vec2 offset1 = vec2(cos(angle1), sin(angle1)) * ghostRadius;
-        vec2 offset2 = vec2(cos(angle2), sin(angle2)) * ghostRadius;
-        vec2 offset3 = vec2(cos(angle3), sin(angle3)) * ghostRadius;
+          float ghostRadius = 0.03;
+          vec2 offset1 = vec2(cos(angle1), sin(angle1)) * ghostRadius;
+          vec2 offset2 = vec2(cos(angle2), sin(angle2)) * ghostRadius;
+          vec2 offset3 = vec2(cos(angle3), sin(angle3)) * ghostRadius;
 
-        // Sample pattern at primary position and ghost offsets
-        float ghost1 = samplePatternOffset(v_uv, offset1);
-        float ghost2 = samplePatternOffset(v_uv, offset2);
-        float ghost3 = samplePatternOffset(v_uv, offset3);
+          float ghost1 = samplePatternOffset(v_uv, offset1);
+          float ghost2 = samplePatternOffset(v_uv, offset2);
+          float ghost3 = samplePatternOffset(v_uv, offset3);
 
-        // Combine: primary pattern + faint ghost layers
-        float combinedPattern = patternValue * 0.5 + ghost1 * 0.2 + ghost2 * 0.15 + ghost3 * 0.15;
+          float combinedPattern = patternValue * 0.5 + ghost1 * 0.2 + ghost2 * 0.15 + ghost3 * 0.15;
 
-        // Basic shimmer
-        float shimmer = sin(u_time * 1.5 + v_shimmerPhase) * 0.08;
-        finalOpacity = v_opacity + shimmer;
-        finalOpacity = max(0.15, finalOpacity);
+          float shimmer = sin(u_time * 1.5 + v_shimmerPhase) * 0.08;
+          finalOpacity = v_opacity + shimmer;
+          finalOpacity = max(0.15, finalOpacity);
 
-        // Discard if all samples are empty
-        if (combinedPattern < 0.3) {
-          discard;
+          if (combinedPattern < 0.3) {
+            discard;
+          }
+          finalOpacity *= min(1.0, combinedPattern * 1.2);
+        } else {
+          // Medium/Low: simplified — primary pattern + shimmer only (no ghost samples)
+          float shimmer = sin(u_time * 1.5 + v_shimmerPhase) * 0.08;
+          finalOpacity = v_opacity + shimmer;
+          finalOpacity = max(0.15, finalOpacity);
+
+          if (patternValue < 0.5) {
+            discard;
+          }
         }
-
-        // Adjust opacity based on combined pattern strength
-        finalOpacity *= min(1.0, combinedPattern * 1.2);
       }
     } else if (v_transitionProgress > 0.0 && v_transitionProgress < 1.0) {
       // During transition: smooth fade
       float eased = 1.0 - pow(1.0 - v_transitionProgress, 3.0);
       finalOpacity *= eased;
 
-      // If pixel is empty, discard
       if (patternValue < 0.5) {
         discard;
       }
@@ -320,22 +317,22 @@ const fragmentShader = /* glsl */ `
 
     // Apply lifecycle opacity variance for old plants
     if (v_lifecycleProgress > 0.7) {
-      // Old plants: subtle opacity variation (slower than shimmer)
       float opacityVariance = sin(u_time * 0.8 + v_shimmerPhase) * 0.05;
       finalOpacity = clamp(finalOpacity + opacityVariance, 0.15, 1.0);
     }
 
     // Atmospheric perspective: distant plants fade toward a hazy tint
-    // and lose saturation, simulating aerial haze
-    float atmosphereT = 1.0 - v_depthT; // 0 = near, 1 = far
-    float atmosphereStrength = atmosphereT * atmosphereT * 0.35; // quadratic falloff, max 35%
-    vec3 hazeColor = vec3(0.75, 0.78, 0.82); // soft blue-grey haze
+    float atmosphereT = 1.0 - v_depthT;
+    float atmosphereStrength = atmosphereT * atmosphereT * 0.35;
+    vec3 hazeColor = vec3(0.75, 0.78, 0.82);
     color = mix(color, hazeColor, atmosphereStrength);
 
-    // Desaturate distant plants slightly
-    vec3 atmosHSV = rgb2hsv(color);
-    atmosHSV.y *= mix(0.55, 1.0, v_depthT); // far plants lose ~45% saturation
-    color = hsv2rgb(atmosHSV);
+    // Desaturate distant plants (skip HSV at low quality)
+    if (u_qualityLevel < 3) {
+      vec3 atmosHSV = rgb2hsv(color);
+      atmosHSV.y *= mix(0.55, 1.0, v_depthT);
+      color = hsv2rgb(atmosHSV);
+    }
 
     gl_FragColor = vec4(color, finalOpacity);
 
@@ -369,6 +366,7 @@ export function createPlantMaterial(atlasTexture: THREE.Texture): THREE.ShaderMa
       u_patternSize: { value: PATTERN_SIZE },
       u_globalPlantScale: { value: 1.5 },
       u_superpositionMode: { value: 0 }, // 0 = stacked ghosts (default)
+      u_qualityLevel: { value: 0 }, // 0=ultra, 1=high, 2=medium, 3=low
       u_gardenHeight: { value: 2160 },
     },
     transparent: true,

@@ -53,6 +53,9 @@ export class QuantumParticleOverlay {
   private instanceColors: Float32Array;
   private instanceOpacities: Float32Array;
 
+  /** Effective max particles (set by adaptive quality, capped at MAX_PARTICLES) */
+  private activeMaxParticles: number = MAX_PARTICLES;
+
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "quantum-particles";
@@ -144,7 +147,7 @@ export class QuantumParticleOverlay {
       };
 
       for (let i = 0; i < params.count; i++) {
-        if (this.particles.length >= MAX_PARTICLES) break;
+        if (this.particles.length >= this.activeMaxParticles) break;
         this.particles.push({
           plantX: plant.position.x,
           plantY: plant.position.y,
@@ -157,7 +160,7 @@ export class QuantumParticleOverlay {
           observed: plant.observed,
         });
       }
-      if (this.particles.length >= MAX_PARTICLES) break;
+      if (this.particles.length >= this.activeMaxParticles) break;
     }
 
     if (this.mesh) {
@@ -237,6 +240,20 @@ export class QuantumParticleOverlay {
     opacityAttr.needsUpdate = true;
 
     return true;
+  }
+
+  /**
+   * Set maximum active particles for adaptive quality.
+   * Excess particles are trimmed; mesh.count is capped.
+   */
+  setMaxParticles(count: number): void {
+    this.activeMaxParticles = Math.min(count, MAX_PARTICLES);
+    if (this.particles.length > this.activeMaxParticles) {
+      this.particles.length = this.activeMaxParticles;
+      if (this.mesh) {
+        this.mesh.count = this.particles.length;
+      }
+    }
   }
 
   hasActiveAnimations(): boolean {

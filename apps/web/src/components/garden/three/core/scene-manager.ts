@@ -883,6 +883,35 @@ export class SceneManager {
   }
 
   /**
+   * Set the renderer pixel ratio for adaptive quality.
+   * Updates renderer, composer, and bloom pass sizes.
+   */
+  setPixelRatio(ratio: number): void {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    this.renderer.setPixelRatio(ratio);
+    this.renderer.setSize(vw, vh);
+
+    if (this.composer) {
+      this.composer.setSize(vw, vh);
+    }
+    if (this.bloomPass) {
+      this.bloomPass.resolution.set(Math.floor(vw / 2), Math.floor(vh / 2));
+    }
+  }
+
+  /**
+   * Set the sparkle quality level on the cloud static shader.
+   * 0 = ultra/high (3x3 neighbors), 1 = high, 2 = medium (center only), 3 = low (disabled)
+   */
+  setSparkleQuality(qualityLevel: number): void {
+    if (this.cloudStaticPass) {
+      this.cloudStaticPass.uniforms["u_qualityLevel"]!.value = qualityLevel;
+    }
+  }
+
+  /**
    * Switch the active background type.
    */
   setBackground(type: BackgroundType): void {

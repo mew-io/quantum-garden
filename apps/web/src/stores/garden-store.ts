@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { UI_TIMING, type Plant, type QuantumEvent } from "@quantum-garden/shared";
+import type { QualityTier } from "@/components/garden/three/core/adaptive-quality";
 
 /**
  * Notification type determines visual styling.
@@ -96,6 +97,12 @@ interface GardenState {
   performanceStats: PerformanceStats | null;
   setPerformanceStats: (stats: PerformanceStats | null) => void;
 
+  // Adaptive quality info
+  qualityInfo: { tier: QualityTier; pixelRatio: number; bloomEnabled: boolean } | null;
+  setQualityInfo: (
+    info: { tier: QualityTier; pixelRatio: number; bloomEnabled: boolean } | null
+  ) => void;
+
   // Entanglement detail panel
   entanglementRevealedGroupId: string | null;
   setEntanglementRevealed: (groupId: string | null) => void;
@@ -167,6 +174,10 @@ export const useGardenStore = create<GardenState>((set) => ({
   // Performance monitoring
   performanceStats: null,
   setPerformanceStats: (stats) => set({ performanceStats: stats }),
+
+  // Adaptive quality info
+  qualityInfo: null,
+  setQualityInfo: (info) => set({ qualityInfo: info }),
 
   // Entanglement detail panel
   entanglementRevealedGroupId: null,

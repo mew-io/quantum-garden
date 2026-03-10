@@ -40,6 +40,7 @@ export const CloudStaticShader = {
     tBackground: { value: null as THREE.Texture | null },
     aspectRatio: { value: 1.0 as number },
     uTime: { value: 0.0 as number },
+    u_qualityLevel: { value: 0 as number },
   },
 
   vertexShader: /* glsl */ `
@@ -55,6 +56,7 @@ export const CloudStaticShader = {
     uniform sampler2D tBackground;
     uniform float aspectRatio;
     uniform float uTime;
+    uniform int u_qualityLevel;
 
     varying vec2 vUv;
 
@@ -67,6 +69,9 @@ export const CloudStaticShader = {
 
     // Sparkle with cross/starburst spikes
     float sparkle(vec2 uv, float time) {
+      // Low quality: sparkles disabled entirely
+      if (u_qualityLevel >= 3) return 0.0;
+
       vec2 cell = floor(uv);
       vec2 local = fract(uv) - 0.5;
 
@@ -74,6 +79,9 @@ export const CloudStaticShader = {
 
       for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
+          // Medium quality: only check center cell (skip neighbors)
+          if (u_qualityLevel >= 2 && (x != 0 || y != 0)) continue;
+
           vec2 neighbor = vec2(float(x), float(y));
           vec2 cellId = cell + neighbor;
 

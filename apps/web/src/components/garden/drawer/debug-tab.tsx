@@ -27,6 +27,7 @@ export function DebugTab({ isActive }: DebugTabProps) {
   });
 
   const performanceStats = useGardenStore((s) => s.performanceStats);
+  const qualityInfo = useGardenStore((s) => s.qualityInfo);
 
   const allLogs = useDebugLogs();
   const filteredLogs = filterLogs(allLogs, logFilters);
@@ -161,6 +162,38 @@ export function DebugTab({ isActive }: DebugTabProps) {
                     />
                   </div>
                 )}
+              </section>
+            )}
+
+            {qualityInfo && (
+              <section>
+                <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">
+                  Adaptive Quality
+                </h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <Stat
+                    label="Tier"
+                    value={qualityInfo.tier.toUpperCase()}
+                    color={
+                      qualityInfo.tier === "ultra"
+                        ? "green"
+                        : qualityInfo.tier === "high"
+                          ? "cyan"
+                          : qualityInfo.tier === "medium"
+                            ? "yellow"
+                            : "red"
+                    }
+                  />
+                  <Stat label="DPR" value={qualityInfo.pixelRatio.toFixed(2)} color="cyan" />
+                  <Stat
+                    label="Bloom"
+                    value={qualityInfo.bloomEnabled ? "ON" : "OFF"}
+                    color={qualityInfo.bloomEnabled ? "green" : "yellow"}
+                  />
+                </div>
+                <div className="mt-2">
+                  <QualityTierSelector />
+                </div>
               </section>
             )}
 
@@ -463,6 +496,39 @@ function LogEntryRow({
           {String(JSON.stringify(log.data, null, 2))}
         </pre>
       )}
+    </div>
+  );
+}
+
+const QUALITY_TIERS = ["auto", "ultra", "high", "medium", "low"] as const;
+
+function QualityTierSelector() {
+  const [selected, setSelected] = useState<string>("auto");
+
+  const handleChange = (tier: string) => {
+    setSelected(tier);
+    window.dispatchEvent(
+      new CustomEvent("quality-tier-force", {
+        detail: { tier: tier === "auto" ? null : tier },
+      })
+    );
+  };
+
+  return (
+    <div className="flex gap-1">
+      {QUALITY_TIERS.map((tier) => (
+        <button
+          key={tier}
+          onClick={() => handleChange(tier)}
+          className={`flex-1 text-xs py-1 px-1 rounded transition-colors ${
+            selected === tier
+              ? "bg-emerald-100/60 text-emerald-700 font-medium"
+              : "bg-[--wc-paper]/60 text-[--wc-ink-muted] hover:bg-[--wc-paper]"
+          }`}
+        >
+          {tier.charAt(0).toUpperCase() + tier.slice(1)}
+        </button>
+      ))}
     </div>
   );
 }

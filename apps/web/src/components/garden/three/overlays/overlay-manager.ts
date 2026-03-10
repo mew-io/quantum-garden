@@ -51,6 +51,9 @@ export class OverlayManager {
   private dirty = true;
   private lastCameraMatrix = new THREE.Matrix4();
 
+  /** Overlay render target resolution scale (1.0 = full, 0.5 = half) */
+  private overlayResolutionScale = 1.0;
+
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
 
@@ -111,7 +114,7 @@ export class OverlayManager {
     }
 
     if (this.watercolorPlants.hasActiveAnimations()) {
-      if (this.watercolorPlants.update(time)) {
+      if (this.watercolorPlants.update(time, this.sceneManager.camera)) {
         this.dirty = true;
       }
     }
@@ -174,14 +177,28 @@ export class OverlayManager {
   }
 
   /**
+   * Set overlay resolution scale for adaptive quality.
+   * Lower values reduce GPU fill cost for the overlay render target.
+   */
+  setOverlayResolutionScale(scale: number): void {
+    if (this.overlayResolutionScale !== scale) {
+      this.overlayResolutionScale = scale;
+      // Force render target recreation on next render
+      this.renderTarget?.dispose();
+      this.renderTarget = null;
+      this.dirty = true;
+    }
+  }
+
+  /**
    * Ensure the render target and composite quad exist and match the renderer size.
    */
   private ensureRenderTarget(): void {
     const renderer = this.sceneManager.renderer;
     const size = renderer.getSize(new THREE.Vector2());
     const pixelRatio = renderer.getPixelRatio();
-    const w = Math.floor(size.x * pixelRatio);
-    const h = Math.floor(size.y * pixelRatio);
+    const w = Math.floor(size.x * pixelRatio * this.overlayResolutionScale);
+    const h = Math.floor(size.y * pixelRatio * this.overlayResolutionScale);
 
     if (this.renderTarget && this.renderTarget.width === w && this.renderTarget.height === h) {
       return;

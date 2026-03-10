@@ -20,6 +20,56 @@ export const WATERCOLOR_RENDER_CONFIG = {
   TUBE_TUBULAR_SEGMENTS: 32,
 };
 
+/** Quality-dependent render config. qualityLevel: 0=ultra, 1=high, 2=medium, 3=low */
+export function getWatercolorRenderConfig(qualityLevel: number) {
+  if (qualityLevel <= 0)
+    return {
+      CIRCLE_SEGMENTS: 24,
+      SHAPE_SEGMENTS: 16,
+      TUBE_RADIAL_SEGMENTS: 6,
+      TUBE_TUBULAR_SEGMENTS: 32,
+    };
+  if (qualityLevel === 1)
+    return {
+      CIRCLE_SEGMENTS: 16,
+      SHAPE_SEGMENTS: 12,
+      TUBE_RADIAL_SEGMENTS: 4,
+      TUBE_TUBULAR_SEGMENTS: 24,
+    };
+  if (qualityLevel === 2)
+    return {
+      CIRCLE_SEGMENTS: 16,
+      SHAPE_SEGMENTS: 8,
+      TUBE_RADIAL_SEGMENTS: 4,
+      TUBE_TUBULAR_SEGMENTS: 16,
+    };
+  return {
+    CIRCLE_SEGMENTS: 12,
+    SHAPE_SEGMENTS: 6,
+    TUBE_RADIAL_SEGMENTS: 3,
+    TUBE_TUBULAR_SEGMENTS: 12,
+  };
+}
+
+/** Scale watercolor effect layers based on quality level. */
+export function getEffectiveLayers(effectLayers: number, qualityLevel: number): number {
+  if (qualityLevel <= 0) return effectLayers;
+  if (qualityLevel === 1) return Math.max(2, Math.ceil(effectLayers * 0.6));
+  if (qualityLevel === 2) return Math.max(2, Math.ceil(effectLayers * 0.4));
+  return 2; // low quality: fixed 2 layers
+}
+
+/** Current quality level for watercolor rendering (set by AdaptiveQualityManager). */
+let currentWatercolorQuality = 0;
+
+export function setWatercolorQuality(qualityLevel: number): void {
+  currentWatercolorQuality = qualityLevel;
+}
+
+export function getWatercolorQuality(): number {
+  return currentWatercolorQuality;
+}
+
 // =============================================================================
 // Seeded PRNG
 // =============================================================================
@@ -285,6 +335,7 @@ export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     uniforms: {
       u_time: { value: 0.0 },
+      u_qualityLevel: { value: 0 },
     },
     vertexShader: `
       uniform float u_time;
@@ -333,6 +384,7 @@ export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
     `,
     fragmentShader: `
       uniform float u_time;
+      uniform int u_qualityLevel;
 
       varying vec4 vColor;
       varying float vIridescence;
@@ -358,12 +410,11 @@ export function createMergedWatercolorMaterial(): THREE.ShaderMaterial {
       void main() {
         vec4 color = vColor;
 
-        // Apply iridescence: quantum-driven hue shift
-        if (vIridescence > 0.001) {
+        // Apply iridescence: quantum-driven hue shift (skip at medium/low quality)
+        if (u_qualityLevel < 2 && vIridescence > 0.001) {
           vec3 hsv = rgb2hsv(color.rgb);
           float iriShift = sin(u_time * 0.8 + vWorldPos.x * 0.012 + vWorldPos.y * 0.009) * vIridescence * 0.08;
           hsv.x = fract(hsv.x + iriShift);
-          // Saturation boost from quantum dominance
           hsv.y = min(1.0, hsv.y * (1.0 + vSaturationBoost * 0.3));
           color.rgb = hsv2rgb(hsv);
         }
@@ -517,7 +568,8 @@ function collectShapeGeometries(
   tempQuat: THREE.Quaternion,
   tempScale: THREE.Vector3
 ): void {
-  const n = effect.layers;
+  const qConfig = getWatercolorRenderConfig(currentWatercolorQuality);
+  const n = getEffectiveLayers(effect.layers, currentWatercolorQuality);
   const baseOp = element.opacity ?? effect.opacity;
   const visualParams = getElementVisualParams(element);
 
@@ -537,7 +589,7 @@ function collectShapeGeometries(
     const jitterX = (rng.next() - 0.5) * effect.spread * 0.5;
     const jitterY = (rng.next() - 0.5) * effect.spread * 0.5;
 
-    const geo = new THREE.ShapeGeometry(shape, WATERCOLOR_RENDER_CONFIG.SHAPE_SEGMENTS);
+    const geo = new THREE.ShapeGeometry(shape, qConfig.SHAPE_SEGMENTS);
     stripUnneededAttributes(geo);
 
     // Compose transform: element position/rotation/scale + layer jitter/scale/z
@@ -572,7 +624,8 @@ function collectStemGeometries(
   const points = element.shape.points;
   const thickness = element.shape.thickness;
 
-  const n = Math.min(effect.layers, 3);
+  const qConfig = getWatercolorRenderConfig(currentWatercolorQuality);
+  const n = Math.min(getEffectiveLayers(effect.layers, currentWatercolorQuality), 3);
   const baseOp = element.opacity ?? effect.opacity;
   const visualParams = getElementVisualParams(element);
   const curvePoints = points.map((p) => new THREE.Vector3(p[0], p[1], 0));
@@ -606,9 +659,9 @@ function collectStemGeometries(
     const curve = new THREE.CatmullRomCurve3(offsetPoints, false, "catmullrom", 0.5);
     const geo = new THREE.TubeGeometry(
       curve,
-      WATERCOLOR_RENDER_CONFIG.TUBE_TUBULAR_SEGMENTS,
+      qConfig.TUBE_TUBULAR_SEGMENTS,
       thickness * thicknessScale,
-      WATERCOLOR_RENDER_CONFIG.TUBE_RADIAL_SEGMENTS,
+      qConfig.TUBE_RADIAL_SEGMENTS,
       false
     );
     stripUnneededAttributes(geo);

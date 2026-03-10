@@ -150,6 +150,11 @@ export class WatercolorPlantOverlay {
   private lastLifecycleCheckTime: number = 0;
   private static LIFECYCLE_CHECK_INTERVAL = 0.1; // seconds
 
+  // Frustum culling
+  private frustum = new THREE.Frustum();
+  private frustumMatrix = new THREE.Matrix4();
+  private boundingSphere = new THREE.Sphere();
+
   constructor() {
     this.group = new THREE.Group();
     this.group.name = "watercolor-plants";
@@ -341,13 +346,19 @@ export class WatercolorPlantOverlay {
    * Update the overlay each frame.
    * Only rebuilds plants whose visual state has changed.
    */
-  update(time: number): boolean {
+  update(time: number, camera?: THREE.Camera): boolean {
     // Always update time uniform for shader-driven sway/breathing/aura animation
     if (this.mergedMaterial.uniforms.u_time) {
       this.mergedMaterial.uniforms.u_time.value = time;
     }
     if (this.auraMaterial.uniforms.u_time) {
       this.auraMaterial.uniforms.u_time.value = time;
+    }
+
+    // Update frustum for culling if camera is provided
+    if (camera) {
+      this.frustumMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      this.frustum.setFromProjectionMatrix(this.frustumMatrix);
     }
 
     // Periodically re-check for lifecycle progression (keyframe changes)
@@ -367,6 +378,18 @@ export class WatercolorPlantOverlay {
 
       const variant = this.getVariant(plant.variantId);
       if (!variant?.watercolorConfig) continue;
+
+      // Frustum culling: skip plants outside the camera view
+      const plantGroup = this.plantMeshes.get(plant.id);
+      if (camera && plantGroup) {
+        const catScale = getCategoryScale(plant.variantId) * 1.4;
+        const radius = catScale * 64 * 1.5; // generous bounding sphere
+        this.boundingSphere.center.set(plant.position.x, plant.position.y, WATERCOLOR_Z_POSITION);
+        this.boundingSphere.radius = radius;
+        const visible = this.frustum.intersectsSphere(this.boundingSphere);
+        plantGroup.visible = visible;
+        if (!visible) continue; // skip rebuild check for off-screen plants
+      }
 
       // Compute current render state
       const plantWithLifecycle: PlantWithLifecycle = {
@@ -400,15 +423,18 @@ export class WatercolorPlantOverlay {
       const prevState = this.plantRenderStates.get(plant.id);
 
       // Get or create plant group
-      let plantGroup = this.plantMeshes.get(plant.id);
-      const isNew = !plantGroup;
+      let group = this.plantMeshes.get(plant.id);
+      const isNew = !group;
 
       if (isNew) {
-        plantGroup = new THREE.Group();
-        plantGroup.name = `wc-plant-${plant.id}`;
-        this.group.add(plantGroup);
-        this.plantMeshes.set(plant.id, plantGroup);
+        group = new THREE.Group();
+        group.name = `wc-plant-${plant.id}`;
+        this.group.add(group);
+        this.plantMeshes.set(plant.id, group);
       }
+
+      // Ensure visible (may have been culled before)
+      if (group) group.visible = true;
 
       // Only rebuild if state changed
       if (
@@ -420,7 +446,7 @@ export class WatercolorPlantOverlay {
         prevState.positionY !== currentState.positionY ||
         prevState.observed !== currentState.observed
       ) {
-        this.rebuildPlant(plantGroup!, plant, variant);
+        this.rebuildPlant(group!, plant, variant);
         this.plantRenderStates.set(plant.id, currentState);
         changed = true;
       }
@@ -444,6 +470,11 @@ export class WatercolorPlantOverlay {
   hasActiveAnimations(): boolean {
     // Always active when plants exist — shader drives continuous sway/breathing
     return this.plants.length > 0;
+  }
+
+  /** Expose merged material for external uniform updates (e.g. quality level). */
+  getMergedMaterial(): THREE.ShaderMaterial {
+    return this.mergedMaterial;
   }
 
   getObject(): THREE.Object3D {

@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import type * as THREE from "three";
 import {
   CANVAS,
   getVariantById,
@@ -20,11 +21,18 @@ import type { BackgroundType } from "./core/backgrounds";
 import { PlantInstancer, type RenderablePlant } from "./plants/plant-instancer";
 import { disposeTextureAtlas } from "./core/texture-atlas";
 import { OverlayManager } from "./overlays";
+import {
+  AdaptiveQualityManager,
+  type QualitySettings,
+  type QualityTier,
+} from "./core/adaptive-quality";
+import { setWatercolorQuality } from "./overlays/watercolor-rendering";
 import { usePlants } from "@/hooks/use-plants";
 import { useGardenStore } from "@/stores/garden-store";
 import { hapticSuccess } from "@/utils/haptics";
 import { debugLogger } from "@/lib/debug-logger";
 import { isFirstObservation, markFirstObservationComplete } from "@/lib/first-observation";
+import { prefersReducedMotion, onReducedMotionChange } from "@/lib/accessibility";
 
 /**
  * Get the primary color from a plant's palette for celebration feedback.
@@ -77,6 +85,7 @@ export function GardenScene() {
   const sceneManagerRef = useRef<SceneManager | null>(null);
   const plantInstancerRef = useRef<PlantInstancer | null>(null);
   const overlayManagerRef = useRef<OverlayManager | null>(null);
+  const qualityManagerRef = useRef<AdaptiveQualityManager | null>(null);
 
   // Load plants from server into store (polls every 5s to pick up server-side evolution)
   // Evolution now runs server-side via cron/worker - client is just a viewer
@@ -119,6 +128,65 @@ export function GardenScene() {
     // Initialize overlay manager
     const overlayManager = new OverlayManager(sceneManager);
     overlayManagerRef.current = overlayManager;
+
+    // Initialize adaptive quality manager
+    const qualityManager = new AdaptiveQualityManager();
+    qualityManagerRef.current = qualityManager;
+
+    const applyQualitySettings = (settings: QualitySettings) => {
+      sceneManager.setPixelRatio(settings.pixelRatio);
+      sceneManager.setBloomEnabled(settings.bloomEnabled);
+      sceneManager.setSparkleQuality(settings.qualityLevel);
+
+      // Plant shader quality
+      const plantMaterial = plantInstancer.getMesh().material as THREE.ShaderMaterial;
+      if (plantMaterial.uniforms.u_qualityLevel) {
+        plantMaterial.uniforms.u_qualityLevel.value = settings.qualityLevel;
+      }
+
+      // Watercolor rendering quality
+      setWatercolorQuality(settings.qualityLevel);
+      const wcMaterial = overlayManager.watercolorPlants.getMergedMaterial();
+      if (wcMaterial.uniforms.u_qualityLevel) {
+        wcMaterial.uniforms.u_qualityLevel.value = settings.qualityLevel;
+      }
+
+      // Overlay resolution
+      overlayManager.setOverlayResolutionScale(settings.overlayResolutionScale);
+
+      // Particle count
+      overlayManager.particles.setMaxParticles(settings.particleMax);
+
+      // Push to store for debug panel
+      useGardenStore.getState().setQualityInfo({
+        tier: settings.tier,
+        pixelRatio: settings.pixelRatio,
+        bloomEnabled: settings.bloomEnabled,
+      });
+
+      debugLogger.rendering.info(`Quality tier changed to ${settings.tier}`);
+    };
+
+    qualityManager.onChange(applyQualitySettings);
+
+    // Respect reduced motion: default to medium tier
+    if (prefersReducedMotion()) {
+      qualityManager.forceTier("medium");
+      qualityManager.lock();
+    }
+    const unsubReducedMotion = onReducedMotionChange((prefersReduced) => {
+      if (prefersReduced) {
+        qualityManager.forceTier("medium");
+        qualityManager.lock();
+      } else {
+        qualityManager.forceTier(null);
+        qualityManager.unlock();
+      }
+      applyQualitySettings(qualityManager.settings);
+    });
+
+    // Apply initial settings
+    applyQualitySettings(qualityManager.settings);
 
     // Helper to convert store plants to renderable format
     const convertToRenderable = (plants: Plant[]): RenderablePlant[] => {
@@ -251,6 +319,10 @@ export function GardenScene() {
       plantInstancer.updateTime(time);
       plantInstancer.updateTransitions();
       overlayManager.update(time, deltaTime);
+
+      // Feed FPS to adaptive quality manager
+      const metrics = sceneManager.performanceMetrics;
+      qualityManager.update(metrics.fps, deltaTime * 1000);
     };
     sceneManager.addUpdateCallback(updateCallback);
 
@@ -356,6 +428,16 @@ export function GardenScene() {
       handleBackgroundChange as EventListener
     );
 
+    // Handle quality tier override from debug panel
+    const handleQualityForce = (e: CustomEvent<{ tier: string | null }>) => {
+      qualityManager.forceTier(e.detail.tier as QualityTier | null);
+      applyQualitySettings(qualityManager.settings);
+    };
+    window.addEventListener(
+      "quality-tier-force" as keyof WindowEventMap,
+      handleQualityForce as EventListener
+    );
+
     // Start render loop
     debugLogger.rendering.info("Starting render loop");
     sceneManager.start();
@@ -378,6 +460,7 @@ export function GardenScene() {
       mounted = false;
       clearInterval(performanceInterval);
       unsubscribe();
+      unsubReducedMotion();
 
       sceneManager.canvas.removeEventListener("click", handleClick);
       window.removeEventListener(
@@ -400,8 +483,17 @@ export function GardenScene() {
         "background-change" as keyof WindowEventMap,
         handleBackgroundChange as EventListener
       );
+      window.removeEventListener(
+        "quality-tier-force" as keyof WindowEventMap,
+        handleQualityForce as EventListener
+      );
       sceneManager.removeUpdateCallback(updateCallback);
       sceneManager.removePostRenderCallback(postRenderCallback);
+
+      if (qualityManagerRef.current) {
+        qualityManagerRef.current.dispose();
+        qualityManagerRef.current = null;
+      }
 
       if (overlayManagerRef.current) {
         overlayManagerRef.current.dispose();

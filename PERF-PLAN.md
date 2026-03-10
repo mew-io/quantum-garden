@@ -1,6 +1,6 @@
 # Rendering Performance Optimization — Resume Plan
 
-## Status: In Progress
+## Status: Adaptive Quality System Implemented
 
 ### Committed (on main, pushed)
 
@@ -8,55 +8,94 @@
 2. **Removed second sparkle layer** (9-iteration loop eliminated per background pixel)
 3. **Overlay render gating** — skips overlay render pass when no visible content
 
-### Uncommitted (in working tree)
+### Newly Implemented: Adaptive Quality System
 
-- **Performance timing instrumentation** — added per-section timing (updates/composerRender/overlays) to debug panel
-- **Overlay render target caching** — renders overlay scene to WebGLRenderTarget, composites with single quad. Only re-renders when dirty (content change or camera change). **Not yet validated — may have issues.**
+Full adaptive rendering system with 4 quality tiers (ultra/high/medium/low) that automatically adjusts based on measured FPS. Degrades gracefully on older hardware to maintain 60fps.
 
-### Root Cause Identified
+#### AdaptiveQualityManager (`core/adaptive-quality.ts`)
 
-The bottleneck is the **watercolor plant overlay**. All plants are watercolor mode, meaning each plant creates multiple THREE.Mesh objects (elements × layers). With ~200 plants × ~5 elements × ~4 layers = ~4000 individual draw calls in the overlay scene every frame.
+- FPS-driven tier selection with hysteresis (drop at <45fps for 2s, raise at >55fps for 5s, 3s cooldown)
+- Prevents oscillation between tiers
+- Manual override via debug panel for testing
+- Respects `prefers-reduced-motion` (defaults to medium tier)
 
-The render target caching approach helps when the camera is static, but the `watercolorPlants.hasActiveAnimations()` returns true every 1 second (lifecycle check interval), causing frequent re-renders. During zoom/pan, the cache is invalidated every frame.
+#### Frustum Culling for Watercolor Overlay
 
-### What Needs To Happen Next
+- Per-plant frustum test using bounding spheres in `watercolor-plant-overlay.ts`
+- Skips off-screen plants entirely (visibility + rebuild check)
+- At 3x zoom, typically only 10-20% of plants visible → major draw call reduction
 
-#### Option A: Reduce watercolor draw calls (preferred)
+#### Pixel Ratio Adaptation
 
-The real fix is reducing the number of meshes. Options:
+- `scene-manager.ts` → `setPixelRatio()` adjusts renderer, composer, and bloom pass
+- Ultra: 2x → High: 1.5x → Medium: 1x → Low: 0.75x
+- Going 2x→1x reduces fragment count by 75%
 
-1. **Merge geometries per plant** — use `BufferGeometryUtils.mergeGeometries()` to combine all layers of a plant into a single mesh. This requires baking per-layer colors into vertex colors instead of separate materials. Could reduce draw calls from ~4000 to ~200.
-2. **Batch all watercolor plants into one merged mesh** — merge everything into a single draw call. Rebuild only when plants change. Most aggressive optimization.
-3. **Use InstancedMesh for watercolor layers** — group layers by material (color+opacity), use instancing. Similar to how pixel plants work.
+#### Post-Processing Quality Tiers
 
-#### Option B: Reduce lifecycle check frequency
+- Bloom toggled off at medium/low (most expensive post-processing pass)
+- Sparkle shader (`backgrounds.ts`): quality-dependent neighbor loop
+  - Ultra/High: full 3x3 grid (9 iterations)
+  - Medium: center cell only (1 iteration)
+  - Low: sparkles disabled
 
-The `LIFECYCLE_CHECK_INTERVAL` of 1 second in `watercolor-plant-overlay.ts:81` causes the overlay to rebuild every second. Increasing this to 5-10 seconds would reduce frequency of expensive re-renders. Quick win.
+#### Plant Shader Simplifications (`plant-material.ts`)
 
-#### Option C: Simplify watercolor effect
+- `u_qualityLevel` uniform gates expensive operations:
+  - Ghost texture samples (3 extra lookups) → skipped at medium/low
+  - Iridescent HSV hue shift → skipped at medium/low
+  - Color transition HSV desaturation → skipped at medium/low
+  - Atmospheric perspective HSV desaturation → skipped at low
 
-Reduce `effect.layers` count (currently up to N layers per element). Even going from 4 layers to 2 would halve draw calls. Check `WatercolorEffect` configuration in shared package.
+#### Watercolor Geometry Reduction (`watercolor-rendering.ts`)
 
-### Remaining planned optimizations (from original plan)
+- Quality-dependent shape segments: 16→12→8→6
+- Quality-dependent tube segments: 32→24→16→12
+- Quality-dependent layer count: 100%→60%→40%→2 fixed
+- Iridescence HSV skipped at medium/low in merged material shader
 
-- **Adaptive quality system** — auto-disable bloom when FPS < 45
-- **Reduce pixel ratio on mobile** — cap at 1.5x instead of 2x
-- **Simplify superposition ghost effect** — reduce from 3 to 1 ghost sample
-- **Throttle sparkle time uniform** — update every 2nd frame
-- **Replace HSV hue shift with RGB rotation matrix** — cheaper iridescence
+#### Overlay Resolution Scaling (`overlay-manager.ts`)
+
+- Render target sized by `overlayResolutionScale`:
+  - Ultra/High: 1.0x, Medium: 0.75x, Low: 0.5x
+- Watercolor is inherently soft, so reduction is barely visible
+
+#### Particle Count Adaptation (`quantum-particle-overlay.ts`)
+
+- `setMaxParticles()` caps active particles per tier:
+  - Ultra: 800, High: 600, Medium: 400, Low: 200
+
+#### Debug Panel Integration (`debug-tab.tsx`)
+
+- Shows quality tier, pixel ratio, bloom status
+- Manual tier selector: Auto / Ultra / High / Medium / Low
+
+#### Reduced Motion Alignment
+
+- `prefers-reduced-motion` → defaults to medium tier, locks auto-adaptation
+- Responds to media query changes at runtime
 
 ### Key Files
 
-- `apps/web/src/components/garden/three/overlays/watercolor-plant-overlay.ts` — main bottleneck
-- `apps/web/src/components/garden/three/overlays/watercolor-rendering.ts` — shape builders, layering, material pool
-- `apps/web/src/components/garden/three/overlays/overlay-manager.ts` — overlay orchestration + caching
-- `apps/web/src/components/garden/three/core/scene-manager.ts` — render loop, post-processing
-- `apps/web/src/components/garden/three/core/backgrounds.ts` — cloud shader
-- `apps/web/src/components/garden/three/plants/plant-material.ts` — plant fragment shader
-- `apps/web/src/components/garden/drawer/debug-tab.tsx` — performance display
+- `apps/web/src/components/garden/three/core/adaptive-quality.ts` — quality manager (NEW)
+- `apps/web/src/components/garden/three/overlays/watercolor-plant-overlay.ts` — frustum culling
+- `apps/web/src/components/garden/three/overlays/watercolor-rendering.ts` — geometry reduction + shader quality
+- `apps/web/src/components/garden/three/overlays/overlay-manager.ts` — resolution scaling
+- `apps/web/src/components/garden/three/overlays/quantum-particle-overlay.ts` — particle count
+- `apps/web/src/components/garden/three/core/scene-manager.ts` — pixel ratio, bloom, sparkle quality
+- `apps/web/src/components/garden/three/core/backgrounds.ts` — sparkle quality levels
+- `apps/web/src/components/garden/three/plants/plant-material.ts` — shader quality levels
+- `apps/web/src/components/garden/three/garden-scene.tsx` — wiring + reduced motion
+- `apps/web/src/components/garden/drawer/debug-tab.tsx` — quality panel
+- `apps/web/src/stores/garden-store.ts` — quality info state
 
 ### How to verify
 
-1. `pnpm --filter web dev` — open garden, open debug panel, check timing stats
-2. Target: Updates < 2ms, Render < 8ms, Overlays < 5ms at idle
-3. FPS should stay at 60 on desktop, 45+ on mobile
+1. `pnpm --filter web dev` → open garden → open debug panel
+2. Check "Adaptive Quality" section shows tier, DPR, bloom status
+3. Throttle CPU in Chrome DevTools (6x slowdown) → tier should drop automatically
+4. Remove throttle → tier recovers after ~8 seconds
+5. Zoom to 3x+ → draw calls should drop significantly (frustum culling)
+6. Force "Low" in debug panel → sparkles off, bloom off, simplified rendering
+7. Force "Ultra" → full quality restored
+8. Target: 60fps on desktop, 45+ on mobile/older hardware

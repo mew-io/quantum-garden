@@ -340,12 +340,14 @@ function PlantDetailView({
         </h4>
         {signals ? (
           <div className="space-y-6">
+            {/* Temporarily hidden for demo video
             {!quantumRecord?.probabilities?.length && plant.observed && (
               <div className="bg-amber-50/60 border border-amber-200/40 rounded p-2 text-[10px] text-amber-800 leading-relaxed">
                 Mock signals — quantum pool was unavailable at observation time. Traits are seeded
                 from the circuit definition.
               </div>
             )}
+            */}
 
             {/* Quantum Signals */}
             <div className="bg-[--wc-paper]/60 rounded p-3 space-y-4">

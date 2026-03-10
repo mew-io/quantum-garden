@@ -226,28 +226,35 @@ export class PlantInstancer {
     });
 
     // Sort by Y ascending (top of screen first = farthest = drawn first)
-    // This ensures correct painter's algorithm ordering for semi-transparent plants
+    // This ensures correct painter's algorithm ordering for semi-transparent plants.
+    // Instance indices are assigned sequentially from this sorted order so that
+    // InstancedMesh draws far-to-near regardless of spawn order.
     pixelPlants.sort((a, b) => a.position.y - b.position.y);
 
     // Track which plants are still active
     const activePlantIds = new Set<string>();
     let hasStructuralChanges = false;
 
-    pixelPlants.forEach((plant) => {
-      activePlantIds.add(plant.id);
+    // Save old index mapping to detect index changes
+    const oldPlantIndexMap = new Map(this.plantIndexMap);
 
-      // Get or create instance index for this plant
-      let index = this.plantIndexMap.get(plant.id);
-      const isNewPlant = index === undefined;
+    // Rebuild index mapping based on sorted order so draw order matches depth order
+    this.plantIndexMap.clear();
+
+    pixelPlants.forEach((plant, sortedIndex) => {
+      if (sortedIndex >= MAX_INSTANCES) {
+        console.warn("PlantInstancer: Max instances reached");
+        return;
+      }
+
+      activePlantIds.add(plant.id);
+      this.plantIndexMap.set(plant.id, sortedIndex);
+
+      const oldIndex = oldPlantIndexMap.get(plant.id);
+      const isNewPlant = oldIndex === undefined;
+      const indexChanged = !isNewPlant && oldIndex !== sortedIndex;
 
       if (isNewPlant) {
-        const newIndex = this.getNextAvailableIndex();
-        if (newIndex === null) {
-          console.warn("PlantInstancer: Max instances reached");
-          return;
-        }
-        index = newIndex;
-        this.plantIndexMap.set(plant.id, index);
         hasStructuralChanges = true;
         // Initialize animation state
         this.animationStates.set(plant.id, {
@@ -263,8 +270,11 @@ export class PlantInstancer {
         });
       }
 
-      // After the block above, index is guaranteed to be defined
-      const instanceIndex = index as number;
+      if (indexChanged) {
+        hasStructuralChanges = true;
+      }
+
+      const instanceIndex = sortedIndex;
 
       // Get animation state
       const animState = this.animationStates.get(plant.id)!;
@@ -349,7 +359,7 @@ export class PlantInstancer {
       // Check if plant state changed (dirty tracking)
       const newHash = this.computePlantHash(plant);
       const oldHash = this.plantHashes.get(plant.id);
-      const isDirty = isNewPlant || newHash !== oldHash || this.forceFullSync;
+      const isDirty = isNewPlant || indexChanged || newHash !== oldHash || this.forceFullSync;
 
       if (isDirty) {
         this.plantHashes.set(plant.id, newHash);
@@ -362,19 +372,24 @@ export class PlantInstancer {
       }
     });
 
-    // Remove plants that are no longer in the list
-    for (const [plantId, index] of this.plantIndexMap) {
+    // Remove animation/hash state for plants that are no longer in the list
+    for (const [plantId] of oldPlantIndexMap) {
       if (!activePlantIds.has(plantId)) {
-        this.clearInstance(index);
-        this.plantIndexMap.delete(plantId);
         this.animationStates.delete(plantId);
         this.plantHashes.delete(plantId);
         hasStructuralChanges = true;
       }
     }
 
-    // Update instance count
-    this.mesh.count = this.plantIndexMap.size;
+    // Update instance count and active count
+    const newCount = Math.min(pixelPlants.length, MAX_INSTANCES);
+    this.activeCount = newCount;
+    this.mesh.count = newCount;
+
+    // Clear any trailing instances that may have been used previously
+    for (let i = newCount; i < (oldPlantIndexMap.size); i++) {
+      this.clearInstance(i);
+    }
 
     // Only mark attributes for update if there were changes
     if (this.dirtyInstances.size > 0 || hasStructuralChanges || this.forceFullSync) {
@@ -699,16 +714,6 @@ export class PlantInstancer {
     // Set scale to 0 to hide
     const stateBase = index * 4;
     this.instanceState[stateBase + 1] = 0;
-  }
-
-  /**
-   * Get next available instance index.
-   */
-  private getNextAvailableIndex(): number | null {
-    if (this.activeCount >= MAX_INSTANCES) {
-      return null;
-    }
-    return this.activeCount++;
   }
 
   /**

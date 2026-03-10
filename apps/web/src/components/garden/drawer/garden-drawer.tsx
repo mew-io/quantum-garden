@@ -108,7 +108,7 @@ export function GardenDrawer() {
 
         {/* Tab content */}
         <div
-          className="flex-1 min-h-0 overflow-hidden"
+          className="flex-1 min-h-0 overflow-hidden flex flex-col"
           style={{ height: isOpen ? "min(calc(70vh - 44px), 500px)" : 0 }}
         >
           {activeTab === "info" && <InfoTab />}

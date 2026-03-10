@@ -91,6 +91,52 @@ export const plantsRouter = router({
   }),
 
   /**
+   * Get detailed plant data for the debug panel, including quantum record.
+   */
+  getDebugDetail: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const plant = await ctx.db.plant.findUnique({
+        where: { id: input.id },
+        include: {
+          quantumCircuit: true,
+          entanglementGroup: {
+            include: {
+              plants: {
+                select: { id: true, variantId: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!plant) return null;
+
+      const circuitType = plant.quantumCircuit?.circuitId ?? "variational";
+      const qr = plant.quantumCircuit;
+
+      return {
+        plant: transformPlant(plant, circuitType),
+        quantumRecord: qr
+          ? {
+              circuitId: qr.circuitId,
+              circuitDefinition: qr.circuitDefinition,
+              status: qr.status,
+              ionqJobId: qr.ionqJobId,
+              measurements: qr.measurements,
+              probabilities: qr.probabilities,
+              createdAt: qr.createdAt,
+              completedAt: qr.completedAt,
+            }
+          : null,
+        entangledPlants:
+          plant.entanglementGroup?.plants
+            .filter((p) => p.id !== plant.id)
+            .map((p) => ({ id: p.id, variantId: p.variantId })) ?? [],
+      };
+    }),
+
+  /**
    * Germinate a dormant plant.
    *
    * Sets the germinatedAt timestamp, allowing the plant to

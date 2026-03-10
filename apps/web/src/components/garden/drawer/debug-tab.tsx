@@ -20,10 +20,8 @@ export function DebugTab({ isActive }: DebugTabProps) {
   const [activeSubTab, setActiveSubTab] = useState<"overview" | "logs" | "plants">("overview");
   const [logFilters, setLogFilters] = useState<{
     categories: LogCategory[];
-    levels: LogLevel[];
   }>({
     categories: ["quantum", "observation", "evolution", "rendering", "system"],
-    levels: ["debug", "info", "warn", "error"],
   });
 
   const { performanceStats } = useGardenStore();
@@ -87,14 +85,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
     }));
   };
 
-  const toggleLevel = (level: LogLevel) => {
-    setLogFilters((prev) => ({
-      ...prev,
-      levels: prev.levels.includes(level)
-        ? prev.levels.filter((l) => l !== level)
-        : [...prev.levels, level],
-    }));
-  };
 
   const observedCount = plants?.filter((p: Plant) => p.observed).length ?? 0;
   const germinatedCount = plants?.filter((p: Plant) => p.germinatedAt !== null).length ?? 0;
@@ -269,17 +259,6 @@ export function DebugTab({ isActive }: DebugTabProps) {
                       active={logFilters.categories.includes(cat)}
                       onClick={() => toggleCategory(cat)}
                       color={getCategoryColor(cat)}
-                    />
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {(["debug", "info", "warn", "error"] as LogLevel[]).map((level) => (
-                    <DebugFilterChip
-                      key={level}
-                      label={level}
-                      active={logFilters.levels.includes(level)}
-                      onClick={() => toggleLevel(level)}
-                      color={getLevelColor(level)}
                     />
                   ))}
                 </div>

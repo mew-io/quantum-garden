@@ -89,11 +89,11 @@ export function GardenDrawer() {
   }, [isOpen, activeTab]);
 
   return (
-    <div className="fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] sm:left-auto right-[var(--inset-right)] z-50 flex flex-col items-end gap-2 w-full sm:w-auto pointer-events-none">
+    <div className="fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] sm:left-auto right-[var(--inset-right)] z-50 flex flex-col items-end gap-2 sm:w-auto pointer-events-none">
       {/* Drawer Panel */}
       <div
         className={`
-          pointer-events-auto w-full sm:w-[380px] garden-panel rounded-xl
+          pointer-events-auto sm:w-[380px] garden-panel rounded-xl
           flex flex-col overflow-hidden
           transition-all duration-300 ease-out origin-bottom
           ${

@@ -34,6 +34,9 @@ export class OverlayManager {
   public watercolorPlants: WatercolorPlantOverlay;
   public debug: DebugOverlay;
 
+  // Track whether plant overlays have content (set via setPlants)
+  private hasPlantOverlayContent = false;
+
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
 
@@ -92,6 +95,7 @@ export class OverlayManager {
    * Set plants for the vector plant overlay and debug overlay.
    */
   setPlants(plants: Plant[]): void {
+    this.hasPlantOverlayContent = plants.length > 0;
     this.vectorPlants.setPlants(plants);
     this.watercolorPlants.setPlants(plants);
     this.debug.setPlants(plants);
@@ -109,6 +113,20 @@ export class OverlayManager {
    */
   triggerLocatePulse(): void {
     this.debug.triggerLocatePulse();
+  }
+
+  /**
+   * Whether any overlay has visible content worth rendering.
+   * Used to skip the overlay render pass entirely when idle.
+   */
+  hasAnyVisibleContent(): boolean {
+    return (
+      this.entanglement.hasActiveAnimations() ||
+      this.feedback.hasActiveAnimations() ||
+      this.germination.hasActiveAnimations() ||
+      this.hasPlantOverlayContent ||
+      this.debug.hasActiveAnimations()
+    );
   }
 
   /**

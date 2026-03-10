@@ -301,9 +301,11 @@ export function GardenScene() {
     };
     sceneManager.addUpdateCallback(updateCallback);
 
-    // Add post-render callback for overlay rendering
+    // Add post-render callback for overlay rendering (skipped when no overlays are active)
     const postRenderCallback = () => {
-      overlayManager.render();
+      if (overlayManager.hasAnyVisibleContent()) {
+        overlayManager.render();
+      }
     };
     sceneManager.addPostRenderCallback(postRenderCallback);
 

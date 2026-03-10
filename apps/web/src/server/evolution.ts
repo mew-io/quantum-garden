@@ -16,7 +16,7 @@ import type { PrismaClient, Plant as PrismaPlant } from "@prisma/client";
 import {
   CANVAS,
   getVariantById,
-  PLANT_VARIANTS,
+  getSpawnableVariants,
   type ClusteringBehavior,
   type PlantVariant,
 } from "@quantum-garden/shared";
@@ -505,18 +505,19 @@ async function autoReseedIfNeeded(
     return record.id;
   }
 
-  // Helper to select variant using rarity weights
+  // Helper to select variant using rarity weights (excludes disabled variants)
+  const spawnableVariants = getSpawnableVariants();
   const selectVariantByRarity = (): PlantVariant => {
-    const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
+    const totalWeight = spawnableVariants.reduce((sum, v) => sum + v.rarity, 0);
     let random = Math.random() * totalWeight;
 
-    for (const variant of PLANT_VARIANTS) {
+    for (const variant of spawnableVariants) {
       random -= variant.rarity;
       if (random <= 0) {
         return variant;
       }
     }
-    return PLANT_VARIANTS[0]!;
+    return spawnableVariants[0]!;
   };
 
   for (let i = 0; i < plantsNeeded; i++) {

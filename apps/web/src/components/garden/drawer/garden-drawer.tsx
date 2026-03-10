@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { DrawerHandle } from "./drawer-handle";
+import { InfoTab } from "./info-tab";
 import { EventsTab } from "./events-tab";
 import { GardenTab } from "./garden-tab";
 import { ShortcutsTab } from "./shortcuts-tab";
@@ -10,9 +11,10 @@ import { debugLogger } from "@/lib/debug-logger";
 
 const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
 
-type TabId = "events" | "garden" | "shortcuts" | "debug";
+type TabId = "info" | "events" | "garden" | "shortcuts" | "debug";
 
 const TABS: { id: TabId; label: string; debugOnly?: boolean }[] = [
+  { id: "info", label: "Info" },
   { id: "events", label: "Events" },
   { id: "garden", label: "Garden" },
   { id: "shortcuts", label: "Keys" },
@@ -21,7 +23,7 @@ const TABS: { id: TabId; label: string; debugOnly?: boolean }[] = [
 
 export function GardenDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>("events");
+  const [activeTab, setActiveTab] = useState<TabId>("info");
 
   const visibleTabs = TABS.filter((t) => !t.debugOnly || isDebugEnabled);
 
@@ -111,6 +113,7 @@ export function GardenDrawer() {
           className="flex-1 min-h-0 overflow-hidden"
           style={{ height: isOpen ? "min(calc(70vh - 44px), 500px)" : 0 }}
         >
+          {activeTab === "info" && <InfoTab />}
           {activeTab === "events" && <EventsTab />}
           {activeTab === "garden" && <GardenTab />}
           {activeTab === "shortcuts" && <ShortcutsTab />}

@@ -15,7 +15,7 @@
  */
 
 import { PrismaClient } from "@prisma/client";
-import { CANVAS, PLANT_VARIANTS, selectColorVariation } from "@quantum-garden/shared";
+import { CANVAS, getSpawnableVariants, selectColorVariation } from "@quantum-garden/shared";
 
 const db = new PrismaClient();
 
@@ -31,18 +31,20 @@ const NUM_ENTANGLED_PAIRS = 5; // Number of entangled plant pairs
 const MARGIN = 250; // Keep plants away from edges (proportional to 4K canvas)
 
 /**
- * Select a variant based on rarity weights.
+ * Select a variant based on rarity weights (excludes disabled variants).
  * Higher rarity = more likely to be selected.
  */
-function selectVariant(): (typeof PLANT_VARIANTS)[number] {
-  if (PLANT_VARIANTS.length === 0) {
-    throw new Error("No plant variants defined");
+const SPAWNABLE_VARIANTS = getSpawnableVariants();
+
+function selectVariant(): (typeof SPAWNABLE_VARIANTS)[number] {
+  if (SPAWNABLE_VARIANTS.length === 0) {
+    throw new Error("No spawnable plant variants defined");
   }
 
-  const totalWeight = PLANT_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
+  const totalWeight = SPAWNABLE_VARIANTS.reduce((sum, v) => sum + v.rarity, 0);
   let random = Math.random() * totalWeight;
 
-  for (const variant of PLANT_VARIANTS) {
+  for (const variant of SPAWNABLE_VARIANTS) {
     random -= variant.rarity;
     if (random <= 0) {
       return variant;
@@ -50,7 +52,7 @@ function selectVariant(): (typeof PLANT_VARIANTS)[number] {
   }
 
   // Fallback to first variant (guaranteed to exist due to check above)
-  return PLANT_VARIANTS[0]!;
+  return SPAWNABLE_VARIANTS[0]!;
 }
 
 /**

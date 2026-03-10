@@ -193,6 +193,7 @@ function buildWcCrystalLatticeElements(ctx: WatercolorBuildContext): WatercolorE
 export const wcCrystalLattice: PlantVariant = {
   id: "wc-crystal-lattice",
   name: "Crystal Lattice",
+  disabled: true,
   description:
     "A minimalist grid of nodes connected by thin crystal stems, its structure determined by quantum entropy",
   rarity: 0.03,

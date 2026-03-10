@@ -79,4 +79,4 @@ export {
 } from "./lifecycle";
 
 // Variant definitions
-export { PLANT_VARIANTS, getVariantById, getAllVariants } from "./registry";
+export { PLANT_VARIANTS, getVariantById, getAllVariants, getSpawnableVariants } from "./registry";

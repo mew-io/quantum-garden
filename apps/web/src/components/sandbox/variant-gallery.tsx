@@ -118,7 +118,7 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
   return (
     <button
       onClick={onSelect}
-      className={`group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col border-t-2 ${accentBorderColor}`}
+      className={`group garden-panel rounded-xl overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[--wc-sage]/50 focus-visible:outline-none text-left cursor-pointer flex flex-col border-t-2 ${accentBorderColor} ${variant.disabled ? "opacity-50" : ""}`}
     >
       {/* Preview area — plant fills the card */}
       <div
@@ -159,6 +159,11 @@ function VariantCard({ variant, onSelect }: { variant: PlantVariant; onSelect: (
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1 mt-auto pt-1">
+          {variant.disabled && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-100/80 text-red-700">
+              Disabled
+            </span>
+          )}
           <span className={`text-[10px] px-1.5 py-0.5 rounded ${rendererBadgeClass}`}>
             {rendererLabel}
           </span>

@@ -145,6 +145,13 @@ export interface PlantVariant {
   /** Human-readable name */
   name: string;
 
+  /**
+   * If true, this variant will not spawn in the garden.
+   * Existing plants of this variant are unaffected.
+   * The variant still appears in the sandbox (marked as disabled).
+   */
+  disabled?: boolean;
+
   /** Optional description for documentation */
   description?: string;
 

@@ -130,3 +130,11 @@ export function getVariantById(id: string): PlantVariant | undefined {
 export function getAllVariants(): PlantVariant[] {
   return [...PLANT_VARIANTS];
 }
+
+/**
+ * Returns only variants eligible for spawning (not disabled).
+ * Use this for rarity-weighted selection during evolution and seeding.
+ */
+export function getSpawnableVariants(): PlantVariant[] {
+  return PLANT_VARIANTS.filter((v) => !v.disabled);
+}

@@ -41,6 +41,15 @@ export function VariantConfigPanel({ variant }: VariantConfigPanelProps) {
 
         {/* Spawn Settings */}
         <ConfigSection title="Spawn Settings">
+          <ConfigToggle
+            label="Spawning"
+            enabled={!variant.disabled}
+            description={
+              variant.disabled
+                ? "This variant will not spawn in the garden"
+                : "This variant can spawn in the garden"
+            }
+          />
           <ConfigRow
             label="Rarity"
             value={`${(variant.rarity * 100).toFixed(0)}%`}

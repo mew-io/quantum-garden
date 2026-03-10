@@ -42,8 +42,8 @@ const CATEGORY_SCALE: Record<string, number> = {
   "ground-cover": 2,
   grass: 2.5,
   flower: 2,
-  shrub: 3.5,
-  tree: 3.5,
+  shrub: 5.25,
+  tree: 7,
   ethereal: 3,
 };
 

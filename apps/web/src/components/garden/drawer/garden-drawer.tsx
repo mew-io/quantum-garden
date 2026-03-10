@@ -89,7 +89,7 @@ export function GardenDrawer() {
   }, [isOpen, activeTab]);
 
   return (
-    <div className="fixed bottom-[var(--inset-bottom)] right-[var(--inset-right)] z-50 flex flex-col items-end gap-2 w-full sm:w-auto pointer-events-none">
+    <div className="fixed bottom-[var(--inset-bottom)] left-[var(--inset-left)] sm:left-auto right-[var(--inset-right)] z-50 flex flex-col items-end gap-2 w-full sm:w-auto pointer-events-none">
       {/* Drawer Panel */}
       <div
         className={`

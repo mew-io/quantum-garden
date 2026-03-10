@@ -185,6 +185,7 @@ function buildWcKaleidoscopeStarVectorElements(ctx: WatercolorBuildContext): Wat
 export const wcKaleidoscopeStarVector: PlantVariant = {
   id: "wc-kaleidoscope-star-vector",
   name: "Kaleidoscope Star Vector",
+  disabled: true,
   description:
     "A vivid mandala-like star with neon radiating petals and tight concentric rings, its symmetry amplified by quantum entropy",
   rarity: 0.02,

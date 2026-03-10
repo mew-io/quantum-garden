@@ -170,6 +170,7 @@ function buildWcKaleidoscopeStarElements(ctx: WatercolorBuildContext): Watercolo
 export const wcKaleidoscopeStar: PlantVariant = {
   id: "wc-kaleidoscope-star",
   name: "Kaleidoscope Star",
+  disabled: true,
   description:
     "A mandala-like star of radiating petals with concentric disc rings, its symmetry determined by quantum entropy",
   rarity: 0.03,

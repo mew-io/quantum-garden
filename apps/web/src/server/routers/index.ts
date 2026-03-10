@@ -1,6 +1,5 @@
 import { router } from "../trpc";
 import { plantsRouter } from "./plants";
-import { observationRouter } from "./observation";
 import { healthRouter } from "./health";
 import { quantumRouter } from "./quantum";
 
@@ -10,7 +9,6 @@ import { quantumRouter } from "./quantum";
 export const appRouter = router({
   health: healthRouter,
   plants: plantsRouter,
-  observation: observationRouter,
   quantum: quantumRouter,
 });
 

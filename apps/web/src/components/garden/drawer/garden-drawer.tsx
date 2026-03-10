@@ -8,22 +8,19 @@ import { GardenTab } from "./garden-tab";
 import { DebugTab } from "./debug-tab";
 import { debugLogger } from "@/lib/debug-logger";
 
-const isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG_ENABLED !== "false";
-
 type TabId = "info" | "events" | "garden" | "debug";
 
-const TABS: { id: TabId; label: string; debugOnly?: boolean }[] = [
+const TABS: { id: TabId; label: string }[] = [
   { id: "info", label: "Info" },
   { id: "events", label: "Events" },
   { id: "garden", label: "Garden" },
-  { id: "debug", label: "Debug", debugOnly: true },
+  { id: "debug", label: "Debug" },
 ];
 
 export function GardenDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("info");
-
-  const visibleTabs = TABS.filter((t) => !t.debugOnly || isDebugEnabled);
+  const [focusedPlantId, setFocusedPlantId] = useState<string | null>(null);
 
   const toggleDrawer = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -42,6 +39,27 @@ export function GardenDrawer() {
     }
   }, [isOpen, activeTab]);
 
+  // Open drawer to debug tab when a plant is clicked on canvas
+  // Handles both open-plant-detail and plant-debug-select in one listener
+  // to avoid race conditions (DebugTab may not be mounted yet)
+  useEffect(() => {
+    const handleOpenPlantDetail = (e: CustomEvent<{ plantId: string }>) => {
+      setFocusedPlantId(e.detail.plantId);
+      setIsOpen(true);
+      setActiveTab("debug");
+    };
+
+    window.addEventListener(
+      "open-plant-detail" as keyof WindowEventMap,
+      handleOpenPlantDetail as EventListener
+    );
+    return () =>
+      window.removeEventListener(
+        "open-plant-detail" as keyof WindowEventMap,
+        handleOpenPlantDetail as EventListener
+      );
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +68,7 @@ export function GardenDrawer() {
       }
 
       // Backtick — toggle debug tab
-      if (e.key === "`" && !e.ctrlKey && !e.metaKey && isDebugEnabled) {
+      if (e.key === "`" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         if (isOpen && activeTab === "debug") {
           setIsOpen(false);
@@ -88,7 +106,7 @@ export function GardenDrawer() {
       >
         {/* Tab bar */}
         <div className="flex border-b border-[--wc-stone]/20 flex-shrink-0">
-          {visibleTabs.map((tab) => (
+          {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -114,8 +132,12 @@ export function GardenDrawer() {
           {activeTab === "info" && <InfoTab />}
           {activeTab === "events" && <EventsTab />}
           {activeTab === "garden" && <GardenTab />}
-          {activeTab === "debug" && isDebugEnabled && (
-            <DebugTab isActive={isOpen && activeTab === "debug"} />
+          {activeTab === "debug" && (
+            <DebugTab
+              isActive={isOpen && activeTab === "debug"}
+              focusedPlantId={focusedPlantId}
+              onFocusedPlantHandled={() => setFocusedPlantId(null)}
+            />
           )}
         </div>
       </div>

@@ -9,12 +9,12 @@ import json
 import threading
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 
-class JobStatus(str, Enum):
+class JobStatus(StrEnum):
     """Status of a quantum job."""
 
     PENDING = "pending"  # Created, not yet submitted to IonQ

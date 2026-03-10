@@ -33,7 +33,7 @@ export function ShortcutsTab() {
       <div className="pt-3 border-t border-[--wc-stone]/30">
         <h4 className="text-[--wc-ink-muted] text-xs uppercase tracking-wide mb-2">Observation</h4>
         <p className="text-[--wc-ink-muted] text-xs leading-relaxed">
-          Hover over a plant and hold to observe it. Its quantum traits will be revealed.
+          Click a plant to observe it. Its quantum traits will be revealed.
         </p>
       </div>
     </div>

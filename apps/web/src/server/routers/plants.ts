@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Plant as PrismaPlant } from "@prisma/client";
 import type { Plant, VisualState, ResolvedTraits } from "@quantum-garden/shared";
 import { router, publicProcedure } from "../trpc";
+import { resolveTraitsFromPool } from "../resolve-traits";
 
 /**
  * Transform a Prisma plant to the shared Plant type.
@@ -114,6 +115,26 @@ export const plantsRouter = router({
 
       const circuitType = plant.quantumCircuit?.circuitId ?? "variational";
       const qr = plant.quantumCircuit;
+
+      // Backfill traits for plants created before trait pre-computation
+      if (!plant.traits) {
+        try {
+          const { traits } = await resolveTraitsFromPool({
+            plantId: plant.id,
+            circuitId: circuitType,
+            variantId: plant.variantId,
+            colorVariationName: plant.colorVariationName,
+            entanglementGroupId: plant.entanglementGroupId,
+          });
+          await ctx.db.plant.update({
+            where: { id: plant.id },
+            data: { traits: traits as unknown as object },
+          });
+          plant.traits = traits as unknown as typeof plant.traits;
+        } catch {
+          // Non-fatal
+        }
+      }
 
       return {
         plant: transformPlant(plant, circuitType),

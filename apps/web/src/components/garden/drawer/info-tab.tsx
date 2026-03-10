@@ -22,8 +22,8 @@ export function InfoTab() {
 
         <Section title="Observation">
           When you encounter a plant, you don&apos;t trigger quantum computation&mdash;you witness
-          and stabilize a result that was already resolved. Hover over a plant and hold to observe
-          it. Its quantum traits will be revealed, collapsing its superposition into a single state.
+          and stabilize a result that was already resolved. Click a plant to observe it. Its quantum
+          traits will be revealed, collapsing its superposition into a single state.
         </Section>
 
         <Section title="Entanglement">

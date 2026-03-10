@@ -11,9 +11,11 @@ import { getCircuitInfo } from "@/lib/quantum-explanations";
 
 interface DebugTabProps {
   isActive: boolean;
+  focusedPlantId?: string | null;
+  onFocusedPlantHandled?: () => void;
 }
 
-export function DebugTab({ isActive }: DebugTabProps) {
+export function DebugTab({ isActive, focusedPlantId, onFocusedPlantHandled }: DebugTabProps) {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [detailPlantId, setDetailPlantId] = useState<string | null>(null);
   const [superpositionMode, setSuperpositionMode] = useState<0 | 1>(0);
@@ -26,7 +28,17 @@ export function DebugTab({ isActive }: DebugTabProps) {
     levels: ["debug", "info", "warn", "error"],
   });
 
-  const { performanceStats } = useGardenStore();
+  // Handle focused plant from parent (e.g. clicking a plant on the canvas)
+  useEffect(() => {
+    if (focusedPlantId) {
+      setSelectedPlantId(focusedPlantId);
+      setDetailPlantId(focusedPlantId);
+      setActiveSubTab("plants");
+      onFocusedPlantHandled?.();
+    }
+  }, [focusedPlantId, onFocusedPlantHandled]);
+
+  const { performanceStats, plants: clientPlants } = useGardenStore();
 
   const allLogs = useDebugLogs();
   const filteredLogs = filterLogs(allLogs, logFilters);
@@ -329,41 +341,45 @@ export function DebugTab({ isActive }: DebugTabProps) {
                   All Plants ({totalCount})
                 </h4>
                 <div className="space-y-1">
-                  {plants?.map((plant: Plant) => (
-                    <button
-                      key={plant.id}
-                      onClick={() => {
-                        setSelectedPlantId(plant.id);
-                        setDetailPlantId(plant.id);
-                        window.dispatchEvent(
-                          new CustomEvent("plant-debug-highlight", {
-                            detail: { plantId: plant.id },
-                          })
-                        );
-                      }}
-                      className={`w-full text-left px-2 py-1.5 rounded text-xs flex justify-between items-center ${
-                        plant.id === selectedPlantId
-                          ? "bg-blue-50/60 text-blue-700"
-                          : "hover:bg-[--wc-paper]/60 text-[--wc-ink-muted]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            plant.observed
-                              ? "bg-yellow-400"
-                              : plant.germinatedAt
-                                ? "bg-green-500"
-                                : "bg-[--wc-stone]/40"
-                          }`}
-                        />
-                        <span>{plant.variantId}</span>
-                      </div>
-                      <span className="text-[--wc-ink-muted]/60 font-mono">
-                        {plant.id.slice(-6)}
-                      </span>
-                    </button>
-                  ))}
+                  {plants?.map((plant: Plant) => {
+                    const isObserved =
+                      clientPlants.find((cp) => cp.id === plant.id)?.observed ?? plant.observed;
+                    return (
+                      <button
+                        key={plant.id}
+                        onClick={() => {
+                          setSelectedPlantId(plant.id);
+                          setDetailPlantId(plant.id);
+                          window.dispatchEvent(
+                            new CustomEvent("plant-debug-highlight", {
+                              detail: { plantId: plant.id },
+                            })
+                          );
+                        }}
+                        className={`w-full text-left px-2 py-1.5 rounded text-xs flex justify-between items-center ${
+                          plant.id === selectedPlantId
+                            ? "bg-blue-50/60 text-blue-700"
+                            : "hover:bg-[--wc-paper]/60 text-[--wc-ink-muted]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              isObserved
+                                ? "bg-yellow-400"
+                                : plant.germinatedAt
+                                  ? "bg-green-500"
+                                  : "bg-[--wc-stone]/40"
+                            }`}
+                          />
+                          <span>{plant.variantId}</span>
+                        </div>
+                        <span className="text-[--wc-ink-muted]/60 font-mono">
+                          {plant.id.slice(-6)}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </section>
             )}
@@ -394,6 +410,9 @@ function PlantDetailView({
     { enabled: isActive, refetchInterval: isActive ? 3000 : false }
   );
 
+  // Merge client-side observation state (observation is client-only, not persisted to DB)
+  const clientPlant = useGardenStore((s) => s.plants.find((p) => p.id === plantId));
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -422,7 +441,18 @@ function PlantDetailView({
     );
   }
 
-  const { plant, quantumRecord, entangledPlants } = data;
+  const { plant: serverPlant, quantumRecord, entangledPlants } = data;
+  const plant = {
+    ...serverPlant,
+    observed: clientPlant?.observed ?? serverPlant.observed,
+    visualState: clientPlant?.visualState ?? serverPlant.visualState,
+    observedAt: clientPlant?.observed
+      ? (serverPlant.observedAt ?? new Date())
+      : serverPlant.observedAt,
+    // Use client-side traits (what the renderer actually uses) if server traits are missing
+    traits: serverPlant.traits ?? clientPlant?.traits,
+  };
+
   const variant = getVariantById(plant.variantId);
   const traits = plant.traits;
   const signals = traits?.quantumSignals;

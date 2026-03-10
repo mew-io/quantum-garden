@@ -150,6 +150,10 @@ export class SceneManager {
     startPan: { x: number; y: number };
   } | null = null;
 
+  /** Whether the last mouse interaction was a drag (moved > threshold) */
+  private _wasDragging = false;
+  private static readonly DRAG_THRESHOLD = 5; // pixels
+
   // Intro zoom animation state
   private introZoomActive: boolean = true;
   private introZoomStart: number = 0;
@@ -277,6 +281,11 @@ export class SceneManager {
   /** Get the full effective zoom including dwell micro-zoom */
   private get effectiveZoom(): number {
     return this.baseZoom * this.userZoom * this.currentZoom;
+  }
+
+  /** Whether the last mouse interaction was a drag rather than a click */
+  get wasDragging(): boolean {
+    return this._wasDragging;
   }
 
   /** Whether panning is enabled (zoomed in past full-garden view) */
@@ -528,10 +537,10 @@ export class SceneManager {
   // --- Mouse handlers: click-drag panning (desktop) ---
 
   private handleMouseDown = (e: MouseEvent): void => {
-    if (!this.isPanningEnabled) return;
-    // Only start pan on left-click
+    // Only track left-click
     if (e.button !== 0) return;
 
+    this._wasDragging = false;
     this.mouseState = {
       startPos: { x: e.clientX, y: e.clientY },
       startPan: { ...this.panOffset },
@@ -543,6 +552,15 @@ export class SceneManager {
 
     const dx = e.clientX - this.mouseState.startPos.x;
     const dy = e.clientY - this.mouseState.startPos.y;
+
+    // Check if movement exceeds drag threshold
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > SceneManager.DRAG_THRESHOLD) {
+      this._wasDragging = true;
+    }
+
+    // Only pan if panning is enabled
+    if (!this.isPanningEnabled) return;
 
     // Convert screen pixels to garden-world units
     const vw = window.innerWidth;

@@ -345,23 +345,42 @@ export function GardenScene() {
     };
     sceneManager.addPostRenderCallback(postRenderCallback);
 
-    // Click handler for plant observation (click any unobserved plant to observe)
+    // Click handler for plant observation + viewing quantum data
     const handleClick = (event: MouseEvent) => {
+      // Ignore clicks that were actually drags (panning)
+      if (sceneManager.wasDragging) return;
+
       const { x, y } = sceneManager.screenToWorld(event.clientX, event.clientY);
 
+      // Find the nearest germinated plant within click radius
       const plants = useGardenStore.getState().plants;
-      const clickedPlant = plants.find((plant) => {
-        if (observedPlantsRef.current.has(plant.id)) return false;
-        if (!plant.germinatedAt) return false;
+      let nearestPlant: (typeof plants)[number] | null = null;
+      let nearestDist = Infinity;
+
+      for (const plant of plants) {
+        if (!plant.germinatedAt) continue;
         const dx = plant.position.x - x;
         const dy = plant.position.y - y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < 48; // Click radius in world pixels
-      });
-
-      if (clickedPlant) {
-        observePlant(clickedPlant.id);
+        if (distance < 48 && distance < nearestDist) {
+          nearestDist = distance;
+          nearestPlant = plant;
+        }
       }
+
+      if (!nearestPlant) return;
+
+      // Observe if not yet observed
+      if (!observedPlantsRef.current.has(nearestPlant.id)) {
+        observePlant(nearestPlant.id);
+      }
+
+      // Always open the debug panel with this plant's detail
+      window.dispatchEvent(
+        new CustomEvent("open-plant-detail", {
+          detail: { plantId: nearestPlant.id },
+        })
+      );
     };
     sceneManager.canvas.addEventListener("click", handleClick);
 

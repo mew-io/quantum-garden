@@ -66,6 +66,7 @@ yarn-error.log*
 prisma/migrations/.migration_lock.toml
 
 # Misc
+misc/
 .cache/
 tmp/
 temp/

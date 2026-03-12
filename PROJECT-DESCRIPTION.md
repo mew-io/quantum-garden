@@ -6,6 +6,12 @@
 
 ---
 
+![Garden view](https://quantum-garden.s3.amazonaws.com/garden.png)
+
+![Seed box](https://quantum-garden.s3.amazonaws.com/seed-box.png)
+
+---
+
 ## Project Content
 
 ### A Living Quantum Art Installation
